@@ -156,16 +156,21 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Update widget scalar fields
-  const { theme, config, ...restUpdates } = updates;
-  await prisma.widget.update({
-    where: { id },
-    data: {
-      ...restUpdates,
-      ...(theme !== undefined && { theme: theme as Prisma.InputJsonValue }),
-      ...(config !== undefined && { config: config as Prisma.InputJsonValue }),
-    },
-  });
+  // Update widget scalar fields — build the Prisma input explicitly so the
+  // JSON fields (theme, config) don't get mis-typed by the Zod inferred shape.
+  const data: Prisma.WidgetUpdateInput = {};
+  if (updates.name !== undefined) data.name = updates.name;
+  if (updates.layout !== undefined) data.layout = updates.layout;
+  if (updates.maxItems !== undefined) data.maxItems = updates.maxItems;
+  if (updates.showRating !== undefined) data.showRating = updates.showRating;
+  if (updates.showAvatar !== undefined) data.showAvatar = updates.showAvatar;
+  if (updates.showDate !== undefined) data.showDate = updates.showDate;
+  if (updates.customCss !== undefined) data.customCss = updates.customCss;
+  if (updates.isActive !== undefined) data.isActive = updates.isActive;
+  if (updates.theme !== undefined) data.theme = updates.theme as Prisma.InputJsonValue;
+  if (updates.config !== undefined) data.config = updates.config as Prisma.InputJsonValue;
+
+  await prisma.widget.update({ where: { id }, data });
 
   // Sync attached testimonials via the join table
   if (testimonialIds) {
