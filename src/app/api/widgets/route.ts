@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { PLAN_LIMITS } from "@/lib/constants";
 
 const createWidgetSchema = z.object({
@@ -160,8 +161,8 @@ export async function PATCH(request: Request) {
     where: { id },
     data: {
       ...updates,
-      theme: updates.theme as Record<string, unknown> | undefined,
-      config: updates.config as Record<string, unknown> | undefined,
+      theme: updates.theme as Prisma.InputJsonValue | undefined,
+      config: updates.config as Prisma.InputJsonValue | undefined,
     },
   });
 
