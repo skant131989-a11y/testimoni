@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, CreditCard, Zap } from "lucide-react";
-import { PLAN_LIMITS, PRO_PRICE_MONTHLY } from "@/lib/constants";
+import { PLAN_LIMITS } from "@/lib/constants";
+import { usePricing } from "@/lib/use-pricing";
+import { CurrencySwitcher } from "@/components/pricing/price-display";
 
 interface Subscription {
   plan: "FREE" | "PRO";
@@ -27,6 +29,7 @@ interface Usage {
 }
 
 export default function BillingPage() {
+  const { proMonthlyFormatted } = usePricing();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [usage, setUsage] = useState<Usage>({ testimonials: 0, widgets: 0 });
   const [loading, setLoading] = useState(true);
@@ -142,7 +145,7 @@ export default function BillingPage() {
               Upgrade to Pro
             </CardTitle>
             <CardDescription>
-              ${PRO_PRICE_MONTHLY}/month · Cancel anytime
+              {proMonthlyFormatted}/month · Cancel anytime
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -163,9 +166,12 @@ export default function BillingPage() {
               ))}
             </ul>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col items-stretch gap-3">
+            <div className="flex justify-center">
+              <CurrencySwitcher />
+            </div>
             <Button onClick={handleUpgrade} disabled={upgrading} className="w-full">
-              {upgrading ? "Redirecting to checkout..." : `Upgrade for $${PRO_PRICE_MONTHLY}/month`}
+              {upgrading ? "Redirecting to checkout..." : `Upgrade for ${proMonthlyFormatted}/month`}
             </Button>
           </CardFooter>
         </Card>

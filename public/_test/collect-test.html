@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acme Corp - Our Products</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #fafaf7;
+      color: #2d2d2d;
+    }
+
+    nav {
+      background: #1a3a2a;
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    nav .logo {
+      color: #e8dcc8;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 28px;
+    }
+
+    nav .nav-links a {
+      color: #c4b99a;
+      text-decoration: none;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    nav .nav-links a:hover { color: #fff; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a3a2a 0%, #2d5a3f 100%);
+      color: #e8dcc8;
+      padding: 80px 40px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 16px;
+      font-weight: normal;
+    }
+
+    .hero p {
+      font-size: 18px;
+      opacity: 0.8;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+
+    .content h2 {
+      font-size: 32px;
+      margin-bottom: 24px;
+      color: #1a3a2a;
+    }
+
+    .content p {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin: 40px 0;
+    }
+
+    .product-card {
+      background: #fff;
+      border: 1px solid #e5e0d5;
+      border-radius: 8px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .product-card .icon {
+      width: 64px;
+      height: 64px;
+      background: #1a3a2a;
+      color: #e8dcc8;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 16px;
+    }
+
+    .product-card h3 {
+      font-size: 20px;
+      color: #1a3a2a;
+      margin-bottom: 8px;
+    }
+
+    .product-card p {
+      font-size: 14px;
+      color: #777;
+      line-height: 1.6;
+    }
+
+    .setup-banner {
+      background: #fff3cd;
+      border: 1px solid #f0e2a0;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 40px;
+    }
+
+    .setup-banner h3 {
+      color: #856404;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .setup-banner p {
+      color: #856404;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .setup-banner code {
+      background: rgba(0,0,0,0.08);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+
+    .form-id-input {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .form-id-input input {
+      padding: 8px 12px;
+      border: 1px solid #d4c98a;
+      border-radius: 4px;
+      font-size: 14px;
+      width: 340px;
+      font-family: monospace;
+    }
+
+    .form-id-input button {
+      padding: 8px 16px;
+      background: #1a3a2a;
+      color: #e8dcc8;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .form-id-input button:hover {
+      background: #2d5a3f;
+    }
+
+    footer {
+      background: #1a3a2a;
+      color: #c4b99a;
+      text-align: center;
+      padding: 32px 40px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 768px) {
+      .products { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">ACME CORP</div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">Products</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <h1>Premium Organic Goods</h1>
+    <p>Handcrafted with care since 1987. We believe in quality ingredients and sustainable practices that make a difference.</p>
+  </div>
+
+  <div class="content">
+    <div class="setup-banner">
+      <h3>Testing Instructions</h3>
+      <p>
+        This page simulates a customer's website with the Testimoni <strong>collect.js</strong> embed script.
+        A purple "Leave a Review" button should appear at the bottom-right corner.
+      </p>
+      <p style="margin-top:8px;">
+        If no button appears, paste your Collection Form ID below (find it in <code>Dashboard &gt; Collect</code>).
+      </p>
+      <div class="form-id-input">
+        <input type="text" id="formIdInput" placeholder="Paste your Collection Form ID here..." />
+        <button onclick="loadCollectScript()">Load</button>
+      </div>
+    </div>
+
+    <h2>Our Products</h2>
+    <p>Every product we make starts with a simple idea: use the best ingredients, respect the land, and never cut corners. Here's what we're proudest of.</p>
+
+    <div class="products">
+      <div class="product-card">
+        <div class="icon">&#x1F33F;</div>
+        <h3>Herbal Tea</h3>
+        <p>A soothing blend of chamomile, lavender, and mint grown in our highland gardens.</p>
+      </div>
+      <div class="product-card">
+        <div class="icon">&#x1F36F;</div>
+        <h3>Raw Honey</h3>
+        <p>Unfiltered wildflower honey from our apiaries in the Pacific Northwest.</p>
+      </div>
+      <div class="product-card">
+        <div class="icon">&#x1F9C8;</div>
+        <h3>Artisan Butter</h3>
+        <p>Small-batch cultured butter from grass-fed cows. Rich, creamy, unforgettable.</p>
+      </div>
+    </div>
+
+    <h2>What Our Customers Say</h2>
+    <p>We love hearing from the people who use our products every day. Your feedback helps us grow and improve.</p>
+    <p style="color: #999; font-style: italic;">Click the purple "Leave a Review" button in the bottom-right corner to share your experience!</p>
+  </div>
+
+  <footer>
+    &copy; 2024 Acme Corp. All rights reserved. &mdash; This is a test page for Testimoni embed testing.
+  </footer>
+
+  <!-- Testimoni Collect Embed Script -->
+  <!-- Replace YOUR_FORM_ID with a real Collection Form ID from your dashboard -->
+  <script id="testimoni-collect" src="/embed/collect.js" data-form-id="YOUR_FORM_ID"></script>
+
+  <script>
+    function loadCollectScript() {
+      var formId = document.getElementById('formIdInput').value.trim();
+      if (!formId) { alert('Please enter a Form ID'); return; }
+
+      // Remove old script and container
+      var oldScript = document.getElementById('testimoni-collect');
+      if (oldScript) oldScript.remove();
+      var oldContainer = document.querySelector('[id^="fc-"]');
+      if (oldContainer) oldContainer.remove();
+
+      // Reset Testimoni state
+      if (window.Testimoni) {
+        Object.keys(window.Testimoni).forEach(function(k) {
+          if (k.startsWith('_collect_')) delete window.Testimoni[k];
+        });
+      }
+
+      // Create fresh script tag
+      var s = document.createElement('script');
+      s.id = 'testimoni-collect';
+      s.src = '/embed/collect.js';
+      s.setAttribute('data-form-id', formId);
+      document.body.appendChild(s);
+    }
+  </script>
+
+</body>
+</html>

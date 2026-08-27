@@ -16,6 +16,10 @@
 # next.js
 /.next/
 /out/
+packages/embed/.next/
+
+# claude / agent local state
+/.claude/
 
 # production
 /build

@@ -8,6 +8,7 @@ import {
   MessageSquareQuote,
   Code2,
   Inbox,
+  Send,
   Import,
   BarChart3,
   Settings,
@@ -20,13 +21,14 @@ import { Button } from "@/components/ui/button";
 import type { PlanType } from "@/lib/constants";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/testimonials", label: "Testimonials", icon: MessageSquareQuote },
-  { href: "/widgets", label: "Widgets", icon: Code2 },
-  { href: "/collect", label: "Collect", icon: Inbox },
-  { href: "/import", label: "Import", icon: Import },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/inbox", label: "Inbox", icon: Inbox },
+  { href: "/dashboard/testimonials", label: "Testimonials", icon: MessageSquareQuote },
+  { href: "/dashboard/widgets", label: "Widgets", icon: Code2 },
+  { href: "/dashboard/collect", label: "Collect", icon: Send },
+  { href: "/dashboard/import", label: "Import", icon: Import },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -54,7 +56,7 @@ export function Sidebar({ workspaceName, plan }: SidebarProps) {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <MessageSquareQuote className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold">FeedbackWidget</span>
+              <span className="text-lg font-semibold">Testimoni</span>
             </Link>
           )}
           {collapsed && (
@@ -77,8 +79,8 @@ export function Sidebar({ workspaceName, plan }: SidebarProps) {
         <nav className="flex-1 space-y-1 px-2 py-4">
           {navItems.map((item) => {
             const isActive =
-              item.href === "/"
-                ? pathname === "/"
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
                 : pathname.startsWith(item.href);
 
             return (
@@ -112,7 +114,7 @@ export function Sidebar({ workspaceName, plan }: SidebarProps) {
               Unlock unlimited testimonials, widgets, and more.
             </p>
             <Button size="sm" className="mt-3 w-full" asChild>
-              <Link href="/settings#billing">Upgrade</Link>
+              <Link href="/dashboard/settings#billing">Upgrade</Link>
             </Button>
           </div>
         )}

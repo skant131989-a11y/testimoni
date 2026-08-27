@@ -1,5 +1,5 @@
 {
-  "name": "@feedbackwidget/embed",
+  "name": "@testimoni/embed",
   "version": "1.0.0",
   "private": true,
   "main": "dist/widget.js",

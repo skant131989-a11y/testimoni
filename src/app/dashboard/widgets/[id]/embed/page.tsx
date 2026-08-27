@@ -17,9 +17,9 @@ export default function EmbedPage() {
   const scriptEmbed = `<div id="fw-${widgetId}"></div>
 <script src="${appUrl}/embed/widget.js" data-widget-id="${widgetId}" async></script>`;
 
-  const reactEmbed = `import { FeedbackWidget } from '@feedbackwidget/react';
+  const reactEmbed = `import { Testimoni } from '@testimoni/react';
 
-<FeedbackWidget widgetId="${widgetId}" />`;
+<Testimoni widgetId="${widgetId}" />`;
 
   const iframeEmbed = `<iframe
   src="${appUrl}/widget-preview/${widgetId}"
@@ -83,7 +83,7 @@ export default function EmbedPage() {
             <CardTitle>React Component</CardTitle>
             <CardDescription>
               Install the npm package and use as a React component.
-              First run: <code className="text-xs bg-muted px-1 rounded">npm install @feedbackwidget/react</code>
+              First run: <code className="text-xs bg-muted px-1 rounded">npm install @testimoni/react</code>
             </CardDescription>
           </CardHeader>
           <CardContent>

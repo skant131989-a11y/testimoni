@@ -119,7 +119,7 @@ export default async function TestimonialsPage({
           </p>
         </div>
         <Button asChild>
-          <Link href="/testimonials?action=add">
+          <Link href="/dashboard/import">
             <Plus className="mr-2 h-4 w-4" />
             Add Testimonial
           </Link>
@@ -149,7 +149,7 @@ export default async function TestimonialsPage({
           {tabs.map((tab) => (
             <Link
               key={tab.value}
-              href={`/testimonials${tab.value !== "ALL" ? `?filter=${tab.value.toLowerCase()}` : ""}${searchQuery ? `${tab.value !== "ALL" ? "&" : "?"}q=${searchQuery}` : ""}`}
+              href={`/dashboard/testimonials${tab.value !== "ALL" ? `?filter=${tab.value.toLowerCase()}` : ""}${searchQuery ? `${tab.value !== "ALL" ? "&" : "?"}q=${searchQuery}` : ""}`}
               className={cn(
                 "flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors",
                 activeFilter === tab.value

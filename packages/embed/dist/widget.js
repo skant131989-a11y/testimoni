@@ -1,131 +1,4 @@
-(function(){"use strict";
-
-var FW = window.FeedbackWidget || {};
-window.FeedbackWidget = FW;
-
-(function init() {
-  var scripts = document.querySelectorAll("script[data-widget-id]");
-  scripts.forEach(function (script) {
-    var widgetId = script.getAttribute("data-widget-id");
-    if (!widgetId || FW["_loaded_" + widgetId]) return;
-    FW["_loaded_" + widgetId] = true;
-
-    var container = document.getElementById("fw-" + widgetId);
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "fw-" + widgetId;
-      script.parentNode.insertBefore(container, script.nextSibling);
-    }
-
-    var shadow = container.attachShadow({ mode: "open" });
-    var wrapper = document.createElement("div");
-    wrapper.className = "fw-root";
-    shadow.appendChild(wrapper);
-
-    var styleEl = document.createElement("style");
-    styleEl.textContent = FW_STYLES;
-    shadow.appendChild(styleEl);
-
-    var baseUrl = script.src.replace(/\/embed\/widget\.js.*$/, "").replace(/\/widget\.js.*$/, "");
-    if (!baseUrl || baseUrl === script.src) {
-      baseUrl = window.location.origin;
-    }
-
-    fetch(baseUrl + "/api/widget/" + widgetId)
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        renderWidget(wrapper, data);
-        // Track impression
-        navigator.sendBeacon && navigator.sendBeacon(
-          baseUrl + "/api/widget/" + widgetId + "?impression=1"
-        );
-      })
-      .catch(function (err) {
-        console.error("[FeedbackWidget] Failed to load:", err);
-      });
-  });
-})();
-
-function renderWidget(container, data) {
-  var widget = data.widget;
-  var testimonials = data.testimonials || [];
-  var showWatermark = data.showWatermark;
-
-  if (!testimonials.length) {
-    container.innerHTML = '<p class="fw-empty">No testimonials yet</p>';
-    return;
-  }
-
-  var theme = widget.theme || {};
-  if (theme.backgroundColor) container.style.setProperty("--fw-bg", theme.backgroundColor);
-  if (theme.textColor) container.style.setProperty("--fw-text", theme.textColor);
-  if (theme.accentColor) container.style.setProperty("--fw-accent", theme.accentColor);
-
-  var layout = (widget.layout || "GRID").toUpperCase();
-  var html = "";
-
-  switch (layout) {
-    case "MASONRY":
-      html = renderMasonry(testimonials, widget);
-      break;
-    case "CAROUSEL":
-      html = renderCarousel(testimonials, widget);
-      break;
-    case "LIST":
-      html = renderList(testimonials, widget);
-      break;
-    case "MARQUEE":
-      html = renderMarquee(testimonials, widget);
-      break;
-    default:
-      html = renderGrid(testimonials, widget);
-  }
-
-  if (showWatermark) {
-    html += '<div class="fw-watermark"><a href="https://feedbackwidget.io" target="_blank" rel="noopener">Powered by FeedbackWidget</a></div>';
-  }
-
-  container.innerHTML = html;
-
-  if (layout === "CAROUSEL") initCarousel(container);
-  if (layout === "MARQUEE") initMarquee(container);
-}
-
-function renderCard(t, widget) {
-  var html = '<div class="fw-card">';
-  if (widget.showAvatar !== false && t.customerAvatar) {
-    html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
-  }
-  html += '<div class="fw-card-body">';
-  if (widget.showRating !== false && t.rating) {
-    html += '<div class="fw-stars">' + renderStars(t.rating) + '</div>';
-  }
-  if (t.content) {
-    html += '<p class="fw-content">' + escapeHtml(t.content) + '</p>';
-  }
-  html += '<div class="fw-author">';
-  html += '<span class="fw-name">' + escapeHtml(t.customerName) + '</span>';
-  if (t.customerTitle) {
-    html += '<span class="fw-title">' + escapeHtml(t.customerTitle) + '</span>';
-  }
-  html += '</div></div></div>';
-  return html;
-}
-
-function renderStars(count) {
-  var html = "";
-  for (var i = 0; i < 5; i++) {
-    html += '<svg class="fw-star' + (i < count ? " fw-star-filled" : "") + '" viewBox="0 0 24 24" width="16" height="16"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-  }
-  return html;
-}
-
-function escapeHtml(str) {
-  if (!str) return "";
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
-var FW_STYLES = `
+(function(){var FW_STYLES = `
 .fw-root {
   --fw-bg: #ffffff;
   --fw-text: #1a1a1a;
@@ -136,15 +9,19 @@ var FW_STYLES = `
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--fw-text);
   line-height: 1.5;
+  text-align: left;
+  font-style: normal;
+  font-weight: normal;
 }
 
 .fw-card {
   background: var(--fw-bg);
   border: 1px solid var(--fw-border);
   border-radius: var(--fw-radius);
-  padding: 24px;
+  padding: 12px 16px;
   display: flex;
-  gap: 16px;
+  gap: 12px;
+  align-items: flex-start;
   transition: box-shadow 0.2s;
 }
 
@@ -153,8 +30,8 @@ var FW_STYLES = `
 }
 
 .fw-avatar {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -168,12 +45,14 @@ var FW_STYLES = `
 .fw-stars {
   display: flex;
   gap: 2px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .fw-star {
   fill: var(--fw-border);
   stroke: none;
+  width: 13px;
+  height: 13px;
 }
 
 .fw-star-filled {
@@ -181,9 +60,9 @@ var FW_STYLES = `
 }
 
 .fw-content {
-  margin: 0 0 12px;
-  font-size: 15px;
-  line-height: 1.6;
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--fw-text);
 }
 
@@ -194,11 +73,11 @@ var FW_STYLES = `
 
 .fw-name {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .fw-title {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--fw-muted);
 }
 
@@ -227,25 +106,25 @@ var FW_STYLES = `
 /* Grid Layout */
 .fw-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
 }
 
 /* Masonry Layout */
 .fw-masonry {
   columns: 3;
-  column-gap: 16px;
+  column-gap: 12px;
 }
 
 .fw-masonry .fw-card {
   break-inside: avoid;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: block;
 }
 
 @media (max-width: 768px) {
   .fw-masonry { columns: 2; }
-  .fw-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .fw-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 }
 
 @media (max-width: 480px) {
@@ -412,6 +291,133 @@ function initMarquee(container) {
   container.addEventListener('mouseleave', function () {
     track.style.animationPlayState = 'running';
   });
+}
+
+"use strict";
+
+var FW = window.Testimoni || {};
+window.Testimoni = FW;
+
+(function init() {
+  var scripts = document.querySelectorAll("script[data-widget-id]");
+  scripts.forEach(function (script) {
+    var widgetId = script.getAttribute("data-widget-id");
+    if (!widgetId || FW["_loaded_" + widgetId]) return;
+    FW["_loaded_" + widgetId] = true;
+
+    var container = document.getElementById("fw-" + widgetId);
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "fw-" + widgetId;
+      script.parentNode.insertBefore(container, script.nextSibling);
+    }
+
+    var shadow = container.attachShadow({ mode: "open" });
+    var wrapper = document.createElement("div");
+    wrapper.className = "fw-root";
+    shadow.appendChild(wrapper);
+
+    var styleEl = document.createElement("style");
+    styleEl.textContent = FW_STYLES;
+    shadow.appendChild(styleEl);
+
+    var baseUrl = script.src.replace(/\/embed\/widget\.js.*$/, "").replace(/\/widget\.js.*$/, "");
+    if (!baseUrl || baseUrl === script.src) {
+      baseUrl = window.location.origin;
+    }
+
+    fetch(baseUrl + "/api/widget/" + widgetId)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        renderWidget(wrapper, data);
+        // Track impression
+        navigator.sendBeacon && navigator.sendBeacon(
+          baseUrl + "/api/widget/" + widgetId + "?impression=1"
+        );
+      })
+      .catch(function (err) {
+        console.error("[Testimoni] Failed to load:", err);
+      });
+  });
+})();
+
+function renderWidget(container, data) {
+  var widget = data.widget;
+  var testimonials = data.testimonials || [];
+  var showWatermark = data.showWatermark;
+
+  if (!testimonials.length) {
+    container.innerHTML = '<p class="fw-empty">No testimonials yet</p>';
+    return;
+  }
+
+  var theme = widget.theme || {};
+  if (theme.backgroundColor) container.style.setProperty("--fw-bg", theme.backgroundColor);
+  if (theme.textColor) container.style.setProperty("--fw-text", theme.textColor);
+  if (theme.accentColor) container.style.setProperty("--fw-accent", theme.accentColor);
+
+  var layout = (widget.layout || "GRID").toUpperCase();
+  var html = "";
+
+  switch (layout) {
+    case "MASONRY":
+      html = renderMasonry(testimonials, widget);
+      break;
+    case "CAROUSEL":
+      html = renderCarousel(testimonials, widget);
+      break;
+    case "LIST":
+      html = renderList(testimonials, widget);
+      break;
+    case "MARQUEE":
+      html = renderMarquee(testimonials, widget);
+      break;
+    default:
+      html = renderGrid(testimonials, widget);
+  }
+
+  if (showWatermark) {
+    html += '<div class="fw-watermark"><a href="https://testimoni.io" target="_blank" rel="noopener">Powered by Testimoni</a></div>';
+  }
+
+  container.innerHTML = html;
+
+  if (layout === "CAROUSEL") initCarousel(container);
+  if (layout === "MARQUEE") initMarquee(container);
+}
+
+function renderCard(t, widget) {
+  var html = '<div class="fw-card">';
+  if (widget.showAvatar !== false && t.customerAvatar) {
+    html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
+  }
+  html += '<div class="fw-card-body">';
+  if (widget.showRating !== false && t.rating) {
+    html += '<div class="fw-stars">' + renderStars(t.rating) + '</div>';
+  }
+  if (t.content) {
+    html += '<p class="fw-content">' + escapeHtml(t.content) + '</p>';
+  }
+  html += '<div class="fw-author">';
+  html += '<span class="fw-name">' + escapeHtml(t.customerName) + '</span>';
+  if (t.customerTitle) {
+    html += '<span class="fw-title">' + escapeHtml(t.customerTitle) + '</span>';
+  }
+  html += '</div></div></div>';
+  return html;
+}
+
+function renderStars(count) {
+  var html = "";
+  for (var i = 0; i < 5; i++) {
+    html += '<svg class="fw-star' + (i < count ? " fw-star-filled" : "") + '" viewBox="0 0 24 24" width="16" height="16"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+  }
+  return html;
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 })();

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { createSubmissionSchema } from "@/lib/validations/submission";
+import { generateSlug } from "@/lib/utils";
 
 export async function GET(request: Request) {
   const auth = await getAuthContext(request);
@@ -10,6 +11,24 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
+
+  if (url.searchParams.get("listForms") === "true") {
+    const forms = await prisma.collectionForm.findMany({
+      where: { workspaceId: auth.workspace.id },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        isActive: true,
+        headline: true,
+        createdAt: true,
+        _count: { select: { submissions: true } },
+      },
+    });
+    return NextResponse.json({ forms });
+  }
+
   const status = url.searchParams.get("status");
   const formId = url.searchParams.get("formId");
   const page = parseInt(url.searchParams.get("page") || "1", 10);
@@ -55,8 +74,54 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  // Public endpoint - no auth required
   const body = await request.json();
+
+  // Authed action: create a new CollectionForm from the dashboard
+  if (body?.action === "createForm") {
+    const auth = await getAuthContext(request);
+    if (!auth) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    if (!name) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+
+    // Ensure slug is unique within the workspace
+    const base = generateSlug(name) || "form";
+    let slug = base;
+    let n = 1;
+    while (
+      await prisma.collectionForm.findFirst({
+        where: { workspaceId: auth.workspace.id, slug },
+        select: { id: true },
+      })
+    ) {
+      n += 1;
+      slug = `${base}-${n}`;
+    }
+
+    const form = await prisma.collectionForm.create({
+      data: {
+        workspaceId: auth.workspace.id,
+        name,
+        slug,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        isActive: true,
+        headline: true,
+        createdAt: true,
+        _count: { select: { submissions: true } },
+      },
+    });
+
+    return NextResponse.json({ form }, { status: 201 });
+  }
+
+  // Public endpoint - no auth required (submission from embed/collect form)
   const parsed = createSubmissionSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -98,8 +163,21 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json(
+  const response = NextResponse.json(
     { submission: { id: submission.id }, message: "Submission received" },
     { status: 201 }
   );
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  return response;
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
 }

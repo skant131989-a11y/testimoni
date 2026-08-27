@@ -23,6 +23,25 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id");
+
+  if (id) {
+    const widget = await prisma.widget.findFirst({
+      where: { id, workspaceId: auth.workspace.id },
+      include: {
+        testimonials: {
+          orderBy: { position: "asc" },
+          select: { testimonialId: true, position: true },
+        },
+      },
+    });
+    if (!widget) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json({ widget });
+  }
+
   const widgets = await prisma.widget.findMany({
     where: { workspaceId: auth.workspace.id },
     orderBy: { createdAt: "desc" },
@@ -94,4 +113,95 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json({ widget }, { status: 201 });
+}
+
+const updateWidgetSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1).max(200).optional(),
+  layout: z.enum(["GRID", "MASONRY", "CAROUSEL", "LIST", "MARQUEE"]).optional(),
+  theme: z.record(z.string(), z.unknown()).optional(),
+  config: z.record(z.string(), z.unknown()).optional(),
+  maxItems: z.number().int().min(1).max(100).optional().nullable(),
+  showRating: z.boolean().optional(),
+  showAvatar: z.boolean().optional(),
+  showDate: z.boolean().optional(),
+  customCss: z.string().max(10000).optional().nullable(),
+  isActive: z.boolean().optional(),
+  testimonialIds: z.array(z.string()).optional(),
+});
+
+export async function PATCH(request: Request) {
+  const auth = await getAuthContext(request);
+  if (!auth) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const parsed = updateWidgetSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const { id, testimonialIds, ...updates } = parsed.data;
+
+  const existing = await prisma.widget.findFirst({
+    where: { id, workspaceId: auth.workspace.id },
+    select: { id: true },
+  });
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Update widget scalar fields
+  await prisma.widget.update({
+    where: { id },
+    data: {
+      ...updates,
+      theme: updates.theme as Record<string, unknown> | undefined,
+      config: updates.config as Record<string, unknown> | undefined,
+    },
+  });
+
+  // Sync attached testimonials via the join table
+  if (testimonialIds) {
+    // Verify all testimonials belong to the workspace
+    const validCount = await prisma.testimonial.count({
+      where: {
+        id: { in: testimonialIds },
+        workspaceId: auth.workspace.id,
+      },
+    });
+    if (validCount !== testimonialIds.length) {
+      return NextResponse.json(
+        { error: "One or more testimonials do not belong to this workspace" },
+        { status: 400 }
+      );
+    }
+
+    await prisma.$transaction([
+      prisma.widgetTestimonial.deleteMany({ where: { widgetId: id } }),
+      prisma.widgetTestimonial.createMany({
+        data: testimonialIds.map((testimonialId, position) => ({
+          widgetId: id,
+          testimonialId,
+          position,
+        })),
+      }),
+    ]);
+  }
+
+  const widget = await prisma.widget.findUnique({
+    where: { id },
+    include: {
+      testimonials: {
+        orderBy: { position: "asc" },
+        select: { testimonialId: true, position: true },
+      },
+    },
+  });
+
+  return NextResponse.json({ widget });
 }

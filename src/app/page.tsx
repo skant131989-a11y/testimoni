@@ -10,8 +10,17 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { ProPriceDual } from "@/components/pricing/price-display";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  let isLoggedIn = false;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    isLoggedIn = !!user;
+  } catch {}
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
@@ -19,21 +28,32 @@ export default function LandingPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">FeedbackWidget</span>
+            <span className="text-xl font-bold">Testimoni</span>
           </div>
           <nav className="hidden items-center gap-6 md:flex">
+            <Link href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
+              Live Demo
+            </Link>
             <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
               Pricing
             </Link>
-            <Link href="/login">
-              <Button variant="ghost" size="sm">Log in</Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm">Get Started Free</Button>
-            </Link>
+            {isLoggedIn ? (
+              <Button size="sm" asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">Log in</Button>
+                </Link>
+                <Link href="/signup">
+                  <Button size="sm">Get Started Free</Button>
+                </Link>
+              </>
+            )}
           </nav>
-          <Link href="/signup" className="md:hidden">
-            <Button size="sm">Get Started</Button>
+          <Link href={isLoggedIn ? "/dashboard" : "/signup"} className="md:hidden">
+            <Button size="sm">{isLoggedIn ? "Dashboard" : "Get Started"}</Button>
           </Link>
         </div>
       </header>
@@ -201,7 +221,7 @@ export default function LandingPage() {
                 Most Popular
               </div>
               <h3 className="text-lg font-semibold">Pro</h3>
-              <p className="mt-2 text-3xl font-bold">$29<span className="text-base font-normal text-muted-foreground">/mo</span></p>
+              <p className="mt-2 text-3xl font-bold"><ProPriceDual primary="USD" /></p>
               <p className="text-sm text-muted-foreground">Everything unlimited</p>
               <ul className="mt-6 space-y-3">
                 {[
@@ -219,7 +239,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Link href="/signup" className="mt-8 block">
-                <Button className="w-full">Start Free Trial</Button>
+                <Button className="w-full">Start Free, Upgrade Anytime</Button>
               </Link>
             </div>
           </div>
@@ -233,7 +253,7 @@ export default function LandingPage() {
             Ready to showcase your customer love?
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Join hundreds of businesses using FeedbackWidget to convert visitors with social proof.
+            Join hundreds of businesses using Testimoni to convert visitors with social proof.
           </p>
           <Link href="/signup" className="mt-8 inline-block">
             <Button size="lg" className="gap-2">
@@ -249,10 +269,10 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
-            <span className="font-semibold">FeedbackWidget</span>
+            <span className="font-semibold">Testimoni</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            &copy; 2024 FeedbackWidget. All rights reserved.
+            &copy; 2024 Testimoni. All rights reserved.
           </p>
         </div>
       </footer>

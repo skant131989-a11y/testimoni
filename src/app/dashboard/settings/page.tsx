@@ -77,7 +77,7 @@ export default async function SettingsPage() {
               <Label htmlFor="workspace-slug">URL Slug</Label>
               <div className="flex items-center gap-1">
                 <span className="text-sm text-muted-foreground">
-                  feedbackwidget.io/
+                  testimoni.io/
                 </span>
                 <Input
                   id="workspace-slug"

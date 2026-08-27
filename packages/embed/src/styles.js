@@ -9,15 +9,19 @@ var FW_STYLES = `
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--fw-text);
   line-height: 1.5;
+  text-align: left;
+  font-style: normal;
+  font-weight: normal;
 }
 
 .fw-card {
   background: var(--fw-bg);
   border: 1px solid var(--fw-border);
   border-radius: var(--fw-radius);
-  padding: 24px;
+  padding: 12px 16px;
   display: flex;
-  gap: 16px;
+  gap: 12px;
+  align-items: flex-start;
   transition: box-shadow 0.2s;
 }
 
@@ -26,8 +30,8 @@ var FW_STYLES = `
 }
 
 .fw-avatar {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -41,12 +45,14 @@ var FW_STYLES = `
 .fw-stars {
   display: flex;
   gap: 2px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .fw-star {
   fill: var(--fw-border);
   stroke: none;
+  width: 13px;
+  height: 13px;
 }
 
 .fw-star-filled {
@@ -54,9 +60,9 @@ var FW_STYLES = `
 }
 
 .fw-content {
-  margin: 0 0 12px;
-  font-size: 15px;
-  line-height: 1.6;
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--fw-text);
 }
 
@@ -67,11 +73,11 @@ var FW_STYLES = `
 
 .fw-name {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .fw-title {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--fw-muted);
 }
 
@@ -100,25 +106,25 @@ var FW_STYLES = `
 /* Grid Layout */
 .fw-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
 }
 
 /* Masonry Layout */
 .fw-masonry {
   columns: 3;
-  column-gap: 16px;
+  column-gap: 12px;
 }
 
 .fw-masonry .fw-card {
   break-inside: avoid;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: block;
 }
 
 @media (max-width: 768px) {
   .fw-masonry { columns: 2; }
-  .fw-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .fw-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 }
 
 @media (max-width: 480px) {

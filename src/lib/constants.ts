@@ -19,4 +19,36 @@ export const PLAN_LIMITS = {
 
 export type PlanType = keyof typeof PLAN_LIMITS;
 
-export const PRO_PRICE_MONTHLY = 29;
+export type Currency = "USD" | "INR";
+
+export const PRICING: Record<
+  Currency,
+  { symbol: string; code: Currency; proMonthly: number; locale: string }
+> = {
+  USD: { symbol: "$", code: "USD", proMonthly: 9, locale: "en-US" },
+  INR: { symbol: "₹", code: "INR", proMonthly: 859, locale: "en-IN" },
+};
+
+export function formatPrice(amount: number, currency: Currency): string {
+  const { symbol, locale } = PRICING[currency];
+  return `${symbol}${new Intl.NumberFormat(locale).format(amount)}`;
+}
+
+/**
+ * Detect currency from user's timezone. Runs safely on both server and client.
+ * India → INR. Everything else → USD. Extend as new regions are supported.
+ */
+export function detectCurrency(): Currency {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta") return "INR";
+  } catch {
+    // fall through
+  }
+  return "USD";
+}
+
+/**
+ * @deprecated Use PRICING[currency].proMonthly instead — kept for back-compat.
+ */
+export const PRO_PRICE_MONTHLY = PRICING.USD.proMonthly;

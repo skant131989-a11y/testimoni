@@ -14,13 +14,13 @@ interface HeaderProps {
 }
 
 const pathLabels: Record<string, string> = {
-  "/": "Dashboard",
-  "/testimonials": "Testimonials",
-  "/widgets": "Widgets",
-  "/collect": "Collect",
-  "/import": "Import",
-  "/analytics": "Analytics",
-  "/settings": "Settings",
+  "/dashboard": "Dashboard",
+  "/dashboard/testimonials": "Testimonials",
+  "/dashboard/widgets": "Widgets",
+  "/dashboard/collect": "Collect",
+  "/dashboard/import": "Import",
+  "/dashboard/analytics": "Analytics",
+  "/dashboard/settings": "Settings",
 };
 
 export function Header({
@@ -86,7 +86,7 @@ export function Header({
             </div>
             <div className="p-1">
               <Link
-                href="/settings"
+                href="/dashboard/settings"
                 className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm hover:bg-accent"
                 onClick={() => setMenuOpen(false)}
               >

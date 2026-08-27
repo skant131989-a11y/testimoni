@@ -138,19 +138,19 @@ export default async function DashboardPage() {
       {/* Quick actions */}
       <div className="flex flex-wrap gap-3">
         <Button asChild>
-          <Link href="/testimonials?action=add">
+          <Link href="/dashboard/import">
             <Plus className="mr-2 h-4 w-4" />
             Add Testimonial
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/widgets?action=create">
+          <Link href="/dashboard/widgets?action=create">
             <Code2 className="mr-2 h-4 w-4" />
             Create Widget
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/collect">
+          <Link href="/dashboard/collect">
             <Share2 className="mr-2 h-4 w-4" />
             Share Form
           </Link>
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
                 customers!
               </p>
               <Button className="mt-4" asChild>
-                <Link href="/collect">Get Started</Link>
+                <Link href="/dashboard/collect">Get Started</Link>
               </Button>
             </div>
           ) : (
@@ -245,7 +245,7 @@ export default async function DashboardPage() {
 
               <div className="pt-2 text-center">
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/testimonials">View all testimonials</Link>
+                  <Link href="/dashboard/testimonials">View all testimonials</Link>
                 </Button>
               </div>
             </div>

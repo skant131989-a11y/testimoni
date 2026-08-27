@@ -1,7 +1,7 @@
 "use strict";
 
-var FW = window.FeedbackWidget || {};
-window.FeedbackWidget = FW;
+var FW = window.Testimoni || {};
+window.Testimoni = FW;
 
 (function init() {
   var scripts = document.querySelectorAll("script[data-widget-id]");
@@ -41,7 +41,7 @@ window.FeedbackWidget = FW;
         );
       })
       .catch(function (err) {
-        console.error("[FeedbackWidget] Failed to load:", err);
+        console.error("[Testimoni] Failed to load:", err);
       });
   });
 })();
@@ -82,7 +82,7 @@ function renderWidget(container, data) {
   }
 
   if (showWatermark) {
-    html += '<div class="fw-watermark"><a href="https://feedbackwidget.io" target="_blank" rel="noopener">Powered by FeedbackWidget</a></div>';
+    html += '<div class="fw-watermark"><a href="https://testimoni.io" target="_blank" rel="noopener">Powered by Testimoni</a></div>';
   }
 
   container.innerHTML = html;
