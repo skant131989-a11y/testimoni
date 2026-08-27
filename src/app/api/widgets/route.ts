@@ -157,12 +157,13 @@ export async function PATCH(request: Request) {
   }
 
   // Update widget scalar fields
+  const { theme, config, ...restUpdates } = updates;
   await prisma.widget.update({
     where: { id },
     data: {
-      ...updates,
-      theme: updates.theme as Prisma.InputJsonValue | undefined,
-      config: updates.config as Prisma.InputJsonValue | undefined,
+      ...restUpdates,
+      ...(theme !== undefined && { theme: theme as Prisma.InputJsonValue }),
+      ...(config !== undefined && { config: config as Prisma.InputJsonValue }),
     },
   });
 
