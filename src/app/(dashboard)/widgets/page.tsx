@@ -1,0 +1,208 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Plus,
+  LayoutGrid,
+  Columns3,
+  GalleryHorizontal,
+  List,
+  MoveHorizontal,
+  Settings,
+  Eye,
+  Code,
+  Trash2,
+} from "lucide-react";
+import Link from "next/link";
+
+const LAYOUTS = [
+  { id: "GRID", label: "Grid", icon: LayoutGrid },
+  { id: "MASONRY", label: "Masonry", icon: Columns3 },
+  { id: "CAROUSEL", label: "Carousel", icon: GalleryHorizontal },
+  { id: "LIST", label: "List", icon: List },
+  { id: "MARQUEE", label: "Marquee", icon: MoveHorizontal },
+] as const;
+
+interface Widget {
+  id: string;
+  name: string;
+  layout: string;
+  isActive: boolean;
+  createdAt: string;
+  _count: { testimonials: number };
+}
+
+export default function WidgetsPage() {
+  const [widgets, setWidgets] = useState<Widget[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  useState(() => {
+    fetch("/api/widgets")
+      .then((r) => r.json())
+      .then((data) => {
+        setWidgets(data.widgets || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  });
+
+  async function handleCreate() {
+    if (!newName.trim()) return;
+    setCreating(true);
+    try {
+      const res = await fetch("/api/widgets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWidgets((prev) => [data.widget, ...prev]);
+        setNewName("");
+        setShowCreate(false);
+      }
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this widget?")) return;
+    await fetch(`/api/widgets`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setWidgets((prev) => prev.filter((w) => w.id !== id));
+  }
+
+  const getLayoutIcon = (layout: string) => {
+    const found = LAYOUTS.find((l) => l.id === layout);
+    return found ? found.icon : LayoutGrid;
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Widgets</h1>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-48 animate-pulse rounded-lg bg-muted" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Widgets</h1>
+        <Button onClick={() => setShowCreate(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Widget
+        </Button>
+      </div>
+
+      {showCreate && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-end gap-4">
+              <div className="flex-1">
+                <Label htmlFor="widget-name">Widget Name</Label>
+                <Input
+                  id="widget-name"
+                  placeholder="e.g., Homepage Testimonials"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                />
+              </div>
+              <Button onClick={handleCreate} disabled={creating}>
+                {creating ? "Creating..." : "Create"}
+              </Button>
+              <Button variant="ghost" onClick={() => setShowCreate(false)}>
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {widgets.length === 0 && !showCreate ? (
+        <Card className="py-12">
+          <CardContent className="text-center">
+            <LayoutGrid className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">No widgets yet</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Create your first widget to start displaying testimonials on your
+              site.
+            </p>
+            <Button className="mt-4" onClick={() => setShowCreate(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Widget
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {widgets.map((widget) => {
+            const LayoutIcon = getLayoutIcon(widget.layout);
+            return (
+              <Card key={widget.id} className="relative">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg">{widget.name}</CardTitle>
+                    <Badge variant={widget.isActive ? "default" : "secondary"}>
+                      {widget.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <LayoutIcon className="h-4 w-4" />
+                    <span>{widget.layout}</span>
+                    <span className="mx-1">·</span>
+                    <span>{widget._count?.testimonials || 0} testimonials</span>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/dashboard/widgets/${widget.id}`}>
+                        <Settings className="mr-1 h-3 w-3" />
+                        Edit
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/dashboard/widgets/${widget.id}/embed`}>
+                        <Code className="mr-1 h-3 w-3" />
+                        Embed
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto text-destructive"
+                      onClick={() => handleDelete(widget.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

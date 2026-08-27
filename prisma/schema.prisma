@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  supabaseId String   @unique @map("supabase_id")
+  email      String   @unique
+  name       String?
+  avatarUrl  String?  @map("avatar_url")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  workspaceMembers WorkspaceMember[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?  @map("logo_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  members      WorkspaceMember[]
+  testimonials Testimonial[]
+  widgets      Widget[]
+  forms        CollectionForm[]
+  subscription Subscription?
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String     @id @default(cuid())
+  userId      String     @map("user_id")
+  workspaceId String     @map("workspace_id")
+  role        MemberRole @default(MEMBER)
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@map("workspace_members")
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Testimonial {
+  id          String @id @default(cuid())
+  workspaceId String @map("workspace_id")
+
+  content       String?
+  rating        Int?
+  videoUrl      String?  @map("video_url")
+  imageUrls     String[] @map("image_urls")
+
+  customerName   String  @map("customer_name")
+  customerEmail  String? @map("customer_email")
+  customerAvatar String? @map("customer_avatar")
+  customerTitle  String? @map("customer_title")
+  customerUrl    String? @map("customer_url")
+
+  source    TestimonialSource @default(MANUAL)
+  sourceUrl String?           @map("source_url")
+  status    TestimonialStatus @default(PENDING)
+  tags      String[]          @default([])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  widgetItems WidgetTestimonial[]
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, createdAt])
+  @@map("testimonials")
+}
+
+enum TestimonialSource {
+  MANUAL
+  FORM
+  TWITTER
+  LINKEDIN
+  GOOGLE
+  IMPORT
+}
+
+enum TestimonialStatus {
+  PENDING
+  APPROVED
+  ARCHIVED
+}
+
+model CollectionForm {
+  id          String @id @default(cuid())
+  workspaceId String @map("workspace_id")
+  name        String
+  slug        String
+
+  headline        String  @default("Share your experience")
+  description     String?
+  questions       Json    @default("[]")
+  allowVideo      Boolean @default(false) @map("allow_video")
+  allowRating     Boolean @default(true) @map("allow_rating")
+  thankYouMessage String  @default("Thank you for your feedback!") @map("thank_you_message")
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@unique([workspaceId, slug])
+  @@map("collection_forms")
+}
+
+model Submission {
+  id     String @id @default(cuid())
+  formId String @map("form_id")
+
+  content       String?
+  rating        Int?
+  videoUrl      String?  @map("video_url")
+  imageUrls     String[] @map("image_urls")
+  customerName  String   @map("customer_name")
+  customerEmail String?  @map("customer_email")
+  answers       Json     @default("{}")
+
+  status        SubmissionStatus @default(NEW)
+  testimonialId String?          @map("testimonial_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  form CollectionForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([formId, status])
+  @@map("submissions")
+}
+
+enum SubmissionStatus {
+  NEW
+  APPROVED
+  REJECTED
+  SPAM
+}
+
+model Widget {
+  id          String @id @default(cuid())
+  workspaceId String @map("workspace_id")
+  name        String
+
+  layout     WidgetLayout @default(GRID)
+  theme      Json         @default("{}")
+  config     Json         @default("{}")
+  filterTags String[]     @default([]) @map("filter_tags")
+  maxItems   Int?         @map("max_items")
+  showRating Boolean      @default(true) @map("show_rating")
+  showAvatar Boolean      @default(true) @map("show_avatar")
+  showDate   Boolean      @default(false) @map("show_date")
+  customCss  String?      @map("custom_css")
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workspace    Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  testimonials WidgetTestimonial[]
+  analytics    WidgetAnalytics[]
+
+  @@index([workspaceId])
+  @@map("widgets")
+}
+
+enum WidgetLayout {
+  GRID
+  MASONRY
+  CAROUSEL
+  LIST
+  MARQUEE
+}
+
+model WidgetTestimonial {
+  id            String @id @default(cuid())
+  widgetId      String @map("widget_id")
+  testimonialId String @map("testimonial_id")
+  position      Int    @default(0)
+
+  widget      Widget      @relation(fields: [widgetId], references: [id], onDelete: Cascade)
+  testimonial Testimonial @relation(fields: [testimonialId], references: [id], onDelete: Cascade)
+
+  @@unique([widgetId, testimonialId])
+  @@index([widgetId, position])
+  @@map("widget_testimonials")
+}
+
+model WidgetAnalytics {
+  id          String   @id @default(cuid())
+  widgetId    String   @map("widget_id")
+  date        DateTime @db.Date
+  impressions Int      @default(0)
+
+  widget Widget @relation(fields: [widgetId], references: [id], onDelete: Cascade)
+
+  @@unique([widgetId, date])
+  @@map("widget_analytics")
+}
+
+model Subscription {
+  id          String @id @default(cuid())
+  workspaceId String @unique @map("workspace_id")
+
+  stripeCustomerId     String  @unique @map("stripe_customer_id")
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+  stripePriceId        String? @map("stripe_price_id")
+
+  plan   PlanType           @default(FREE)
+  status SubscriptionStatus @default(ACTIVE)
+
+  currentPeriodStart DateTime? @map("current_period_start")
+  currentPeriodEnd   DateTime? @map("current_period_end")
+  cancelAtPeriodEnd  Boolean   @default(false) @map("cancel_at_period_end")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+enum PlanType {
+  FREE
+  PRO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
