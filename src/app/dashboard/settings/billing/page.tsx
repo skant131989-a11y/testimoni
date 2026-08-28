@@ -191,6 +191,20 @@ export default function BillingPage() {
         </div>
       )}
 
+      {cancelling && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="mx-4 max-w-sm rounded-2xl border bg-background p-6 text-center shadow-2xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold">Cancelling your subscription…</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Talking to Razorpay. This usually takes a few seconds.
+            </p>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold">Billing</h1>
 
       {/* Current Plan */}
