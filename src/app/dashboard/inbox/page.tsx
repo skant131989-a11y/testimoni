@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 type FilterTab = "NEW" | "APPROVED" | "REJECTED";
 
 interface InboxPageProps {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; error?: string }>;
 }
 
 export default async function InboxPage({ searchParams }: InboxPageProps) {
@@ -67,6 +67,21 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
           Review submissions from your collection forms. Approve to add them to your testimonials.
         </p>
       </div>
+
+      {params.error === "limit" && (
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-4">
+          <p className="text-sm text-destructive">
+            <span className="font-semibold">Testimonial limit reached.</span>{" "}
+            You&apos;ve hit the Free plan cap of 10 testimonials. Approve more by upgrading.
+          </p>
+          <Link
+            href="/dashboard/settings/billing"
+            className="mt-1 inline-block text-xs font-semibold text-destructive underline"
+          >
+            Upgrade to Pro →
+          </Link>
+        </div>
+      )}
 
       <div className="flex gap-1 border-b">
         {tabs.map((tab) => (

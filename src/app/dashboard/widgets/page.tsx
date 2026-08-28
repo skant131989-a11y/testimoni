@@ -43,6 +43,7 @@ export default function WidgetsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   useState(() => {
     fetch("/api/widgets")
@@ -57,6 +58,7 @@ export default function WidgetsPage() {
   async function handleCreate() {
     if (!newName.trim()) return;
     setCreating(true);
+    setCreateError(null);
     try {
       const res = await fetch("/api/widgets", {
         method: "POST",
@@ -68,6 +70,9 @@ export default function WidgetsPage() {
         setWidgets((prev) => [data.widget, ...prev]);
         setNewName("");
         setShowCreate(false);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setCreateError(data.error || "Could not create widget. Please try again.");
       }
     } finally {
       setCreating(false);
@@ -135,6 +140,19 @@ export default function WidgetsPage() {
                 Cancel
               </Button>
             </div>
+            {createError && (
+              <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3">
+                <p className="text-sm text-destructive">{createError}</p>
+                {createError.toLowerCase().includes("limit") && (
+                  <a
+                    href="/dashboard/settings/billing"
+                    className="mt-1 inline-block text-xs font-semibold text-destructive underline"
+                  >
+                    Upgrade to Pro →
+                  </a>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

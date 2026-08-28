@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
+import { getEffectiveLimits } from "@/lib/plan";
 
 export async function POST(
   request: Request,
@@ -24,6 +25,23 @@ export async function POST(
 
   if (submission.testimonialId) {
     return NextResponse.json({ error: "Already approved" }, { status: 400 });
+  }
+
+  // Enforce testimonial plan limit here too — approving a submission
+  // creates a Testimonial row, same as direct create.
+  const subscription = await prisma.subscription.findUnique({
+    where: { workspaceId: auth.workspace.id },
+  });
+  const limits = getEffectiveLimits(auth.workspace.slug, subscription?.plan);
+  const currentCount = await prisma.testimonial.count({
+    where: { workspaceId: auth.workspace.id },
+  });
+  if (currentCount >= limits.maxTestimonials) {
+    // Redirect back to the inbox with an error so the form submit doesn't
+    // dump raw JSON into the browser.
+    const url = new URL("/dashboard/inbox", request.url);
+    url.searchParams.set("error", "limit");
+    return NextResponse.redirect(url, 303);
   }
 
   const [testimonial] = await prisma.$transaction([

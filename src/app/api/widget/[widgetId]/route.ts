@@ -48,6 +48,10 @@ export async function GET(
 
   const plan = getEffectivePlan(widget.workspace.slug, widget.workspace.subscription?.plan);
   const showWatermark = plan === "FREE";
+  // Layout gating: FREE plan is grid-only. If a workspace downgrades
+  // to FREE and still owns non-GRID widgets, serve them as GRID rather
+  // than 404'ing or leaking a Pro layout for free.
+  const effectiveLayout = plan === "FREE" ? "GRID" : widget.layout;
 
   // Apply maxItems limit if set
   let testimonials = widget.testimonials.map((wt) => wt.testimonial);
@@ -59,7 +63,7 @@ export async function GET(
     widget: {
       id: widget.id,
       name: widget.name,
-      layout: widget.layout,
+      layout: effectiveLayout,
       theme: widget.theme,
       config: widget.config,
       showRating: widget.showRating,
