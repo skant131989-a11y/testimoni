@@ -33,9 +33,11 @@ interface Testimonial {
   rating: number;
   isNew?: boolean;
   isApproved?: boolean;
+  inWidget?: boolean;
 }
 
 const SEED_TESTIMONIALS: Testimonial[] = [
+  // Already approved AND added to the widget — visible immediately
   {
     customerName: "Sarah Chen",
     customerTitle: "CEO at LaunchPad",
@@ -44,6 +46,7 @@ const SEED_TESTIMONIALS: Testimonial[] = [
       "Testimoni transformed our landing page. We saw a 34% increase in conversions within the first week. Setup took less than 5 minutes.",
     rating: 5,
     isApproved: true,
+    inWidget: true,
   },
   {
     customerName: "Marcus Johnson",
@@ -53,7 +56,9 @@ const SEED_TESTIMONIALS: Testimonial[] = [
       "My students love leaving video testimonials. It adds so much authenticity compared to plain text. The embed looks beautiful on my site.",
     rating: 5,
     isApproved: true,
+    inWidget: true,
   },
+  // Approved but NOT in the widget — user can add it
   {
     customerName: "Emily Rodriguez",
     customerTitle: "Marketing Lead at Flowbase",
@@ -62,6 +67,7 @@ const SEED_TESTIMONIALS: Testimonial[] = [
       "We switched from manually updating our testimonials page to Testimoni. Customers submit directly, we approve the best ones. Huge time saver.",
     rating: 5,
     isApproved: true,
+    inWidget: false,
   },
   {
     customerName: "David Park",
@@ -71,6 +77,28 @@ const SEED_TESTIMONIALS: Testimonial[] = [
       "The masonry layout is gorgeous. Our wall of love went from amateur to looking like a $10M ARR SaaS. Worth every penny.",
     rating: 5,
     isApproved: true,
+    inWidget: false,
+  },
+  // Pending — in inbox, awaiting approval
+  {
+    customerName: "Priya Sharma",
+    customerTitle: "Product Manager at Nova",
+    customerAvatar: "https://i.pravatar.cc/150?img=47",
+    content:
+      "Onboarding was ridiculously fast. Had our first testimonial widget live within 10 minutes of signing up.",
+    rating: 5,
+    isApproved: false,
+    inWidget: false,
+  },
+  {
+    customerName: "Alex Kumar",
+    customerTitle: "Indie Hacker",
+    customerAvatar: "https://i.pravatar.cc/150?img=12",
+    content:
+      "Cheapest testimonial tool I've tried and the widget looks the best. Not even close.",
+    rating: 4,
+    isApproved: false,
+    inWidget: false,
   },
 ];
 
@@ -189,6 +217,8 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   const ctaHref = isLoggedIn ? "/dashboard" : "/signup";
   const ctaLabel = isLoggedIn ? "Go to Dashboard" : "Get Started Free";
   const approvedTestimonials = testimonials.filter((t) => t.isApproved);
+  const widgetTestimonials = approvedTestimonials.filter((t) => t.inWidget);
+  const curateRef = useRef<HTMLDivElement>(null);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -221,12 +251,21 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
       prev.map((t, i) => (i === index ? { ...t, isApproved: true, isNew: false } : t))
     );
     setTimeout(() => {
-      widgetRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      curateRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 300);
   }
 
   function rejectTestimonial(index: number) {
     setTestimonials((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function toggleInWidget(index: number) {
+    setTestimonials((prev) =>
+      prev.map((t, i) => (i === index ? { ...t, inWidget: !t.inWidget } : t))
+    );
+    setTimeout(() => {
+      widgetRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
   }
 
   function resetForm() {
@@ -449,7 +488,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
                 )}
                 {testimonials.some((t) => t.isApproved) && (
                   <div className="pt-2 text-center text-xs text-muted-foreground">
-                    + {testimonials.filter((t) => t.isApproved).length} already approved, live in widget below
+                    + {testimonials.filter((t) => t.isApproved).length} already approved. Curate them below ↓
                   </div>
                 )}
               </div>
@@ -457,11 +496,89 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           </div>
         </div>
 
-        {/* Step 3: Live Widget */}
+        {/* Step 3: Curate widget — pick which approved testimonials go in your widget */}
+        <div className="mt-16" ref={curateRef}>
+          <div className="mb-3 flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+              3
+            </div>
+            <h2 className="text-lg font-semibold">Pick which testimonials go in your widget</h2>
+          </div>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Approved testimonials are your <strong>library</strong>. Click any card to add it to the widget or remove it — you might not want to show every one on every page.
+          </p>
+
+          <div className="rounded-2xl border bg-card p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                APPROVED LIBRARY
+              </h3>
+              <Badge>
+                {widgetTestimonials.length} of {approvedTestimonials.length} in widget
+              </Badge>
+            </div>
+
+            {approvedTestimonials.length === 0 ? (
+              <p className="py-6 text-center text-xs text-muted-foreground">
+                Approve testimonials in the Inbox above to add them here.
+              </p>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {testimonials
+                  .map((t, i) => ({ t, i }))
+                  .filter(({ t }) => t.isApproved)
+                  .map(({ t, i }) => {
+                    const inWidget = !!t.inWidget;
+                    return (
+                      <button
+                        key={`curate-${t.customerName}-${i}`}
+                        onClick={() => toggleInWidget(i)}
+                        className={`group relative flex items-start gap-3 rounded-lg border p-3 text-left transition-all hover:shadow-sm ${
+                          inWidget
+                            ? "border-primary bg-primary/5"
+                            : "border-dashed border-muted-foreground/30 bg-muted/30 opacity-70 hover:opacity-100"
+                        }`}
+                      >
+                        <img
+                          src={t.customerAvatar}
+                          alt=""
+                          className="h-9 w-9 rounded-full object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold">{t.customerName}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {t.content}
+                          </p>
+                          <div className="mt-1 flex gap-0.5">
+                            {Array.from({ length: t.rating }).map((_, j) => (
+                              <Star key={j} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                        </div>
+                        <div
+                          className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+                            inWidget
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-background text-muted-foreground border"
+                          }`}
+                        >
+                          {inWidget ? "✓ In widget" : "+ Add"}
+                        </div>
+                      </button>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Step 4: Live Widget */}
         <div className="mt-16" ref={widgetRef}>
           <div className="mb-4 flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-              3
+              4
             </div>
             <h2 className="text-lg font-semibold">It appears on your website automatically</h2>
           </div>
@@ -514,14 +631,23 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             <div className="mb-3 flex items-center gap-2">
               <Eye className="h-4 w-4 text-muted-foreground" />
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Live widget preview — {layout} · {approvedTestimonials.length} approved
+                Live widget preview — {layout} · {widgetTestimonials.length} in widget
               </span>
             </div>
 
+            {widgetTestimonials.length === 0 && (
+              <div className="rounded-xl border border-dashed border-muted-foreground/30 py-12 text-center text-sm text-muted-foreground">
+                No testimonials in the widget yet.<br />
+                Add some from the library above to see them here.
+              </div>
+            )}
+
+            {widgetTestimonials.length > 0 && (
+              <>
             {/* Grid */}
             {layout === "grid" && (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {approvedTestimonials.map((t, i) => (
+                {widgetTestimonials.map((t, i) => (
                   <TestimonialCard key={`${t.customerName}-${i}`} t={t} theme={theme} />
                 ))}
               </div>
@@ -530,7 +656,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             {/* Masonry */}
             {layout === "masonry" && (
               <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-                {approvedTestimonials.map((t, i) => (
+                {widgetTestimonials.map((t, i) => (
                   <div key={`${t.customerName}-${i}`} className="mb-4 break-inside-avoid">
                     <TestimonialCard t={t} theme={theme} />
                   </div>
@@ -542,7 +668,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             {layout === "carousel" && (
               <div className="relative">
                 <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
-                  {approvedTestimonials.map((t, i) => (
+                  {widgetTestimonials.map((t, i) => (
                     <div
                       key={`${t.customerName}-${i}`}
                       className="min-w-[300px] max-w-[300px] flex-shrink-0 snap-start"
@@ -560,7 +686,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             {/* List */}
             {layout === "list" && (
               <div className="mx-auto max-w-2xl space-y-4">
-                {approvedTestimonials.map((t, i) => (
+                {widgetTestimonials.map((t, i) => (
                   <TestimonialCard key={`${t.customerName}-${i}`} t={t} theme={theme} />
                 ))}
               </div>
@@ -570,7 +696,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             {layout === "marquee" && (
               <div className="overflow-hidden">
                 <div className="flex gap-4 animate-[marquee_30s_linear_infinite] hover:[animation-play-state:paused]">
-                  {[...approvedTestimonials, ...approvedTestimonials].map((t, i) => (
+                  {[...widgetTestimonials, ...widgetTestimonials].map((t, i) => (
                     <div
                       key={`${t.customerName}-${i}`}
                       className="min-w-[300px] max-w-[300px] flex-shrink-0"
@@ -580,6 +706,8 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
                   ))}
                 </div>
               </div>
+            )}
+              </>
             )}
           </div>
         </div>
