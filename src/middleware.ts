@@ -9,6 +9,7 @@ export async function middleware(request: NextRequest) {
     pathname === "/pricing" ||
     pathname === "/features" ||
     pathname === "/demo" ||
+    pathname === "/contact" ||
     pathname.startsWith("/collect/");
 
   if (isPublicPage) {

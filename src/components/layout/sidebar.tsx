@@ -9,6 +9,7 @@ import {
   Code2,
   Inbox,
   Send,
+  MessageCircle,
   Import,
   BarChart3,
   Settings,
@@ -120,7 +121,19 @@ export function Sidebar({ workspaceName, plan }: SidebarProps) {
         )}
 
         {/* Collapse toggle */}
-        <div className="border-t p-2">
+        <div className="border-t p-2 space-y-1">
+          <Link
+            href="/contact"
+            target="_blank"
+            className={cn(
+              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+              collapsed && "justify-center px-2"
+            )}
+            title={collapsed ? "Send feedback" : undefined}
+          >
+            <MessageCircle className="h-5 w-5 shrink-0" />
+            {!collapsed && <span>Send feedback</span>}
+          </Link>
           <Button
             variant="ghost"
             size="icon"

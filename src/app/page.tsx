@@ -425,6 +425,11 @@ export default async function LandingPage() {
             <MessageSquare className="h-5 w-5 text-primary" />
             <span className="font-semibold">Testimoni</span>
           </div>
+          <nav className="flex items-center gap-5 text-sm">
+            <Link href="/demo" className="text-muted-foreground hover:text-foreground">Demo</Link>
+            <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
+            <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
+          </nav>
           <p className="text-sm text-muted-foreground">
             &copy; 2024 Testimoni. All rights reserved.
           </p>

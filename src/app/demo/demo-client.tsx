@@ -789,6 +789,21 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           </p>
         </div>
       </main>
+
+      <footer className="border-t py-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
+          <Link href="/" className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" />
+            <span className="font-semibold">Testimoni</span>
+          </Link>
+          <nav className="flex items-center gap-5 text-sm">
+            <Link href="/demo" className="text-muted-foreground hover:text-foreground">Demo</Link>
+            <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
+            <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
+          </nav>
+          <p className="text-sm text-muted-foreground">&copy; 2024 Testimoni.</p>
+        </div>
+      </footer>
     </div>
   );
 }
