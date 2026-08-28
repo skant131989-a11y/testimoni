@@ -23,6 +23,7 @@ export async function GET(request: Request) {
         isActive: true,
         headline: true,
         createdAt: true,
+        workspace: { select: { slug: true } },
         _count: { select: { submissions: true } },
       },
     });
@@ -114,6 +115,7 @@ export async function POST(request: Request) {
         isActive: true,
         headline: true,
         createdAt: true,
+        workspace: { select: { slug: true } },
         _count: { select: { submissions: true } },
       },
     });

@@ -27,6 +27,7 @@ interface CollectionForm {
   isActive: boolean;
   headline: string;
   createdAt: string;
+  workspace: { slug: string };
   _count: { submissions: number };
 }
 
@@ -73,7 +74,7 @@ export default function CollectPage() {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   function getFormUrl(form: CollectionForm) {
-    return `${origin}/collect/${form.slug}`;
+    return `${origin}/collect/${form.workspace.slug}/${form.slug}`;
   }
 
   function getEmbedScript(form: CollectionForm) {
