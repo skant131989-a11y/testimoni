@@ -2,6 +2,7 @@ export const PLAN_LIMITS = {
   FREE: {
     maxTestimonials: 10,
     maxWidgets: 1,
+    maxForms: 1,
     layouts: ["GRID"] as const,
     video: false,
     watermark: true,
@@ -10,6 +11,7 @@ export const PLAN_LIMITS = {
   PRO: {
     maxTestimonials: Infinity,
     maxWidgets: Infinity,
+    maxForms: Infinity,
     layouts: ["GRID", "MASONRY", "CAROUSEL", "LIST", "MARQUEE"] as const,
     video: true,
     watermark: false,

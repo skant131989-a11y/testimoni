@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { createSubmissionSchema } from "@/lib/validations/submission";
 import { generateSlug } from "@/lib/utils";
+import { getEffectiveLimits } from "@/lib/plan";
 
 export async function GET(request: Request) {
   const auth = await getAuthContext(request);
@@ -86,6 +87,24 @@ export async function POST(request: Request) {
     const name = typeof body.name === "string" ? body.name.trim() : "";
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+
+    // Plan limit — Free allows 1 form
+    const subscription = await prisma.subscription.findUnique({
+      where: { workspaceId: auth.workspace.id },
+    });
+    const limits = getEffectiveLimits(auth.workspace.slug, subscription?.plan);
+    const currentForms = await prisma.collectionForm.count({
+      where: { workspaceId: auth.workspace.id },
+    });
+    if (currentForms >= limits.maxForms) {
+      return NextResponse.json(
+        {
+          error:
+            "Collection form limit reached on the Free plan. Upgrade to Pro to create more.",
+        },
+        { status: 403 }
+      );
     }
 
     // Ensure slug is unique within the workspace

@@ -129,7 +129,7 @@ export default async function PricingPage() {
                 },
                 {
                   q: "How many forms and widgets can I have?",
-                  a: "Free plan: 1 widget, unlimited forms. Pro: unlimited both. Most Pro customers run 1-3 forms (one per collection channel) and 2-5 widgets (one per page they want testimonials on).",
+                  a: "Free plan: 1 form, 1 widget, 10 testimonials. Pro: unlimited forms and widgets. Most Pro customers run 1-3 forms (one per collection channel) and 2-5 widgets (one per page they want testimonials on).",
                 },
                 {
                   q: "Can I cancel anytime?",

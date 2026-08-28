@@ -37,6 +37,7 @@ export default function CollectPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Record<string, string>>({});
@@ -54,6 +55,7 @@ export default function CollectPage() {
   async function handleCreate() {
     if (!newName.trim()) return;
     setCreating(true);
+    setCreateError(null);
     try {
       const res = await fetch("/api/submissions", {
         method: "POST",
@@ -65,6 +67,9 @@ export default function CollectPage() {
         setForms((prev) => [data.form, ...prev]);
         setNewName("");
         setShowCreate(false);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setCreateError(data.error || "Could not create form. Please try again.");
       }
     } finally {
       setCreating(false);
@@ -158,6 +163,19 @@ export default function CollectPage() {
                 Cancel
               </Button>
             </div>
+            {createError && (
+              <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3">
+                <p className="text-sm text-destructive">{createError}</p>
+                {createError.toLowerCase().includes("limit") && (
+                  <a
+                    href="/dashboard/settings/billing"
+                    className="mt-1 inline-block text-xs font-semibold text-destructive underline"
+                  >
+                    Upgrade to Pro →
+                  </a>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
