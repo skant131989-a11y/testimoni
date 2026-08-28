@@ -77,7 +77,7 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-3xl">
           <div className="mb-4 inline-flex items-center rounded-full border px-3 py-1 text-sm">
             <Star className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400" />
-            Trusted by 500+ businesses
+            Just launched · Free forever plan
           </div>
           <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
             Turn customer love into{" "}
@@ -417,7 +417,7 @@ export default async function LandingPage() {
             Ready to showcase your customer love?
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Join hundreds of businesses using Testimoni to convert visitors with social proof.
+            Get set up in 5 minutes. Free forever plan. No credit card required.
           </p>
           <Link href="/signup" className="mt-8 inline-block">
             <Button size="lg" className="gap-2">
