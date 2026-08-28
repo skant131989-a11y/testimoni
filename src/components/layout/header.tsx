@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LogOut, User, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -63,10 +64,13 @@ export function Header({
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {userAvatarUrl ? (
-            <img
+            <Image
               src={userAvatarUrl}
               alt={userName || "User avatar"}
-              className="h-7 w-7 rounded-full object-cover"
+              width={28}
+              height={28}
+              className="rounded-full object-cover"
+              unoptimized
             />
           ) : (
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">

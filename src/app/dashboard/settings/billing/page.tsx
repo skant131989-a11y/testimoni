@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Script from "next/script";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -72,6 +71,29 @@ export default function BillingPage() {
     setUpgrading(true);
     setError(null);
     try {
+      // Lazy-load Razorpay checkout.js — only pulled the first time
+      // the user actually clicks Upgrade. Saves ~30KB on the initial
+      // billing page load for everyone (including existing Pro users).
+      if (!window.Razorpay) {
+        await new Promise<void>((resolve, reject) => {
+          const existing = document.querySelector<HTMLScriptElement>(
+            "script[data-razorpay]"
+          );
+          if (existing) {
+            existing.addEventListener("load", () => resolve());
+            existing.addEventListener("error", () => reject(new Error("Razorpay script failed to load")));
+            return;
+          }
+          const s = document.createElement("script");
+          s.src = "https://checkout.razorpay.com/v1/checkout.js";
+          s.async = true;
+          s.dataset.razorpay = "true";
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error("Razorpay script failed to load"));
+          document.head.appendChild(s);
+        });
+      }
+
       const res = await fetch("/api/billing/razorpay/checkout", { method: "POST" });
       const data = await res.json();
       if (!res.ok || !data.subscription_id) {
@@ -79,7 +101,7 @@ export default function BillingPage() {
         return;
       }
       if (!window.Razorpay) {
-        setError("Razorpay script hasn't loaded yet. Please wait a moment and try again.");
+        setError("Razorpay didn't load. Please refresh and try again.");
         return;
       }
       const rzp = new window.Razorpay({
@@ -175,8 +197,6 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-6">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
-
       {verifying && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="mx-4 max-w-sm rounded-2xl border bg-background p-6 text-center shadow-2xl">

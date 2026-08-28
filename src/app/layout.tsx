@@ -102,8 +102,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+    : null;
+
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        {/* Preconnect to Supabase so the first auth + DB call races DNS */}
+        {supabaseHost && (
+          <>
+            <link rel="preconnect" href={supabaseHost} crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href={supabaseHost} />
+          </>
+        )}
+        {/* DNS-prefetch Razorpay for faster first checkout script fetch */}
+        <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
+      </head>
       <body className="min-h-screen bg-background font-sans antialiased">
         <PricingProvider>{children}</PricingProvider>
       </body>
