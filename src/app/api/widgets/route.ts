@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
-import { PLAN_LIMITS } from "@/lib/constants";
+import { getEffectiveLimits, getEffectivePlan } from "@/lib/plan";
 
 const createWidgetSchema = z.object({
   name: z.string().min(1).max(200),
@@ -64,8 +64,8 @@ export async function POST(request: Request) {
   const subscription = await prisma.subscription.findUnique({
     where: { workspaceId: auth.workspace.id },
   });
-  const plan = subscription?.plan || "FREE";
-  const limits = PLAN_LIMITS[plan];
+  const plan = getEffectivePlan(auth.workspace.slug, subscription?.plan);
+  const limits = getEffectiveLimits(auth.workspace.slug, subscription?.plan);
 
   const currentCount = await prisma.widget.count({
     where: { workspaceId: auth.workspace.id },

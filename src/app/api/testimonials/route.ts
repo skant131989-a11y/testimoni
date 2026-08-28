@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { createTestimonialSchema } from "@/lib/validations/testimonial";
-import { PLAN_LIMITS } from "@/lib/constants";
+import { getEffectiveLimits } from "@/lib/plan";
 
 export async function GET(request: Request) {
   const auth = await getAuthContext(request);
@@ -64,8 +64,7 @@ export async function POST(request: Request) {
   const subscription = await prisma.subscription.findUnique({
     where: { workspaceId: auth.workspace.id },
   });
-  const plan = subscription?.plan || "FREE";
-  const limits = PLAN_LIMITS[plan];
+  const limits = getEffectiveLimits(auth.workspace.slug, subscription?.plan);
 
   const currentCount = await prisma.testimonial.count({
     where: { workspaceId: auth.workspace.id },

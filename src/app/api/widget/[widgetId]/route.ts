@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getEffectivePlan } from "@/lib/plan";
 
 export async function GET(
   _request: Request,
@@ -11,7 +12,8 @@ export async function GET(
     where: { id: widgetId },
     include: {
       workspace: {
-        include: {
+        select: {
+          slug: true,
           subscription: { select: { plan: true } },
         },
       },
@@ -44,7 +46,7 @@ export async function GET(
     return NextResponse.json({ error: "Widget not found" }, { status: 404 });
   }
 
-  const plan = widget.workspace.subscription?.plan || "FREE";
+  const plan = getEffectivePlan(widget.workspace.slug, widget.workspace.subscription?.plan);
   const showWatermark = plan === "FREE";
 
   // Apply maxItems limit if set

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { generateSlug } from "@/lib/utils";
-import type { PlanType } from "@/lib/constants";
+import { getEffectivePlan } from "@/lib/plan";
 
 export default async function DashboardLayout({
   children,
@@ -108,7 +108,7 @@ export default async function DashboardLayout({
   }
 
   const workspace = dbUser.workspaceMembers[0].workspace;
-  const plan: PlanType = workspace.subscription?.plan ?? "FREE";
+  const plan = getEffectivePlan(workspace.slug, workspace.subscription?.plan);
 
   return (
     <div className="flex h-screen overflow-hidden">
