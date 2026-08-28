@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Script from "next/script";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, CreditCard, Zap } from "lucide-react";
-import { PLAN_LIMITS } from "@/lib/constants";
+import { PLAN_LIMITS, PRICING } from "@/lib/constants";
 import { usePricing } from "@/lib/use-pricing";
 import { CurrencySwitcher } from "@/components/pricing/price-display";
 
@@ -28,12 +29,30 @@ interface Usage {
   widgets: number;
 }
 
+/** Minimal window.Razorpay shape — the SDK is loaded via <Script>. */
+declare global {
+  interface Window {
+    Razorpay?: new (opts: RazorpayOptions) => { open: () => void };
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  subscription_id: string;
+  name: string;
+  description?: string;
+  prefill?: { email?: string; name?: string };
+  theme?: { color?: string };
+  handler?: (response: { razorpay_payment_id: string }) => void;
+}
+
 export default function BillingPage() {
-  const { proMonthlyFormatted } = usePricing();
+  const { currency, proMonthlyFormatted } = usePricing();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [usage, setUsage] = useState<Usage>({ testimonials: 0, widgets: 0 });
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/billing/checkout")
@@ -46,14 +65,51 @@ export default function BillingPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  async function handleUpgrade() {
+  async function handleStripeUpgrade() {
     setUpgrading(true);
+    setError(null);
     try {
       const res = await fetch("/api/billing/checkout", { method: "POST" });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else {
+        setError(data.error || "Could not start Stripe checkout.");
       }
+    } finally {
+      setUpgrading(false);
+    }
+  }
+
+  async function handleRazorpayUpgrade() {
+    setUpgrading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/billing/razorpay/checkout", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.subscription_id) {
+        setError(data.error || "Could not start Razorpay checkout.");
+        return;
+      }
+      if (!window.Razorpay) {
+        setError("Razorpay script hasn't loaded yet. Please wait a moment and try again.");
+        return;
+      }
+      const rzp = new window.Razorpay({
+        key: data.key_id,
+        subscription_id: data.subscription_id,
+        name: "Testimoni",
+        description: `Pro plan (${PRICING.INR.symbol}${PRICING.INR.proMonthly}/mo)`,
+        prefill: data.prefill,
+        theme: { color: "#7c3aed" },
+        handler: () => {
+          // Payment succeeded — webhook will flip plan to PRO in the background.
+          window.location.reload();
+        },
+      });
+      rzp.open();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
       setUpgrading(false);
     }
@@ -81,6 +137,8 @@ export default function BillingPage() {
 
   return (
     <div className="space-y-6">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
+
       <h1 className="text-3xl font-bold">Billing</h1>
 
       {/* Current Plan */}
@@ -170,9 +228,35 @@ export default function BillingPage() {
             <div className="flex justify-center">
               <CurrencySwitcher />
             </div>
-            <Button onClick={handleUpgrade} disabled={upgrading} className="w-full">
-              {upgrading ? "Redirecting to checkout..." : `Upgrade for ${proMonthlyFormatted}/month`}
-            </Button>
+            {error && (
+              <p className="text-center text-sm text-destructive">{error}</p>
+            )}
+            {currency === "INR" ? (
+              <Button
+                onClick={handleRazorpayUpgrade}
+                disabled={upgrading}
+                className="w-full"
+              >
+                {upgrading
+                  ? "Opening Razorpay…"
+                  : `Pay with Razorpay · ${proMonthlyFormatted}/mo`}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleStripeUpgrade}
+                disabled={upgrading}
+                className="w-full"
+              >
+                {upgrading
+                  ? "Redirecting to Stripe…"
+                  : `Pay with card · ${proMonthlyFormatted}/mo`}
+              </Button>
+            )}
+            <p className="text-center text-xs text-muted-foreground">
+              {currency === "INR"
+                ? "UPI, cards, netbanking — settles to your INR account"
+                : "Powered by Stripe · secure checkout"}
+            </p>
           </CardFooter>
         </Card>
       )}

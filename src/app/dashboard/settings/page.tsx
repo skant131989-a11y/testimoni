@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import {
@@ -153,9 +154,13 @@ export default async function SettingsPage() {
               </p>
             </div>
             {plan === "FREE" ? (
-              <Button>Upgrade to Pro</Button>
+              <Button asChild>
+                <Link href="/dashboard/settings/billing">Upgrade to Pro</Link>
+              </Button>
             ) : (
-              <Button variant="outline">Manage Subscription</Button>
+              <Button variant="outline" asChild>
+                <Link href="/dashboard/settings/billing">Manage Subscription</Link>
+              </Button>
             )}
           </div>
         </CardContent>

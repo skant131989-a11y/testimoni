@@ -228,6 +228,10 @@ model Subscription {
   stripeSubscriptionId String? @unique @map("stripe_subscription_id")
   stripePriceId        String? @map("stripe_price_id")
 
+  razorpayCustomerId     String? @unique @map("razorpay_customer_id")
+  razorpaySubscriptionId String? @unique @map("razorpay_subscription_id")
+  razorpayPlanId         String? @map("razorpay_plan_id")
+
   plan   PlanType           @default(FREE)
   status SubscriptionStatus @default(ACTIVE)
 
