@@ -47,8 +47,9 @@ export default function SignupPage() {
         return;
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      // Hard navigation so the fresh auth cookies are attached to the
+      // request the server sees.
+      window.location.assign("/dashboard");
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {

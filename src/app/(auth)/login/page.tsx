@@ -42,8 +42,10 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      // Hard navigation so the fresh auth cookies are attached to the
+      // request the server sees (router.push races the cookie handshake
+      // and can occasionally land on /login or / instead of /dashboard).
+      window.location.assign("/dashboard");
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
