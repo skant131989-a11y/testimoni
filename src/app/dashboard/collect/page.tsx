@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { useSubscription } from "@/lib/use-subscription";
+import { LimitBanner } from "@/components/plan/limit-banner";
 import {
   Plus,
   Link as LinkIcon,
@@ -38,6 +40,8 @@ export default function CollectPage() {
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const { plan, limits } = useSubscription();
+  const atLimit = forms.length >= limits.maxForms;
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Record<string, string>>({});
@@ -136,11 +140,23 @@ export default function CollectPage() {
             Choose how you want to gather testimonials from customers
           </p>
         </div>
-        <Button onClick={() => setShowCreate(true)}>
+        <Button
+          onClick={() => setShowCreate(true)}
+          disabled={atLimit}
+          title={atLimit ? "Free plan is limited to 1 form. Upgrade to Pro." : undefined}
+        >
           <Plus className="mr-2 h-4 w-4" />
           New Form
         </Button>
       </div>
+
+      {atLimit && plan === "FREE" && (
+        <LimitBanner
+          resource="collection form"
+          usage={`${forms.length} / ${limits.maxForms}`}
+          description="Pro unlocks unlimited forms so you can collect testimonials from different channels (post-purchase, onboarding, support)."
+        />
+      )}
 
       {showCreate && (
         <Card>

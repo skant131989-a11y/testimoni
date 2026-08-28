@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LimitBanner } from "@/components/plan/limit-banner";
+import { getEffectivePlan, getEffectiveLimits } from "@/lib/plan";
 
 type FilterTab = "NEW" | "APPROVED" | "REJECTED";
 
@@ -31,10 +33,11 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   if (!dbUser || !dbUser.workspaceMembers[0]) redirect("/dashboard");
 
   const workspaceId = dbUser.workspaceMembers[0].workspaceId;
+  const workspaceSlug = dbUser.workspaceMembers[0].workspace.slug;
   const activeFilter: FilterTab =
     (params.filter?.toUpperCase() as FilterTab) || "NEW";
 
-  const [submissions, counts] = await Promise.all([
+  const [submissions, counts, subscription, testimonialCount] = await Promise.all([
     prisma.submission.findMany({
       where: {
         status: activeFilter,
@@ -48,7 +51,13 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
       where: { form: { workspaceId } },
       _count: true,
     }),
+    prisma.subscription.findUnique({ where: { workspaceId } }),
+    prisma.testimonial.count({ where: { workspaceId } }),
   ]);
+
+  const effectivePlan = getEffectivePlan(workspaceSlug, subscription?.plan);
+  const effectiveLimits = getEffectiveLimits(workspaceSlug, subscription?.plan);
+  const atTestimonialLimit = testimonialCount >= effectiveLimits.maxTestimonials;
 
   const countMap: Record<string, number> = {};
   for (const g of counts) countMap[g.status] = g._count;
@@ -68,19 +77,12 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
         </p>
       </div>
 
-      {params.error === "limit" && (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-4">
-          <p className="text-sm text-destructive">
-            <span className="font-semibold">Testimonial limit reached.</span>{" "}
-            You&apos;ve hit the Free plan cap of 10 testimonials. Approve more by upgrading.
-          </p>
-          <Link
-            href="/dashboard/settings/billing"
-            className="mt-1 inline-block text-xs font-semibold text-destructive underline"
-          >
-            Upgrade to Pro →
-          </Link>
-        </div>
+      {(atTestimonialLimit || params.error === "limit") && effectivePlan === "FREE" && (
+        <LimitBanner
+          resource="testimonials"
+          usage={`${testimonialCount} / ${effectiveLimits.maxTestimonials}`}
+          description="You've collected the max testimonials on Free. Upgrade to Pro to keep approving new submissions."
+        />
       )}
 
       <div className="flex gap-1 border-b">
@@ -181,7 +183,8 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
                           type="submit"
                           size="sm"
                           className="gap-1"
-                          title="Approve and add to testimonials"
+                          title={atTestimonialLimit ? "Testimonial limit reached — upgrade to Pro" : "Approve and add to testimonials"}
+                          disabled={atTestimonialLimit}
                         >
                           <Check className="h-3.5 w-3.5" />
                           Approve

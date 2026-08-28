@@ -14,10 +14,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [subscription, testimonialCount, widgetCount] = await Promise.all([
+  const [subscription, testimonialCount, widgetCount, formCount] = await Promise.all([
     prisma.subscription.findUnique({ where: { workspaceId: auth.workspace.id } }),
     prisma.testimonial.count({ where: { workspaceId: auth.workspace.id } }),
     prisma.widget.count({ where: { workspaceId: auth.workspace.id } }),
+    prisma.collectionForm.count({ where: { workspaceId: auth.workspace.id } }),
   ]);
 
   const effectivePlan = getEffectivePlan(
@@ -35,6 +36,7 @@ export async function GET(request: Request) {
     usage: {
       testimonials: testimonialCount,
       widgets: widgetCount,
+      forms: formCount,
     },
   });
 }

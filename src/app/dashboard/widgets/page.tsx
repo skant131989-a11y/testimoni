@@ -19,6 +19,8 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { useSubscription } from "@/lib/use-subscription";
+import { LimitBanner } from "@/components/plan/limit-banner";
 
 const LAYOUTS = [
   { id: "GRID", label: "Grid", icon: LayoutGrid },
@@ -44,6 +46,8 @@ export default function WidgetsPage() {
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const { plan, limits } = useSubscription();
+  const atLimit = widgets.length >= limits.maxWidgets;
 
   useState(() => {
     fetch("/api/widgets")
@@ -113,11 +117,23 @@ export default function WidgetsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Widgets</h1>
-        <Button onClick={() => setShowCreate(true)}>
+        <Button
+          onClick={() => setShowCreate(true)}
+          disabled={atLimit}
+          title={atLimit ? "Free plan is limited to 1 widget. Upgrade to Pro." : undefined}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Create Widget
         </Button>
       </div>
+
+      {atLimit && plan === "FREE" && (
+        <LimitBanner
+          resource="widget"
+          usage={`${widgets.length} / ${limits.maxWidgets}`}
+          description="Pro unlocks unlimited widgets, all layouts (Masonry, Carousel, Marquee), and removes the watermark."
+        />
+      )}
 
       {showCreate && (
         <Card>
