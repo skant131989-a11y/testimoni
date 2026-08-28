@@ -89,7 +89,9 @@ export default async function PricingPage() {
               <ul className="mt-8 space-y-4">
                 {[
                   "Unlimited testimonials",
+                  "Unlimited collection forms",
                   "Unlimited widgets",
+                  "Curate different testimonials per widget",
                   "All layouts (Grid, Masonry, Carousel, List, Marquee)",
                   "Video testimonials",
                   "Custom branding & colors",
@@ -97,7 +99,6 @@ export default async function PricingPage() {
                   "Import from Twitter/LinkedIn",
                   "Analytics dashboard",
                   "Priority support",
-                  "React component package",
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-3 text-sm">
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
@@ -121,6 +122,14 @@ export default async function PricingPage() {
                 {
                   q: "Can I try before upgrading?",
                   a: "Yes! The free plan is fully functional with 10 testimonials and 1 widget. No credit card required.",
+                },
+                {
+                  q: "Can I show different testimonials on different pages?",
+                  a: "Yes — that's the point. Create one form (or many) to collect. Every approved testimonial lives in one library. Then build separate widgets for your homepage, pricing page, product pages, etc. Each widget picks which testimonials to show, and you can use any layout per widget. The same testimonial can appear in multiple widgets, or nowhere at all.",
+                },
+                {
+                  q: "How many forms and widgets can I have?",
+                  a: "Free plan: 1 widget, unlimited forms. Pro: unlimited both. Most Pro customers run 1-3 forms (one per collection channel) and 2-5 widgets (one per page they want testimonials on).",
                 },
                 {
                   q: "Can I cancel anytime?",

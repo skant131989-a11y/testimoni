@@ -9,9 +9,13 @@ import {
   Shield,
   ArrowRight,
   CheckCircle2,
+  Inbox,
+  LibraryBig,
+  MonitorSmartphone,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ProPriceDual } from "@/components/pricing/price-display";
+import { AnimatedDemo } from "@/components/animated-demo";
 
 export default async function LandingPage() {
   let isLoggedIn = false;
@@ -89,6 +93,156 @@ export default async function LandingPage() {
           <p className="mt-4 text-sm text-muted-foreground">
             Free plan available. No credit card required.
           </p>
+        </div>
+
+        {/* Animated demo preview — CSS-only, no video/GIF */}
+        <div className="mt-16">
+          <AnimatedDemo />
+        </div>
+      </section>
+
+      {/* One library, many widgets — the multi-form/multi-widget story */}
+      <section className="border-t bg-muted/20 py-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="text-center">
+            <div className="mb-3 inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs font-medium">
+              <LibraryBig className="mr-1 h-3 w-3" />
+              Flexible by design
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              One library. Unlimited widgets.<br />
+              <span className="text-primary">Curate what shows where.</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+              Collect testimonials from as many channels as you want. Then build
+              a different widget for every page — with only the testimonials
+              you pick for that spot.
+            </p>
+          </div>
+
+          {/* Visual mapping */}
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {/* Column 1: Forms */}
+            <div className="rounded-2xl border bg-card p-6">
+              <div className="mb-3 flex items-center gap-2">
+                <Inbox className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Multiple forms</h3>
+              </div>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Ask different customers different questions.
+              </p>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-mono">form 1</span>
+                  <span>Post-purchase feedback</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-mono">form 2</span>
+                  <span>Onboarding experience</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-mono">form 3</span>
+                  <span>Feature request survey</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 2: Library */}
+            <div className="relative rounded-2xl border-2 border-primary/40 bg-card p-6 shadow-sm">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                Your library
+              </div>
+              <div className="mb-3 flex items-center gap-2">
+                <LibraryBig className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">One approved pool</h3>
+              </div>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Every approved testimonial lives here — text, video, ratings.
+              </p>
+              <div className="space-y-2 text-sm">
+                {[
+                  { name: "Sarah Chen", rating: 5 },
+                  { name: "Marcus Johnson", rating: 5 },
+                  { name: "Emily Rodriguez", rating: 5 },
+                  { name: "Alex Kumar", rating: 4 },
+                  { name: "+12 more approved", rating: 0 },
+                ].map((t) => (
+                  <div
+                    key={t.name}
+                    className="flex items-center justify-between rounded-md border bg-background px-3 py-1.5 text-xs"
+                  >
+                    <span>{t.name}</span>
+                    {t.rating > 0 && (
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: t.rating }).map((_, i) => (
+                          <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 3: Widgets */}
+            <div className="rounded-2xl border bg-card p-6">
+              <div className="mb-3 flex items-center gap-2">
+                <MonitorSmartphone className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Multiple widgets</h3>
+              </div>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Different subset per page. Different layout per widget.
+              </p>
+              <ul className="space-y-2 text-sm">
+                <li className="rounded-md border p-2">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-md border px-1.5 py-0.5 text-[10px] font-mono">widget A</span>
+                    <span className="font-medium">Homepage grid</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    6 hand-picked bangers, masonry layout
+                  </p>
+                </li>
+                <li className="rounded-md border p-2">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-md border px-1.5 py-0.5 text-[10px] font-mono">widget B</span>
+                    <span className="font-medium">Pricing carousel</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Enterprise customers only
+                  </p>
+                </li>
+                <li className="rounded-md border p-2">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-md border px-1.5 py-0.5 text-[10px] font-mono">widget C</span>
+                    <span className="font-medium">Product page marquee</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    5-star reviews only
+                  </p>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Real-world use cases */}
+          <div className="mt-10 rounded-2xl border bg-background p-6">
+            <p className="text-sm font-semibold">Real setups</p>
+            <div className="mt-3 grid gap-4 text-sm text-muted-foreground md:grid-cols-3">
+              <div>
+                <p className="font-medium text-foreground">SaaS founder</p>
+                <p className="mt-1">2 forms (in-app, post-cancel) · 3 widgets (homepage, pricing, in-app sidebar)</p>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Course creator</p>
+                <p className="mt-1">1 form per cohort · 1 widget per course landing page</p>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">D2C store</p>
+                <p className="mt-1">1 form post-delivery · 1 widget per product category</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
