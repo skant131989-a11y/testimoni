@@ -322,6 +322,41 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           </p>
         </div>
 
+        {/* How customers reach the form — sits between hero and the interactive flow */}
+        <div className="mt-10 rounded-2xl border bg-muted/30 p-6">
+          <div className="flex items-start gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+              0
+            </div>
+            <div>
+              <h3 className="text-base font-semibold">First — how does a customer even reach this form?</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                You never send them to Testimoni. You share the form through 5 channels from your dashboard:
+              </p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                {[
+                  { label: "Share link", detail: "Paste in emails, DMs, socials" },
+                  { label: "Embed script", detail: "Floating button on your site" },
+                  { label: "iFrame", detail: "Full form on a page you host" },
+                  { label: "Email template", detail: "Send after a purchase" },
+                  { label: "QR code", detail: "Print on receipts, packaging" },
+                ].map((c) => (
+                  <div
+                    key={c.label}
+                    className="rounded-lg border bg-background px-3 py-2 text-xs"
+                  >
+                    <div className="font-semibold">{c.label}</div>
+                    <div className="mt-0.5 text-muted-foreground">{c.detail}</div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                For this demo, pretend you just clicked one — the form below is what your customer would see. ↓
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Two-column layout: Form + Arrow + Widget */}
         <div className="mt-12 grid gap-8 lg:grid-cols-2">
           {/* LEFT: Collection Form */}
