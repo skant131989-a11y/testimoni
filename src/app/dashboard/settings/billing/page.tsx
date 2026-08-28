@@ -44,6 +44,7 @@ interface RazorpayOptions {
   prefill?: { email?: string; name?: string };
   theme?: { color?: string };
   handler?: (response: { razorpay_payment_id: string }) => void;
+  modal?: { ondismiss?: () => void };
 }
 
 export default function BillingPage() {
@@ -52,6 +53,7 @@ export default function BillingPage() {
   const [usage, setUsage] = useState<Usage>({ testimonials: 0, widgets: 0 });
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,9 +88,32 @@ export default function BillingPage() {
         description: `Pro plan (${PRICING.INR.symbol}${PRICING.INR.proMonthly}/mo)`,
         prefill: data.prefill,
         theme: { color: "#7c3aed" },
-        handler: () => {
-          // Payment succeeded — webhook will flip plan to PRO in the background.
-          window.location.reload();
+        handler: async () => {
+          // Payment reported success by Razorpay. Immediately verify with
+          // our server (which pulls the authoritative status from Razorpay's
+          // API) so the plan flips without waiting for the webhook. Webhook
+          // remains the source of truth for later events.
+          setVerifying(true);
+          try {
+            for (let attempt = 0; attempt < 6; attempt++) {
+              const vr = await fetch("/api/billing/razorpay/verify", { method: "POST" });
+              const vd = await vr.json();
+              if (vd.plan === "PRO") {
+                window.location.reload();
+                return;
+              }
+              await new Promise((r) => setTimeout(r, 1500));
+            }
+            // If we're still here after 6 tries (~10s), Razorpay hasn't
+            // marked the subscription active yet. Reload anyway — the
+            // webhook will catch up in the background.
+            window.location.reload();
+          } catch {
+            window.location.reload();
+          }
+        },
+        modal: {
+          ondismiss: () => setUpgrading(false),
         },
       });
       rzp.open();
@@ -122,6 +147,20 @@ export default function BillingPage() {
   return (
     <div className="space-y-6">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
+
+      {verifying && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="mx-4 max-w-sm rounded-2xl border bg-background p-6 text-center shadow-2xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold">Confirming your payment…</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Razorpay reported success. We&apos;re activating your Pro plan now.
+            </p>
+          </div>
+        </div>
+      )}
 
       <h1 className="text-3xl font-bold">Billing</h1>
 
