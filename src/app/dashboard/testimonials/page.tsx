@@ -61,7 +61,7 @@ export default async function TestimonialsPage({
   });
 
   if (!dbUser || !dbUser.workspaceMembers[0]) {
-    redirect("/onboarding");
+    redirect("/login");
   }
 
   const workspaceId = dbUser.workspaceMembers[0].workspaceId;

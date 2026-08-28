@@ -39,7 +39,7 @@ export default async function SettingsPage() {
   });
 
   if (!dbUser || !dbUser.workspaceMembers[0]) {
-    redirect("/onboarding");
+    redirect("/login");
   }
 
   const workspace = dbUser.workspaceMembers[0].workspace;

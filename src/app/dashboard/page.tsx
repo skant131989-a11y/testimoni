@@ -65,7 +65,8 @@ export default async function DashboardPage() {
   });
 
   if (!dbUser || !dbUser.workspaceMembers[0]) {
-    redirect("/onboarding");
+    // Layout auto-provisions on entry; if we hit this the session is stale
+    redirect("/login");
   }
 
   const workspaceId = dbUser.workspaceMembers[0].workspaceId;
