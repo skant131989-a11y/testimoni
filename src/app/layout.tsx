@@ -67,14 +67,7 @@ export const metadata: Metadata = {
     title: "Testimoni · Collect & Display Customer Testimonials in Minutes",
     description:
       "The fastest testimonial widget for SaaS, coaches, and D2C brands. Collect testimonials via multiple channels and embed a beautiful wall of love in one line of code.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Testimoni — Collect and display customer testimonials",
-      },
-    ],
+    // og-image is auto-picked up from src/app/opengraph-image.tsx
   },
   twitter: {
     card: "summary_large_image",
@@ -83,11 +76,11 @@ export const metadata: Metadata = {
     title: "Testimoni · Collect & Display Customer Testimonials",
     description:
       "The fastest way to collect testimonials and embed them anywhere. Free plan available.",
-    images: ["/og-image.png"],
+    // twitter-image is auto-picked up from src/app/twitter-image.tsx
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
   },
   manifest: "/manifest.webmanifest",
   verification: {
