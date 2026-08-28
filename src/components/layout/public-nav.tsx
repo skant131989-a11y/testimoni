@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageSquare } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,7 +28,14 @@ export async function PublicNav({ right }: PublicNavProps) {
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <MessageSquare className="h-6 w-6 text-primary" />
+          <Image
+            src="/icon.png"
+            alt="Testimoni logo"
+            width={28}
+            height={28}
+            className="rounded-full"
+            priority
+          />
           <span className="text-xl font-bold">Testimoni</span>
         </Link>
         <nav className="flex items-center gap-3">

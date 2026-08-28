@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard,
-  MessageSquareQuote,
   Code2,
   Inbox,
   Send,
@@ -20,11 +20,16 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { PlanType } from "@/lib/constants";
+import { QuoteOpen } from "@/components/icons/quote-open";
 
-const navItems = [
+const navItems: {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+}[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/inbox", label: "Inbox", icon: Inbox },
-  { href: "/dashboard/testimonials", label: "Testimonials", icon: MessageSquareQuote },
+  { href: "/dashboard/testimonials", label: "Testimonials", icon: QuoteOpen },
   { href: "/dashboard/widgets", label: "Widgets", icon: Code2 },
   { href: "/dashboard/collect", label: "Collect", icon: Send },
   { href: "/dashboard/import", label: "Import", icon: Import },
@@ -54,16 +59,28 @@ export function Sidebar({ workspaceName, plan }: SidebarProps) {
         <div className="flex h-16 items-center justify-between border-b px-4">
           {!collapsed && (
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <MessageSquareQuote className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <Image
+                src="/icon.png"
+                alt="Testimoni logo"
+                width={32}
+                height={32}
+                className="rounded-lg"
+                priority
+              />
               <span className="text-lg font-semibold">Testimoni</span>
             </Link>
           )}
           {collapsed && (
-            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <MessageSquareQuote className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <Link href="/" className="mx-auto flex items-center justify-center">
+              <Image
+                src="/icon.png"
+                alt="Testimoni logo"
+                width={32}
+                height={32}
+                className="rounded-lg"
+                priority
+              />
+            </Link>
           )}
         </div>
 

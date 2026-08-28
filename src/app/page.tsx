@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Star,
@@ -33,7 +34,14 @@ export default async function LandingPage() {
       <header className="border-b">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-primary" />
+            <Image
+              src="/icon.png"
+              alt="Testimoni logo"
+              width={28}
+              height={28}
+              className="rounded-full"
+              priority
+            />
             <span className="text-xl font-bold">Testimoni</span>
           </div>
           <nav className="hidden items-center gap-6 md:flex">
@@ -424,7 +432,13 @@ export default async function LandingPage() {
       <footer className="border-t py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
+            <Image
+              src="/icon.png"
+              alt="Testimoni logo"
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
             <span className="font-semibold">Testimoni</span>
           </div>
           <nav className="flex items-center gap-5 text-sm">
