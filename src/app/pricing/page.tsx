@@ -1,28 +1,30 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, MessageSquare, ArrowLeft } from "lucide-react";
+import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { ProPriceDual } from "@/components/pricing/price-display";
+import { PublicNav } from "@/components/layout/public-nav";
+import { createClient } from "@/lib/supabase/server";
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  let isLoggedIn = false;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    isLoggedIn = !!user;
+  } catch {
+    isLoggedIn = false;
+  }
+
+  const proHref = isLoggedIn ? "/dashboard/settings/billing" : "/signup";
+  const proLabel = isLoggedIn ? "Upgrade to Pro" : "Start Free, Upgrade Anytime";
+  const freeHref = isLoggedIn ? "/dashboard" : "/signup";
+  const freeLabel = isLoggedIn ? "Go to Dashboard" : "Get Started Free";
+
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="border-b">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Testimoni</span>
-          </Link>
-          <nav className="flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="ghost" size="sm">Log in</Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm">Get Started Free</Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PublicNav />
 
       {/* Pricing */}
       <main className="flex-1 py-20">
@@ -65,9 +67,9 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/signup" className="mt-8 block">
+              <Link href={freeHref} className="mt-8 block">
                 <Button variant="outline" className="w-full" size="lg">
-                  Get Started Free
+                  {freeLabel}
                 </Button>
               </Link>
             </div>
@@ -103,9 +105,9 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/signup" className="mt-8 block">
+              <Link href={proHref} className="mt-8 block">
                 <Button className="w-full" size="lg">
-                  Start Free, Upgrade Anytime
+                  {proLabel}
                 </Button>
               </Link>
             </div>
@@ -147,7 +149,6 @@ export default function PricingPage() {
       <footer className="border-t py-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
             <span className="font-semibold">Testimoni</span>
           </Link>
           <p className="text-sm text-muted-foreground">
