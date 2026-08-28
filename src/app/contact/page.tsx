@@ -81,6 +81,23 @@ export default async function ContactPage() {
               <div className="mt-6">
                 <PublicCollectionForm formConfig={formConfig} />
               </div>
+
+              {/* Always show the email escape hatch — some people prefer email */}
+              <div className="mx-auto mt-8 max-w-lg rounded-xl border bg-card p-5 text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm font-medium">Prefer email?</p>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Reach us directly at{" "}
+                  <a
+                    href={`mailto:${supportEmail}?subject=Testimoni feedback`}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {supportEmail}
+                  </a>
+                </p>
+              </div>
             </>
           ) : (
             <div className="mx-auto mt-10 max-w-md rounded-2xl border bg-card p-8 text-center">
