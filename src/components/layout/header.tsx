@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { LogOut, User, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 interface HeaderProps {
   userName: string | null;
@@ -93,15 +94,20 @@ export function Header({
                 <User className="h-4 w-4" />
                 Settings
               </Link>
-              <form action="/auth/signout" method="post">
-                <button
-                  type="submit"
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-destructive hover:bg-accent"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign out
-                </button>
-              </form>
+              <button
+                type="button"
+                onClick={async () => {
+                  const supabase = createClient();
+                  await supabase.auth.signOut();
+                  // Hard navigation clears any cached RSC + guarantees the
+                  // browser drops the sb-* cookies before we land on /.
+                  window.location.assign("/");
+                }}
+                className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-destructive hover:bg-accent"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </button>
             </div>
           </div>
         )}
