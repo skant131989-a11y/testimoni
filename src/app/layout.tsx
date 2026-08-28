@@ -19,11 +19,11 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Testimoni · Collect & Display Customer Testimonials in Minutes",
+    default: "Testimoni — Collect & Embed Customer Testimonials",
     template: "%s · Testimoni",
   },
   description:
-    "The fastest testimonial widget for SaaS, coaches, and D2C brands. Collect via link, form, iframe, email, or QR — then embed a beautiful wall of love on your site with one line of code. Free plan available.",
+    "Turn happy customers into social proof. Collect via link, form, or QR — then embed a wall of love on any site with one line of code. Free plan.",
   applicationName: "Testimoni",
   keywords: [
     "testimonial widget",
@@ -64,18 +64,18 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: SITE_URL,
     siteName: "Testimoni",
-    title: "Testimoni · Collect & Display Customer Testimonials in Minutes",
+    title: "Testimoni — Collect & Embed Customer Testimonials",
     description:
-      "The fastest testimonial widget for SaaS, coaches, and D2C brands. Collect testimonials via multiple channels and embed a beautiful wall of love in one line of code.",
+      "Turn happy customers into social proof. Collect via link, form, or QR. Embed anywhere with one line of code. Free plan.",
     // og-image is auto-picked up from src/app/opengraph-image.tsx
   },
   twitter: {
     card: "summary_large_image",
     site: "@usetestimoni",
     creator: "@usetestimoni",
-    title: "Testimoni · Collect & Display Customer Testimonials",
+    title: "Testimoni — Collect & Embed Testimonials",
     description:
-      "The fastest way to collect testimonials and embed them anywhere. Free plan available.",
+      "Collect + embed customer testimonials. Multiple channels. One line of code. Free plan.",
     // twitter-image is auto-picked up from src/app/twitter-image.tsx
   },
   icons: {
