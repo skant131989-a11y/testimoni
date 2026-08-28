@@ -65,22 +65,6 @@ export default function BillingPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  async function handleStripeUpgrade() {
-    setUpgrading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/billing/checkout", { method: "POST" });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError(data.error || "Could not start Stripe checkout.");
-      }
-    } finally {
-      setUpgrading(false);
-    }
-  }
-
   async function handleRazorpayUpgrade() {
     setUpgrading(true);
     setError(null);
@@ -231,31 +215,19 @@ export default function BillingPage() {
             {error && (
               <p className="text-center text-sm text-destructive">{error}</p>
             )}
-            {currency === "INR" ? (
-              <Button
-                onClick={handleRazorpayUpgrade}
-                disabled={upgrading}
-                className="w-full"
-              >
-                {upgrading
-                  ? "Opening Razorpay…"
-                  : `Pay with Razorpay · ${proMonthlyFormatted}/mo`}
-              </Button>
-            ) : (
-              <Button
-                onClick={handleStripeUpgrade}
-                disabled={upgrading}
-                className="w-full"
-              >
-                {upgrading
-                  ? "Redirecting to Stripe…"
-                  : `Pay with card · ${proMonthlyFormatted}/mo`}
-              </Button>
-            )}
+            <Button
+              onClick={handleRazorpayUpgrade}
+              disabled={upgrading}
+              className="w-full"
+            >
+              {upgrading
+                ? "Opening Razorpay…"
+                : `Upgrade · ${proMonthlyFormatted}/mo`}
+            </Button>
             <p className="text-center text-xs text-muted-foreground">
               {currency === "INR"
-                ? "UPI, cards, netbanking — settles to your INR account"
-                : "Powered by Stripe · secure checkout"}
+                ? "UPI, cards, netbanking — powered by Razorpay"
+                : `Charged as ${PRICING.INR.symbol}${PRICING.INR.proMonthly} in INR (~${proMonthlyFormatted}). International cards supported.`}
             </p>
           </CardFooter>
         </Card>
