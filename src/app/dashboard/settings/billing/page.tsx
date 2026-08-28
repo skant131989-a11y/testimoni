@@ -12,7 +12,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, CreditCard, Zap } from "lucide-react";
+import { Check, CreditCard, Zap, XCircle } from "lucide-react";
 import { PLAN_LIMITS, PRICING } from "@/lib/constants";
 import { usePricing } from "@/lib/use-pricing";
 import { CurrencySwitcher } from "@/components/pricing/price-display";
@@ -54,6 +54,7 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -129,6 +130,34 @@ export default function BillingPage() {
     const data = await res.json();
     if (data.url) {
       window.location.href = data.url;
+    }
+  }
+
+  async function handleCancel() {
+    const ok = window.confirm(
+      "Cancel your Pro subscription? You'll keep access until the end of the current billing period, then drop back to Free."
+    );
+    if (!ok) return;
+    setCancelling(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/billing/razorpay/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ immediate: false }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Cancel failed. Please try again.");
+        return;
+      }
+      // Re-fetch subscription so UI reflects the pending cancellation
+      const fresh = await fetch("/api/billing/subscription").then((r) => r.json());
+      setSubscription(fresh.subscription);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Cancel failed");
+    } finally {
+      setCancelling(false);
     }
   }
 
@@ -208,11 +237,25 @@ export default function BillingPage() {
           )}
         </CardContent>
         {isPro && (
-          <CardFooter>
-            <Button variant="outline" onClick={handleManageBilling}>
-              <CreditCard className="mr-2 h-4 w-4" />
-              Manage Billing
-            </Button>
+          <CardFooter className="flex flex-wrap gap-2">
+            {subscription?.cancelAtPeriodEnd ? (
+              <p className="text-sm text-muted-foreground">
+                Your Pro plan will end on{" "}
+                {subscription.currentPeriodEnd
+                  ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
+                  : "the next billing date"}
+                . You&apos;ll keep access until then.
+              </p>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                disabled={cancelling}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                {cancelling ? "Cancelling…" : "Cancel subscription"}
+              </Button>
+            )}
           </CardFooter>
         )}
       </Card>
