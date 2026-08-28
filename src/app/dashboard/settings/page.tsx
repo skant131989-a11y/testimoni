@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getEffectivePlan } from "@/lib/plan";
 import {
   Card,
   CardContent,
@@ -43,7 +44,7 @@ export default async function SettingsPage() {
   }
 
   const workspace = dbUser.workspaceMembers[0].workspace;
-  const plan = workspace.subscription?.plan ?? "FREE";
+  const plan = getEffectivePlan(workspace.slug, workspace.subscription?.plan);
 
   return (
     <div className="space-y-6">

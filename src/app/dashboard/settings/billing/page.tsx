@@ -57,7 +57,7 @@ export default function BillingPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/billing/checkout")
+    fetch("/api/billing/subscription")
       .then((r) => r.json())
       .then((data) => {
         setSubscription(data.subscription);
