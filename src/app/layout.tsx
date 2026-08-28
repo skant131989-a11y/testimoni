@@ -13,10 +13,88 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
+
 export const metadata: Metadata = {
-  title: "Testimoni - Collect & Display Customer Testimonials",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Testimoni · Collect & Display Customer Testimonials in Minutes",
+    template: "%s · Testimoni",
+  },
   description:
-    "Collect, manage, and embed beautiful customer testimonials on your website. Wall of love layouts, video testimonials, and more.",
+    "The fastest testimonial widget for SaaS, coaches, and D2C brands. Collect via link, form, iframe, email, or QR — then embed a beautiful wall of love on your site with one line of code. Free plan available.",
+  applicationName: "Testimoni",
+  keywords: [
+    "testimonial widget",
+    "collect testimonials",
+    "customer testimonials",
+    "wall of love",
+    "social proof",
+    "testimonial software",
+    "video testimonials",
+    "SaaS testimonials",
+    "embed testimonials",
+    "testimonial platform",
+    "Senja alternative",
+    "Testimonial.to alternative",
+    "review widget",
+    "customer reviews",
+  ],
+  authors: [{ name: "Testimoni" }],
+  creator: "Testimoni",
+  publisher: "Testimoni",
+  category: "Software",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: "Testimoni",
+    title: "Testimoni · Collect & Display Customer Testimonials in Minutes",
+    description:
+      "The fastest testimonial widget for SaaS, coaches, and D2C brands. Collect testimonials via multiple channels and embed a beautiful wall of love in one line of code.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Testimoni — Collect and display customer testimonials",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@usetestimoni",
+    creator: "@usetestimoni",
+    title: "Testimoni · Collect & Display Customer Testimonials",
+    description:
+      "The fastest way to collect testimonials and embed them anywhere. Free plan available.",
+    images: ["/og-image.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.webmanifest",
+  verification: {
+    // Add these when you set up Google Search Console / Bing Webmaster
+    // google: "your-google-verification-code",
+    // other: { "msvalidate.01": "your-bing-verification-code" },
+  },
 };
 
 export default function RootLayout({

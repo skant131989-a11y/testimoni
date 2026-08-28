@@ -1,9 +1,23 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { ProPriceDual } from "@/components/pricing/price-display";
 import { PublicNav } from "@/components/layout/public-nav";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Pricing — Free forever plan + Pro at $9/month",
+  description:
+    "Simple pricing. Free forever plan with 10 testimonials, 1 collection form, and 1 widget. Pro at $9/month (₹859) for unlimited forms, widgets, testimonials, all layouts, and video testimonials. Cancel anytime.",
+  alternates: { canonical: "/pricing" },
+  openGraph: {
+    title: "Testimoni Pricing — Free forever + Pro at $9/month",
+    description:
+      "Simple pricing. Free forever plan + Pro at $9/mo (₹859) for unlimited testimonials, forms, and widgets. Cancel anytime.",
+    url: "/pricing",
+  },
+};
 
 export default async function PricingPage() {
   let isLoggedIn = false;

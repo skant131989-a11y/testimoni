@@ -1,8 +1,16 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Mail, MessageSquare, Sparkles } from "lucide-react";
 import { PublicNav } from "@/components/layout/public-nav";
 import PublicCollectionForm from "@/components/collection/public-form";
 import { prisma } from "@/lib/prisma";
+
+export const metadata: Metadata = {
+  title: "Contact — Share your feedback",
+  description:
+    "Feedback, feature requests, bug reports — reach the Testimoni team. This page uses Testimoni's own collection form, so you can see the product working.",
+  alternates: { canonical: "/contact" },
+};
 
 /**
  * Public contact / feedback page.

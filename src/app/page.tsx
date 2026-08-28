@@ -16,6 +16,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { ProPriceDual } from "@/components/pricing/price-display";
 import { AnimatedDemo } from "@/components/animated-demo";
+import { StructuredData } from "@/components/seo/structured-data";
 
 export default async function LandingPage() {
   let isLoggedIn = false;
@@ -27,6 +28,7 @@ export default async function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <StructuredData />
       {/* Header */}
       <header className="border-b">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
@@ -429,6 +431,24 @@ export default async function LandingPage() {
             <Link href="/demo" className="text-muted-foreground hover:text-foreground">Demo</Link>
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
+            <a
+              href="https://x.com/usetestimoni"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Testimoni on X (Twitter)"
+            >
+              X
+            </a>
+            <a
+              href="https://www.linkedin.com/company/144771086"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Testimoni on LinkedIn"
+            >
+              LinkedIn
+            </a>
           </nav>
           <p className="text-sm text-muted-foreground">
             &copy; 2024 Testimoni. All rights reserved.
