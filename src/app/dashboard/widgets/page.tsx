@@ -43,7 +43,7 @@ export default function WidgetsPage() {
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [newName, setNewName] = useState("");
+  const [newName, setNewName] = useState("Homepage Testimonials");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const { plan, limits } = useSubscription();
@@ -72,7 +72,7 @@ export default function WidgetsPage() {
       if (res.ok) {
         const data = await res.json();
         setWidgets((prev) => [data.widget, ...prev]);
-        setNewName("");
+        setNewName("Homepage Testimonials");
         setShowCreate(false);
       } else {
         const data = await res.json().catch(() => ({}));

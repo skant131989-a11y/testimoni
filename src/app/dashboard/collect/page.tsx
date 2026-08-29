@@ -40,7 +40,9 @@ export default function CollectPage() {
   const [forms, setForms] = useState<CollectionForm[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(isWelcome);
-  const [newName, setNewName] = useState(isWelcome ? "Customer Feedback" : "");
+  // Pre-fill with a sensible default so hitting Enter after "New form"
+  // creates a working form in one keystroke.
+  const [newName, setNewName] = useState("Customer Feedback");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const { plan, limits } = useSubscription();
@@ -72,7 +74,7 @@ export default function CollectPage() {
       if (res.ok) {
         const data = await res.json();
         setForms((prev) => [data.form, ...prev]);
-        setNewName("");
+        setNewName("Customer Feedback");
         setShowCreate(false);
       } else {
         const data = await res.json().catch(() => ({}));
