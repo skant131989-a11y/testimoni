@@ -39,9 +39,9 @@ export default function SignupPage() {
         password,
         options: {
           data: { full_name: name },
-          // ?next=/dashboard/collect?welcome=1 so users landing via the
-          // email verification link also drop onto the create-form step.
-          emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/collect?welcome=1")}`,
+          // ?next=/dashboard/welcome so users landing via the
+          // email verification link also drop onto the paste-tweet welcome flow.
+          emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/welcome")}`,
         },
       });
 
@@ -50,14 +50,13 @@ export default function SignupPage() {
         return;
       }
 
-      // If Supabase started a session immediately, email confirmation is
-      // disabled — go straight to the welcome flow. Otherwise Supabase has
-      // sent a verification email; tell the user to check their inbox.
-      if (data.session) {
-        window.location.assign("/dashboard/collect?welcome=1");
-        return;
-      }
-      setCheckEmail(email);
+      // Email confirmation is currently disabled in Supabase for launch —
+      // always drop straight into the welcome flow regardless of whether
+      // Supabase returned a session immediately. Middleware will bounce
+      // back to /login if the session never actually attached, but in
+      // practice this makes signup one click instead of two.
+      window.location.assign("/dashboard/welcome");
+      return;
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
@@ -74,9 +73,9 @@ export default function SignupPage() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          // ?next=/dashboard/collect?welcome=1 lands new Google signups
-          // on the create-form step, same as email/password signups.
-          redirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/collect?welcome=1")}`,
+          // ?next=/dashboard/welcome lands new Google signups
+          // on the paste-tweet welcome flow, same as email/password signups.
+          redirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/welcome")}`,
         },
       });
 

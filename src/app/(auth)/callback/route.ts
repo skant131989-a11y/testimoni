@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const WELCOME_URL = "/dashboard/collect?welcome=1";
+const WELCOME_URL = "/dashboard/welcome";
 
 // If the user was created within this many seconds of hitting /callback,
 // treat them as brand-new and force the onboarding landing regardless of

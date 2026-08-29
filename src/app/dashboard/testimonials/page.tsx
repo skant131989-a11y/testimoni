@@ -1,41 +1,23 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  Plus,
-  Search,
-  CheckCircle2,
-  Archive,
-  Trash2,
-  Star,
-} from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import type { TestimonialStatus, TestimonialSource } from "@prisma/client";
+import type { TestimonialStatus } from "@prisma/client";
+import { TestimonialRow, type TestimonialRowData } from "./testimonial-row";
 
 type FilterTab = "ALL" | TestimonialStatus;
 
 interface TestimonialsPageProps {
   searchParams: Promise<{ filter?: string; q?: string }>;
 }
-
-const sourceColors: Record<TestimonialSource, string> = {
-  MANUAL: "bg-gray-100 text-gray-700",
-  FORM: "bg-blue-100 text-blue-700",
-  TWITTER: "bg-sky-100 text-sky-700",
-  LINKEDIN: "bg-indigo-100 text-indigo-700",
-  GOOGLE: "bg-red-100 text-red-700",
-  IMPORT: "bg-purple-100 text-purple-700",
-};
 
 export default async function TestimonialsPage({
   searchParams,
@@ -186,126 +168,20 @@ export default async function TestimonialsPage({
         </Card>
       ) : (
         <div className="space-y-3">
-          {testimonials.map((testimonial) => (
-            <Card key={testimonial.id}>
-              <CardContent className="flex items-start gap-4 p-4">
-                {/* Avatar */}
-                {testimonial.customerAvatar ? (
-                  <img
-                    src={testimonial.customerAvatar}
-                    alt={testimonial.customerName}
-                    className="h-10 w-10 shrink-0 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                    {testimonial.customerName.charAt(0).toUpperCase()}
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-medium">
-                      {testimonial.customerName}
-                    </p>
-                    {testimonial.customerTitle && (
-                      <span className="text-xs text-muted-foreground">
-                        {testimonial.customerTitle}
-                      </span>
-                    )}
-                    <Badge
-                      className={cn(
-                        "text-xs",
-                        sourceColors[testimonial.source]
-                      )}
-                      variant="outline"
-                    >
-                      {testimonial.source.toLowerCase()}
-                    </Badge>
-                    <Badge
-                      variant={
-                        testimonial.status === "APPROVED"
-                          ? "default"
-                          : testimonial.status === "PENDING"
-                            ? "secondary"
-                            : "outline"
-                      }
-                    >
-                      {testimonial.status.toLowerCase()}
-                    </Badge>
-                  </div>
-
-                  {/* Rating */}
-                  {testimonial.rating && (
-                    <div className="mt-1 flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={cn(
-                            "h-3.5 w-3.5",
-                            i < testimonial.rating!
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-muted-foreground/30"
-                          )}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Content preview */}
-                  <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
-                    {testimonial.content || "No text content"}
-                  </p>
-                </div>
-
-                {/* Actions and date */}
-                <div className="flex shrink-0 flex-col items-end gap-2">
-                  <time className="text-xs text-muted-foreground">
-                    {new Date(testimonial.createdAt).toLocaleDateString()}
-                  </time>
-                  <div className="flex gap-1">
-                    {testimonial.status !== "APPROVED" && (
-                      <form action={`/api/testimonials/${testimonial.id}/approve`} method="POST">
-                        <Button
-                          type="submit"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          title="Approve"
-                        >
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        </Button>
-                      </form>
-                    )}
-                    {testimonial.status !== "ARCHIVED" && (
-                      <form action={`/api/testimonials/${testimonial.id}/archive`} method="POST">
-                        <Button
-                          type="submit"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          title="Archive"
-                        >
-                          <Archive className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                      </form>
-                    )}
-                    <form action={`/api/testimonials/${testimonial.id}/delete`} method="POST">
-                      <Button
-                        type="submit"
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </form>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {testimonials.map((testimonial) => {
+            const row: TestimonialRowData = {
+              id: testimonial.id,
+              content: testimonial.content,
+              rating: testimonial.rating,
+              customerName: testimonial.customerName,
+              customerTitle: testimonial.customerTitle,
+              customerAvatar: testimonial.customerAvatar,
+              source: testimonial.source,
+              status: testimonial.status,
+              createdAt: testimonial.createdAt.toISOString(),
+            };
+            return <TestimonialRow key={testimonial.id} testimonial={row} />;
+          })}
         </div>
       )}
     </div>

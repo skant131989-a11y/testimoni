@@ -210,7 +210,7 @@ export default function WidgetsPage() {
                     <span className="mx-1">·</span>
                     <span>{widget._count?.testimonials || 0} testimonials</span>
                   </div>
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/dashboard/widgets/${widget.id}`}>
                         <Settings className="mr-1 h-3 w-3" />
@@ -234,6 +234,7 @@ export default function WidgetsPage() {
                       size="sm"
                       className="ml-auto text-destructive"
                       onClick={() => handleDelete(widget.id)}
+                      aria-label="Delete widget"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
