@@ -17,6 +17,7 @@ import {
   Eye,
   Code,
   Trash2,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import { useSubscription } from "@/lib/use-subscription";
@@ -221,6 +222,12 @@ export default function WidgetsPage() {
                         <Code className="mr-1 h-3 w-3" />
                         Embed
                       </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={`/w/${widget.id}`} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="mr-1 h-3 w-3" />
+                        Wall
+                      </a>
                     </Button>
                     <Button
                       variant="ghost"

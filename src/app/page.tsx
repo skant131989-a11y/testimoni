@@ -103,6 +103,11 @@ export default async function LandingPage() {
           <p className="mt-4 text-sm text-muted-foreground">
             Free plan available. No credit card required.
           </p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            <Link href="/w/demo" className="font-medium text-primary hover:underline">
+              See a live Wall of Love →
+            </Link>
+          </p>
         </div>
 
         {/* Animated demo preview — CSS-only, no video/GIF */}

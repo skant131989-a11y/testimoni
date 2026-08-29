@@ -125,9 +125,9 @@ export default function WidgetBuilderPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <a href={`/api/widget/${widgetId}`} target="_blank">
+            <a href={`/w/${widgetId}`} target="_blank" rel="noopener noreferrer">
               <Eye className="mr-2 h-4 w-4" />
-              Preview
+              Open wall
             </a>
           </Button>
           <Button onClick={handleSave} disabled={saving}>

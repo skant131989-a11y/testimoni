@@ -784,6 +784,11 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
                 View Pricing
               </Button>
             </Link>
+            <Link href="/w/demo">
+              <Button size="lg" variant="ghost">
+                See a Sample Wall →
+              </Button>
+            </Link>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
             Free forever plan. No credit card required.
@@ -804,6 +809,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             <span className="font-semibold">Testimoni</span>
           </Link>
           <nav className="flex items-center gap-5 text-sm">
+            <Link href="/w/demo" className="text-muted-foreground hover:text-foreground">Sample Wall</Link>
             <Link href="/demo" className="text-muted-foreground hover:text-foreground">Demo</Link>
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>

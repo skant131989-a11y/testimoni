@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Copy, Check, Code } from "lucide-react";
+import { Copy, Check, Code, ExternalLink, Sparkles } from "lucide-react";
+import { ShareWall } from "@/components/share-wall";
 
 export default function EmbedPage() {
   const params = useParams();
@@ -16,6 +17,8 @@ export default function EmbedPage() {
 
   const scriptEmbed = `<div id="fw-${widgetId}"></div>
 <script src="${appUrl}/embed/widget.js" data-widget-id="${widgetId}" async></script>`;
+
+  const hostedUrl = `${appUrl}/w/${widgetId}`;
 
   const reactEmbed = `import { Testimoni } from '@testimoni/react';
 
@@ -45,6 +48,54 @@ export default function EmbedPage() {
       </div>
 
       <div className="space-y-4">
+        {/* Hosted Wall — no-code, share as link */}
+        <Card className="border-primary/30 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Hosted Wall of Love (no code required)
+            </CardTitle>
+            <CardDescription>
+              Share this URL anywhere — social bios, DMs, emails, Substack.
+              Anyone can view; no signup needed. Perfect for coaches, agencies,
+              and indie founders.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="relative">
+              <pre className="overflow-x-auto rounded-lg bg-background p-4 text-sm">
+                <code>{hostedUrl}</code>
+              </pre>
+              <Button
+                size="sm"
+                variant="outline"
+                className="absolute right-2 top-2"
+                onClick={() => copyToClipboard(hostedUrl, "hosted")}
+              >
+                {copied === "hosted" ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button asChild variant="default">
+                <a href={hostedUrl} target="_blank" rel="noopener noreferrer">
+                  Open wall <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Share panel — X, LinkedIn, WhatsApp, Email, QR */}
+        <ShareWall
+          url={hostedUrl}
+          workspaceName="Your workspace"
+          testimonialCount={0}
+        />
+
         {/* Script Tag */}
         <Card>
           <CardHeader>
