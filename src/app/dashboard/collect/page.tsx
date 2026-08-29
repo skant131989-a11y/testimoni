@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,10 +35,12 @@ interface CollectionForm {
 }
 
 export default function CollectPage() {
+  const searchParams = useSearchParams();
+  const isWelcome = searchParams.get("welcome") === "1";
   const [forms, setForms] = useState<CollectionForm[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
-  const [newName, setNewName] = useState("");
+  const [showCreate, setShowCreate] = useState(isWelcome);
+  const [newName, setNewName] = useState(isWelcome ? "Customer Feedback" : "");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const { plan, limits } = useSubscription();
@@ -133,6 +136,16 @@ export default function CollectPage() {
 
   return (
     <div className="space-y-6">
+      {isWelcome && forms.length === 0 && (
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+          <p className="text-lg font-semibold">Welcome to Testimoni 👋</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Let&apos;s create your first collection form. Give it a name, share it with
+            customers, and their testimonials will land in your inbox for one-click approval.
+          </p>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Collect Feedback</h1>

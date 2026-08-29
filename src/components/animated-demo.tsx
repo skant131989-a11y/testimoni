@@ -26,8 +26,9 @@ export function AnimatedDemo() {
           40%, 100% { width: 100%; }
         }
         @keyframes ad-star-fill {
-          0%, 40% { fill: #d1d5db; }
-          45%, 100% { fill: #facc15; }
+          0%, 100% { fill: #facc15; transform: scale(1); }
+          42% { fill: #facc15; transform: scale(1.35); }
+          50% { fill: #facc15; transform: scale(1); }
         }
         @keyframes ad-submit-pulse {
           0%, 60% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
@@ -98,10 +99,10 @@ export function AnimatedDemo() {
                 {[0, 1, 2, 3, 4].map((i) => (
                   <Star
                     key={i}
-                    className="ad-loop ad-star h-5 w-5"
+                    className="ad-loop ad-star h-5 w-5 fill-yellow-400"
                     style={{
                       animationDelay: `${i * 0.15}s`,
-                      color: "transparent",
+                      color: "#facc15",
                     }}
                   />
                 ))}

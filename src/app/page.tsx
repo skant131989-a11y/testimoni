@@ -80,17 +80,17 @@ export default async function LandingPage() {
             Just launched · Free forever plan
           </div>
           <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-            Turn customer love into{" "}
-            <span className="text-primary">social proof</span>
+            Collect testimonials.{" "}
+            <span className="text-primary">Embed them on your site today.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-            Collect, manage, and embed beautiful testimonials on your website in
-            minutes. No coding required.
+            Collect via link, form, or QR — approve the best ones, embed a
+            beautiful wall of love with one line of code. Free plan.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link href="/signup">
               <Button size="lg" className="gap-2">
-                Start Collecting Testimonials
+                Get started free
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>

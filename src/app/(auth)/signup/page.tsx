@@ -47,9 +47,11 @@ export default function SignupPage() {
         return;
       }
 
-      // Hard navigation so the fresh auth cookies are attached to the
-      // request the server sees.
-      window.location.assign("/dashboard");
+      // First-run goal is to create a collection form, so drop new users
+      // straight onto /dashboard/collect (with ?welcome=1 so we can nudge
+      // them into the create-form flow). Hard navigation so fresh auth
+      // cookies attach to the server request.
+      window.location.assign("/dashboard/collect?welcome=1");
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
@@ -66,7 +68,9 @@ export default function SignupPage() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/callback`,
+          // ?next=/dashboard/collect?welcome=1 lands new Google signups
+          // on the create-form step, same as email/password signups.
+          redirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/collect?welcome=1")}`,
         },
       });
 
