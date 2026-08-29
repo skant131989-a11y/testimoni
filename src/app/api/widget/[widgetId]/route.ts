@@ -53,7 +53,8 @@ export async function GET(
   // than 404'ing or leaking a Pro layout for free.
   const effectiveLayout = plan === "FREE" ? "GRID" : widget.layout;
 
-  // Apply maxItems limit if set
+  // Apply maxItems limit if set. Widget script generates letter avatars
+  // client-side when customerAvatar is null — no per-visitor lookups.
   let testimonials = widget.testimonials.map((wt) => wt.testimonial);
   if (widget.maxItems) {
     testimonials = testimonials.slice(0, widget.maxItems);

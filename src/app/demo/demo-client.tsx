@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { LetterAvatar } from "@/components/letter-avatar";
 import {
   MessageSquare,
   Star,
@@ -185,11 +186,7 @@ function TestimonialCard({
         &ldquo;{t.content}&rdquo;
       </p>
       <div className="mt-4 flex items-center gap-3">
-        <img
-          src={t.customerAvatar}
-          alt={t.customerName}
-          className="h-10 w-10 rounded-full object-cover"
-        />
+        <LetterAvatar name={t.customerName} size={40} />
         <div>
           <p className="text-sm font-semibold" style={{ color: theme.text }}>
             {t.customerName}
@@ -384,9 +381,13 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
 
             <div className="rounded-2xl border-2 border-primary/20 bg-card p-6 shadow-sm">
               <div className="mb-6 text-center">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <MessageSquare className="h-6 w-6 text-primary" />
-                </div>
+                <Image
+                  src="/icon.png"
+                  alt="Testimoni logo"
+                  width={48}
+                  height={48}
+                  className="mx-auto mb-3 rounded-full"
+                />
                 <h3 className="text-xl font-bold">Share your experience</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   We&apos;d love to hear what you think!
@@ -494,11 +495,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
                           t.isNew ? "border-primary bg-primary/5" : ""
                         }`}
                       >
-                        <img
-                          src={t.customerAvatar}
-                          alt=""
-                          className="h-9 w-9 rounded-full object-cover"
-                        />
+                        <LetterAvatar name={t.customerName} size={36} />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold">{t.customerName}</span>
@@ -585,11 +582,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
                             : "border-dashed border-muted-foreground/30 bg-muted/30 opacity-70 hover:opacity-100"
                         }`}
                       >
-                        <img
-                          src={t.customerAvatar}
-                          alt=""
-                          className="h-9 w-9 rounded-full object-cover"
-                        />
+                        <LetterAvatar name={t.customerName} size={36} />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold">{t.customerName}</span>

@@ -12,16 +12,22 @@
   text-align: left;
   font-style: normal;
   font-weight: normal;
+  display: block;
+  box-sizing: border-box;
+}
+
+.fw-root *, .fw-root *::before, .fw-root *::after {
+  box-sizing: border-box;
 }
 
 .fw-card {
   background: var(--fw-bg);
   border: 1px solid var(--fw-border);
   border-radius: var(--fw-radius);
-  padding: 10px 16px;
+  padding: 20px 22px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 14px;
   transition: box-shadow 0.2s, transform 0.2s;
 }
 
@@ -31,33 +37,42 @@
 }
 
 .fw-avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  align-self: center;
+}
+
+.fw-avatar-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  font-family: inherit;
 }
 
 .fw-card-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 12px;
   flex: 1;
   min-height: 0;
 }
 
 .fw-stars {
   display: flex;
-  gap: 2px;
-  align-self: flex-start;
+  gap: 3px;
 }
 
 .fw-star {
   fill: var(--fw-border);
   stroke: none;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
 }
 
 .fw-star-filled {
@@ -66,39 +81,44 @@
 
 .fw-content {
   margin: 0;
-  font-size: 13.5px;
-  line-height: 1.4;
+  font-size: 15px;
+  line-height: 1.55;
   color: var(--fw-text);
-  text-align: center;
-  padding: 2px 4px;
+  text-align: left;
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .fw-content::before { content: "\\201C"; }
 .fw-content::after  { content: "\\201D"; }
 
-.fw-author {
+.fw-author-row {
   display: flex;
-  justify-content: center;
-  align-items: baseline;
-  gap: 6px;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--fw-text);
-  text-align: center;
+  align-items: center;
+  gap: 12px;
+  padding-top: 2px;
 }
 
-.fw-author::before { content: "— "; color: var(--fw-text); font-weight: 700; }
+.fw-author-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  min-width: 0;
+}
+
+.fw-author {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--fw-text);
+  line-height: 1.2;
+}
 
 .fw-title {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--fw-muted);
   font-weight: 500;
-  text-align: center;
-  margin-top: 1px;
+  line-height: 1.3;
+  margin-top: 2px;
 }
 
 .fw-empty {
@@ -109,8 +129,10 @@
 
 .fw-watermark {
   text-align: center;
-  margin-top: 16px;
-  padding: 8px;
+  margin-top: 20px;
+  padding: 4px;
+  font-size: 12px;
+  color: var(--fw-muted);
 }
 
 .fw-watermark a {
@@ -127,7 +149,7 @@
 .fw-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .fw-grid .fw-card {
@@ -420,18 +442,58 @@ function renderCard(t, widget) {
   if (widget.showRating !== false && t.rating) {
     html += '<div class="fw-stars">' + renderStars(t.rating) + '</div>';
   }
-  if (widget.showAvatar !== false && t.customerAvatar) {
-    html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
-  }
   if (t.content) {
     html += '<p class="fw-content">' + escapeHtml(t.content) + '</p>';
   }
+  html += '<div class="fw-author-row">';
+  if (widget.showAvatar !== false) {
+    html += renderAvatar(t);
+  }
+  html += '<div class="fw-author-text">';
   html += '<div class="fw-author">' + escapeHtml(t.customerName) + '</div>';
   if (t.customerTitle) {
     html += '<div class="fw-title">' + escapeHtml(t.customerTitle) + '</div>';
   }
+  html += '</div>';
+  html += '</div>';
   html += '</div></div>';
   return html;
+}
+
+/* Colored letter avatar rendered when there's no photo. Palette picked
+   by name so the same person always gets the same color. */
+var FW_LETTER_BG = [
+  "#7c3aed", "#0891b2", "#059669", "#d97706", "#dc2626",
+  "#db2777", "#4f46e5", "#0284c7", "#65a30d", "#c2410c",
+];
+
+function letterAvatarSvg(name) {
+  var letter = (name || "?").trim().charAt(0).toUpperCase() || "?";
+  var idx = 0;
+  for (var i = 0; i < (name || "").length; i++) {
+    idx = (idx + name.charCodeAt(i)) % FW_LETTER_BG.length;
+  }
+  var bg = FW_LETTER_BG[idx];
+  return (
+    '<div class="fw-avatar fw-avatar-letter" style="background:' + bg + '">' +
+    escapeHtml(letter) +
+    '</div>'
+  );
+}
+
+function renderAvatar(t) {
+  if (t.customerAvatar) {
+    // onerror swaps a broken image (e.g. Gravatar 404) for the
+    // letter fallback without needing extra network round trips.
+    var fallback = letterAvatarSvg(t.customerName)
+      .replace(/'/g, "&#39;")
+      .replace(/"/g, "&quot;");
+    return (
+      '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) +
+      '" alt="" onerror="this.outerHTML=&quot;' + fallback + '&quot;" />'
+    );
+  }
+  return letterAvatarSvg(t.customerName);
 }
 
 function renderStars(count) {
