@@ -107,11 +107,19 @@ export default function FeaturesPage() {
             <p className="mt-2 text-muted-foreground">
               5-minute setup. Free plan works forever.
             </p>
-            <Button size="lg" asChild className="mt-6">
-              <Link href="/signup">
-                Get started free <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Button size="lg" asChild>
+                <Link href="/signup">
+                  Get started free <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/demo">Try the live demo</Link>
+              </Button>
+              <Button size="lg" variant="ghost" asChild>
+                <Link href="/w/demo">See a Sample Wall</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </main>

@@ -203,6 +203,17 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [theme, setTheme] = useState(THEMES[0]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(SEED_TESTIMONIALS);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [tweetImported, setTweetImported] = useState(false);
+  const [tweetImporting, setTweetImporting] = useState(false);
+
+  function fakeTweetImport() {
+    if (tweetImported || tweetImporting) return;
+    setTweetImporting(true);
+    setTimeout(() => {
+      setTweetImporting(false);
+      setTweetImported(true);
+    }, 700);
+  }
   const [step, setStep] = useState<"form" | "submitted">("form");
 
   const [formName, setFormName] = useState("");
@@ -509,6 +520,84 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Alt path: import from a tweet URL (mock — no real API call) */}
+        <div className="mt-16">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+              ⇢
+            </div>
+            <h2 className="text-lg font-semibold">
+              Alt path: already have tweets praising you? Import in one click
+            </h2>
+          </div>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Paste any public X or LinkedIn post URL — we pull the author and
+            text, drop an approved testimonial into your library, and add it
+            to your wall. Same interactive card as above, zero collection form
+            needed.
+          </p>
+
+          <div className="rounded-2xl border bg-card p-5 shadow-sm">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="min-w-0 flex-1 rounded-md border bg-muted/60 px-3 py-2 font-mono text-xs text-muted-foreground">
+                https://x.com/founder/status/1794012345678
+              </div>
+              <Button
+                onClick={fakeTweetImport}
+                disabled={tweetImporting || tweetImported}
+                className="shrink-0"
+              >
+                {tweetImporting
+                  ? "Importing…"
+                  : tweetImported
+                    ? "✓ Imported"
+                    : "Paste demo tweet"}
+              </Button>
+            </div>
+
+            {tweetImported && (
+              <div
+                className="mt-4 rounded-xl border bg-background p-4 shadow-sm"
+                style={{ animation: "fadeSlideIn 400ms ease-out" }}
+              >
+                <style>{`
+                  @keyframes fadeSlideIn {
+                    from { opacity: 0; transform: translateY(8px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                  }
+                `}</style>
+                <div className="flex gap-3">
+                  <LetterAvatar name="Priya Menon" size={40} />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold">Priya Menon</span>
+                      <Badge variant="secondary" className="text-[10px]">
+                        via X
+                      </Badge>
+                    </div>
+                    <div className="mt-1 flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <Star
+                          key={j}
+                          className="h-3 w-3 fill-yellow-400 text-yellow-400"
+                        />
+                      ))}
+                    </div>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      &ldquo;Started using Testimoni today and had a live wall
+                      up in the time it took me to make coffee. Genuinely
+                      wild.&rdquo;
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-3 text-center text-xs text-muted-foreground">
+                  ✓ Approved · Added to your wall · Zero setup
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

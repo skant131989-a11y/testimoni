@@ -116,6 +116,68 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* Tweet-import call-out — the "start collecting today with zero customers" story */}
+      <section className="border-y bg-gradient-to-br from-blue-50/40 via-background to-purple-50/40 py-14">
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs font-medium">
+                <Zap className="h-3 w-3" />
+                Instant library
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                Already have tweets praising you?
+              </h2>
+              <p className="mt-3 text-base text-muted-foreground">
+                Paste an{" "}
+                <span className="font-semibold text-foreground">X (Twitter)</span>{" "}
+                or{" "}
+                <span className="font-semibold text-foreground">LinkedIn</span>{" "}
+                post URL — we pull the author and text, drop an approved
+                testimonial into your library, and add it to your wall in one
+                click. No screenshots. No copy-paste.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Button asChild>
+                  <Link href="/signup">
+                    Try it free <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link href="/features">See all features</Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Visual: mock URL bar + arrow + card */}
+            <div className="hidden max-w-sm rounded-2xl border bg-card p-4 shadow-sm md:block">
+              <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Paste a URL
+              </div>
+              <div className="rounded-md border bg-muted/60 px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                https://x.com/user/status/…
+              </div>
+              <div className="my-3 flex items-center gap-2 text-[11px] font-medium text-primary">
+                <ArrowRight className="h-3.5 w-3.5" />
+                Approved &amp; live on your wall
+              </div>
+              <div className="rounded-md border bg-background p-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                    S
+                  </div>
+                  <div className="text-xs font-semibold">Sarah Chen</div>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  &ldquo;Testimoni turned a mess of tweets into a wall of love
+                  in about 30 seconds.&rdquo;
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* One library, many widgets — the multi-form/multi-widget story */}
       <section className="border-t bg-muted/20 py-20">
         <div className="mx-auto max-w-6xl px-4">
@@ -304,9 +366,9 @@ export default async function LandingPage() {
               },
               {
                 icon: Star,
-                title: "Import Reviews",
+                title: "Paste-a-tweet import",
                 description:
-                  "Pull in existing reviews from Twitter, LinkedIn, and other platforms.",
+                  "Turn a public X or LinkedIn post into an approved testimonial by pasting the URL. Author and text pulled automatically; you edit the rating if you want.",
               },
             ].map((feature) => (
               <div key={feature.title} className="rounded-lg border bg-card p-6">

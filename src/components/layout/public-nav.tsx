@@ -38,6 +38,23 @@ export async function PublicNav({ right }: PublicNavProps) {
           />
           <span className="text-xl font-bold">Testimoni</span>
         </Link>
+
+        {/* Primary nav — hidden on mobile to keep the header uncluttered */}
+        <nav className="hidden items-center gap-6 md:flex">
+          <Link href="/demo" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            Demo
+          </Link>
+          <Link href="/features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            Features
+          </Link>
+          <Link href="/pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            Pricing
+          </Link>
+          <Link href="/blog" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            Blog
+          </Link>
+        </nav>
+
         <nav className="flex items-center gap-3">
           {right}
           {isLoggedIn ? (

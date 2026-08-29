@@ -115,6 +115,26 @@ export default function TestimonialWidgetGuidePage() {
                 </p>
               </div>
 
+              {/* Inline CTA #1 — user just read about sharing the form,
+                  showing them the end result reinforces the payoff. */}
+              <div className="not-prose flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-bold">
+                    💜 Want to see what the end result looks like?
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Peek at a real Wall of Love — same layout you&apos;ll be
+                    building.
+                  </p>
+                </div>
+                <Link
+                  href="/w/demo"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  See a Sample Wall <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+
               <div className="rounded-xl border bg-card p-6">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
@@ -172,6 +192,27 @@ export default function TestimonialWidgetGuidePage() {
                   <strong>Estimated time:</strong> 30 seconds
                 </p>
               </div>
+            </div>
+
+            {/* Inline CTA #2 — after user just learned about embedding,
+                introduce the hosted-wall alternative for no-code users. */}
+            <div className="not-prose mt-8 flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-bold">
+                  ⚡ Not ready to embed? Share a hosted URL instead.
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Every workspace gets a public Wall of Love URL you can paste
+                  in your Instagram bio, email signature, or WhatsApp status —
+                  zero code required.
+                </p>
+              </div>
+              <Link
+                href="/w/demo"
+                className="inline-flex shrink-0 items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              >
+                See a Sample Wall <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
 
             <h2 className="mt-12 text-2xl font-bold">Which layout should you pick?</h2>
