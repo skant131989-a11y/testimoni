@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [checkEmail, setCheckEmail] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -33,7 +34,7 @@ export default function SignupPage() {
 
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -49,11 +50,14 @@ export default function SignupPage() {
         return;
       }
 
-      // First-run goal is to create a collection form, so drop new users
-      // straight onto /dashboard/collect (with ?welcome=1 so we can nudge
-      // them into the create-form flow). Hard navigation so fresh auth
-      // cookies attach to the server request.
-      window.location.assign("/dashboard/collect?welcome=1");
+      // If Supabase started a session immediately, email confirmation is
+      // disabled — go straight to the welcome flow. Otherwise Supabase has
+      // sent a verification email; tell the user to check their inbox.
+      if (data.session) {
+        window.location.assign("/dashboard/collect?welcome=1");
+        return;
+      }
+      setCheckEmail(email);
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
@@ -84,6 +88,45 @@ export default function SignupPage() {
       setError("An unexpected error occurred. Please try again.");
       setIsGoogleLoading(false);
     }
+  }
+
+  // Check-your-inbox screen — shown after a successful signup that
+  // requires email verification.
+  if (checkEmail) {
+    return (
+      <Card>
+        <CardContent className="pt-8 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+            <MailCheck className="h-7 w-7 text-primary" />
+          </div>
+          <h2 className="mt-6 text-2xl font-bold">Check your email</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            We sent a verification link to
+          </p>
+          <p className="mt-1 font-medium">{checkEmail}</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Click the link in that email to activate your account. If you
+            don&apos;t see it in a minute or two, check your spam folder.
+          </p>
+          <div className="mt-8 flex flex-col gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCheckEmail(null);
+                setEmail("");
+                setPassword("");
+                setName("");
+              }}
+            >
+              Use a different email
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/login">Back to log in</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
