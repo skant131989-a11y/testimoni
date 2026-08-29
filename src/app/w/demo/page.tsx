@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { Star, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -79,8 +80,33 @@ const TESTIMONIALS: {
 export default function DemoWallPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/40 via-background to-background">
+      {/* Minimal top nav — only on the sample wall, not real customer walls.
+          Lets marketing-page visitors jump to Log in / Get Started without
+          bouncing back through history. */}
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 pt-4">
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/icon.png"
+            alt="Testimoni logo"
+            width={24}
+            height={24}
+            className="rounded-full"
+            priority
+          />
+          <span className="font-semibold">Testimoni</span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/login">Log in</Link>
+          </Button>
+          <Button size="sm" asChild>
+            <Link href="/signup">Get Started Free</Link>
+          </Button>
+        </div>
+      </nav>
+
       {/* Sample banner */}
-      <div className="bg-primary/10 py-2 text-center text-xs font-medium text-primary">
+      <div className="mt-4 bg-primary/10 py-2 text-center text-xs font-medium text-primary">
         <Sparkles className="mr-1 inline-block h-3 w-3" />
         Sample wall — built with Testimoni. Your own can look like this.
       </div>
