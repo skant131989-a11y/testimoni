@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
+import { InlineSignup } from "@/components/inline-signup";
 
 export const metadata: Metadata = {
   title: "Features — Testimoni",
@@ -102,23 +103,25 @@ export default function FeaturesPage() {
             ))}
           </div>
 
-          <div className="mt-16 rounded-2xl bg-primary/5 p-8 text-center">
-            <h2 className="text-2xl font-bold">Try every feature free</h2>
-            <p className="mt-2 text-muted-foreground">
-              5-minute setup. Free plan works forever.
-            </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <Button size="lg" asChild>
-                <Link href="/signup">
-                  Get started free <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/demo">Try the live demo</Link>
-              </Button>
-              <Button size="lg" variant="ghost" asChild>
-                <Link href="/w/demo">See a Sample Wall</Link>
-              </Button>
+          <div className="mt-16 rounded-2xl border-2 border-primary/30 bg-primary/5 p-6 md:p-8">
+            <div className="grid gap-6 md:grid-cols-[1fr_1.1fr] md:gap-8">
+              <div>
+                <h2 className="text-2xl font-bold md:text-3xl">Try every feature free</h2>
+                <p className="mt-2 text-muted-foreground">
+                  5-minute setup. Free plan works forever. Every feature above
+                  is on the free tier — you only upgrade when you outgrow the
+                  limits.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button variant="outline" asChild>
+                    <Link href="/demo">Try the live demo</Link>
+                  </Button>
+                  <Button variant="ghost" asChild>
+                    <Link href="/w/demo">See a Sample Wall</Link>
+                  </Button>
+                </div>
+              </div>
+              <InlineSignup source="features" idPrefix="features" />
             </div>
           </div>
         </div>

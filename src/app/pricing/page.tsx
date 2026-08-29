@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { ProPriceDual } from "@/components/pricing/price-display";
 import { PublicNav } from "@/components/layout/public-nav";
+import { InlineSignup } from "@/components/inline-signup";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -163,6 +164,27 @@ export default async function PricingPage() {
                   <p className="mt-2 text-sm text-muted-foreground">{faq.a}</p>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Bottom CTA — inline signup for the Free plan.
+              Highest-intent visitors on the site; no more click-through. */}
+          <div className="mx-auto mt-20 max-w-5xl rounded-2xl border-2 border-primary/30 bg-primary/5 p-6 md:p-8">
+            <div className="grid gap-6 md:grid-cols-[1fr_1.1fr] md:gap-8">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                  Start free
+                </div>
+                <h2 className="text-2xl font-bold md:text-3xl">
+                  Free forever plan · no credit card
+                </h2>
+                <p className="mt-2 text-muted-foreground">
+                  10 testimonials, 1 collection form, 1 widget, a public
+                  Wall of Love URL, and one-line embed. Upgrade to Pro when
+                  you need unlimited or the fancy layouts.
+                </p>
+              </div>
+              <InlineSignup source="pricing" idPrefix="pricing" />
             </div>
           </div>
         </div>

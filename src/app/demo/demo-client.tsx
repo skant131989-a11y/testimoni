@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { LetterAvatar } from "@/components/letter-avatar";
+import { createClient } from "@/lib/supabase/client";
 import {
   MessageSquare,
   Star,
@@ -25,6 +26,7 @@ import {
   Eye,
   MousePointerClick,
   Palette,
+  Loader2,
 } from "lucide-react";
 
 interface Testimonial {
@@ -203,6 +205,69 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [theme, setTheme] = useState(THEMES[0]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(SEED_TESTIMONIALS);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [demoApproveCount, setDemoApproveCount] = useState(0);
+  const [showKeepCallout, setShowKeepCallout] = useState(false);
+
+  // Inline signup form state — shown inside the "Want to keep this?"
+  // callout after the user approves a testimonial.
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [signupLoading, setSignupLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function handleInlineSignup(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSignupError(null);
+    if (!signupEmail || signupPassword.length < 8) {
+      setSignupError("Enter an email and a password of at least 8 characters.");
+      return;
+    }
+    setSignupLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signUp({
+        email: signupEmail,
+        password: signupPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/welcome")}`,
+        },
+      });
+      if (authError) {
+        setSignupError(authError.message);
+        return;
+      }
+      // Whether Supabase issued a session or is emailing a verification
+      // link, land the user on /dashboard/welcome — middleware bounces
+      // to /login if verification is required and they aren't confirmed yet.
+      window.location.assign("/dashboard/welcome?src=demo");
+    } catch {
+      setSignupError("Something went wrong. Try again or use the signup page.");
+    } finally {
+      setSignupLoading(false);
+    }
+  }
+
+  async function handleInlineGoogle() {
+    setSignupError(null);
+    setGoogleLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/welcome?src=demo")}`,
+        },
+      });
+      if (authError) {
+        setSignupError(authError.message);
+        setGoogleLoading(false);
+      }
+    } catch {
+      setSignupError("Something went wrong. Try again or use the signup page.");
+      setGoogleLoading(false);
+    }
+  }
   const [tweetImported, setTweetImported] = useState(false);
   const [tweetImporting, setTweetImporting] = useState(false);
 
@@ -222,6 +287,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [formRating, setFormRating] = useState(5);
 
   const widgetRef = useRef<HTMLDivElement>(null);
+  const keepCalloutRef = useRef<HTMLDivElement>(null);
   const inboxRef = useRef<HTMLDivElement>(null);
 
   const ctaHref = isLoggedIn ? "/dashboard" : "/signup";
@@ -264,9 +330,24 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
         i === index ? { ...t, isApproved: true, inWidget: true, isNew: false } : t
       )
     );
+    setDemoApproveCount((c) => c + 1);
     setTimeout(() => {
       widgetRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 300);
+    // Delay the "Want to keep this?" callout by ~3s so the user has
+    // real time to look at their testimonial in the widget preview and
+    // register that the loop closed — otherwise the CTA hijacks the
+    // moment before it lands. Then scroll it into view so the whole
+    // signup form is visible.
+    setTimeout(() => {
+      setShowKeepCallout(true);
+      setTimeout(() => {
+        keepCalloutRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 300);
+    }, 3000);
   }
 
   function rejectTestimonial(index: number) {
@@ -331,7 +412,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
         <div className="text-center">
           <Badge variant="outline" className="mb-4">
             <MousePointerClick className="mr-1 h-3 w-3" />
-            Try it yourself — no signup needed
+            Try the flow. Save it to an account when you want it on your site.
           </Badge>
           <h1 className="text-4xl font-bold md:text-5xl">
             Submit a testimonial.<br />
@@ -739,6 +820,156 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           </div>
         </div>
 
+        {/* "Want to keep this?" callout — appears 1.5s after the user
+            approves a testimonial, giving them time to actually see the
+            widget update above first. Slides up + fades in so it doesn't
+            feel abrupt. Inline signup so the aha moment converts directly
+            without a page navigation. */}
+        {showKeepCallout && demoApproveCount > 0 && (
+          <div
+            ref={keepCalloutRef}
+            className="mt-12 rounded-2xl border-2 border-primary/40 bg-primary/5 p-6 md:p-8"
+            style={{ animation: "demoKeepIn 500ms ease-out" }}
+          >
+            <style>{`
+              @keyframes demoKeepIn {
+                from { opacity: 0; transform: translateY(14px); }
+                to   { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
+
+            <div className="grid gap-6 md:grid-cols-[1fr_1.1fr] md:gap-8">
+              {/* Left — the pitch */}
+              <div>
+                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                  <Sparkles className="h-3 w-3" /> That&apos;s your testimonial, live ↑
+                </div>
+                <p className="text-2xl font-bold">Want to keep this?</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Create a free account and this same flow lives at your own
+                  Wall of Love URL — sharable in your Instagram bio, email
+                  signature, or embedded on any site with one line of code.
+                </p>
+                <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                  <li>✓ Free forever plan · no credit card</li>
+                  <li>✓ Public wall URL you can share today</li>
+                  <li>✓ 5-minute setup, cancel anytime</li>
+                </ul>
+              </div>
+
+              {/* Right — inline signup form */}
+              <div className="rounded-xl border bg-background p-5 shadow-sm">
+                <form onSubmit={handleInlineSignup} className="space-y-3">
+                  <div>
+                    <Label htmlFor="demo-signup-email" className="text-xs">
+                      Email
+                    </Label>
+                    <Input
+                      id="demo-signup-email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      required
+                      disabled={signupLoading || googleLoading}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="demo-signup-password" className="text-xs">
+                      Password
+                    </Label>
+                    <Input
+                      id="demo-signup-password"
+                      type="password"
+                      autoComplete="new-password"
+                      minLength={8}
+                      placeholder="At least 8 characters"
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      required
+                      disabled={signupLoading || googleLoading}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {signupError && (
+                    <p className="text-xs text-destructive" role="alert">
+                      {signupError}
+                    </p>
+                  )}
+
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={signupLoading || googleLoading}
+                  >
+                    {signupLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating…
+                      </>
+                    ) : (
+                      <>
+                        Create free account <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      or
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleInlineGoogle}
+                  disabled={signupLoading || googleLoading}
+                >
+                  {googleLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <svg className="h-4 w-4" viewBox="0 0 24 24">
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335"
+                      />
+                    </svg>
+                  )}
+                  Continue with Google
+                </Button>
+
+                <p className="mt-3 text-center text-[11px] text-muted-foreground">
+                  By continuing you agree to our{" "}
+                  <Link href="/terms" className="underline">Terms</Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="underline">Privacy Policy</Link>.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* The magic line */}
         <div className="mt-12 rounded-xl border bg-card p-6">
           <h3 className="font-semibold">All of this from one line of code</h3>
@@ -882,15 +1113,15 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             Set it up for your own site in under 5 minutes.
           </p>
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link href={ctaHref}>
+            <Link href="/signup">
               <Button size="lg" className="gap-2">
-                {ctaLabel}
+                Get started free
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/pricing">
+            <Link href="/w/demo">
               <Button size="lg" variant="outline">
-                View Pricing
+                See a Sample Wall
               </Button>
             </Link>
           </div>
@@ -918,7 +1149,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
           </nav>
-          <p className="text-sm text-muted-foreground">&copy; 2024 Testimoni.</p>
+          <p className="text-sm text-muted-foreground">&copy; 2026 Testimoni.</p>
         </div>
       </footer>
     </div>

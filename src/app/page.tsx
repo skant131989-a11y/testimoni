@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ProPriceDual } from "@/components/pricing/price-display";
 import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
+import { InlineSignup } from "@/components/inline-signup";
 
 export default async function LandingPage() {
   let isLoggedIn = false;
@@ -412,19 +413,23 @@ export default async function LandingPage() {
 
       {/* CTA */}
       <section className="py-20">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="text-3xl font-bold">
-            Ready to showcase your customer love?
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            Get set up in 5 minutes. Free forever plan. No credit card required.
-          </p>
-          <Link href="/signup" className="mt-8 inline-block">
-            <Button size="lg" className="gap-2">
-              Get Started Free
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="grid gap-8 md:grid-cols-[1fr_1.1fr] md:gap-10">
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl font-bold">
+                Ready to showcase your customer love?
+              </h2>
+              <p className="mt-4 text-muted-foreground">
+                Get set up in 5 minutes. Free forever plan. No credit card required.
+              </p>
+              <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
+                <li>✓ 10 testimonials, 1 form, 1 widget on the Free plan</li>
+                <li>✓ Public Wall of Love URL — shareable anywhere</li>
+                <li>✓ One-line embed for any site (Framer, Webflow, WordPress, React)</li>
+              </ul>
+            </div>
+            <InlineSignup source="home_bottom" idPrefix="home-bottom" />
+          </div>
         </div>
       </section>
 
