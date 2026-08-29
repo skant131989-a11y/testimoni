@@ -152,14 +152,24 @@ export function AnimatedDemo() {
           </div>
         </div>
 
-        {/* MIDDLE: Arrow — hidden on mobile */}
-        <div className="hidden lg:flex lg:flex-col lg:items-center lg:gap-1">
-          <div className="ad-loop ad-arrow flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <ArrowRight className="h-5 w-5 text-primary" />
+        {/* MIDDLE: Two-step flow — hidden on mobile */}
+        <div className="hidden lg:flex lg:flex-col lg:items-center lg:gap-3">
+          <div className="flex flex-col items-center gap-1">
+            <div className="ad-loop ad-arrow flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+              <ArrowRight className="h-4 w-4 text-primary" />
+            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              1 · Approve
+            </p>
           </div>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-            You approve
-          </p>
+          <div className="flex flex-col items-center gap-1">
+            <div className="ad-loop ad-arrow flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+              <ArrowRight className="h-4 w-4 text-primary" />
+            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              2 · Add to widget
+            </p>
+          </div>
         </div>
 
         {/* RIGHT: Widget preview */}

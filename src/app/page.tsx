@@ -84,8 +84,8 @@ export default async function LandingPage() {
             <span className="text-primary">Embed them on your site today.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-            Collect via link, form, or QR — approve the best ones, embed a
-            beautiful wall of love with one line of code. Free plan.
+            Collect via link, form, or QR. Approve the ones you love, drop them
+            into a widget, and embed with one line of code. Free plan.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link href="/signup">
@@ -320,9 +320,9 @@ export default async function LandingPage() {
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4">
           <h2 className="text-center text-3xl font-bold">
-            Get started in 3 steps
+            Get started in 4 steps
           </h2>
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
+          <div className="mt-12 grid gap-8 md:grid-cols-4">
             {[
               {
                 step: "1",
@@ -331,13 +331,18 @@ export default async function LandingPage() {
               },
               {
                 step: "2",
-                title: "Curate your wall of love",
-                description: "Review submissions, approve the best ones, and organize them.",
+                title: "Approve incoming submissions",
+                description: "Review each submission in your inbox and approve the ones you want.",
               },
               {
                 step: "3",
+                title: "Build a widget",
+                description: "Pick a layout, choose which approved testimonials to feature, and theme it.",
+              },
+              {
+                step: "4",
                 title: "Embed on your site",
-                description: "Copy the embed code and paste it anywhere on your website.",
+                description: "Copy one line of code and paste it anywhere — Framer, Webflow, WordPress, or vanilla HTML.",
               },
             ].map((item) => (
               <div key={item.step} className="text-center">

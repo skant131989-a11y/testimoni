@@ -38,7 +38,9 @@ export default function SignupPage() {
         password,
         options: {
           data: { full_name: name },
-          emailRedirectTo: `${window.location.origin}/callback`,
+          // ?next=/dashboard/collect?welcome=1 so users landing via the
+          // email verification link also drop onto the create-form step.
+          emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/collect?welcome=1")}`,
         },
       });
 
