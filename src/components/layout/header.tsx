@@ -7,6 +7,7 @@ import { LogOut, User, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { LetterAvatar } from "@/components/letter-avatar";
 
 interface HeaderProps {
   userName: string | null;
@@ -33,6 +34,7 @@ export function Header({
 }: HeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const currentLabel = pathLabels[pathname] || "Dashboard";
@@ -63,19 +65,22 @@ export function Header({
           className="flex items-center gap-2"
           onClick={() => setMenuOpen(!menuOpen)}
         >
-          {userAvatarUrl ? (
+          {userAvatarUrl && !avatarError ? (
             <Image
               src={userAvatarUrl}
-              alt={userName || "User avatar"}
+              alt=""
               width={28}
               height={28}
               className="rounded-full object-cover"
               unoptimized
+              onError={() => setAvatarError(true)}
             />
           ) : (
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-              {(userName || userEmail).charAt(0).toUpperCase()}
-            </div>
+            <LetterAvatar
+              name={userName || userEmail}
+              size={28}
+              fontSize={12}
+            />
           )}
           <span className="hidden text-sm font-medium sm:inline-block">
             {userName || userEmail}

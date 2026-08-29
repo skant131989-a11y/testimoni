@@ -441,10 +441,12 @@ export default async function LandingPage() {
             />
             <span className="font-semibold">Testimoni</span>
           </div>
-          <nav className="flex items-center gap-5 text-sm">
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
             <Link href="/demo" className="text-muted-foreground hover:text-foreground">Demo</Link>
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
+            <Link href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy</Link>
+            <Link href="/terms" className="text-muted-foreground hover:text-foreground">Terms</Link>
             <a
               href="https://x.com/usetestimoni"
               target="_blank"
