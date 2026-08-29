@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -282,7 +283,14 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-primary" />
+            <Image
+              src="/icon.png"
+              alt="Testimoni logo"
+              width={28}
+              height={28}
+              className="rounded-full"
+              priority
+            />
             <span className="text-xl font-bold">Testimoni</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -793,7 +801,13 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
       <footer className="border-t py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
           <Link href="/" className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
+            <Image
+              src="/icon.png"
+              alt="Testimoni logo"
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
             <span className="font-semibold">Testimoni</span>
           </Link>
           <nav className="flex items-center gap-5 text-sm">
