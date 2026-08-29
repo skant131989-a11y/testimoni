@@ -202,6 +202,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [layout, setLayout] = useState("grid");
   const [theme, setTheme] = useState(THEMES[0]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(SEED_TESTIMONIALS);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [step, setStep] = useState<"form" | "submitted">("form");
 
   const [formName, setFormName] = useState("");
@@ -245,11 +246,15 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   }
 
   function approveTestimonial(index: number) {
+    // Auto-add on approve — the testimonial goes straight into the widget
+    // so users see it live on their wall the moment they approve.
     setTestimonials((prev) =>
-      prev.map((t, i) => (i === index ? { ...t, isApproved: true, isNew: false } : t))
+      prev.map((t, i) =>
+        i === index ? { ...t, isApproved: true, inWidget: true, isNew: false } : t
+      )
     );
     setTimeout(() => {
-      curateRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      widgetRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 300);
   }
 
@@ -325,44 +330,12 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             This is exactly what your customers experience. Fill out the form
             below, then see your testimonial show up in the live widget.
           </p>
-        </div>
-
-        {/* Step 0: How customers reach the form */}
-        <div className="mt-12">
-          <div className="mb-3 flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-              0
-            </div>
-            <h2 className="text-lg font-semibold">
-              First — how does a customer reach this form?
-            </h2>
-          </div>
-          <p className="mb-4 text-sm text-muted-foreground">
-            You never send them to Testimoni. You share the form through 5 channels from your dashboard:
+          <p className="mt-3 text-sm text-muted-foreground">
+            Prefer a shareable link over embed code?{" "}
+            <Link href="/w/demo" className="font-medium text-primary hover:underline">
+              See a hosted Sample Wall →
+            </Link>
           </p>
-
-          <div className="rounded-2xl border bg-card p-6 shadow-sm">
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-              {[
-                { label: "Share link", detail: "Paste in emails, DMs, socials" },
-                { label: "Embed script", detail: "Floating button on your site" },
-                { label: "iFrame", detail: "Full form on a page you host" },
-                { label: "Email template", detail: "Send after a purchase" },
-                { label: "QR code", detail: "Print on receipts, packaging" },
-              ].map((c) => (
-                <div
-                  key={c.label}
-                  className="rounded-lg border bg-background px-3 py-2 text-xs"
-                >
-                  <div className="font-semibold">{c.label}</div>
-                  <div className="mt-0.5 text-muted-foreground">{c.detail}</div>
-                </div>
-              ))}
-            </div>
-            <p className="mt-4 text-xs text-muted-foreground">
-              For this demo, pretend you just clicked one — the form below is what your customer would see. ↓
-            </p>
-          </div>
         </div>
 
         {/* Two-column layout: Form + Arrow + Widget */}
@@ -531,7 +504,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
                 )}
                 {testimonials.some((t) => t.isApproved) && (
                   <div className="pt-2 text-center text-xs text-muted-foreground">
-                    + {testimonials.filter((t) => t.isApproved).length} already approved. Curate them below ↓
+                    + {testimonials.filter((t) => t.isApproved).length} already approved. Live on your wall ↓
                   </div>
                 )}
               </div>
@@ -539,85 +512,11 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           </div>
         </div>
 
-        {/* Step 3: Curate widget — pick which approved testimonials go in your widget */}
-        <div className="mt-16" ref={curateRef}>
-          <div className="mb-3 flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-              3
-            </div>
-            <h2 className="text-lg font-semibold">Pick which testimonials go in your widget</h2>
-          </div>
-          <p className="mb-6 text-sm text-muted-foreground">
-            Approved testimonials are your <strong>library</strong>. Click any card to add it to the widget or remove it — you might not want to show every one on every page.
-          </p>
-
-          <div className="rounded-2xl border bg-card p-4 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-muted-foreground">
-                APPROVED LIBRARY
-              </h3>
-              <Badge>
-                {widgetTestimonials.length} of {approvedTestimonials.length} in widget
-              </Badge>
-            </div>
-
-            {approvedTestimonials.length === 0 ? (
-              <p className="py-6 text-center text-xs text-muted-foreground">
-                Approve testimonials in the Inbox above to add them here.
-              </p>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {testimonials
-                  .map((t, i) => ({ t, i }))
-                  .filter(({ t }) => t.isApproved)
-                  .map(({ t, i }) => {
-                    const inWidget = !!t.inWidget;
-                    return (
-                      <button
-                        key={`curate-${t.customerName}-${i}`}
-                        onClick={() => toggleInWidget(i)}
-                        className={`group relative flex items-start gap-3 rounded-lg border p-3 text-left transition-all hover:shadow-sm ${
-                          inWidget
-                            ? "border-primary bg-primary/5"
-                            : "border-dashed border-muted-foreground/30 bg-muted/30 opacity-70 hover:opacity-100"
-                        }`}
-                      >
-                        <LetterAvatar name={t.customerName} size={36} />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold">{t.customerName}</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {t.content}
-                          </p>
-                          <div className="mt-1 flex gap-0.5">
-                            {Array.from({ length: t.rating }).map((_, j) => (
-                              <Star key={j} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            ))}
-                          </div>
-                        </div>
-                        <div
-                          className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
-                            inWidget
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-background text-muted-foreground border"
-                          }`}
-                        >
-                          {inWidget ? "✓ In widget" : "+ Add"}
-                        </div>
-                      </button>
-                    );
-                  })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Step 4: Live Widget */}
+        {/* Step 3: Live Widget */}
         <div className="mt-16" ref={widgetRef}>
           <div className="mb-4 flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-              4
+              3
             </div>
             <h2 className="text-lg font-semibold">It appears on your website automatically</h2>
           </div>
@@ -762,6 +661,127 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           </pre>
         </div>
 
+        {/* Hosted wall alternative — highest-context CTA */}
+        <Link
+          href="/w/demo"
+          className="mt-6 flex items-start gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-6 transition-colors hover:bg-primary/10"
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/20 text-2xl">
+            💜
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-foreground">
+              Not ready to embed? Share a hosted wall instead.
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Every widget also has a public URL you can drop in your
+              Instagram bio, email signature, or WhatsApp status. Zero code.
+            </p>
+            <p className="mt-2 text-sm font-semibold text-primary">
+              See a Sample Wall →
+            </p>
+          </div>
+        </Link>
+
+        {/* Advanced (Pro): curate per widget — collapsed by default so it
+            doesn't interrupt the primary Free-plan flow above. */}
+        <div className="mt-16" ref={curateRef}>
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="flex w-full items-center justify-between rounded-2xl border bg-card p-4 text-left transition-colors hover:bg-accent"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                ✨
+              </div>
+              <div>
+                <p className="font-semibold">
+                  Advanced: curate per widget{" "}
+                  <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                    Pro
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Show different testimonials on different pages — homepage,
+                  pricing, product. Click to see how.
+                </p>
+              </div>
+            </div>
+            <span className="text-xl text-muted-foreground">
+              {showAdvanced ? "−" : "+"}
+            </span>
+          </button>
+
+          {showAdvanced && (
+            <div className="mt-4 rounded-2xl border bg-card p-4 shadow-sm">
+              <p className="mb-4 text-sm text-muted-foreground">
+                On Free, every approved testimonial lands on your one widget
+                automatically. On Pro, you can build unlimited widgets and
+                toggle each testimonial in or out of each one:
+              </p>
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-muted-foreground">
+                  APPROVED LIBRARY
+                </h3>
+                <Badge>
+                  {widgetTestimonials.length} of {approvedTestimonials.length} in widget
+                </Badge>
+              </div>
+
+              {approvedTestimonials.length === 0 ? (
+                <p className="py-6 text-center text-xs text-muted-foreground">
+                  Approve testimonials in the Inbox above to see them here.
+                </p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {testimonials
+                    .map((t, i) => ({ t, i }))
+                    .filter(({ t }) => t.isApproved)
+                    .map(({ t, i }) => {
+                      const inWidget = !!t.inWidget;
+                      return (
+                        <button
+                          key={`curate-${t.customerName}-${i}`}
+                          onClick={() => toggleInWidget(i)}
+                          className={`group relative flex items-start gap-3 rounded-lg border p-3 text-left transition-all hover:shadow-sm ${
+                            inWidget
+                              ? "border-primary bg-primary/5"
+                              : "border-dashed border-muted-foreground/30 bg-muted/30 opacity-70 hover:opacity-100"
+                          }`}
+                        >
+                          <LetterAvatar name={t.customerName} size={36} />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold">{t.customerName}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {t.content}
+                            </p>
+                            <div className="mt-1 flex gap-0.5">
+                              {Array.from({ length: t.rating }).map((_, j) => (
+                                <Star key={j} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              ))}
+                            </div>
+                          </div>
+                          <div
+                            className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+                              inWidget
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-background text-muted-foreground border"
+                            }`}
+                          >
+                            {inWidget ? "✓ In widget" : "+ Add"}
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Bottom CTA */}
         <div className="mt-16 rounded-2xl bg-primary/5 border border-primary/20 p-12 text-center">
           <Sparkles className="mx-auto h-8 w-8 text-primary" />
@@ -782,11 +802,6 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             <Link href="/pricing">
               <Button size="lg" variant="outline">
                 View Pricing
-              </Button>
-            </Link>
-            <Link href="/w/demo">
-              <Button size="lg" variant="ghost">
-                See a Sample Wall →
               </Button>
             </Link>
           </div>

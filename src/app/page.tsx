@@ -325,29 +325,24 @@ export default async function LandingPage() {
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4">
           <h2 className="text-center text-3xl font-bold">
-            Get started in 4 steps
+            Get started in 3 steps
           </h2>
-          <div className="mt-12 grid gap-8 md:grid-cols-4">
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
             {[
               {
                 step: "1",
-                title: "Create a collection form",
-                description: "Set up a branded form and share the link with your customers.",
+                title: "Share a collection form",
+                description: "We create your first form on signup. Share the link, embed a floating button, or drop a QR code on your packaging.",
               },
               {
                 step: "2",
-                title: "Approve incoming submissions",
-                description: "Review each submission in your inbox and approve the ones you want.",
+                title: "Approve in one click",
+                description: "Review each submission in your inbox. Approve — and it&apos;s instantly on your wall. No extra steps.",
               },
               {
                 step: "3",
-                title: "Build a widget",
-                description: "Pick a layout, choose which approved testimonials to feature, and theme it.",
-              },
-              {
-                step: "4",
-                title: "Embed on your site",
-                description: "Copy one line of code and paste it anywhere — Framer, Webflow, WordPress, or vanilla HTML.",
+                title: "Share or embed the wall",
+                description: "Every workspace gets a hosted Wall of Love URL. Paste it in your bio, or copy one line of code to embed anywhere.",
               },
             ].map((item) => (
               <div key={item.step} className="text-center">
@@ -355,9 +350,7 @@ export default async function LandingPage() {
                   {item.step}
                 </div>
                 <h3 className="mt-4 text-lg font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {item.description}
-                </p>
+                <p className="mt-2 text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: item.description }} />
               </div>
             ))}
           </div>

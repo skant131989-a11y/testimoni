@@ -78,5 +78,41 @@ export async function POST(
     data: { testimonialId: testimonial.id },
   });
 
-  return NextResponse.json({ ok: true, testimonialId: testimonial.id });
+  // Auto-add the fresh testimonial to the workspace's default widget so
+  // it appears on the hosted wall / embed instantly. "Default" = oldest
+  // widget (usually the seeded "Homepage Testimonials"). Silently skips
+  // if the workspace has no widgets or the testimonial is already there.
+  const defaultWidget = await prisma.widget.findFirst({
+    where: { workspaceId: auth.workspace.id, isActive: true },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, name: true },
+  });
+
+  if (defaultWidget) {
+    const nextPosition = await prisma.widgetTestimonial.count({
+      where: { widgetId: defaultWidget.id },
+    });
+    await prisma.widgetTestimonial.upsert({
+      where: {
+        widgetId_testimonialId: {
+          widgetId: defaultWidget.id,
+          testimonialId: testimonial.id,
+        },
+      },
+      create: {
+        widgetId: defaultWidget.id,
+        testimonialId: testimonial.id,
+        position: nextPosition,
+      },
+      update: {},
+    });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    testimonialId: testimonial.id,
+    widget: defaultWidget
+      ? { id: defaultWidget.id, name: defaultWidget.name }
+      : null,
+  });
 }

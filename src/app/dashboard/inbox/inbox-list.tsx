@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, X, Star, Mail, ArrowRight } from "lucide-react";
+import { Check, X, Star, Mail, ArrowRight, Sparkles, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,11 +43,24 @@ export function InboxList({
   const [atLimit, setAtLimit] = useState(initialAtLimit);
   const [error, setError] = useState<string | null>(null);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const [confirmations, setConfirmations] = useState<
+    { key: string; message: string; widgetId?: string }[]
+  >([]);
   const [isRefreshing, startTransition] = useTransition();
+
+  function pushConfirmation(message: string, widgetId?: string) {
+    const key = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setConfirmations((c) => [...c, { key, message, widgetId }]);
+    // Auto-dismiss after 6 seconds
+    setTimeout(() => {
+      setConfirmations((c) => c.filter((x) => x.key !== key));
+    }, 6000);
+  }
 
   async function handleAction(
     id: string,
-    action: "approve" | "reject"
+    action: "approve" | "reject",
+    customerName: string
   ): Promise<void> {
     setError(null);
     // Optimistically remove from the list
@@ -59,8 +72,8 @@ export function InboxList({
       const res = await fetch(`/api/submissions/${id}/${action}`, {
         method: "POST",
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         // Revert on error
         setSubmissions(previous);
         if (res.status === 403) {
@@ -74,6 +87,15 @@ export function InboxList({
       if (action === "approve") {
         setTestimonialCount((n) => n + 1);
         if (testimonialCount + 1 >= maxTestimonials) setAtLimit(true);
+        const widget = data.widget as { id: string; name: string } | null | undefined;
+        pushConfirmation(
+          widget
+            ? `Approved ${customerName}. Added to “${widget.name}”.`
+            : `Approved ${customerName}. Added to your library.`,
+          widget?.id
+        );
+      } else {
+        pushConfirmation(`Rejected ${customerName}.`);
       }
       // Refresh tab counts (NEW → APPROVED etc.) without a full navigation
       startTransition(() => router.refresh());
@@ -97,6 +119,40 @@ export function InboxList({
           usage={`${testimonialCount} / ${maxTestimonials}`}
           description="You've collected the max testimonials on Free. Upgrade to Pro to keep approving new submissions."
         />
+      )}
+
+      {confirmations.length > 0 && (
+        <div className="space-y-2">
+          {confirmations.map((c) => (
+            <div
+              key={c.key}
+              className="flex items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm"
+            >
+              <p className="flex items-center gap-2 font-medium text-primary">
+                <Sparkles className="h-4 w-4" />
+                {c.message}
+              </p>
+              {c.widgetId && (
+                <div className="flex gap-1">
+                  <Button asChild size="sm" variant="ghost">
+                    <a
+                      href={`/w/${c.widgetId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View wall <ExternalLink className="ml-1 h-3 w-3" />
+                    </a>
+                  </Button>
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href={`/dashboard/widgets/${c.widgetId}`}>
+                      Edit widget <ArrowRight className="ml-1 h-3 w-3" />
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
       {error && (
@@ -186,7 +242,7 @@ export function InboxList({
                           : "Approve and add to testimonials"
                       }
                       disabled={atLimit || pendingIds.has(s.id) || isRefreshing}
-                      onClick={() => handleAction(s.id, "approve")}
+                      onClick={() => handleAction(s.id, "approve", s.customerName)}
                     >
                       <Check className="h-3.5 w-3.5" />
                       Approve
@@ -198,7 +254,7 @@ export function InboxList({
                       className="gap-1"
                       title="Reject"
                       disabled={pendingIds.has(s.id) || isRefreshing}
-                      onClick={() => handleAction(s.id, "reject")}
+                      onClick={() => handleAction(s.id, "reject", s.customerName)}
                     >
                       <X className="h-3.5 w-3.5" />
                       Reject

@@ -152,24 +152,18 @@ export function AnimatedDemo() {
           </div>
         </div>
 
-        {/* MIDDLE: Two-step flow — hidden on mobile */}
-        <div className="hidden lg:flex lg:flex-col lg:items-center lg:gap-3">
-          <div className="flex flex-col items-center gap-1">
-            <div className="ad-loop ad-arrow flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-              <ArrowRight className="h-4 w-4 text-primary" />
-            </div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              1 · Approve
-            </p>
+        {/* MIDDLE: single-arrow flow — hidden on mobile.
+            Auto-add on approve means one click is all it takes. */}
+        <div className="hidden lg:flex lg:flex-col lg:items-center lg:gap-2">
+          <div className="ad-loop ad-arrow flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+            <ArrowRight className="h-5 w-5 text-primary" />
           </div>
-          <div className="flex flex-col items-center gap-1">
-            <div className="ad-loop ad-arrow flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-              <ArrowRight className="h-4 w-4 text-primary" />
-            </div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              2 · Add to widget
-            </p>
-          </div>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            You approve
+          </p>
+          <p className="text-[10px] text-muted-foreground">
+            Instantly on your wall
+          </p>
         </div>
 
         {/* RIGHT: Widget preview */}
@@ -226,7 +220,7 @@ export function AnimatedDemo() {
       </div>
 
       <p className="mt-3 text-center text-xs text-muted-foreground">
-        This whole flow — form, approve, curate, embed — is what{" "}
+        This whole flow — form, approve, embed — is what{" "}
         <Link href="/demo" className="font-semibold text-primary hover:underline">
           the live demo
         </Link>{" "}
