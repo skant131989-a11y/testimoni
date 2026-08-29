@@ -5,6 +5,7 @@ export const createSubmissionSchema = z
     formId: z.string().min(1),
     customerName: z.string().min(1).max(200),
     customerEmail: z.string().email().max(320).optional(),
+    customerTitle: z.string().max(200).optional(),
     content: z.string().max(5000).optional(),
     rating: z.number().int().min(1).max(5).optional(),
     videoUrl: z.string().url().max(2048).optional(),

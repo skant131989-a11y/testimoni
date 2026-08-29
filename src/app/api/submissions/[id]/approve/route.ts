@@ -56,6 +56,13 @@ export async function POST(
         imageUrls: submission.imageUrls,
         customerName: submission.customerName,
         customerEmail: submission.customerEmail,
+        // Public form stores job title in answers.jobTitle so we don't
+        // need a schema change on Submission.
+        customerTitle:
+          (submission.answers &&
+            typeof submission.answers === "object" &&
+            (submission.answers as { jobTitle?: string }).jobTitle) ||
+          null,
         source: "FORM",
         status: "APPROVED",
       },

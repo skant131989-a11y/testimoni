@@ -25,6 +25,7 @@ export default function PublicCollectionForm({
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -56,6 +57,7 @@ export default function PublicCollectionForm({
           customerEmail: email,
           content,
           rating: rating || null,
+          answers: jobTitle.trim() ? { jobTitle: jobTitle.trim() } : {},
         }),
       });
 
@@ -165,6 +167,17 @@ export default function PublicCollectionForm({
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="jobTitle">Job title / role (optional)</Label>
+              <Input
+                id="jobTitle"
+                placeholder="e.g. CEO at Acme, or Marketing Manager"
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                maxLength={200}
+              />
             </div>
 
             {error && (

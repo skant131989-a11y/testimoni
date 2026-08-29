@@ -5,8 +5,8 @@
   --fw-accent: #7c3aed;
   --fw-border: #e5e7eb;
   --fw-muted: #6b7280;
-  --fw-radius: 12px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --fw-radius: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   color: var(--fw-text);
   line-height: 1.5;
   text-align: left;
@@ -18,41 +18,46 @@
   background: var(--fw-bg);
   border: 1px solid var(--fw-border);
   border-radius: var(--fw-radius);
-  padding: 12px 16px;
+  padding: 10px 16px;
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  transition: box-shadow 0.2s;
+  flex-direction: column;
+  gap: 4px;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .fw-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
 }
 
 .fw-avatar {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  align-self: center;
 }
 
 .fw-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   flex: 1;
-  min-width: 0;
+  min-height: 0;
 }
 
 .fw-stars {
   display: flex;
   gap: 2px;
-  margin-bottom: 4px;
+  align-self: flex-start;
 }
 
 .fw-star {
   fill: var(--fw-border);
   stroke: none;
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
 }
 
 .fw-star-filled {
@@ -60,25 +65,40 @@
 }
 
 .fw-content {
-  margin: 0 0 6px;
-  font-size: 14px;
-  line-height: 1.45;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.4;
   color: var(--fw-text);
+  text-align: center;
+  padding: 2px 4px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.fw-content::before { content: "\\201C"; }
+.fw-content::after  { content: "\\201D"; }
 
 .fw-author {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: baseline;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--fw-text);
+  text-align: center;
 }
 
-.fw-name {
-  font-weight: 600;
-  font-size: 13px;
-}
+.fw-author::before { content: "— "; color: var(--fw-text); font-weight: 700; }
 
 .fw-title {
   font-size: 12px;
   color: var(--fw-muted);
+  font-weight: 500;
+  text-align: center;
+  margin-top: 1px;
 }
 
 .fw-empty {
@@ -106,29 +126,37 @@
 /* Grid Layout */
 .fw-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 12px;
 }
 
-/* Masonry Layout */
+.fw-grid .fw-card {
+  height: 100%;
+}
+
+/* Masonry Layout — flex-wrap based (CSS columns are unreliable with
+   flex children + margin-bottom, causing card overlap at column breaks) */
 .fw-masonry {
-  columns: 3;
-  column-gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
 }
 
 .fw-masonry .fw-card {
-  break-inside: avoid;
-  margin-bottom: 12px;
-  display: block;
+  flex: 1 1 280px;
+  min-width: 280px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
-  .fw-masonry { columns: 2; }
   .fw-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .fw-masonry .fw-card { flex: 1 1 220px; min-width: 220px; }
 }
 
 @media (max-width: 480px) {
-  .fw-masonry { columns: 1; }
+  .fw-masonry .fw-card { flex: 1 1 100%; min-width: 100%; }
   .fw-grid { grid-template-columns: 1fr; }
 }
 
@@ -388,22 +416,21 @@ function renderWidget(container, data) {
 
 function renderCard(t, widget) {
   var html = '<div class="fw-card">';
-  if (widget.showAvatar !== false && t.customerAvatar) {
-    html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
-  }
   html += '<div class="fw-card-body">';
   if (widget.showRating !== false && t.rating) {
     html += '<div class="fw-stars">' + renderStars(t.rating) + '</div>';
   }
+  if (widget.showAvatar !== false && t.customerAvatar) {
+    html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
+  }
   if (t.content) {
     html += '<p class="fw-content">' + escapeHtml(t.content) + '</p>';
   }
-  html += '<div class="fw-author">';
-  html += '<span class="fw-name">' + escapeHtml(t.customerName) + '</span>';
+  html += '<div class="fw-author">' + escapeHtml(t.customerName) + '</div>';
   if (t.customerTitle) {
-    html += '<span class="fw-title">' + escapeHtml(t.customerTitle) + '</span>';
+    html += '<div class="fw-title">' + escapeHtml(t.customerTitle) + '</div>';
   }
-  html += '</div></div></div>';
+  html += '</div></div>';
   return html;
 }
 
