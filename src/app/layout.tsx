@@ -67,7 +67,14 @@ export const metadata: Metadata = {
     title: "Testimoni — Collect & Embed Customer Testimonials",
     description:
       "Turn happy customers into social proof. Collect via link, form, or QR. Embed anywhere with one line of code. Free plan.",
-    // og-image is auto-picked up from src/app/opengraph-image.tsx
+    images: [
+      {
+        url: "/opengraph-image?v=2",
+        width: 1200,
+        height: 630,
+        alt: "Testimoni — Turn happy customers into social proof",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -76,7 +83,7 @@ export const metadata: Metadata = {
     title: "Testimoni — Collect & Embed Testimonials",
     description:
       "Collect + embed customer testimonials. Multiple channels. One line of code. Free plan.",
-    // twitter-image is auto-picked up from src/app/twitter-image.tsx
+    images: ["/twitter-image?v=2"],
   },
   icons: {
     icon: "/icon.png",
