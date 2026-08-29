@@ -5,25 +5,33 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   : undefined;
 
 const nextConfig: NextConfig = {
-  // Vercel compresses by default, keep explicit for parity with any other host
   compress: true,
-  // Serve modern image formats when the browser supports them
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
-      // Supabase Storage avatars (customer + workspace logos)
       ...(supabaseHost
         ? [{ protocol: "https" as const, hostname: supabaseHost }]
         : []),
-      // Google avatars from OAuth signups
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
-      // Twitter avatars if we import testimonials
       { protocol: "https", hostname: "pbs.twimg.com" },
     ],
   },
-  // Turn off the "x-powered-by: Next.js" header for a byte-shaving win
   poweredByHeader: false,
+  // Common aliases that crawlers + occasional users probe — redirect them
+  // to the canonical page rather than serving 404s (bad for SEO signals).
+  async redirects() {
+    return [
+      { source: "/about-us", destination: "/about", permanent: true },
+      { source: "/plans", destination: "/pricing", permanent: true },
+      { source: "/price", destination: "/pricing", permanent: true },
+      { source: "/product", destination: "/", permanent: true },
+      { source: "/platform", destination: "/", permanent: true },
+      { source: "/how-it-works", destination: "/demo", permanent: true },
+      { source: "/use-cases", destination: "/", permanent: true },
+      { source: "/customers", destination: "/", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;
