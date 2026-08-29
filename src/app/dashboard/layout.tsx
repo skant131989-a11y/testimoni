@@ -84,6 +84,27 @@ export default async function DashboardLayout({
           stripeCustomerId: `cus_placeholder_${user.id}`,
         },
       });
+
+      // Seed a default collection form and widget so the new workspace has
+      // a shareable form link and hosted wall URL from minute one — no
+      // clicks required before they can start inviting customers.
+      await tx.collectionForm.create({
+        data: {
+          workspaceId: workspace.id,
+          name: "Customer Feedback",
+          slug: "customer-feedback",
+          headline: "Share your experience",
+          description: `We'd love to hear what you think about ${fullName}'s work.`,
+        },
+      });
+
+      await tx.widget.create({
+        data: {
+          workspaceId: workspace.id,
+          name: "Homepage Testimonials",
+          layout: "GRID",
+        },
+      });
     });
 
     dbUser = await prisma.user.findUnique({
