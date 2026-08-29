@@ -37,11 +37,13 @@ export async function POST(
     where: { workspaceId: auth.workspace.id },
   });
   if (currentCount >= limits.maxTestimonials) {
-    // Redirect back to the inbox with an error so the form submit doesn't
-    // dump raw JSON into the browser.
-    const url = new URL("/dashboard/inbox", request.url);
-    url.searchParams.set("error", "limit");
-    return NextResponse.redirect(url, 303);
+    return NextResponse.json(
+      {
+        error:
+          "Testimonial limit reached on the Free plan. Upgrade to Pro to approve more submissions.",
+      },
+      { status: 403 }
+    );
   }
 
   const [testimonial] = await prisma.$transaction([
@@ -69,5 +71,5 @@ export async function POST(
     data: { testimonialId: testimonial.id },
   });
 
-  return NextResponse.redirect(new URL("/dashboard/inbox", request.url), 303);
+  return NextResponse.json({ ok: true, testimonialId: testimonial.id });
 }

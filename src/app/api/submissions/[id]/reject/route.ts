@@ -27,5 +27,5 @@ export async function POST(
     data: { status: "REJECTED" },
   });
 
-  return NextResponse.redirect(new URL("/dashboard/inbox", request.url), 303);
+  return NextResponse.json({ ok: true });
 }

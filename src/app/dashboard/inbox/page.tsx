@@ -1,19 +1,15 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Check, X, Star, Mail, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { LimitBanner } from "@/components/plan/limit-banner";
 import { getEffectivePlan, getEffectiveLimits } from "@/lib/plan";
+import { InboxList, type InboxSubmission } from "./inbox-list";
 
 type FilterTab = "NEW" | "APPROVED" | "REJECTED";
 
 interface InboxPageProps {
-  searchParams: Promise<{ filter?: string; error?: string }>;
+  searchParams: Promise<{ filter?: string }>;
 }
 
 export default async function InboxPage({ searchParams }: InboxPageProps) {
@@ -68,6 +64,16 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
     { label: "Rejected", value: "REJECTED", count: countMap["REJECTED"] ?? 0 },
   ];
 
+  const inboxSubmissions: InboxSubmission[] = submissions.map((s) => ({
+    id: s.id,
+    customerName: s.customerName,
+    customerEmail: s.customerEmail,
+    content: s.content,
+    rating: s.rating,
+    createdAt: s.createdAt.toISOString(),
+    formName: s.form.name,
+  }));
+
   return (
     <div className="space-y-6">
       <div>
@@ -76,14 +82,6 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
           Review submissions from your collection forms. Approve to add them to your testimonials.
         </p>
       </div>
-
-      {(atTestimonialLimit || params.error === "limit") && effectivePlan === "FREE" && (
-        <LimitBanner
-          resource="testimonials"
-          usage={`${testimonialCount} / ${effectiveLimits.maxTestimonials}`}
-          description="You've collected the max testimonials on Free. Upgrade to Pro to keep approving new submissions."
-        />
-      )}
 
       <div className="flex gap-1 border-b">
         {tabs.map((tab) => (
@@ -112,104 +110,14 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
         ))}
       </div>
 
-      {submissions.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">
-              {activeFilter === "NEW"
-                ? "Inbox zero! No pending submissions to review."
-                : `No ${activeFilter.toLowerCase()} submissions yet.`}
-            </p>
-            <Button asChild className="mt-4" variant="outline">
-              <Link href="/dashboard/collect">
-                Get share links & embed code
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {submissions.map((s) => (
-            <Card key={s.id}>
-              <CardContent className="flex items-start gap-4 p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                  {s.customerName.charAt(0).toUpperCase()}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-medium">{s.customerName}</p>
-                    {s.customerEmail && (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Mail className="h-3 w-3" />
-                        {s.customerEmail}
-                      </span>
-                    )}
-                    <Badge variant="outline" className="text-xs">
-                      via {s.form.name}
-                    </Badge>
-                  </div>
-
-                  {s.rating && (
-                    <div className="mt-1 flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={cn(
-                            "h-3.5 w-3.5",
-                            i < s.rating!
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-muted-foreground/30"
-                          )}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    {s.content || <em>No text content</em>}
-                  </p>
-                </div>
-
-                <div className="flex shrink-0 flex-col items-end gap-2">
-                  <time className="text-xs text-muted-foreground">
-                    {new Date(s.createdAt).toLocaleDateString()}
-                  </time>
-                  {activeFilter === "NEW" && (
-                    <div className="flex gap-1">
-                      <form action={`/api/submissions/${s.id}/approve`} method="POST">
-                        <Button
-                          type="submit"
-                          size="sm"
-                          className="gap-1"
-                          title={atTestimonialLimit ? "Testimonial limit reached — upgrade to Pro" : "Approve and add to testimonials"}
-                          disabled={atTestimonialLimit}
-                        >
-                          <Check className="h-3.5 w-3.5" />
-                          Approve
-                        </Button>
-                      </form>
-                      <form action={`/api/submissions/${s.id}/reject`} method="POST">
-                        <Button
-                          type="submit"
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1"
-                          title="Reject"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                          Reject
-                        </Button>
-                      </form>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <InboxList
+        initial={inboxSubmissions}
+        activeFilter={activeFilter}
+        atTestimonialLimit={atTestimonialLimit}
+        testimonialCount={testimonialCount}
+        maxTestimonials={effectiveLimits.maxTestimonials}
+        isFree={effectivePlan === "FREE"}
+      />
     </div>
   );
 }
