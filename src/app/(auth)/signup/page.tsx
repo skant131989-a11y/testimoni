@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { track, identify } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+    track("signup_started", { method: "email", source: "signup_page" });
 
     try {
       const supabase = createClient();
@@ -47,6 +49,7 @@ export default function SignupPage() {
 
       if (authError) {
         setError(authError.message);
+        track("signup_failed", { method: "email", error: authError.message });
         return;
       }
 
@@ -55,6 +58,8 @@ export default function SignupPage() {
       // Supabase returned a session immediately. Middleware will bounce
       // back to /login if the session never actually attached, but in
       // practice this makes signup one click instead of two.
+      if (data.user?.id) identify(data.user.id, { email, name });
+      track("signup_completed", { method: "email" });
       window.location.assign("/dashboard/welcome");
       return;
     } catch {
@@ -67,6 +72,7 @@ export default function SignupPage() {
   async function handleGoogleSignup() {
     setError(null);
     setIsGoogleLoading(true);
+    track("signup_started", { method: "google", source: "signup_page" });
 
     try {
       const supabase = createClient();

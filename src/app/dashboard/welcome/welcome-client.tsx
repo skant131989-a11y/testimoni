@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { LetterAvatar } from "@/components/letter-avatar";
+import { track, identify } from "@/lib/analytics";
 
 interface ImportedTestimonial {
   id: string;
@@ -37,12 +38,20 @@ interface WelcomeClientProps {
   defaultWidgetId: string | null;
   defaultFormUrl: string | null;
   workspaceName: string;
+  isNewSignup: boolean;
+  signupMethod: "google" | "email";
+  userId: string | null;
+  userEmail: string | null;
 }
 
 export function WelcomeClient({
   defaultWidgetId,
   defaultFormUrl,
   workspaceName,
+  isNewSignup,
+  signupMethod,
+  userId,
+  userEmail,
 }: WelcomeClientProps) {
   const router = useRouter();
   const [url, setUrl] = useState("");
@@ -59,6 +68,19 @@ export function WelcomeClient({
   const [editRating, setEditRating] = useState<number>(5);
   const [showFormShare, setShowFormShare] = useState(false);
   const [formCopied, setFormCopied] = useState(false);
+
+  // Fire signup_completed exactly once for fresh signups (< 90s old).
+  // Google OAuth users can't be tracked from the button click alone
+  // because the browser redirects away before capture flushes; instead
+  // we catch them when they land back on this welcome page. Guard with
+  // a ref so React StrictMode / re-renders don't double-fire.
+  const completionFiredRef = useRef(false);
+  useEffect(() => {
+    if (!isNewSignup || completionFiredRef.current) return;
+    completionFiredRef.current = true;
+    if (userId) identify(userId, { email: userEmail ?? undefined });
+    track("signup_completed", { method: signupMethod, source: "welcome_landing" });
+  }, [isNewSignup, signupMethod, userId, userEmail]);
 
   const fullFormUrl =
     typeof window !== "undefined" && defaultFormUrl

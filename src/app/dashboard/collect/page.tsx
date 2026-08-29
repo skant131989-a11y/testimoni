@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { track } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -76,6 +77,7 @@ export default function CollectPage() {
         setForms((prev) => [data.form, ...prev]);
         setNewName("Customer Feedback");
         setShowCreate(false);
+        track("form_created", { formId: data.form?.id, name: newName });
       } else {
         const data = await res.json().catch(() => ({}));
         setCreateError(data.error || "Could not create form. Please try again.");
@@ -111,6 +113,11 @@ export default function CollectPage() {
     navigator.clipboard.writeText(text);
     setCopiedKey(key);
     setTimeout(() => setCopiedKey(null), 2000);
+    // Any copy of a share URL / embed / iframe / email counts as
+    // "form_published" — the moment the user makes their form
+    // reachable outside the dashboard.
+    const [channel, formId] = key.split("-");
+    track("form_published", { channel, formId });
   }
 
   if (loading) {

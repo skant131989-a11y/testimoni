@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { LetterAvatar } from "@/components/letter-avatar";
+import { TrackedLink } from "@/components/tracked-link";
 import { createClient } from "@/lib/supabase/client";
 import {
   MessageSquare,
@@ -398,9 +399,9 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
                 <Link href="/login">
                   <Button variant="ghost" size="sm">Log in</Button>
                 </Link>
-                <Link href="/signup">
+                <TrackedLink cta="demo_nav_signup" surface="demo" href="/signup">
                   <Button size="sm">Get Started Free</Button>
-                </Link>
+                </TrackedLink>
               </>
             )}
           </div>
@@ -424,9 +425,9 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
             Prefer a shareable link over embed code?{" "}
-            <Link href="/w/demo" className="font-medium text-primary hover:underline">
+            <TrackedLink cta="demo_hero_wall_demo" surface="demo" href="/w/demo" className="font-medium text-primary hover:underline">
               See a hosted Sample Wall →
-            </Link>
+            </TrackedLink>
           </p>
         </div>
 
@@ -982,7 +983,9 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
         </div>
 
         {/* Hosted wall alternative — highest-context CTA */}
-        <Link
+        <TrackedLink
+          cta="demo_hosted_wall_card"
+          surface="demo"
           href="/w/demo"
           className="mt-6 flex items-start gap-4 rounded-2xl border border-primary/30 bg-primary/5 p-6 transition-colors hover:bg-primary/10"
         >
@@ -1001,7 +1004,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
               See a Sample Wall →
             </p>
           </div>
-        </Link>
+        </TrackedLink>
 
         {/* Advanced (Pro): curate per widget — collapsed by default so it
             doesn't interrupt the primary Free-plan flow above. */}
@@ -1113,17 +1116,17 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             Set it up for your own site in under 5 minutes.
           </p>
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link href="/signup">
+            <TrackedLink cta="demo_bottom_signup" surface="demo" href="/signup">
               <Button size="lg" className="gap-2">
                 Get started free
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </Link>
-            <Link href="/w/demo">
+            </TrackedLink>
+            <TrackedLink cta="demo_bottom_wall_demo" surface="demo" href="/w/demo">
               <Button size="lg" variant="outline">
                 See a Sample Wall
               </Button>
-            </Link>
+            </TrackedLink>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
             Free forever plan. No credit card required.

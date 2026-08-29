@@ -5,6 +5,7 @@ import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { ProPriceDual } from "@/components/pricing/price-display";
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
+import { TrackedLink } from "@/components/tracked-link";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -82,11 +83,11 @@ export default async function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href={freeHref} className="mt-8 block">
+              <TrackedLink cta="pricing_free_plan" surface="pricing" href={freeHref} className="mt-8 block">
                 <Button variant="outline" className="w-full" size="lg">
                   {freeLabel}
                 </Button>
-              </Link>
+              </TrackedLink>
             </div>
 
             {/* Pro Plan */}
@@ -121,11 +122,11 @@ export default async function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href={proHref} className="mt-8 block">
+              <TrackedLink cta="pricing_pro_plan" surface="pricing" href={proHref} className="mt-8 block">
                 <Button className="w-full" size="lg">
                   {proLabel}
                 </Button>
-              </Link>
+              </TrackedLink>
             </div>
           </div>
 

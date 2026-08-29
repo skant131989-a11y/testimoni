@@ -19,6 +19,7 @@ import { ProPriceDual } from "@/components/pricing/price-display";
 import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
+import { TrackedLink } from "@/components/tracked-link";
 
 export default async function LandingPage() {
   let isLoggedIn = false;
@@ -89,25 +90,25 @@ export default async function LandingPage() {
             into a widget, and embed with one line of code. Free plan.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link href="/signup">
+            <TrackedLink cta="hero_signup" surface="home" href="/signup">
               <Button size="lg" className="gap-2">
                 Get started free
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </Link>
-            <Link href="/pricing">
+            </TrackedLink>
+            <TrackedLink cta="hero_pricing" surface="home" href="/pricing">
               <Button size="lg" variant="outline">
                 View Pricing
               </Button>
-            </Link>
+            </TrackedLink>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             Free plan available. No credit card required.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
-            <Link href="/w/demo" className="font-medium text-primary hover:underline">
+            <TrackedLink cta="hero_wall_demo" surface="home" href="/w/demo" className="font-medium text-primary hover:underline">
               See a live Wall of Love →
-            </Link>
+            </TrackedLink>
           </p>
         </div>
 
@@ -140,12 +141,12 @@ export default async function LandingPage() {
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Button asChild>
-                  <Link href="/signup">
+                  <TrackedLink cta="tweet_import_signup" surface="home" href="/signup">
                     Try it free <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                  </TrackedLink>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href="/features">See all features</Link>
+                  <TrackedLink cta="tweet_import_features" surface="home" href="/features">See all features</TrackedLink>
                 </Button>
               </div>
             </div>
@@ -339,18 +340,22 @@ export default async function LandingPage() {
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm">
             <span className="text-muted-foreground">Full comparisons →</span>
-            <Link
+            <TrackedLink
+              cta="vs_senja"
+              surface="home"
               href="/vs/senja"
               className="rounded-full border px-3 py-1 font-medium text-primary hover:bg-primary/5"
             >
               vs Senja
-            </Link>
-            <Link
+            </TrackedLink>
+            <TrackedLink
+              cta="vs_testimonial_to"
+              surface="home"
               href="/vs/testimonial-to"
               className="rounded-full border px-3 py-1 font-medium text-primary hover:bg-primary/5"
             >
               vs Testimonial.to
-            </Link>
+            </TrackedLink>
           </div>
         </div>
       </section>
@@ -376,9 +381,9 @@ export default async function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/signup" className="mt-8 block">
+              <TrackedLink cta="pricing_preview_free" surface="home" href="/signup" className="mt-8 block">
                 <Button variant="outline" className="w-full">Get Started</Button>
-              </Link>
+              </TrackedLink>
             </div>
             {/* Pro */}
             <div className="relative rounded-lg border-2 border-primary bg-card p-8 text-left">
@@ -403,9 +408,9 @@ export default async function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/signup" className="mt-8 block">
+              <TrackedLink cta="pricing_preview_pro" surface="home" href="/signup" className="mt-8 block">
                 <Button className="w-full">Start Free, Upgrade Anytime</Button>
-              </Link>
+              </TrackedLink>
             </div>
           </div>
         </div>

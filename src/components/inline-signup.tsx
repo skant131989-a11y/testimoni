@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Loader2, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { track, identify } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,9 +33,10 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
       return;
     }
     setLoading(true);
+    track("signup_started", { method: "email", source });
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -43,8 +45,11 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
       });
       if (authError) {
         setError(authError.message);
+        track("signup_failed", { method: "email", source, error: authError.message });
         return;
       }
+      if (data.user?.id) identify(data.user.id, { email });
+      track("signup_completed", { method: "email", source });
       window.location.assign(`/dashboard/welcome?src=${source}`);
     } catch {
       setError("Something went wrong. Try again or use the signup page.");
@@ -56,6 +61,7 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
   async function handleGoogle() {
     setError(null);
     setGoogleLoading(true);
+    track("signup_started", { method: "google", source });
     try {
       const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithOAuth({
@@ -66,6 +72,7 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
       });
       if (authError) {
         setError(authError.message);
+        track("signup_failed", { method: "google", source, error: authError.message });
         setGoogleLoading(false);
       }
     } catch {

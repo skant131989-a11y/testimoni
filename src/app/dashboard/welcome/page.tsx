@@ -23,6 +23,17 @@ export default async function WelcomePage() {
   let defaultFormUrl: string | null = null;
   let workspaceName = "";
 
+  // For analytics: fire signup_completed on first landing here. We can't
+  // fire it from the OAuth handler (Google redirect leaves our origin),
+  // so we detect a fresh signup by created_at < 90s and pass the auth
+  // provider down to the client.
+  const createdAt = authUser?.created_at ? new Date(authUser.created_at).getTime() : 0;
+  const isNewSignup = createdAt > 0 && Date.now() - createdAt < 90_000;
+  const signupMethod =
+    (authUser?.app_metadata?.provider as string | undefined) === "google"
+      ? "google"
+      : "email";
+
   if (authUser) {
     const dbUser = await prisma.user.findUnique({
       where: { supabaseId: authUser.id },
@@ -63,6 +74,10 @@ export default async function WelcomePage() {
       defaultWidgetId={defaultWidgetId}
       defaultFormUrl={defaultFormUrl}
       workspaceName={workspaceName}
+      isNewSignup={isNewSignup}
+      signupMethod={signupMethod}
+      userId={authUser?.id ?? null}
+      userEmail={authUser?.email ?? null}
     />
   );
 }

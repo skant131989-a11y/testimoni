@@ -5,6 +5,7 @@ import { Star, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { InlineSignup } from "@/components/inline-signup";
+import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
   title: "Neha's Coaching — Wall of Love (sample)",
@@ -101,7 +102,7 @@ export default function DemoWallPage() {
             <Link href="/login">Log in</Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href="/signup">Get Started Free</Link>
+            <TrackedLink cta="wall_demo_nav_signup" surface="wall_demo" href="/signup">Get Started Free</TrackedLink>
           </Button>
         </div>
       </nav>

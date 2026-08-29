@@ -7,6 +7,7 @@ import { LogOut, User, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { track, resetAnalytics } from "@/lib/analytics";
 import { LetterAvatar } from "@/components/letter-avatar";
 
 interface HeaderProps {
@@ -106,8 +107,10 @@ export function Header({
               <button
                 type="button"
                 onClick={async () => {
+                  track("logout");
                   const supabase = createClient();
                   await supabase.auth.signOut();
+                  resetAnalytics();
                   // Hard navigation clears any cached RSC + guarantees the
                   // browser drops the sb-* cookies before we land on /.
                   window.location.assign("/");

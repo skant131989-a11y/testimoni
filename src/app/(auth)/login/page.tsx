@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { track, identify } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,19 +30,23 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+    track("login_started", { method: "email" });
 
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (authError) {
         setError(authError.message);
+        track("login_failed", { method: "email", error: authError.message });
         return;
       }
 
+      if (data.user?.id) identify(data.user.id, { email });
+      track("login_completed", { method: "email" });
       // Hard navigation so the fresh auth cookies are attached to the
       // request the server sees (router.push races the cookie handshake
       // and can occasionally land on /login or / instead of /dashboard).
@@ -56,6 +61,7 @@ export default function LoginPage() {
   async function handleGoogleLogin() {
     setError(null);
     setIsGoogleLoading(true);
+    track("login_started", { method: "google" });
 
     try {
       const supabase = createClient();

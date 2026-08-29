@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
+import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
   title: "Features — Testimoni",
@@ -114,10 +115,10 @@ export default function FeaturesPage() {
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Button variant="outline" asChild>
-                    <Link href="/demo">Try the live demo</Link>
+                    <TrackedLink cta="features_try_demo" surface="features" href="/demo">Try the live demo</TrackedLink>
                   </Button>
                   <Button variant="ghost" asChild>
-                    <Link href="/w/demo">See a Sample Wall</Link>
+                    <TrackedLink cta="features_sample_wall" surface="features" href="/w/demo">See a Sample Wall</TrackedLink>
                   </Button>
                 </div>
               </div>
