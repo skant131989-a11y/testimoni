@@ -3,33 +3,48 @@ import { ImageResponse } from "next/og";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/** Twitter card — mirrors the OG card exactly so links look consistent
- *  across X, LinkedIn, Slack, etc. */
+/** Twitter card — mirrors the OG card exactly so shared links look
+ *  consistent across X, LinkedIn, Slack. See opengraph-image.tsx for
+ *  the density/contrast decisions behind this design. */
+
+/** Inline SVG star — see opengraph-image.tsx for why we don't use ★. */
+function StarRow({ size: sz = 18 }: { size?: number }) {
+  return (
+    <div style={{ display: "flex", gap: 2 }}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <svg
+          key={i}
+          width={sz}
+          height={sz}
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+            fill="#facc15"
+          />
+        </svg>
+      ))}
+    </div>
+  );
+}
 
 const MINI_TESTIMONIALS = [
   {
     letter: "P",
     color: "#16a34a",
     name: "Priya Menon",
-    quote: "Live wall up in the time it took me to make coffee.",
-  },
-  {
-    letter: "M",
-    color: "#2563eb",
-    name: "Marcus Johnson",
-    quote: "Best coaching money I've spent this year.",
-  },
-  {
-    letter: "A",
-    color: "#ea580c",
-    name: "Aditi Rao",
-    quote: "Paid back the whole cohort several times over.",
+    title: "Founder, LinenLab",
+    quote:
+      "Live wall up in the time it took me to make coffee. Genuinely wild.",
   },
   {
     letter: "S",
-    color: "#0891b2",
+    color: "#ea580c",
     name: "Sarah Chen",
-    quote: "Turned a mess of tweets into a wall of love.",
+    title: "CEO, LaunchPad",
+    quote:
+      "Turned a mess of tweets into a wall of love in about 30 seconds.",
   },
 ];
 
@@ -42,34 +57,32 @@ export default function TwitterImage() {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "56px 60px",
+          padding: "48px 56px",
           background:
-            "linear-gradient(135deg, #f5f3ff 0%, #ede9fe 40%, #ddd6fe 100%)",
+            "linear-gradient(135deg, #ede9fe 0%, #c4b5fd 50%, #a78bfa 100%)",
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 14 }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              background: "#7c3aed",
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              background: "#5b21b6",
               color: "white",
-              fontSize: 28,
+              fontSize: 32,
               fontWeight: 900,
-              paddingBottom: 6,
+              paddingBottom: 8,
               fontFamily: "Georgia, serif",
             }}
           >
             &ldquo;
           </div>
-          <div style={{ fontSize: 32, fontWeight: 800, color: "#1a1a1a" }}>
+          <div style={{ fontSize: 34, fontWeight: 800, color: "#1a1a1a" }}>
             Testimoni
           </div>
         </div>
@@ -83,20 +96,14 @@ export default function TwitterImage() {
             gap: 40,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              width: 560,
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", width: 540 }}>
             <div
               style={{
                 display: "flex",
-                fontSize: 60,
+                fontSize: 64,
                 fontWeight: 800,
                 color: "#1a1a1a",
-                lineHeight: 1.05,
+                lineHeight: 1.02,
                 letterSpacing: "-0.02em",
               }}
             >
@@ -107,20 +114,20 @@ export default function TwitterImage() {
                 display: "flex",
                 fontSize: 60,
                 fontWeight: 800,
-                color: "#7c3aed",
+                color: "#4c1d95",
                 lineHeight: 1.05,
                 letterSpacing: "-0.02em",
-                marginTop: 4,
+                marginTop: 6,
               }}
             >
-              Get a testimonial in 30s.
+              Get a testimonial in 30 seconds.
             </div>
 
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 14,
+                gap: 12,
                 marginTop: 28,
               }}
             >
@@ -131,10 +138,10 @@ export default function TwitterImage() {
                   padding: "10px 16px",
                   borderRadius: 10,
                   background: "white",
-                  border: "2px solid #cbd5e1",
+                  border: "2px solid rgba(76, 29, 149, 0.25)",
                   fontSize: 18,
                   fontWeight: 500,
-                  color: "#64748b",
+                  color: "#4b5563",
                   fontFamily: "ui-monospace, SFMono-Regular, monospace",
                 }}
               >
@@ -143,8 +150,8 @@ export default function TwitterImage() {
               <div
                 style={{
                   display: "flex",
-                  fontSize: 28,
-                  color: "#7c3aed",
+                  fontSize: 30,
+                  color: "#4c1d95",
                   fontWeight: 800,
                 }}
               >
@@ -154,28 +161,16 @@ export default function TwitterImage() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "8px 14px",
+                  padding: "10px 16px",
                   borderRadius: 10,
-                  background: "#7c3aed",
+                  background: "#4c1d95",
                   color: "white",
-                  fontSize: 16,
+                  fontSize: 17,
                   fontWeight: 700,
                 }}
               >
-                ✓ Live on your wall
+                Live on your wall
               </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                fontSize: 22,
-                color: "#4b5563",
-                marginTop: 28,
-                lineHeight: 1.4,
-              }}
-            >
-              Or collect fresh ones via form. Free hosted Wall of Love included.
             </div>
           </div>
 
@@ -184,105 +179,98 @@ export default function TwitterImage() {
               display: "flex",
               flexDirection: "column",
               flex: 1,
-              padding: 16,
+              padding: 18,
               borderRadius: 20,
-              background: "rgba(255,255,255,0.7)",
-              border: "1px solid rgba(124,58,237,0.15)",
+              background: "white",
+              border: "1px solid rgba(76, 29, 149, 0.15)",
+              boxShadow: "0 10px 30px rgba(76, 29, 149, 0.15)",
             }}
           >
             <div
               style={{
                 display: "flex",
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 700,
-                color: "#7c3aed",
-                letterSpacing: "0.06em",
+                color: "#4c1d95",
+                letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                marginBottom: 10,
+                marginBottom: 12,
               }}
             >
-              ★ Wall of Love — live preview
+              Wall of Love — live preview
             </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-              }}
-            >
-              {[0, 1].map((row) => (
-                <div key={row} style={{ display: "flex", gap: 10 }}>
-                  {MINI_TESTIMONIALS.slice(row * 2, row * 2 + 2).map((t) => (
+            <div style={{ display: "flex", gap: 12 }}>
+              {MINI_TESTIMONIALS.map((t) => (
+                <div
+                  key={t.name}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
+                    padding: 14,
+                    borderRadius: 12,
+                    background: "#faf9fc",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <StarRow size={18} />
+                  <div
+                    style={{
+                      display: "flex",
+                      fontSize: 16,
+                      color: "#1f2937",
+                      lineHeight: 1.4,
+                      marginTop: 8,
+                    }}
+                  >
+                    &ldquo;{t.quote}&rdquo;
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      marginTop: 12,
+                    }}
+                  >
                     <div
-                      key={t.name}
                       style={{
                         display: "flex",
-                        flexDirection: "column",
-                        flex: 1,
-                        padding: 12,
-                        borderRadius: 12,
-                        background: "white",
-                        border: "1px solid #e5e7eb",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 30,
+                        height: 30,
+                        borderRadius: 15,
+                        background: t.color,
+                        color: "white",
+                        fontSize: 14,
+                        fontWeight: 800,
                       }}
                     >
+                      {t.letter}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
                       <div
                         style={{
                           display: "flex",
                           fontSize: 14,
-                          color: "#facc15",
-                          letterSpacing: "0.06em",
+                          fontWeight: 700,
+                          color: "#1a1a1a",
                         }}
                       >
-                        ★★★★★
+                        {t.name}
                       </div>
                       <div
                         style={{
                           display: "flex",
-                          fontSize: 13,
-                          color: "#374151",
-                          lineHeight: 1.35,
-                          marginTop: 6,
+                          fontSize: 12,
+                          color: "#6b7280",
                         }}
                       >
-                        &ldquo;{t.quote}&rdquo;
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          marginTop: 8,
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: 22,
-                            height: 22,
-                            borderRadius: 11,
-                            background: t.color,
-                            color: "white",
-                            fontSize: 11,
-                            fontWeight: 800,
-                          }}
-                        >
-                          {t.letter}
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            fontSize: 12,
-                            fontWeight: 700,
-                            color: "#1a1a1a",
-                          }}
-                        >
-                          {t.name}
-                        </div>
+                        {t.title}
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -294,7 +282,9 @@ export default function TwitterImage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginTop: 20,
+            marginTop: 18,
+            paddingLeft: 8,
+            paddingRight: 8,
           }}
         >
           <div
@@ -302,7 +292,7 @@ export default function TwitterImage() {
               display: "flex",
               fontSize: 24,
               fontWeight: 700,
-              color: "#7c3aed",
+              color: "#4c1d95",
             }}
           >
             testimoni.io
@@ -311,16 +301,16 @@ export default function TwitterImage() {
             style={{
               display: "flex",
               alignItems: "center",
-              padding: "8px 18px",
+              padding: "8px 20px",
               borderRadius: 999,
               background: "white",
-              border: "2px solid #7c3aed",
+              border: "2px solid #4c1d95",
               fontSize: 18,
-              fontWeight: 600,
-              color: "#7c3aed",
+              fontWeight: 700,
+              color: "#4c1d95",
             }}
           >
-            Free plan — no credit card
+            Free plan — no card required
           </div>
         </div>
       </div>
