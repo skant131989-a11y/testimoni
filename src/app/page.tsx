@@ -76,7 +76,7 @@ export default async function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-7xl px-4 py-20 text-center md:py-32">
+      <section className="mx-auto max-w-7xl px-4 py-10 text-center md:py-16">
         <div className="mx-auto max-w-3xl">
           <div className="mb-4 inline-flex items-center rounded-full border px-3 py-1 text-sm">
             <Star className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -87,8 +87,8 @@ export default async function LandingPage() {
             <span className="text-primary">Get a testimonial in 30 seconds.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-            Or collect fresh ones via form, QR, or link. Approve, embed, done
-            — free hosted Wall of Love included.
+            No screenshots. No copy-paste. Just a URL and your first
+            testimonial is live on your wall.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <TrackedLink cta="hero_signup" surface="home" href="/signup">
@@ -98,13 +98,14 @@ export default async function LandingPage() {
               </Button>
             </TrackedLink>
             <TrackedLink cta="hero_pricing" surface="home" href="/pricing">
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="ghost">
                 View Pricing
               </Button>
             </TrackedLink>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            Free plan available. No credit card required.
+            Free plan. No card required. Also collect fresh testimonials via
+            form, QR, or link — every intake path in one library.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
             <TrackedLink cta="hero_wall_demo" surface="home" href="/w/demo" className="font-medium text-primary hover:underline">

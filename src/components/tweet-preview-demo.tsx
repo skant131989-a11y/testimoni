@@ -99,7 +99,7 @@ export function TweetPreviewDemo() {
   return (
     <div className="rounded-2xl border bg-card p-4 shadow-sm">
       <form onSubmit={handleSubmit}>
-        <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="mb-2 text-xs text-muted-foreground">
           Paste a public X or LinkedIn post URL
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
