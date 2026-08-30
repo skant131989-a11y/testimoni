@@ -16,7 +16,11 @@ import {
   Twitter,
   Linkedin,
   ArrowRight,
+  Code,
+  Copy,
+  Check,
 } from "lucide-react";
+import { track } from "@/lib/analytics";
 
 type Mode = "url" | "manual";
 
@@ -34,6 +38,25 @@ export default function ImportPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [successWidgetId, setSuccessWidgetId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [embedOpen, setEmbedOpen] = useState(false);
+  const [embedCopied, setEmbedCopied] = useState(false);
+
+  // Same one-line embed used on /dashboard/welcome — script tag with a
+  // div anchor. Populated with the successfully-imported testimonial's
+  // widget so users can drop it onto their site without hunting.
+  const embedOrigin =
+    typeof window !== "undefined" ? window.location.origin : "https://testimoni.io";
+  const embedSnippet = successWidgetId
+    ? `<div id="fw-${successWidgetId}"></div>\n<script src="${embedOrigin}/embed/widget.js" data-widget-id="${successWidgetId}" async></script>`
+    : null;
+
+  function copyEmbed() {
+    if (!embedSnippet) return;
+    navigator.clipboard.writeText(embedSnippet);
+    setEmbedCopied(true);
+    track("embed_copied", { source: "import_page" });
+    setTimeout(() => setEmbedCopied(false), 2000);
+  }
 
   async function handleUrlImport() {
     if (!url.trim()) return;
@@ -187,26 +210,79 @@ export default function ImportPage() {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
             {success && (
-              <div className="flex flex-col gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-                <p className="flex items-center gap-2 font-medium text-primary">
-                  <CheckCircle2 className="h-4 w-4" />
-                  {success}
-                </p>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <Button asChild size="sm" variant="ghost">
-                    <Link href="/dashboard/testimonials">
-                      See it <ArrowRight className="ml-1 h-3 w-3" />
-                    </Link>
-                  </Button>
-                  {successWidgetId && (
-                    <Button asChild size="sm">
-                      <Link href={`/w/${successWidgetId}`} target="_blank" rel="noopener noreferrer">
-                        Go to Wall <ArrowRight className="ml-1 h-3 w-3" />
+              <>
+                <div className="flex flex-col gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                  <p className="flex items-center gap-2 font-medium text-primary">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {success}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Button asChild size="sm" variant="ghost">
+                      <Link href="/dashboard/testimonials">
+                        See it <ArrowRight className="ml-1 h-3 w-3" />
                       </Link>
                     </Button>
-                  )}
+                    {successWidgetId && (
+                      <Button asChild size="sm">
+                        <Link href={`/w/${successWidgetId}`} target="_blank" rel="noopener noreferrer">
+                          Go to Wall <ArrowRight className="ml-1 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    )}
+                    {embedSnippet && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          const next = !embedOpen;
+                          setEmbedOpen(next);
+                          if (next) track("embed_opened", { source: "import_page" });
+                        }}
+                      >
+                        <Code className="mr-1 h-3 w-3" />
+                        {embedOpen ? "Hide embed" : "Copy embed"}
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
+
+                {/* Collapsible embed snippet — mirrors welcome page card but
+                    much lighter since import-page users are past onboarding. */}
+                {embedOpen && embedSnippet && (
+                  <div className="rounded-md border bg-muted/30 p-3">
+                    <p className="text-xs text-muted-foreground">
+                      Paste this on your site (Framer, Webflow, WordPress, React, HTML):
+                    </p>
+                    <pre className="mt-2 overflow-x-auto rounded border bg-background p-2.5 font-mono text-[11px] leading-relaxed text-foreground">
+                      <code>{embedSnippet}</code>
+                    </pre>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        onClick={copyEmbed}
+                        variant={embedCopied ? "default" : "outline"}
+                      >
+                        {embedCopied ? (
+                          <>
+                            <Check className="mr-1.5 h-3.5 w-3.5" /> Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy code
+                          </>
+                        )}
+                      </Button>
+                      {successWidgetId && (
+                        <Button size="sm" variant="ghost" asChild>
+                          <Link href={`/dashboard/widgets/${successWidgetId}/embed`}>
+                            More embed options →
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
@@ -290,26 +366,77 @@ export default function ImportPage() {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
             {success && (
-              <div className="flex flex-col gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-                <p className="flex items-center gap-2 font-medium text-primary">
-                  <CheckCircle2 className="h-4 w-4" />
-                  {success}
-                </p>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <Button asChild size="sm" variant="ghost">
-                    <Link href="/dashboard/testimonials">
-                      See it <ArrowRight className="ml-1 h-3 w-3" />
-                    </Link>
-                  </Button>
-                  {successWidgetId && (
-                    <Button asChild size="sm">
-                      <Link href={`/w/${successWidgetId}`} target="_blank" rel="noopener noreferrer">
-                        Go to Wall <ArrowRight className="ml-1 h-3 w-3" />
+              <>
+                <div className="flex flex-col gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                  <p className="flex items-center gap-2 font-medium text-primary">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {success}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Button asChild size="sm" variant="ghost">
+                      <Link href="/dashboard/testimonials">
+                        See it <ArrowRight className="ml-1 h-3 w-3" />
                       </Link>
                     </Button>
-                  )}
+                    {successWidgetId && (
+                      <Button asChild size="sm">
+                        <Link href={`/w/${successWidgetId}`} target="_blank" rel="noopener noreferrer">
+                          Go to Wall <ArrowRight className="ml-1 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    )}
+                    {embedSnippet && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          const next = !embedOpen;
+                          setEmbedOpen(next);
+                          if (next) track("embed_opened", { source: "import_page" });
+                        }}
+                      >
+                        <Code className="mr-1 h-3 w-3" />
+                        {embedOpen ? "Hide embed" : "Copy embed"}
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
+
+                {embedOpen && embedSnippet && (
+                  <div className="rounded-md border bg-muted/30 p-3">
+                    <p className="text-xs text-muted-foreground">
+                      Paste this on your site (Framer, Webflow, WordPress, React, HTML):
+                    </p>
+                    <pre className="mt-2 overflow-x-auto rounded border bg-background p-2.5 font-mono text-[11px] leading-relaxed text-foreground">
+                      <code>{embedSnippet}</code>
+                    </pre>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        onClick={copyEmbed}
+                        variant={embedCopied ? "default" : "outline"}
+                      >
+                        {embedCopied ? (
+                          <>
+                            <Check className="mr-1.5 h-3.5 w-3.5" /> Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy code
+                          </>
+                        )}
+                      </Button>
+                      {successWidgetId && (
+                        <Button size="sm" variant="ghost" asChild>
+                          <Link href={`/dashboard/widgets/${successWidgetId}/embed`}>
+                            More embed options →
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             <Button

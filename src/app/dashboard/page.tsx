@@ -7,6 +7,8 @@ import {
   Eye,
   Plus,
   Share2,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
@@ -70,6 +72,7 @@ export default async function DashboardPage() {
   }
 
   const workspaceId = dbUser.workspaceMembers[0].workspaceId;
+  const workspaceSlug = dbUser.workspaceMembers[0].workspace.slug;
 
   // Fetch stats in parallel
   const [
@@ -78,6 +81,8 @@ export default async function DashboardPage() {
     pendingSubmissions,
     totalImpressions,
     recentTestimonials,
+    defaultWidget,
+    defaultForm,
   ] = await Promise.all([
     prisma.testimonial.count({ where: { workspaceId } }),
     prisma.widget.count({ where: { workspaceId, isActive: true } }),
@@ -96,9 +101,89 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
+    prisma.widget.findFirst({
+      where: { workspaceId, isActive: true },
+      orderBy: { createdAt: "asc" },
+      select: { id: true },
+    }),
+    prisma.collectionForm.findFirst({
+      where: { workspaceId },
+      orderBy: { createdAt: "asc" },
+      select: { slug: true },
+    }),
   ]);
 
   const impressionsTotal = totalImpressions._sum.impressions ?? 0;
+  const wallUrl = defaultWidget ? `/w/${defaultWidget.id}` : null;
+  const embedHref = defaultWidget ? `/dashboard/widgets/${defaultWidget.id}/embed` : null;
+  const formShareHref = defaultForm ? `/collect/${workspaceSlug}/${defaultForm.slug}` : null;
+
+  // Next-best-action decision tree. Picks the single highest-value CTA
+  // for the user's current state so /dashboard never feels like a
+  // dead-end stats screen. Order matters: earlier branches win.
+  type Nba = {
+    kind: string;
+    title: string;
+    desc: string;
+    href: string;
+    label: string;
+    external?: boolean;
+  };
+  const nba: Nba = (() => {
+    if (pendingSubmissions > 0) {
+      return {
+        kind: "review_inbox",
+        title: `You have ${pendingSubmissions} testimonial${pendingSubmissions === 1 ? "" : "s"} waiting for approval`,
+        desc: "Approve or reject them in your inbox — approved ones flow into your Wall of Love automatically.",
+        href: "/dashboard/inbox",
+        label: "Review inbox",
+      };
+    }
+    if (totalTestimonials === 0) {
+      return {
+        kind: "first_import",
+        title: "Get your first testimonial live in 30 seconds",
+        desc: "Paste any public X or LinkedIn post about your work — we pull the author, text, and star rating. No screenshots.",
+        href: "/dashboard/import",
+        label: "Import a tweet",
+      };
+    }
+    if (impressionsTotal === 0 && embedHref) {
+      return {
+        kind: "copy_embed",
+        title: "Your wall is empty on the web — copy the embed code",
+        desc: "One line of code drops your widget on any site: Framer, Webflow, WordPress, React, plain HTML.",
+        href: embedHref,
+        label: "Copy embed code",
+      };
+    }
+    if (totalTestimonials < 5 && formShareHref) {
+      return {
+        kind: "share_form",
+        title: `Get more testimonials — you have ${totalTestimonials}`,
+        desc: "Share your collection form with your last few customers. Every submission lands in your inbox for one-click approval.",
+        href: "/dashboard/collect",
+        label: "Share your form",
+      };
+    }
+    if (wallUrl) {
+      return {
+        kind: "share_wall",
+        title: "Share your Wall of Love with the world",
+        desc: "Drop the public URL in your Instagram bio, email signature, or a QR code. No signup needed to view.",
+        href: wallUrl,
+        label: "Open your wall",
+        external: true,
+      };
+    }
+    return {
+      kind: "explore_widgets",
+      title: "Try a different widget layout",
+      desc: "Grid, Masonry, Carousel, List, or Marquee — pick the one that fits your site.",
+      href: "/dashboard/widgets",
+      label: "Explore widgets",
+    };
+  })();
 
   return (
     <div className="space-y-8">
@@ -108,6 +193,38 @@ export default async function DashboardPage() {
         <p className="text-muted-foreground">
           Welcome back! Here&apos;s an overview of your testimonials.
         </p>
+      </div>
+
+      {/* Next best action — one clear CTA above stats so the page
+          always feels forward-moving, never like a dead-end. */}
+      <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+              <Sparkles className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                Do next
+              </p>
+              <p className="mt-1 text-base font-semibold text-foreground">
+                {nba.title}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{nba.desc}</p>
+            </div>
+          </div>
+          <Button asChild size="lg" className="shrink-0">
+            {nba.external ? (
+              <a href={nba.href} target="_blank" rel="noopener noreferrer">
+                {nba.label} <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            ) : (
+              <Link href={nba.href}>
+                {nba.label} <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Stats cards */}
@@ -180,7 +297,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {recentTestimonials.map((testimonial) => (
+              {recentTestimonials.map((testimonial: (typeof recentTestimonials)[number]) => (
                 <div
                   key={testimonial.id}
                   className="flex items-start gap-4 rounded-lg border p-4"
