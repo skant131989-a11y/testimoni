@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { getEffectivePlan } from "@/lib/plan";
+import { TrackedLink } from "@/components/tracked-link";
 import {
   Card,
   CardContent,
@@ -156,11 +157,11 @@ export default async function SettingsPage() {
             </div>
             {plan === "FREE" ? (
               <Button asChild>
-                <Link href="/dashboard/settings/billing">Upgrade to Pro</Link>
+                <TrackedLink cta="settings_upgrade_to_pro" surface="settings" href="/dashboard/settings/billing">Upgrade to Pro</TrackedLink>
               </Button>
             ) : (
               <Button variant="outline" asChild>
-                <Link href="/dashboard/settings/billing">Manage Subscription</Link>
+                <TrackedLink cta="settings_manage_subscription" surface="settings" href="/dashboard/settings/billing">Manage Subscription</TrackedLink>
               </Button>
             )}
           </div>

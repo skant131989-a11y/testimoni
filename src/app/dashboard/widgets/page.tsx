@@ -22,6 +22,7 @@ import {
 import Link from "next/link";
 import { useSubscription } from "@/lib/use-subscription";
 import { LimitBanner } from "@/components/plan/limit-banner";
+import { track } from "@/lib/analytics";
 
 const LAYOUTS = [
   { id: "GRID", label: "Grid", icon: LayoutGrid },
@@ -75,6 +76,7 @@ export default function WidgetsPage() {
         setWidgets((prev) => [data.widget, ...prev]);
         setNewName("Homepage Testimonials");
         setShowCreate(false);
+        track("widget_created", { widgetId: data.widget?.id, layout: data.widget?.layout });
       } else {
         const data = await res.json().catch(() => ({}));
         setCreateError(data.error || "Could not create widget. Please try again.");

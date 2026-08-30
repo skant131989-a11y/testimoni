@@ -32,6 +32,7 @@ export default function ImportPage() {
   });
   const [importing, setImporting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
+  const [successWidgetId, setSuccessWidgetId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   async function handleUrlImport() {
@@ -39,6 +40,7 @@ export default function ImportPage() {
     setImporting(true);
     setError("");
     setSuccess(null);
+    setSuccessWidgetId(null);
     try {
       const res = await fetch("/api/testimonials/import-url", {
         method: "POST",
@@ -52,6 +54,7 @@ export default function ImportPage() {
       }
       const name = data.testimonial?.customerName ?? "the author";
       setSuccess(`Imported testimonial from ${name}. Added to your library.`);
+      setSuccessWidgetId(data.widget?.id ?? null);
       setUrl("");
     } catch {
       setError("Something went wrong");
@@ -65,6 +68,7 @@ export default function ImportPage() {
     setImporting(true);
     setError("");
     setSuccess(null);
+    setSuccessWidgetId(null);
     try {
       const res = await fetch("/api/testimonials", {
         method: "POST",
@@ -81,6 +85,7 @@ export default function ImportPage() {
         return;
       }
       setSuccess(`Added testimonial from ${manualData.customerName}.`);
+      setSuccessWidgetId(data.widget?.id ?? null);
       setManualData({
         customerName: "",
         customerEmail: "",
@@ -182,16 +187,25 @@ export default function ImportPage() {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
             {success && (
-              <div className="flex items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+              <div className="flex flex-col gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                 <p className="flex items-center gap-2 font-medium text-primary">
                   <CheckCircle2 className="h-4 w-4" />
                   {success}
                 </p>
-                <Button asChild size="sm" variant="ghost">
-                  <Link href="/dashboard/testimonials">
-                    See it <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </Button>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href="/dashboard/testimonials">
+                      See it <ArrowRight className="ml-1 h-3 w-3" />
+                    </Link>
+                  </Button>
+                  {successWidgetId && (
+                    <Button asChild size="sm">
+                      <Link href={`/w/${successWidgetId}`} target="_blank" rel="noopener noreferrer">
+                        Go to Wall <ArrowRight className="ml-1 h-3 w-3" />
+                      </Link>
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>
@@ -276,16 +290,25 @@ export default function ImportPage() {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
             {success && (
-              <div className="flex items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+              <div className="flex flex-col gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                 <p className="flex items-center gap-2 font-medium text-primary">
                   <CheckCircle2 className="h-4 w-4" />
                   {success}
                 </p>
-                <Button asChild size="sm" variant="ghost">
-                  <Link href="/dashboard/testimonials">
-                    See it <ArrowRight className="ml-1 h-3 w-3" />
-                  </Link>
-                </Button>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href="/dashboard/testimonials">
+                      See it <ArrowRight className="ml-1 h-3 w-3" />
+                    </Link>
+                  </Button>
+                  {successWidgetId && (
+                    <Button asChild size="sm">
+                      <Link href={`/w/${successWidgetId}`} target="_blank" rel="noopener noreferrer">
+                        Go to Wall <ArrowRight className="ml-1 h-3 w-3" />
+                      </Link>
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
 

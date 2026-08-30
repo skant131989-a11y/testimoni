@@ -47,30 +47,30 @@ export default async function LandingPage() {
             <span className="text-xl font-bold">Testimoni</span>
           </div>
           <nav className="hidden items-center gap-6 md:flex">
-            <Link href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
+            <TrackedLink cta="nav_demo" surface="home_nav" href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
               Live Demo
-            </Link>
-            <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
+            </TrackedLink>
+            <TrackedLink cta="nav_pricing" surface="home_nav" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
               Pricing
-            </Link>
+            </TrackedLink>
             {isLoggedIn ? (
               <Button size="sm" asChild>
-                <Link href="/dashboard">Dashboard</Link>
+                <TrackedLink cta="nav_dashboard" surface="home_nav" href="/dashboard">Dashboard</TrackedLink>
               </Button>
             ) : (
               <>
-                <Link href="/login">
+                <TrackedLink cta="nav_login" surface="home_nav" href="/login">
                   <Button variant="ghost" size="sm">Log in</Button>
-                </Link>
-                <Link href="/signup">
+                </TrackedLink>
+                <TrackedLink cta="nav_signup" surface="home_nav" href="/signup">
                   <Button size="sm">Get Started Free</Button>
-                </Link>
+                </TrackedLink>
               </>
             )}
           </nav>
-          <Link href={isLoggedIn ? "/dashboard" : "/signup"} className="md:hidden">
+          <TrackedLink cta="nav_mobile_cta" surface="home_nav" href={isLoggedIn ? "/dashboard" : "/signup"} className="md:hidden">
             <Button size="sm">{isLoggedIn ? "Dashboard" : "Get Started"}</Button>
-          </Link>
+          </TrackedLink>
         </div>
       </header>
 

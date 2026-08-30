@@ -94,5 +94,38 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json({ testimonial }, { status: 201 });
+  // Auto-add approved testimonials to the workspace's default (oldest
+  // active) widget so users can jump straight to "Go to Wall" — mirrors
+  // the URL-import path.
+  let defaultWidget: { id: string } | null = null;
+  if (testimonial.status === "APPROVED") {
+    defaultWidget = await prisma.widget.findFirst({
+      where: { workspaceId: auth.workspace.id, isActive: true },
+      orderBy: { createdAt: "asc" },
+      select: { id: true },
+    });
+    if (defaultWidget) {
+      const lastPos = await prisma.widgetTestimonial.findFirst({
+        where: { widgetId: defaultWidget.id },
+        orderBy: { position: "desc" },
+        select: { position: true },
+      });
+      await prisma.widgetTestimonial.upsert({
+        where: {
+          widgetId_testimonialId: {
+            widgetId: defaultWidget.id,
+            testimonialId: testimonial.id,
+          },
+        },
+        create: {
+          widgetId: defaultWidget.id,
+          testimonialId: testimonial.id,
+          position: (lastPos?.position ?? -1) + 1,
+        },
+        update: {},
+      });
+    }
+  }
+
+  return NextResponse.json({ testimonial, widget: defaultWidget }, { status: 201 });
 }

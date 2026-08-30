@@ -30,7 +30,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-    track("login_started", { method: "email" });
+    track("login_started", { method: "email" }, { instant: true });
 
     try {
       const supabase = createClient();
@@ -46,7 +46,7 @@ export default function LoginPage() {
       }
 
       if (data.user?.id) identify(data.user.id, { email });
-      track("login_completed", { method: "email" });
+      track("login_completed", { method: "email" }, { instant: true });
       // Hard navigation so the fresh auth cookies are attached to the
       // request the server sees (router.push races the cookie handshake
       // and can occasionally land on /login or / instead of /dashboard).
@@ -61,7 +61,7 @@ export default function LoginPage() {
   async function handleGoogleLogin() {
     setError(null);
     setIsGoogleLoading(true);
-    track("login_started", { method: "google" });
+    track("login_started", { method: "google" }, { instant: true });
 
     try {
       const supabase = createClient();

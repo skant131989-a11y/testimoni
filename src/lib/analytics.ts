@@ -2,44 +2,92 @@ import posthog from "posthog-js";
 
 let ready = false;
 
+// Dev-only trace: NEXT_PUBLIC_ vars are inlined at build time, so
+// process.env.NODE_ENV works client-side.
+const DEBUG = process.env.NODE_ENV === "development";
+
 /**
  * Initialize PostHog on the client. Safe to call multiple times — only
  * runs once. No-ops if env vars are missing (e.g., local dev without
  * a project set up) or if init throws for any reason.
  */
 export function initAnalytics() {
+  if (DEBUG) console.log("[analytics] initAnalytics called, ready=", ready);
   if (ready || typeof window === "undefined") return;
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  if (DEBUG) console.log("[analytics] key present?", !!key);
   if (!key) return;
+
+  // Suppress the known posthog-js + React 19 web-vitals bug:
+  // "Cannot read properties of undefined (reading 'startTime')".
+  // It comes from posthog's async web-vitals reporter and can't be
+  // disabled via config in this SDK version. Left uncaught, it
+  // pollutes the console + can break other tracking libs. We only
+  // swallow this ONE specific error signature.
+  window.addEventListener("error", (e) => {
+    if (
+      e.message?.includes("startTime") ||
+      (e.error?.stack ?? "").includes("reportAllChanges")
+    ) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  });
+
   try {
     posthog.init(key, {
       api_host:
         process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
-      // We deliberately don't track page_view — bot traffic dominates
-      // the counts pre-launch. Autocapture off keeps events explicit.
       capture_pageview: false,
       autocapture: false,
       persistence: "localStorage+cookie",
+      // Full-stack shutdown of the perf/vitals + recording features
+      // we don't use. The nested capture_performance object is what
+      // this SDK version actually reads for web_vitals.
+      capture_performance: {
+        network_timing: false,
+        web_vitals: false,
+      },
+      disable_session_recording: true,
+      disable_surveys: true,
+      loaded: () => {
+        if (DEBUG) console.log("[analytics] posthog loaded");
+      },
     });
     ready = true;
-  } catch {
-    // If PostHog fails to init, silently give up — analytics must
-    // never break user flows.
+    if (DEBUG) console.log("[analytics] init OK, ready=true");
+  } catch (e) {
+    if (DEBUG) console.warn("[analytics] init threw", e);
   }
 }
 
 /**
  * Fire an event. All calls are wrapped in try/catch so a broken
  * analytics network / SDK bug can never block a CTA click or a
- * signup submission. capture() itself is fire-and-forget (uses
- * navigator.sendBeacon under the hood on navigations), so we don't
- * add measurable click latency.
+ * signup submission.
+ *
+ * Pass `instant: true` for events that fire immediately before a
+ * navigation (CTA clicks, signup buttons that redirect to OAuth) —
+ * this forces PostHog to POST right away via sendBeacon instead of
+ * queuing for its 30-second batch, so the event isn't dropped when
+ * the page unloads. Non-instant tracks (form_published, logout,
+ * signup_completed on a landed page) can safely batch.
  */
-export function track(event: string, props?: Record<string, unknown>) {
+export function track(
+  event: string,
+  props?: Record<string, unknown>,
+  options?: { instant?: boolean },
+) {
+  if (DEBUG) console.log(`[analytics] track(${event}) ready=${ready}`, props);
   if (!ready) return;
   try {
-    posthog.capture(event, props);
-  } catch {
+    if (options?.instant) {
+      posthog.capture(event, props, { send_instantly: true });
+    } else {
+      posthog.capture(event, props);
+    }
+  } catch (e) {
+    if (DEBUG) console.warn("[analytics] capture threw", e);
     // Swallow — never let analytics break the app.
   }
 }

@@ -33,7 +33,7 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
       return;
     }
     setLoading(true);
-    track("signup_started", { method: "email", source });
+    track("signup_started", { method: "email", source }, { instant: true });
     try {
       const supabase = createClient();
       const { data, error: authError } = await supabase.auth.signUp({
@@ -49,7 +49,7 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
         return;
       }
       if (data.user?.id) identify(data.user.id, { email });
-      track("signup_completed", { method: "email", source });
+      track("signup_completed", { method: "email", source }, { instant: true });
       window.location.assign(`/dashboard/welcome?src=${source}`);
     } catch {
       setError("Something went wrong. Try again or use the signup page.");
@@ -61,7 +61,7 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
   async function handleGoogle() {
     setError(null);
     setGoogleLoading(true);
-    track("signup_started", { method: "google", source });
+    track("signup_started", { method: "google", source }, { instant: true });
     try {
       const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithOAuth({

@@ -107,7 +107,7 @@ export function Header({
               <button
                 type="button"
                 onClick={async () => {
-                  track("logout");
+                  track("logout", undefined, { instant: true });
                   const supabase = createClient();
                   await supabase.auth.signOut();
                   resetAnalytics();

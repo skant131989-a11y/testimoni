@@ -32,7 +32,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-    track("signup_started", { method: "email", source: "signup_page" });
+    track("signup_started", { method: "email", source: "signup_page" }, { instant: true });
 
     try {
       const supabase = createClient();
@@ -59,7 +59,7 @@ export default function SignupPage() {
       // back to /login if the session never actually attached, but in
       // practice this makes signup one click instead of two.
       if (data.user?.id) identify(data.user.id, { email, name });
-      track("signup_completed", { method: "email" });
+      track("signup_completed", { method: "email" }, { instant: true });
       window.location.assign("/dashboard/welcome");
       return;
     } catch {
@@ -72,7 +72,7 @@ export default function SignupPage() {
   async function handleGoogleSignup() {
     setError(null);
     setIsGoogleLoading(true);
-    track("signup_started", { method: "google", source: "signup_page" });
+    track("signup_started", { method: "google", source: "signup_page" }, { instant: true });
 
     try {
       const supabase = createClient();

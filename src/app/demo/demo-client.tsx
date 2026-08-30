@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { TrackedLink } from "@/components/tracked-link";
+import { track } from "@/lib/analytics";
 import { createClient } from "@/lib/supabase/client";
 import {
   MessageSquare,
@@ -301,6 +302,8 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
     e.preventDefault();
     if (!formName.trim() || !formContent.trim()) return;
 
+    track("demo_form_submitted", { rating: formRating });
+
     const newTestimonial: Testimonial = {
       customerName: formName,
       customerTitle: formTitle || "Happy Customer",
@@ -324,6 +327,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   }
 
   function approveTestimonial(index: number) {
+    track("demo_testimonial_approved", { position: index });
     // Auto-add on approve — the testimonial goes straight into the widget
     // so users see it live on their wall the moment they approve.
     setTestimonials((prev) =>
@@ -352,6 +356,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
   }
 
   function rejectTestimonial(index: number) {
+    track("demo_testimonial_rejected", { position: index });
     setTestimonials((prev) => prev.filter((_, i) => i !== index));
   }
 
@@ -396,9 +401,9 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
               </Link>
             ) : (
               <>
-                <Link href="/login">
+                <TrackedLink cta="demo_nav_login" surface="demo" href="/login">
                   <Button variant="ghost" size="sm">Log in</Button>
-                </Link>
+                </TrackedLink>
                 <TrackedLink cta="demo_nav_signup" surface="demo" href="/signup">
                   <Button size="sm">Get Started Free</Button>
                 </TrackedLink>

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TrackedLink } from "@/components/tracked-link";
 
 interface LimitBannerProps {
   /** Short label of the thing at limit, e.g. "widget", "collection form", "testimonials" */
@@ -34,7 +34,13 @@ export function LimitBanner({ resource, usage, description }: LimitBannerProps) 
         </div>
       </div>
       <Button asChild size="sm">
-        <Link href="/dashboard/settings/billing">Go Pro</Link>
+        <TrackedLink
+          cta="limit_banner_go_pro"
+          surface="limit_banner"
+          href="/dashboard/settings/billing"
+        >
+          Go Pro
+        </TrackedLink>
       </Button>
     </div>
   );

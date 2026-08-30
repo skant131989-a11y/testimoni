@@ -15,6 +15,7 @@ import { Check, CreditCard, Zap, XCircle } from "lucide-react";
 import { PLAN_LIMITS, PRICING } from "@/lib/constants";
 import { usePricing } from "@/lib/use-pricing";
 import { CurrencySwitcher } from "@/components/pricing/price-display";
+import { track } from "@/lib/analytics";
 
 interface Subscription {
   plan: "FREE" | "PRO";
@@ -70,6 +71,8 @@ export default function BillingPage() {
   async function handleRazorpayUpgrade() {
     setUpgrading(true);
     setError(null);
+    // Fire before we touch the network — highest-value conversion signal.
+    track("upgrade_clicked", { currency, plan: "PRO" });
     try {
       // Lazy-load Razorpay checkout.js — only pulled the first time
       // the user actually clicks Upgrade. Saves ~30KB on the initial

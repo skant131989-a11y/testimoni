@@ -99,7 +99,7 @@ export default function DemoWallPage() {
         </Link>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">Log in</Link>
+            <TrackedLink cta="wall_demo_nav_login" surface="wall_demo" href="/login">Log in</TrackedLink>
           </Button>
           <Button size="sm" asChild>
             <TrackedLink cta="wall_demo_nav_signup" surface="wall_demo" href="/signup">Get Started Free</TrackedLink>

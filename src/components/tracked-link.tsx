@@ -30,7 +30,14 @@ export function TrackedLink({ cta, surface, onClick, ...rest }: TrackedLinkProps
       {...rest}
       onClick={(e) => {
         try {
-          track("cta_clicked", { cta, surface, href: String(rest.href ?? "") });
+          // instant: true — post via sendBeacon immediately, don't batch.
+          // If we let PostHog queue it for the 30s batch, the click's
+          // page navigation would tear down the tab before the flush.
+          track(
+            "cta_clicked",
+            { cta, surface, href: String(rest.href ?? "") },
+            { instant: true },
+          );
         } catch {
           // Should be unreachable — track() already catches — but keeps
           // navigation guaranteed even if imports break.
