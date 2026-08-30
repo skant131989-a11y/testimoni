@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
 
 export const metadata: Metadata = {
-  title: "Testimonial.to alternative — Testimoni",
+  title: "Testimonial.to alternative — Paste a Tweet, Free Wall of Love",
   description:
-    "Looking for a Testimonial.to alternative? Testimoni offers a hosted Wall of Love on the free plan, auto-add on approve, Twitter/LinkedIn URL import, and Pro at $9/month. Compare features side by side.",
+    "Looking for a Testimonial.to alternative? Testimoni lets you paste an X or LinkedIn URL and get an approved testimonial in 30 seconds. Every workspace gets a hosted Wall of Love URL on the free plan. Pro at $9/month.",
   alternates: { canonical: "/vs/testimonial-to" },
   openGraph: {
     title: "Testimoni vs Testimonial.to — Testimonial widget comparison",
@@ -72,9 +72,10 @@ export default function TestimonialToVsPage() {
               Testimoni vs Testimonial.to
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-              Both let you collect text and video testimonials. Here&apos;s where
-              Testimoni is different — and where Testimonial.to might be the
-              better fit.
+              Two headline differences: <span className="font-semibold text-foreground">paste any X or LinkedIn URL and get an approved testimonial in 30 seconds</span>, and{" "}
+              <span className="font-semibold text-foreground">a public Wall of Love URL free on day one</span> —
+              Testimonial.to has neither. Everything else below is the standard
+              testimonial-tool comparison.
             </p>
           </div>
 
@@ -82,18 +83,18 @@ export default function TestimonialToVsPage() {
           <section className="mt-12 grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
               <Sparkles className="h-5 w-5 text-primary" />
-              <p className="mt-3 text-sm font-bold">Free hosted Wall of Love</p>
+              <p className="mt-3 text-sm font-bold">Paste-a-tweet import</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Every workspace gets a public URL to share in your Instagram
-                bio. Testimonial.to doesn&apos;t have a dedicated hosted wall.
+                Paste an X or LinkedIn URL — we pull the author and text.
+                Testimonial.to has no URL-import flow.
               </p>
             </div>
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
               <Sparkles className="h-5 w-5 text-primary" />
-              <p className="mt-3 text-sm font-bold">Auto-add on approve</p>
+              <p className="mt-3 text-sm font-bold">Free hosted Wall of Love</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Approved testimonials appear on your wall instantly. No
-                separate curation step.
+                Every workspace gets a public URL to share in your Instagram
+                bio. Testimonial.to doesn&apos;t have a dedicated hosted wall.
               </p>
             </div>
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">

@@ -20,11 +20,11 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Testimoni — Collect & Embed Customer Testimonials",
+    default: "Testimoni — Paste a Tweet, Get a Testimonial",
     template: "%s · Testimoni",
   },
   description:
-    "Turn happy customers into social proof. Collect via link, form, or QR — then embed a wall of love on any site with one line of code. Free plan.",
+    "Turn any X or LinkedIn post into a live testimonial in 30 seconds — no screenshots, no copy-paste. Or collect fresh ones via form. Free wall of love + one-line embed.",
   applicationName: "Testimoni",
   keywords: [
     "testimonial widget",
@@ -65,15 +65,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: SITE_URL,
     siteName: "Testimoni",
-    title: "Testimoni — Collect & Embed Customer Testimonials",
+    title: "Testimoni — Paste a Tweet, Get a Testimonial",
     description:
-      "Turn happy customers into social proof. Collect via link, form, or QR. Embed anywhere with one line of code. Free plan.",
+      "Turn any X or LinkedIn post into a testimonial in 30 seconds. Free wall of love, one-line embed.",
     images: [
       {
-        url: "/opengraph-image?v=2",
+        url: "/opengraph-image?v=3",
         width: 1200,
         height: 630,
-        alt: "Testimoni — Turn happy customers into social proof",
+        alt: "Testimoni — Paste a tweet, get a testimonial in 30 seconds",
       },
     ],
   },
@@ -81,10 +81,10 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@usetestimoni",
     creator: "@usetestimoni",
-    title: "Testimoni — Collect & Embed Testimonials",
+    title: "Testimoni — Paste a Tweet, Get a Testimonial",
     description:
-      "Collect + embed customer testimonials. Multiple channels. One line of code. Free plan.",
-    images: ["/twitter-image?v=2"],
+      "Turn any X or LinkedIn post into a testimonial in 30 seconds. Free plan.",
+    images: ["/twitter-image?v=3"],
   },
   icons: {
     icon: "/icon.png",

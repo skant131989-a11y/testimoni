@@ -9,14 +9,14 @@ import { TrackedLink } from "@/components/tracked-link";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Pricing — Free forever plan + Pro at $9/month",
+  title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",
   description:
-    "Simple pricing. Free forever plan with 10 testimonials, 1 collection form, and 1 widget. Pro at $9/month (₹859) for unlimited forms, widgets, testimonials, all layouts, and video testimonials. Cancel anytime.",
+    "Free plan includes paste-a-tweet import, a hosted Wall of Love URL, 10 testimonials, and one-line embed — no credit card. Pro at $9/month (₹859) for unlimited testimonials, forms, widgets, and video.",
   alternates: { canonical: "/pricing" },
   openGraph: {
-    title: "Testimoni Pricing — Free forever + Pro at $9/month",
+    title: "Testimoni Pricing — Free forever with paste-a-tweet + Wall of Love",
     description:
-      "Simple pricing. Free forever plan + Pro at $9/mo (₹859) for unlimited testimonials, forms, and widgets. Cancel anytime.",
+      "Free plan includes paste-a-tweet import and a hosted Wall of Love URL. Pro at $9/mo (₹859) for unlimited testimonials, forms, and widgets.",
     url: "/pricing",
   },
 };
@@ -46,9 +46,13 @@ export default async function PricingPage() {
       <main className="flex-1 py-20">
         <div className="mx-auto max-w-5xl px-4">
           <div className="text-center">
-            <h1 className="text-4xl font-bold">Simple, transparent pricing</h1>
+            <h1 className="text-4xl font-bold">
+              Free forever.{" "}
+              <span className="text-primary">Paste-a-tweet included.</span>
+            </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Start free. Upgrade when you&apos;re ready to go pro.
+              Every workspace gets paste-a-tweet import and a public Wall of
+              Love URL on the free plan — competitors gate both behind Pro.
             </p>
           </div>
 
@@ -70,10 +74,11 @@ export default async function PricingPage() {
               </p>
               <ul className="mt-8 space-y-4">
                 {[
+                  "Paste-a-tweet import (X + LinkedIn)",
+                  "Public Wall of Love URL",
                   "Up to 10 testimonials",
-                  "1 widget",
+                  "1 collection form + 1 widget",
                   "Grid layout",
-                  "Collection forms",
                   "Email support",
                   "Script tag embed",
                 ].map((feature) => (

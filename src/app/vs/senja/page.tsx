@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
 
 export const metadata: Metadata = {
-  title: "Senja alternative — Testimoni",
+  title: "Senja alternative — Paste a Tweet, Free Wall of Love",
   description:
-    "Looking for a Senja alternative? Testimoni offers a hosted Wall of Love on the free plan, auto-add on approve, Twitter/LinkedIn URL import, and Pro at $9/month. Compare features, pricing, and workflows.",
+    "Looking for a Senja alternative? Testimoni lets you paste an X or LinkedIn URL and get an approved testimonial in 30 seconds. Every workspace gets a hosted Wall of Love URL on the free plan. Pro at $9/month.",
   alternates: { canonical: "/vs/senja" },
   openGraph: {
     title: "Testimoni vs Senja — Testimonial widget comparison",
@@ -75,8 +75,10 @@ export default function SenjaVsPage() {
               Testimoni vs Senja
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-              Both help you collect and embed testimonials. Here&apos;s how
-              Testimoni is different — and where Senja might be the better fit.
+              Two headline differences: <span className="font-semibold text-foreground">paste any X or LinkedIn URL and get an approved testimonial in 30 seconds</span>, and{" "}
+              <span className="font-semibold text-foreground">a public Wall of Love URL free on day one</span> —
+              Senja gates both. Everything else below is the standard
+              testimonial-tool comparison.
             </p>
           </div>
 
@@ -84,18 +86,18 @@ export default function SenjaVsPage() {
           <section className="mt-12 grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
               <Sparkles className="h-5 w-5 text-primary" />
-              <p className="mt-3 text-sm font-bold">Free hosted Wall of Love</p>
+              <p className="mt-3 text-sm font-bold">Paste-a-tweet import</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Every workspace gets a public URL. Drop it in your Instagram bio.
-                Senja gates this behind Pro.
+                Paste an X or LinkedIn URL — we pull the author and text.
+                Senja makes you screenshot or copy-paste.
               </p>
             </div>
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
               <Sparkles className="h-5 w-5 text-primary" />
-              <p className="mt-3 text-sm font-bold">Auto-add on approve</p>
+              <p className="mt-3 text-sm font-bold">Free hosted Wall of Love</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Approved testimonials appear on your wall instantly. No curation
-                click. Senja needs the extra step.
+                Every workspace gets a public URL. Drop it in your Instagram bio.
+                Senja gates this behind Pro.
               </p>
             </div>
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">

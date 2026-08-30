@@ -40,10 +40,12 @@ export async function PublicNav({ right }: PublicNavProps) {
           <span className="text-xl font-bold">Testimoni</span>
         </Link>
 
-        {/* Primary nav — hidden on mobile to keep the header uncluttered */}
+        {/* Right-aligned nav — links + auth CTAs grouped together, matching
+            the landing-page header. Nav links hidden on mobile; a single
+            "Get Started" pill takes their place. */}
         <nav className="hidden items-center gap-6 md:flex">
           <TrackedLink cta="nav_demo" surface="public_nav" href="/demo" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-            Demo
+            Live Demo
           </TrackedLink>
           <TrackedLink cta="nav_features" surface="public_nav" href="/features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Features
@@ -54,9 +56,6 @@ export async function PublicNav({ right }: PublicNavProps) {
           <TrackedLink cta="nav_blog" surface="public_nav" href="/blog" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
             Blog
           </TrackedLink>
-        </nav>
-
-        <nav className="flex items-center gap-3">
           {right}
           {isLoggedIn ? (
             <Button size="sm" asChild>
@@ -64,15 +63,25 @@ export async function PublicNav({ right }: PublicNavProps) {
             </Button>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <TrackedLink cta="nav_login" surface="public_nav" href="/login">Log in</TrackedLink>
-              </Button>
-              <Button size="sm" asChild>
-                <TrackedLink cta="nav_signup" surface="public_nav" href="/signup">Get Started Free</TrackedLink>
-              </Button>
+              <TrackedLink cta="nav_login" surface="public_nav" href="/login">
+                <Button variant="ghost" size="sm">Log in</Button>
+              </TrackedLink>
+              <TrackedLink cta="nav_signup" surface="public_nav" href="/signup">
+                <Button size="sm">Get Started Free</Button>
+              </TrackedLink>
             </>
           )}
         </nav>
+
+        {/* Mobile: single primary CTA — matches landing */}
+        <TrackedLink
+          cta="nav_mobile_cta"
+          surface="public_nav"
+          href={isLoggedIn ? "/dashboard" : "/signup"}
+          className="md:hidden"
+        >
+          <Button size="sm">{isLoggedIn ? "Dashboard" : "Get Started"}</Button>
+        </TrackedLink>
       </div>
     </header>
   );

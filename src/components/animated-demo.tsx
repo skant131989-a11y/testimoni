@@ -5,12 +5,12 @@ import Link from "next/link";
  * Auto-playing animated hero showing the collect → display flow.
  * CSS keyframes only — no JS, no video, no GIF. Loops every 12s.
  *
- * The animation:
- *   0-3s   : "typing" the customer's name + testimonial
- *   3-4s   : stars fill in
- *   4-5s   : submit button pulses and "clicks"
- *   5-8s   : new card slides into the widget on the right
- *   8-12s  : pause showing the final state
+ * The animation (rebalanced so the "aha" moment holds):
+ *   0-3s   : "typing" the customer's name + testimonial, stars fill in
+ *   3-4s   : submit button pulses and "clicks"
+ *   4-5s   : new card slides into the widget on the right (highlighted)
+ *   5-10s  : card STAYS visible — this is the payoff, needs dwell time
+ *   10-12s : brief hold, then reset
  *   loop.
  */
 export function AnimatedDemo() {
@@ -31,30 +31,38 @@ export function AnimatedDemo() {
           50% { fill: #facc15; transform: scale(1); }
         }
         @keyframes ad-submit-pulse {
-          0%, 60% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
-          65% { transform: scale(0.96); box-shadow: 0 0 0 8px rgba(124, 58, 237, 0); }
-          70%, 100% { transform: scale(1); }
+          0%, 25% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+          30% { transform: scale(0.96); box-shadow: 0 0 0 8px rgba(124, 58, 237, 0); }
+          35%, 100% { transform: scale(1); }
         }
+        /* Card starts hidden, slides in at 30% of loop (3.6s), stays
+           visible for the rest. animation-fill-mode: both prevents the
+           reset-to-inline-style flash between iterations. */
         @keyframes ad-slide-in {
-          0%, 65% { opacity: 0; transform: translateX(24px); }
-          75%, 100% { opacity: 1; transform: translateX(0); }
+          0%, 30% { opacity: 0; transform: translateX(24px); }
+          40%, 100% { opacity: 1; transform: translateX(0); }
         }
         @keyframes ad-highlight {
-          0%, 65% { box-shadow: none; }
-          75% { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.4); }
-          95%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+          0%, 30% { box-shadow: none; }
+          40% { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.4); }
+          70%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
         }
         @keyframes ad-arrow-flow {
-          0%, 60% { transform: translateX(0); opacity: 0.4; }
-          70% { transform: translateX(6px); opacity: 1; }
-          80%, 100% { transform: translateX(0); opacity: 0.4; }
+          0%, 25% { transform: translateX(0); opacity: 0.4; }
+          35% { transform: translateX(6px); opacity: 1; }
+          45%, 100% { transform: translateX(0); opacity: 0.4; }
         }
         @keyframes ad-badge-pop {
-          0%, 65% { transform: scale(0); }
-          75% { transform: scale(1.2); }
-          80%, 100% { transform: scale(1); }
+          0%, 30% { transform: scale(0); }
+          40% { transform: scale(1.2); }
+          45%, 100% { transform: scale(1); }
         }
-        .ad-loop { animation-duration: 12s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+        .ad-loop {
+          animation-duration: 12s;
+          animation-iteration-count: infinite;
+          animation-timing-function: ease-in-out;
+          animation-fill-mode: both;
+        }
         .ad-type-name    { animation-name: ad-type-name; }
         .ad-type-content { animation-name: ad-type-content; }
         .ad-star         { animation-name: ad-star-fill; }
@@ -178,10 +186,12 @@ export function AnimatedDemo() {
           </div>
 
           <div className="space-y-2">
-            {/* The new card that slides in — highlighted */}
+            {/* The new card that slides in — highlighted. No inline opacity;
+                animation-fill-mode: both on .ad-loop uses the 0% keyframe
+                state as the "before" style, avoiding the flash-to-invisible
+                gap at the tail end of each iteration. */}
             <div
               className="ad-loop ad-slide ad-highlight rounded-lg border bg-background p-3"
-              style={{ opacity: 0 }}
             >
               <div className="flex items-center gap-0.5">
                 {Array.from({ length: 5 }).map((_, j) => (

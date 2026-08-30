@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { TrackedLink } from "@/components/tracked-link";
+import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { track } from "@/lib/analytics";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -270,17 +271,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
       setGoogleLoading(false);
     }
   }
-  const [tweetImported, setTweetImported] = useState(false);
-  const [tweetImporting, setTweetImporting] = useState(false);
 
-  function fakeTweetImport() {
-    if (tweetImported || tweetImporting) return;
-    setTweetImporting(true);
-    setTimeout(() => {
-      setTweetImporting(false);
-      setTweetImported(true);
-    }, 700);
-  }
   const [step, setStep] = useState<"form" | "submitted">("form");
 
   const [formName, setFormName] = useState("");
@@ -421,12 +412,13 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
             Try the flow. Save it to an account when you want it on your site.
           </Badge>
           <h1 className="text-4xl font-bold md:text-5xl">
-            Submit a testimonial.<br />
-            <span className="text-primary">Watch it appear instantly.</span>
+            Paste a tweet, or fill a form.{" "}
+            <span className="text-primary">See it live in 30 seconds.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            This is exactly what your customers experience. Fill out the form
-            below, then see your testimonial show up in the live widget.
+            The two intake paths, both interactive. Try the form flow below,
+            or scroll down to paste any X or LinkedIn URL and see the same
+            testimonial land in your library.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
             Prefer a shareable link over embed code?{" "}
@@ -436,255 +428,227 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
           </p>
         </div>
 
-        {/* Two-column layout: Form + Arrow + Widget */}
-        <div className="mt-12 grid gap-8 lg:grid-cols-2">
-          {/* LEFT: Collection Form */}
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                1
-              </div>
-              <h2 className="text-lg font-semibold">Your customer fills this form</h2>
+        {/* STEP 1: Two intake paths — tweet-paste OR form — side by side
+            with an OR divider. Both are interactive; both land in the same
+            testimonial library after signup. */}
+        <div className="mt-12">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+              1
             </div>
-            <p className="mb-4 text-sm text-muted-foreground">
-              You share a link. They click it and see this. Try it now:
-            </p>
+            <h2 className="text-lg font-semibold">Choose an intake path</h2>
+          </div>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Two ways in. Paste an existing tweet — instant. Or share a form
+            for fresh submissions. Both flows below are live.
+          </p>
 
-            <div className="rounded-2xl border-2 border-primary/20 bg-card p-6 shadow-sm">
-              <div className="mb-6 text-center">
-                <Image
-                  src="/icon.png"
-                  alt="Testimoni logo"
-                  width={48}
-                  height={48}
-                  className="mx-auto mb-3 rounded-full"
-                />
-                <h3 className="text-xl font-bold">Share your experience</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  We&apos;d love to hear what you think!
-                </p>
+          <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr] md:items-stretch md:gap-8">
+            {/* LEFT: Paste-a-tweet flow */}
+            <div className="flex flex-col">
+              <div className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full border-2 border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                Auto-approved · Skips step 2 →
               </div>
+              <div className="flex-1">
+                <TweetPreviewDemo />
+              </div>
+            </div>
 
-              {step === "form" ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label>Rating</Label>
-                    <div className="mt-1">
-                      <StarInput rating={formRating} onChange={setFormRating} />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="demo-content">Your testimonial *</Label>
-                    <Textarea
-                      id="demo-content"
-                      placeholder="What did you love about working with us?"
-                      value={formContent}
-                      onChange={(e) => setFormContent(e.target.value)}
-                      rows={3}
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+            {/* OR divider */}
+            <div className="relative flex items-center justify-center md:my-0">
+              <div className="absolute inset-0 flex items-center md:hidden" aria-hidden="true">
+                <div className="h-px w-full border-t border-dashed" />
+              </div>
+              <div className="absolute inset-y-0 hidden items-center md:flex" aria-hidden="true">
+                <div className="h-full w-px border-l border-dashed" />
+              </div>
+              <span className="relative rounded-full border bg-background px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                or
+              </span>
+            </div>
+
+            {/* RIGHT: Collection form flow */}
+            <div className="flex flex-col" ref={inboxRef}>
+              <div className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full border-2 border-muted-foreground/30 bg-muted/40 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Needs your approval below ↓
+              </div>
+              <div className="flex-1 rounded-2xl border-2 border-primary/20 bg-card p-6 shadow-sm">
+                <div className="mb-6 text-center">
+                  <Image
+                    src="/icon.png"
+                    alt="Testimoni logo"
+                    width={48}
+                    height={48}
+                    className="mx-auto mb-3 rounded-full"
+                  />
+                  <h3 className="text-xl font-bold">Share your experience</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    We&apos;d love to hear what you think!
+                  </p>
+                </div>
+
+                {step === "form" ? (
+                  <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <Label htmlFor="demo-name">Your name *</Label>
-                      <Input
-                        id="demo-name"
-                        placeholder="Jane Smith"
-                        value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
+                      <Label>Rating</Label>
+                      <div className="mt-1">
+                        <StarInput rating={formRating} onChange={setFormRating} />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="demo-content">Your testimonial *</Label>
+                      <Textarea
+                        id="demo-content"
+                        placeholder="What did you love about working with us?"
+                        value={formContent}
+                        onChange={(e) => setFormContent(e.target.value)}
+                        rows={3}
                         required
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="demo-title">Title / Company</Label>
-                      <Input
-                        id="demo-title"
-                        placeholder="CEO at Acme"
-                        value={formTitle}
-                        onChange={(e) => setFormTitle(e.target.value)}
-                      />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label htmlFor="demo-name">Your name *</Label>
+                        <Input
+                          id="demo-name"
+                          placeholder="Jane Smith"
+                          value={formName}
+                          onChange={(e) => setFormName(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="demo-title">Title / Company</Label>
+                        <Input
+                          id="demo-title"
+                          placeholder="CEO at Acme"
+                          value={formTitle}
+                          onChange={(e) => setFormTitle(e.target.value)}
+                        />
+                      </div>
                     </div>
+                    <Button type="submit" className="w-full gap-2" size="lg">
+                      <Send className="h-4 w-4" />
+                      Submit Testimonial
+                    </Button>
+                  </form>
+                ) : (
+                  <div className="py-6 text-center">
+                    <CheckCircle2 className="mx-auto h-16 w-16 text-green-500" />
+                    <h3 className="mt-4 text-xl font-bold">Thank you!</h3>
+                    <p className="mt-2 text-muted-foreground">
+                      Your testimonial has been submitted. It&apos;s waiting
+                      for approval in step 2 below.
+                    </p>
+                    <div className="mt-4 flex items-center justify-center gap-2 text-primary">
+                      <ArrowRight className="h-5 w-5" />
+                      <span className="text-sm font-medium">Approve it below ↓</span>
+                    </div>
+                    <Button variant="outline" className="mt-4" onClick={resetForm}>
+                      Submit another
+                    </Button>
                   </div>
-                  <Button type="submit" className="w-full gap-2" size="lg">
-                    <Send className="h-4 w-4" />
-                    Submit Testimonial
-                  </Button>
-                </form>
-              ) : (
-                <div className="py-6 text-center">
-                  <CheckCircle2 className="mx-auto h-16 w-16 text-green-500" />
-                  <h3 className="mt-4 text-xl font-bold">Thank you!</h3>
-                  <p className="mt-2 text-muted-foreground">
-                    Your testimonial has been submitted. It&apos;s waiting for approval in the inbox on the right.
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Bridge sentence between step 1 and step 2 — makes the workflow
+              difference explicit. */}
+          <p className="mt-8 rounded-lg border border-dashed bg-muted/30 px-4 py-3 text-center text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">Form submissions</span> land in your inbox for one-click approval.{" "}
+            <span className="font-medium text-foreground">Tweet imports</span> skip straight to your library — you already vetted them by picking the URL.
+          </p>
+        </div>
+
+        {/* STEP 2: Approve — full-width section. Shows the inbox with
+            pending items from the form path; empty state explains why
+            it's empty (either nothing submitted yet, or only the tweet
+            path was used). */}
+        <div className="mt-16">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+              2
+            </div>
+            <h2 className="text-lg font-semibold">Approve form submissions</h2>
+          </div>
+          <p className="mb-4 text-sm text-muted-foreground">
+            New form submissions appear here. Click <strong>Approve</strong> to
+            publish, or <strong>Reject</strong> to hide. Tweet imports skip
+            this step entirely.
+          </p>
+
+          <div className="rounded-2xl border bg-card p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                INBOX &middot; PENDING
+              </h3>
+              <Badge variant={testimonials.some((t) => !t.isApproved) ? "default" : "secondary"}>
+                {testimonials.filter((t) => !t.isApproved).length} pending
+              </Badge>
+            </div>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              {testimonials.filter((t) => !t.isApproved).length === 0 ? (
+                <div className="py-8 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Inbox is empty.
                   </p>
-                  <div className="mt-4 flex items-center justify-center gap-2 text-primary">
-                    <ArrowRight className="h-5 w-5" />
-                    <span className="text-sm font-medium">Now approve it in the Inbox →</span>
-                  </div>
-                  <Button variant="outline" className="mt-4" onClick={resetForm}>
-                    Submit another
-                  </Button>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Submit the form above to see a pending item here — or if
+                    you used the tweet path, this step is skipped by design.
+                  </p>
+                </div>
+              ) : (
+                testimonials
+                  .map((t, i) => ({ t, i }))
+                  .filter(({ t }) => !t.isApproved)
+                  .map(({ t, i }) => (
+                    <div
+                      key={`${t.customerName}-${i}`}
+                      className={`flex items-start gap-3 rounded-lg border p-3 transition-all ${
+                        t.isNew ? "border-primary bg-primary/5" : ""
+                      }`}
+                    >
+                      <LetterAvatar name={t.customerName} size={36} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold">{t.customerName}</span>
+                          {t.isNew && <Badge className="text-[10px] px-1.5 py-0">New</Badge>}
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{t.content}</p>
+                        <div className="mt-1 flex gap-0.5">
+                          {Array.from({ length: t.rating }).map((_, j) => (
+                            <Star key={j} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 flex-col gap-1">
+                        <Button
+                          size="sm"
+                          className="text-xs"
+                          onClick={() => approveTestimonial(i)}
+                        >
+                          <CheckCircle2 className="mr-1 h-3 w-3" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() => rejectTestimonial(i)}
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+              )}
+              {testimonials.some((t) => t.isApproved) && (
+                <div className="pt-2 text-center text-xs text-muted-foreground">
+                  + {testimonials.filter((t) => t.isApproved).length} already approved. Live on your wall ↓
                 </div>
               )}
             </div>
-          </div>
-
-          {/* RIGHT: What you (the business) see */}
-          <div ref={inboxRef}>
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                2
-              </div>
-              <h2 className="text-lg font-semibold">You approve it in your dashboard</h2>
-            </div>
-            <p className="mb-4 text-sm text-muted-foreground">
-              New submissions appear here. Click <strong>Approve</strong> to publish, or <strong>Reject</strong> to hide it — approved ones flow into the widget below.
-            </p>
-
-            <div className="rounded-2xl border bg-card p-4 shadow-sm">
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-muted-foreground">
-                  INBOX &middot; PENDING
-                </h3>
-                <Badge variant={testimonials.some((t) => !t.isApproved) ? "default" : "secondary"}>
-                  {testimonials.filter((t) => !t.isApproved).length} pending
-                </Badge>
-              </div>
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                {testimonials.filter((t) => !t.isApproved).length === 0 ? (
-                  <p className="py-6 text-center text-xs text-muted-foreground">
-                    Inbox is empty. Submit a testimonial on the left to see it appear here.
-                  </p>
-                ) : (
-                  testimonials
-                    .map((t, i) => ({ t, i }))
-                    .filter(({ t }) => !t.isApproved)
-                    .map(({ t, i }) => (
-                      <div
-                        key={`${t.customerName}-${i}`}
-                        className={`flex items-start gap-3 rounded-lg border p-3 transition-all ${
-                          t.isNew ? "border-primary bg-primary/5" : ""
-                        }`}
-                      >
-                        <LetterAvatar name={t.customerName} size={36} />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold">{t.customerName}</span>
-                            {t.isNew && <Badge className="text-[10px] px-1.5 py-0">New</Badge>}
-                          </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2">{t.content}</p>
-                          <div className="mt-1 flex gap-0.5">
-                            {Array.from({ length: t.rating }).map((_, j) => (
-                              <Star key={j} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 flex-col gap-1">
-                          <Button
-                            size="sm"
-                            className="text-xs"
-                            onClick={() => approveTestimonial(i)}
-                          >
-                            <CheckCircle2 className="mr-1 h-3 w-3" />
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-xs"
-                            onClick={() => rejectTestimonial(i)}
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                )}
-                {testimonials.some((t) => t.isApproved) && (
-                  <div className="pt-2 text-center text-xs text-muted-foreground">
-                    + {testimonials.filter((t) => t.isApproved).length} already approved. Live on your wall ↓
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Alt path: import from a tweet URL (mock — no real API call) */}
-        <div className="mt-16">
-          <div className="mb-3 flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-              ⇢
-            </div>
-            <h2 className="text-lg font-semibold">
-              Alt path: already have tweets praising you? Import in one click
-            </h2>
-          </div>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Paste any public X or LinkedIn post URL — we pull the author and
-            text, drop an approved testimonial into your library, and add it
-            to your wall. Same interactive card as above, zero collection form
-            needed.
-          </p>
-
-          <div className="rounded-2xl border bg-card p-5 shadow-sm">
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="min-w-0 flex-1 rounded-md border bg-muted/60 px-3 py-2 font-mono text-xs text-muted-foreground">
-                https://x.com/founder/status/1794012345678
-              </div>
-              <Button
-                onClick={fakeTweetImport}
-                disabled={tweetImporting || tweetImported}
-                className="shrink-0"
-              >
-                {tweetImporting
-                  ? "Importing…"
-                  : tweetImported
-                    ? "✓ Imported"
-                    : "Paste demo tweet"}
-              </Button>
-            </div>
-
-            {tweetImported && (
-              <div
-                className="mt-4 rounded-xl border bg-background p-4 shadow-sm"
-                style={{ animation: "fadeSlideIn 400ms ease-out" }}
-              >
-                <style>{`
-                  @keyframes fadeSlideIn {
-                    from { opacity: 0; transform: translateY(8px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                  }
-                `}</style>
-                <div className="flex gap-3">
-                  <LetterAvatar name="Priya Menon" size={40} />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold">Priya Menon</span>
-                      <Badge variant="secondary" className="text-[10px]">
-                        via X
-                      </Badge>
-                    </div>
-                    <div className="mt-1 flex gap-0.5">
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <Star
-                          key={j}
-                          className="h-3 w-3 fill-yellow-400 text-yellow-400"
-                        />
-                      ))}
-                    </div>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      &ldquo;Started using Testimoni today and had a live wall
-                      up in the time it took me to make coffee. Genuinely
-                      wild.&rdquo;
-                    </p>
-                  </div>
-                </div>
-                <p className="mt-3 text-center text-xs text-muted-foreground">
-                  ✓ Approved · Added to your wall · Zero setup
-                </p>
-              </div>
-            )}
           </div>
         </div>
 

@@ -82,35 +82,54 @@ const TESTIMONIALS: {
 export default function DemoWallPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/40 via-background to-background">
-      {/* Minimal top nav — only on the sample wall, not real customer walls.
-          Lets marketing-page visitors jump to Log in / Get Started without
-          bouncing back through history. */}
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 pt-4">
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/icon.png"
-            alt="Testimoni logo"
-            width={24}
-            height={24}
-            className="rounded-full"
-            priority
-          />
-          <span className="font-semibold">Testimoni</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
-            <TrackedLink cta="wall_demo_nav_login" surface="wall_demo" href="/login">Log in</TrackedLink>
-          </Button>
-          <Button size="sm" asChild>
-            <TrackedLink cta="wall_demo_nav_signup" surface="wall_demo" href="/signup">Get Started Free</TrackedLink>
-          </Button>
+      {/* Header — mirrors the landing-page header so /w/demo doesn't feel
+          like a stripped-down variant. Same logo size, same nav items,
+          same button hierarchy. */}
+      <header className="border-b bg-background">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/icon.png"
+              alt="Testimoni logo"
+              width={28}
+              height={28}
+              className="rounded-full"
+              priority
+            />
+            <span className="text-xl font-bold">Testimoni</span>
+          </Link>
+          <nav className="hidden items-center gap-6 md:flex">
+            <TrackedLink cta="wall_demo_nav_demo" surface="wall_demo" href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
+              Live Demo
+            </TrackedLink>
+            <TrackedLink cta="wall_demo_nav_pricing" surface="wall_demo" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
+              Pricing
+            </TrackedLink>
+            <TrackedLink cta="wall_demo_nav_login" surface="wall_demo" href="/login">
+              <Button variant="ghost" size="sm">Log in</Button>
+            </TrackedLink>
+            <TrackedLink cta="wall_demo_nav_signup" surface="wall_demo" href="/signup">
+              <Button size="sm">Get Started Free</Button>
+            </TrackedLink>
+          </nav>
+          <TrackedLink cta="wall_demo_nav_mobile_cta" surface="wall_demo" href="/signup" className="md:hidden">
+            <Button size="sm">Get Started</Button>
+          </TrackedLink>
         </div>
-      </nav>
+      </header>
 
       {/* Sample banner */}
-      <div className="mt-4 bg-primary/10 py-2 text-center text-xs font-medium text-primary">
+      <div className="bg-primary/10 py-2 text-center text-xs font-medium text-primary">
         <Sparkles className="mr-1 inline-block h-3 w-3" />
-        Sample wall — built with Testimoni. Your own can look like this.
+        Every testimonial on this sample wall came from pasting a tweet URL.{" "}
+        <TrackedLink
+          cta="wall_demo_banner_try_it"
+          surface="wall_demo"
+          href="/demo"
+          className="underline underline-offset-2"
+        >
+          Try it →
+        </TrackedLink>
       </div>
 
       {/* Hero */}

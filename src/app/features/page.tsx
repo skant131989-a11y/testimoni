@@ -11,6 +11,8 @@ import {
   Palette,
   ShieldCheck,
   Globe,
+  Twitter,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
@@ -18,11 +20,32 @@ import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
-  title: "Features — Testimoni",
+  title: "Features — Paste a Tweet, Build a Wall of Love",
   description:
-    "Every feature Testimoni ships: multi-channel collection forms, curated widgets, five layouts, Shadow DOM embed, video testimonials, and more.",
+    "Paste an X or LinkedIn URL and get an approved testimonial in 30 seconds. Every workspace gets a hosted Wall of Love URL free. Five collection channels, five widget layouts, one-line embed.",
   alternates: { canonical: "/features" },
 };
+
+// The two headline wedges — paste-a-tweet + hosted wall — get a dedicated
+// hero row above the generic feature grid.
+const headlineWedges = [
+  {
+    icon: Twitter,
+    title: "Paste-a-tweet import",
+    tag: "The wedge",
+    desc: "Paste any public X or LinkedIn post URL. We pull the author and text automatically, drop an approved testimonial into your library, and add it to your wall in one click. No screenshots, no copy-paste.",
+    cta: "Try it on the homepage",
+    href: "/",
+  },
+  {
+    icon: Heart,
+    title: "Free hosted Wall of Love",
+    tag: "Free on day one",
+    desc: "Every workspace gets a public /w/[id] URL — a full Wall of Love you can drop in your Instagram bio, email signature, or QR code before you touch a single line of code. Competitors gate this behind Pro.",
+    cta: "See a sample wall",
+    href: "/w/demo",
+  },
+];
 
 const features = [
   {
@@ -84,15 +107,48 @@ export default function FeaturesPage() {
               Features
             </div>
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-              Everything you need to ship social proof
+              Paste a tweet.{" "}
+              <span className="text-primary">Build a Wall of Love in a day.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-              Collect, curate, and embed customer testimonials — end to end. No
-              piecing together forms, spreadsheets, and hand-coded HTML.
+              Two things nobody else does as smoothly: import praise you already
+              have from X or LinkedIn in seconds, and share a hosted wall of
+              love free on day one. Everything else is standard testimonial-
+              tool table stakes — solid, but not why you&apos;d switch.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* Headline wedges — bigger, above the fold, first thing after H1 */}
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {headlineWedges.map((w) => (
+              <div
+                key={w.title}
+                className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-6"
+              >
+                <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  {w.tag}
+                </div>
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+                  <w.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h2 className="mt-4 text-xl font-bold">{w.title}</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{w.desc}</p>
+                <TrackedLink
+                  cta={`features_wedge_${w.title.toLowerCase().replace(/\s+/g, "_")}`}
+                  surface="features"
+                  href={w.href}
+                  className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+                >
+                  {w.cta} <ArrowRight className="h-3.5 w-3.5" />
+                </TrackedLink>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-12 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Everything else — the standard stuff, done well
+          </p>
+          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
               <div key={f.title} className="rounded-2xl border bg-card p-6">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">

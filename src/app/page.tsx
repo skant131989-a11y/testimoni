@@ -20,6 +20,7 @@ import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
+import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 
 export default async function LandingPage() {
   let isLoggedIn = false;
@@ -82,12 +83,12 @@ export default async function LandingPage() {
             Just launched · Free forever plan
           </div>
           <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-            Collect testimonials.{" "}
-            <span className="text-primary">Embed them on your site today.</span>
+            Paste a tweet.{" "}
+            <span className="text-primary">Get a testimonial in 30 seconds.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-            Collect via link, form, or QR. Approve the ones you love, drop them
-            into a widget, and embed with one line of code. Free plan.
+            Or collect fresh ones via form, QR, or link. Approve, embed, done
+            — free hosted Wall of Love included.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <TrackedLink cta="hero_signup" surface="home" href="/signup">
@@ -111,14 +112,12 @@ export default async function LandingPage() {
             </TrackedLink>
           </p>
         </div>
-
-        {/* Animated demo preview — CSS-only, no video/GIF */}
-        <div className="mt-16">
-          <AnimatedDemo />
-        </div>
       </section>
 
-      {/* Tweet-import call-out — the "start collecting today with zero customers" story */}
+      {/* Tweet-import callout — visual proof of the hero's "paste a tweet"
+          promise. Placed right after the hero (before the animated demo,
+          which shows the form path) so the reader gets the promised
+          paste-a-tweet demo first. */}
       <section className="border-y bg-gradient-to-br from-blue-50/40 via-background to-purple-50/40 py-14">
         <div className="mx-auto max-w-4xl px-4">
           <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
@@ -128,16 +127,16 @@ export default async function LandingPage() {
                 Instant library
               </div>
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                Already have tweets praising you?
+                Have a tweet? Paste it right here.
               </h2>
               <p className="mt-3 text-base text-muted-foreground">
-                Paste an{" "}
+                Paste any public{" "}
                 <span className="font-semibold text-foreground">X (Twitter)</span>{" "}
                 or{" "}
                 <span className="font-semibold text-foreground">LinkedIn</span>{" "}
-                post URL — we pull the author and text, drop an approved
-                testimonial into your library, and add it to your wall in one
-                click. No screenshots. No copy-paste.
+                post URL — we pull the author and text right now, no signup
+                needed. When you like what you see, save it to your library
+                with one click.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Button asChild>
@@ -151,35 +150,27 @@ export default async function LandingPage() {
               </div>
             </div>
 
-            {/* Visual: mock URL bar + arrow + card */}
-            <div className="hidden max-w-sm rounded-2xl border bg-card p-4 shadow-sm md:block">
-              <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Paste a URL
-              </div>
-              <div className="rounded-md border bg-muted/60 px-3 py-2 font-mono text-[11px] text-muted-foreground">
-                https://x.com/user/status/…
-              </div>
-              <div className="my-3 flex items-center gap-2 text-[11px] font-medium text-primary">
-                <ArrowRight className="h-3.5 w-3.5" />
-                Approved &amp; live on your wall
-              </div>
-              <div className="rounded-md border bg-background p-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                    S
-                  </div>
-                  <div className="text-xs font-semibold">Sarah Chen</div>
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                  &ldquo;Testimoni turned a mess of tweets into a wall of love
-                  in about 30 seconds.&rdquo;
-                </p>
-              </div>
+            {/* Live paste-a-URL demo — anonymous, hits /api/tweet-preview,
+                swaps the static Sarah card for the user's imported
+                testimonial. The whole point of this section. */}
+            <div className="w-full max-w-sm md:min-w-[380px]">
+              <TweetPreviewDemo />
             </div>
           </div>
         </div>
       </section>
 
+      {/* Animated demo — shows the form → approve → widget path so both
+          intake flows get one visual each (tweet-import above, form here). */}
+      <section className="py-16">
+        <div className="mx-auto max-w-7xl px-4">
+          <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted-foreground">
+            That was paste-a-tweet. Here&apos;s the form path — click through,
+            it&apos;s live.
+          </p>
+          <AnimatedDemo />
+        </div>
+      </section>
 
       {/* Features */}
       <section className="border-t bg-muted/30 py-20">
