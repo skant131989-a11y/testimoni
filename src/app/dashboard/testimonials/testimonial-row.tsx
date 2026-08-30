@@ -53,6 +53,42 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
   const [editName, setEditName] = useState(t.customerName);
   const [editTitle, setEditTitle] = useState(t.customerTitle ?? "");
   const [editRating, setEditRating] = useState<number>(t.rating ?? 5);
+  // Optimistic removal — hide the row locally on successful delete so
+  // the UI updates without a full page refresh.
+  const [removed, setRemoved] = useState(false);
+  // Track which side-action is in flight (approve/archive/delete) so
+  // we can show a spinner on the right button.
+  const [busy, setBusy] = useState<"approve" | "archive" | "delete" | null>(null);
+
+  async function runAction(action: "approve" | "archive" | "delete") {
+    if (busy) return;
+    setBusy(action);
+    setError(null);
+    try {
+      const res = await fetch(`/api/testimonials/${t.id}/${action}`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Couldn't ${action}. Try again.`);
+        return;
+      }
+      if (action === "delete") {
+        setRemoved(true);
+      } else if (action === "approve") {
+        setT((prev) => ({ ...prev, status: "APPROVED" }));
+      } else {
+        setT((prev) => ({ ...prev, status: "ARCHIVED" }));
+      }
+      // Refresh so server components (counts, empty states) stay in
+      // sync without blocking the optimistic UI update above.
+      router.refresh();
+    } catch {
+      setError(`Couldn't ${action}. Try again.`);
+    } finally {
+      setBusy(null);
+    }
+  }
 
   function startEdit() {
     setEditContent(t.content ?? "");
@@ -98,6 +134,9 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
       setSaving(false);
     }
   }
+
+  // Optimistic delete — remove from DOM without waiting for router.refresh().
+  if (removed) return null;
 
   return (
     <Card>
@@ -259,24 +298,54 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
                 <Pencil className="h-4 w-4 text-muted-foreground" />
               </Button>
               {t.status !== "APPROVED" && (
-                <form action={`/api/testimonials/${t.id}/approve`} method="POST">
-                  <Button type="submit" variant="ghost" size="icon" className="h-8 w-8" title="Approve">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  title="Approve"
+                  disabled={busy !== null}
+                  onClick={() => runAction("approve")}
+                >
+                  {busy === "approve" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
                     <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  </Button>
-                </form>
+                  )}
+                </Button>
               )}
               {t.status !== "ARCHIVED" && (
-                <form action={`/api/testimonials/${t.id}/archive`} method="POST">
-                  <Button type="submit" variant="ghost" size="icon" className="h-8 w-8" title="Archive">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  title="Archive"
+                  disabled={busy !== null}
+                  onClick={() => runAction("archive")}
+                >
+                  {busy === "archive" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
                     <Archive className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </form>
-              )}
-              <form action={`/api/testimonials/${t.id}/delete`} method="POST">
-                <Button type="submit" variant="ghost" size="icon" className="h-8 w-8" title="Delete">
-                  <Trash2 className="h-4 w-4 text-destructive" />
+                  )}
                 </Button>
-              </form>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                title="Delete"
+                disabled={busy !== null}
+                onClick={() => runAction("delete")}
+              >
+                {busy === "delete" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                )}
+              </Button>
             </div>
           )}
         </div>
