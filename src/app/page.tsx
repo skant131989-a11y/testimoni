@@ -51,6 +51,9 @@ export default async function LandingPage() {
             <TrackedLink cta="nav_demo" surface="home_nav" href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
               Live Demo
             </TrackedLink>
+            <TrackedLink cta="nav_features" surface="home_nav" href="/features" className="text-sm text-muted-foreground hover:text-foreground">
+              Features
+            </TrackedLink>
             <TrackedLink cta="nav_pricing" surface="home_nav" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
               Pricing
             </TrackedLink>
@@ -139,16 +142,6 @@ export default async function LandingPage() {
                 needed. When you like what you see, save it to your library
                 with one click.
               </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Button asChild>
-                  <TrackedLink cta="tweet_import_signup" surface="home" href="/signup">
-                    Try it free <ArrowRight className="ml-2 h-4 w-4" />
-                  </TrackedLink>
-                </Button>
-                <Button variant="outline" asChild>
-                  <TrackedLink cta="tweet_import_features" surface="home" href="/features">See all features</TrackedLink>
-                </Button>
-              </div>
             </div>
 
             {/* Live paste-a-URL demo — anonymous, hits /api/tweet-preview,
@@ -345,6 +338,17 @@ export default async function LandingPage() {
               </div>
             ))}
           </div>
+
+          <p className="mt-10 text-center text-sm">
+            <TrackedLink
+              cta="features_grid_see_all"
+              surface="home"
+              href="/features"
+              className="font-medium text-primary hover:underline"
+            >
+              See all features and details →
+            </TrackedLink>
+          </p>
         </div>
       </section>
 
