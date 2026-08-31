@@ -155,7 +155,7 @@ export default async function LandingPage() {
                 swaps the static Sarah card for the user's imported
                 testimonial. The whole point of this section. */}
             <div className="w-full max-w-sm md:min-w-[380px]">
-              <TweetPreviewDemo />
+              <TweetPreviewDemo isLoggedIn={isLoggedIn} />
             </div>
           </div>
         </div>

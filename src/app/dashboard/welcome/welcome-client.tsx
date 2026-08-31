@@ -93,38 +93,69 @@ export function WelcomeClient({
   }, [isNewSignup, signupMethod, userId, userEmail]);
 
   // Auto-import a URL the user pasted on the homepage demo before
-  // signing up. sessionStorage survives the auth redirect (same tab)
-  // and lets the "Save to my Wall" CTA feel like it worked instantly
-  // — user lands here with their tweet already saved. Ref guard so
-  // React StrictMode doesn't double-import.
+  // signing up. sessionStorage survives the auth redirect (same tab).
+  // If a preview payload is also stashed we render the imported card
+  // instantly (skipping the "Importing..." loader flash) and persist
+  // to the DB in the background.
   const autoImportRef = useRef(false);
   useEffect(() => {
     if (autoImportRef.current) return;
     let pending: string | null = null;
+    let previewJson: string | null = null;
     try {
       pending = sessionStorage.getItem("pending_import_url");
+      previewJson = sessionStorage.getItem("pending_import_preview");
     } catch {}
     if (!pending) return;
     autoImportRef.current = true;
     try {
       sessionStorage.removeItem("pending_import_url");
+      sessionStorage.removeItem("pending_import_preview");
     } catch {}
-    // Prefill and trigger the same import flow the user would run
-    // manually. Doing this via state → handleImport keeps a single
-    // code path.
     setUrl(pending);
-    // Fire on next tick so the state update settles first.
-    setTimeout(() => {
-      handleImportRef.current?.();
-    }, 0);
     track("auto_import_from_demo", { source: "welcome_landing" });
+
+    // Optimistic render — use the stashed preview so the user sees
+    // "your testimonial is live" immediately, without watching a
+    // second loader after the one on the landing page.
+    if (previewJson) {
+      try {
+        const preview = JSON.parse(previewJson) as {
+          content: string;
+          customerName: string;
+          customerTitle?: string | null;
+          source: string;
+          sourceUrl: string;
+        };
+        setImported({
+          // Provisional id — replaced with the real DB id once persist
+          // completes. Edit is disabled until then via the check on
+          // imported.id below (added in startEdit).
+          id: "pending",
+          content: preview.content,
+          customerName: preview.customerName,
+          customerTitle: preview.customerTitle ?? null,
+          rating: 5,
+          source: preview.source,
+          sourceUrl: preview.sourceUrl,
+        });
+        if (defaultWidgetId) setImportedWidgetId(defaultWidgetId);
+      } catch {}
+    }
+
+    // Persist in the background. Pass the URL directly so we don't
+    // race React's re-render after setUrl above — see handleImport.
+    const hadPreview = !!previewJson;
+    setTimeout(() => {
+      handleImportRef.current?.({ silent: hadPreview, urlOverride: pending! });
+    }, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // handleImport is defined below with closures over state; keep a
   // ref so the auto-import effect (which must run once on mount)
   // can call the latest version.
-  const handleImportRef = useRef<() => void>(null);
+  const handleImportRef = useRef<((opts?: { silent?: boolean; urlOverride?: string }) => void) | null>(null);
 
   const fullFormUrl =
     typeof window !== "undefined" && defaultFormUrl
@@ -151,15 +182,22 @@ export function WelcomeClient({
     ? `<div id="fw-${effectiveWidgetId}"></div>\n<script src="${embedOrigin}/embed/widget.js" data-widget-id="${effectiveWidgetId}" async></script>`
     : null;
 
-  async function handleImport() {
-    if (!url.trim()) return;
-    setImporting(true);
+  async function handleImport(opts?: { silent?: boolean; urlOverride?: string }) {
+    // Accept an explicit urlOverride so callers that just set the URL
+    // state don't have to wait for React's re-render before firing the
+    // import. Without this, the auto-import effect races the render
+    // and reads a stale empty `url` from the closure — the persist
+    // then bails on the trim() guard and the testimonial never lands
+    // in the DB (only in the optimistic UI).
+    const target = (opts?.urlOverride ?? url).trim();
+    if (!target) return;
+    if (!opts?.silent) setImporting(true);
     setError(null);
     try {
       const res = await fetch("/api/testimonials/import-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: target }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -173,7 +211,7 @@ export function WelcomeClient({
     } catch {
       setError("Something went wrong. Try again.");
     } finally {
-      setImporting(false);
+      if (!opts?.silent) setImporting(false);
     }
   }
 
@@ -584,7 +622,7 @@ export function WelcomeClient({
                 className="text-base"
               />
               <Button
-                onClick={handleImport}
+                onClick={() => handleImport()}
                 disabled={importing || !url.trim()}
                 size="lg"
               >

@@ -450,7 +450,7 @@ export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
                 Auto-approved · Skips step 2 →
               </div>
               <div className="flex-1">
-                <TweetPreviewDemo />
+                <TweetPreviewDemo isLoggedIn={isLoggedIn} />
               </div>
             </div>
 

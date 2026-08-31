@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Loader2, Sparkles, Link2, Code } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
@@ -16,19 +15,24 @@ interface PreviewResult {
   sourceUrl: string;
 }
 
+interface TweetPreviewDemoProps {
+  /** Passed from the parent server component. When true, "Save to my
+   *  Wall" skips the signup redirect and imports directly. */
+  isLoggedIn?: boolean;
+}
+
 /**
- * Live paste-a-tweet demo for the homepage. Anonymous visitor pastes
- * an X or LinkedIn URL, we call /api/tweet-preview, then swap the
- * static Sarah Chen card for their imported testimonial. Zero signup
- * required — the goal is the "wait, it actually works" moment.
+ * Live paste-a-tweet demo. Anonymous visitors get a "wait, it works"
+ * moment before signup; logged-in visitors can save the imported
+ * testimonial directly to their workspace without leaving.
  */
-export function TweetPreviewDemo() {
+export function TweetPreviewDemo({ isLoggedIn = false }: TweetPreviewDemoProps) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PreviewResult | null>(null);
-  // Guard so we only fire tweet_preview_pasted once per session — a
-  // user pasting multiple times in a row shouldn't spam the funnel.
+  const [savingLoggedIn, setSavingLoggedIn] = useState(false);
+  // Guard so we only fire tweet_preview_pasted once per session.
   const [pastedTracked, setPastedTracked] = useState(false);
 
   function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
@@ -36,8 +40,6 @@ export function TweetPreviewDemo() {
     const pastedText = e.clipboardData.getData("text").trim();
     if (!pastedText) return;
     setPastedTracked(true);
-    // Best-effort platform detection from the pasted string, so we can
-    // segment the funnel by source even before Import is clicked.
     const platform = /(?:twitter|x)\.com\/[^/]+\/status\/\d+/i.test(pastedText)
       ? "twitter"
       : /linkedin\.com\/(feed\/update|posts|pulse)/i.test(pastedText)
@@ -64,16 +66,18 @@ export function TweetPreviewDemo() {
         track("tweet_preview_failed", { source: "home_hero", status: res.status });
         return;
       }
-      setResult(data.testimonial);
-      // Stash the URL so the welcome page can auto-import it into the
-      // user's fresh workspace after signup — turns "cool demo" into
-      // "your first testimonial is already saved" on landing.
+      const preview: PreviewResult = data.testimonial;
+      setResult(preview);
+      // Stash BOTH the URL and the full preview so the welcome page
+      // can render the imported card instantly without re-fetching
+      // (skips the "Importing..." loader flash after signup).
       try {
         sessionStorage.setItem("pending_import_url", url.trim());
+        sessionStorage.setItem("pending_import_preview", JSON.stringify(preview));
       } catch {}
       track("tweet_preview_success", {
         source: "home_hero",
-        platform: data.testimonial.source,
+        platform: preview.source,
       });
     } catch {
       setError("Network error. Try again in a moment.");
@@ -86,14 +90,48 @@ export function TweetPreviewDemo() {
   function reset() {
     track("tweet_preview_try_another", {
       source: "home_hero",
-      // Track which platform they're coming FROM — helps see if
-      // people bounce between X and LinkedIn.
       previous_platform: result?.source ?? null,
     });
     setResult(null);
     setUrl("");
     setError(null);
     setPastedTracked(false);
+  }
+
+  /**
+   * Logged-in "Save to my Wall": call the authenticated import
+   * endpoint directly, then land the user on the welcome page's
+   * success screen. sessionStorage already holds the preview so
+   * welcome renders instantly without another API round-trip.
+   */
+  async function handleSaveWhileLoggedIn() {
+    if (!result || savingLoggedIn) return;
+    setSavingLoggedIn(true);
+    setError(null);
+    track("tweet_preview_save_cta", {
+      source: "home_hero",
+      platform: result.source,
+      auth: "logged_in",
+    });
+    try {
+      const res = await fetch("/api/testimonials/import-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: result.sourceUrl }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Couldn't save. Try again.");
+        setSavingLoggedIn(false);
+        return;
+      }
+      // Success — welcome page will read sessionStorage and render
+      // the imported card immediately (see welcome-client.tsx).
+      window.location.assign("/dashboard/welcome");
+    } catch {
+      setError("Network error. Try again in a moment.");
+      setSavingLoggedIn(false);
+    }
   }
 
   return (
@@ -143,18 +181,16 @@ export function TweetPreviewDemo() {
         {result ? (
           <>
             <Sparkles className="h-3.5 w-3.5" />
-            Approved &amp; ready to embed
+            Preview — save it to make it live
           </>
         ) : (
           <>
             <ArrowRight className="h-3.5 w-3.5" />
-            Approved &amp; live on your wall
+            Example — paste a URL to try it
           </>
         )}
       </div>
 
-      {/* Result card — shows the imported testimonial OR a static example
-          before the user pastes anything. */}
       <div className="rounded-md border bg-background p-3">
         {result ? (
           <>
@@ -172,33 +208,82 @@ export function TweetPreviewDemo() {
             <p className="mt-2 line-clamp-4 text-xs leading-relaxed text-muted-foreground">
               &ldquo;{result.content}&rdquo;
             </p>
-            {/* Post-import conversion — this testimonial gets auto-saved
-                to their new library on signup. Highest-intent moment on
-                the whole page. */}
-            <div className="mt-4 flex flex-col gap-2 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
+
+            {/* Benefit stack + CTA. Sells both wedges (wall URL + embed)
+                in the same card so the single button converts whether
+                the user cares about sharing a link or embedding code. */}
+            <div className="mt-4 space-y-2 border-t pt-3">
+              <p className="text-[11px] font-semibold text-foreground">
+                Save it to get:
+              </p>
+              <ul className="space-y-1.5 text-[11px] text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <Link2 className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
+                  <span>
+                    A public <span className="font-medium text-foreground">Wall of Love URL</span>{" "}
+                    — share in bios, DMs, or a QR code
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Code className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
+                  <span>
+                    <span className="font-medium text-foreground">One-line embed</span>{" "}
+                    for your site — Framer, Webflow, WordPress, React
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
                 onClick={reset}
-                className="order-2 text-[11px] font-medium text-muted-foreground hover:text-foreground sm:order-1"
+                disabled={savingLoggedIn}
+                className="order-2 text-[11px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50 sm:order-1"
               >
                 ← Try another URL
               </button>
-              <Button
-                size="sm"
-                asChild
-                onClick={() =>
-                  track("tweet_preview_save_cta", {
-                    source: "home_hero",
-                    platform: result.source,
-                  })
-                }
-                className="order-1 sm:order-2"
-              >
-                <Link href="/signup?import=1">
-                  Save to my Wall <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                </Link>
-              </Button>
+              {isLoggedIn ? (
+                <Button
+                  size="sm"
+                  onClick={handleSaveWhileLoggedIn}
+                  disabled={savingLoggedIn}
+                  className="order-1 sm:order-2"
+                >
+                  {savingLoggedIn ? (
+                    <>
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      Saving…
+                    </>
+                  ) : (
+                    <>
+                      Save to my Wall <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  asChild
+                  onClick={() =>
+                    track("tweet_preview_save_cta", {
+                      source: "home_hero",
+                      platform: result.source,
+                      auth: "logged_out",
+                    })
+                  }
+                  className="order-1 sm:order-2"
+                >
+                  <a href="/signup?import=1">
+                    Save to my Wall <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                  </a>
+                </Button>
+              )}
             </div>
+
+            <p className="mt-2 text-center text-[10px] text-muted-foreground sm:text-right">
+              Free forever · No card required
+            </p>
           </>
         ) : (
           <>
