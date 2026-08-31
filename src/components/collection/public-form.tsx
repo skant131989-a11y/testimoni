@@ -54,8 +54,10 @@ export default function PublicCollectionForm({
         body: JSON.stringify({
           formId: formConfig.id,
           customerName: name,
-          customerEmail: email,
-          content,
+          // Send undefined (via omit) for blank optional fields — Zod
+          // treats "" as an invalid email on the server otherwise.
+          customerEmail: email.trim() || undefined,
+          content: content.trim() || undefined,
           rating: rating || null,
           answers: jobTitle.trim() ? { jobTitle: jobTitle.trim() } : {},
         }),

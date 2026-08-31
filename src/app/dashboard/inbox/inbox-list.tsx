@@ -27,6 +27,8 @@ interface InboxListProps {
   testimonialCount: number;
   maxTestimonials: number;
   isFree: boolean;
+  defaultWidgetId: string | null;
+  defaultWidgetName: string | null;
 }
 
 export function InboxList({
@@ -36,6 +38,8 @@ export function InboxList({
   testimonialCount: initialCount,
   maxTestimonials,
   isFree,
+  defaultWidgetId,
+  defaultWidgetName,
 }: InboxListProps) {
   const router = useRouter();
   const [submissions, setSubmissions] = useState(initial);
@@ -48,7 +52,7 @@ export function InboxList({
   >([]);
   const [isRefreshing, startTransition] = useTransition();
 
-  function pushConfirmation(message: string, widgetId?: string) {
+  function pushConfirmation(message: string, widgetId?: string): string {
     const key = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setConfirmations((c) => [...c, { key, message, widgetId }]);
     // Rejects auto-dismiss after 6s. Approves with a widget stick
@@ -60,6 +64,7 @@ export function InboxList({
         setConfirmations((c) => c.filter((x) => x.key !== key));
       }, 6000);
     }
+    return key;
   }
 
   function dismissConfirmation(key: string) {
@@ -72,10 +77,27 @@ export function InboxList({
     customerName: string
   ): Promise<void> {
     setError(null);
-    // Optimistically remove from the list
+    // Optimistically remove from the list AND surface the confirmation
+    // banner immediately. The approve API can take 500ms-5s depending
+    // on DB latency; without this optimism the "View wall" CTA is
+    // invisible during that gap and users think nothing happened.
     const previous = submissions;
     setSubmissions((s) => s.filter((sub) => sub.id !== id));
     setPendingIds((p) => new Set(p).add(id));
+
+    // Show the confirmation now — the widgetId comes from the parent
+    // server component (same default widget the approve API adds to),
+    // so we don't need to wait for the API response to display it.
+    let optimisticKey: string | null = null;
+    if (action === "approve") {
+      const widgetName = defaultWidgetName ?? "your wall";
+      optimisticKey = pushConfirmation(
+        `Approved ${customerName}. Added to “${widgetName}”.`,
+        defaultWidgetId ?? undefined
+      );
+    } else {
+      pushConfirmation(`Rejected ${customerName}.`);
+    }
 
     try {
       const res = await fetch(`/api/submissions/${id}/${action}`, {
@@ -83,8 +105,11 @@ export function InboxList({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        // Revert on error
+        // Revert on error — also pull the optimistic confirmation so
+        // there isn't a stale "Approved!" banner sitting over a
+        // failed request.
         setSubmissions(previous);
+        if (optimisticKey) dismissConfirmation(optimisticKey);
         if (res.status === 403) {
           setAtLimit(true);
           setError(data.error || "Testimonial limit reached.");
@@ -96,20 +121,12 @@ export function InboxList({
       if (action === "approve") {
         setTestimonialCount((n) => n + 1);
         if (testimonialCount + 1 >= maxTestimonials) setAtLimit(true);
-        const widget = data.widget as { id: string; name: string } | null | undefined;
-        pushConfirmation(
-          widget
-            ? `Approved ${customerName}. Added to “${widget.name}”.`
-            : `Approved ${customerName}. Added to your library.`,
-          widget?.id
-        );
-      } else {
-        pushConfirmation(`Rejected ${customerName}.`);
       }
       // Refresh tab counts (NEW → APPROVED etc.) without a full navigation
       startTransition(() => router.refresh());
     } catch {
       setSubmissions(previous);
+      if (optimisticKey) dismissConfirmation(optimisticKey);
       setError(`Could not ${action}. Try again.`);
     } finally {
       setPendingIds((p) => {
@@ -136,45 +153,57 @@ export function InboxList({
             <div
               key={c.key}
               className={cn(
-                "flex flex-col gap-3 rounded-md border p-3 text-sm sm:flex-row sm:items-center sm:justify-between",
+                "rounded-md border p-3 text-sm",
                 c.widgetId
                   ? "border-primary bg-primary/10"
                   : "border-primary/30 bg-primary/5"
               )}
             >
-              <p className="flex items-center gap-2 font-medium text-primary">
-                <Sparkles className="h-4 w-4" />
-                {c.message}
-              </p>
-              <div className="flex items-center gap-1.5">
-                {c.widgetId && (
-                  <>
-                    {/* Primary — the "aha" moment. Purple, not ghost. */}
-                    <Button asChild size="sm">
-                      <a
-                        href={`/w/${c.widgetId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="flex items-center gap-2 font-medium text-primary">
+                  <Sparkles className="h-4 w-4" />
+                  {c.message}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  {c.widgetId && (
+                    <>
+                      {/* Primary — the "aha" moment. Purple, not ghost. */}
+                      <Button asChild size="sm">
+                        <a
+                          href={`/w/${c.widgetId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View wall <ExternalLink className="ml-1 h-3 w-3" />
+                        </a>
+                      </Button>
+                      <Button asChild size="sm" variant="ghost">
+                        <Link href={`/dashboard/widgets/${c.widgetId}`}>
+                          Edit widget <ArrowRight className="ml-1 h-3 w-3" />
+                        </Link>
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={() => dismissConfirmation(c.key)}
+                        aria-label="Dismiss"
+                        className="rounded-sm p-1 text-muted-foreground hover:bg-primary/10 hover:text-foreground"
                       >
-                        View wall <ExternalLink className="ml-1 h-3 w-3" />
-                      </a>
-                    </Button>
-                    <Button asChild size="sm" variant="ghost">
-                      <Link href={`/dashboard/widgets/${c.widgetId}`}>
-                        Edit widget <ArrowRight className="ml-1 h-3 w-3" />
-                      </Link>
-                    </Button>
-                    <button
-                      type="button"
-                      onClick={() => dismissConfirmation(c.key)}
-                      aria-label="Dismiss"
-                      className="rounded-sm p-1 text-muted-foreground hover:bg-primary/10 hover:text-foreground"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </>
-                )}
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
+              {/* Expectation-setter — we surface the banner optimistically
+                  (before the approve API commits), so if the user clicks
+                  View wall in the same second, the wall page may not
+                  have the fresh testimonial yet. This tiny line saves a
+                  "why isn't it there?" refresh. */}
+              {c.widgetId && (
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  May take a few seconds to appear on the wall.
+                </p>
+              )}
             </div>
           ))}
         </div>

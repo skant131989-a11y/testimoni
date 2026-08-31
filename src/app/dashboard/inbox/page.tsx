@@ -33,7 +33,7 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   const activeFilter: FilterTab =
     (params.filter?.toUpperCase() as FilterTab) || "NEW";
 
-  const [submissions, counts, subscription, testimonialCount] = await Promise.all([
+  const [submissions, counts, subscription, testimonialCount, defaultWidget] = await Promise.all([
     prisma.submission.findMany({
       where: {
         status: activeFilter,
@@ -49,6 +49,14 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
     }),
     prisma.subscription.findUnique({ where: { workspaceId } }),
     prisma.testimonial.count({ where: { workspaceId } }),
+    // Default widget = oldest active. Same one the approve API adds
+    // testimonials to — we need its id upfront so the client can show
+    // the "View wall" CTA optimistically without waiting for the API.
+    prisma.widget.findFirst({
+      where: { workspaceId, isActive: true },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, name: true },
+    }),
   ]);
 
   const effectivePlan = getEffectivePlan(workspaceSlug, subscription?.plan);
@@ -117,6 +125,8 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
         testimonialCount={testimonialCount}
         maxTestimonials={effectiveLimits.maxTestimonials}
         isFree={effectivePlan === "FREE"}
+        defaultWidgetId={defaultWidget?.id ?? null}
+        defaultWidgetName={defaultWidget?.name ?? null}
       />
     </div>
   );
