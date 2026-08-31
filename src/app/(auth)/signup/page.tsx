@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -20,6 +20,11 @@ import {
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // The landing-page tweet preview redirects here with ?import=1 after
+  // "Save to my Wall". Show a specific "your testimonial is waiting"
+  // headline so the user knows exactly why they're here.
+  const isImportFlow = searchParams.get("import") === "1";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -137,9 +142,15 @@ export default function SignupPage() {
   return (
     <Card>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Create an account</CardTitle>
+        <CardTitle className="text-2xl">
+          {isImportFlow
+            ? "One more step — save your testimonial"
+            : "Paste a tweet. Get a testimonial in 30 seconds."}
+        </CardTitle>
         <CardDescription>
-          Enter your details below to create your account
+          {isImportFlow
+            ? "The tweet you just imported is waiting in your workspace. Sign up (30 seconds) and we'll drop it on your Wall of Love."
+            : "Create your free account. Every workspace gets a public Wall of Love URL and a one-line embed on day one."}
         </CardDescription>
       </CardHeader>
       <CardContent>

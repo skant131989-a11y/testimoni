@@ -51,10 +51,19 @@ export function InboxList({
   function pushConfirmation(message: string, widgetId?: string) {
     const key = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setConfirmations((c) => [...c, { key, message, widgetId }]);
-    // Auto-dismiss after 6 seconds
-    setTimeout(() => {
-      setConfirmations((c) => c.filter((x) => x.key !== key));
-    }, 6000);
+    // Rejects auto-dismiss after 6s. Approves with a widget stick
+    // around indefinitely so the "View wall" CTA is actually visible
+    // — the whole point of surfacing it is to let the user click it,
+    // not flash it and hide before they can react.
+    if (!widgetId) {
+      setTimeout(() => {
+        setConfirmations((c) => c.filter((x) => x.key !== key));
+      }, 6000);
+    }
+  }
+
+  function dismissConfirmation(key: string) {
+    setConfirmations((c) => c.filter((x) => x.key !== key));
   }
 
   async function handleAction(
@@ -126,30 +135,46 @@ export function InboxList({
           {confirmations.map((c) => (
             <div
               key={c.key}
-              className="flex items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm"
+              className={cn(
+                "flex flex-col gap-3 rounded-md border p-3 text-sm sm:flex-row sm:items-center sm:justify-between",
+                c.widgetId
+                  ? "border-primary bg-primary/10"
+                  : "border-primary/30 bg-primary/5"
+              )}
             >
               <p className="flex items-center gap-2 font-medium text-primary">
                 <Sparkles className="h-4 w-4" />
                 {c.message}
               </p>
-              {c.widgetId && (
-                <div className="flex gap-1">
-                  <Button asChild size="sm" variant="ghost">
-                    <a
-                      href={`/w/${c.widgetId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+              <div className="flex items-center gap-1.5">
+                {c.widgetId && (
+                  <>
+                    {/* Primary — the "aha" moment. Purple, not ghost. */}
+                    <Button asChild size="sm">
+                      <a
+                        href={`/w/${c.widgetId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View wall <ExternalLink className="ml-1 h-3 w-3" />
+                      </a>
+                    </Button>
+                    <Button asChild size="sm" variant="ghost">
+                      <Link href={`/dashboard/widgets/${c.widgetId}`}>
+                        Edit widget <ArrowRight className="ml-1 h-3 w-3" />
+                      </Link>
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => dismissConfirmation(c.key)}
+                      aria-label="Dismiss"
+                      className="rounded-sm p-1 text-muted-foreground hover:bg-primary/10 hover:text-foreground"
                     >
-                      View wall <ExternalLink className="ml-1 h-3 w-3" />
-                    </a>
-                  </Button>
-                  <Button asChild size="sm" variant="ghost">
-                    <Link href={`/dashboard/widgets/${c.widgetId}`}>
-                      Edit widget <ArrowRight className="ml-1 h-3 w-3" />
-                    </Link>
-                  </Button>
-                </div>
-              )}
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           ))}
         </div>

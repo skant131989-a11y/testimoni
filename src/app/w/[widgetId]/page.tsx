@@ -193,18 +193,26 @@ export default async function HostedWallPage({ params }: WallPageProps) {
         </div>
       </main>
 
-      {/* Watermark (free plan only) */}
+      {/* Watermark (free plan only) — doubles as a viral acquisition
+          link. Every public wall URL a customer shares becomes a
+          signup funnel: someone lands here, sees the "Build your own"
+          CTA, converts. Pro removes this. */}
       {showWatermark && (
-        <footer className="border-t py-6">
-          <p className="text-center text-sm text-muted-foreground">
-            Powered by{" "}
+        <footer className="border-t bg-muted/30 py-8">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 px-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              Powered by{" "}
+              <Link href="/" className="font-semibold text-primary hover:underline">
+                Testimoni
+              </Link>
+            </p>
             <Link
-              href="/"
-              className="font-semibold text-primary hover:underline"
+              href="/?ref=wall"
+              className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10"
             >
-              Testimoni
+              Build your own Wall of Love — free →
             </Link>
-          </p>
+          </div>
         </footer>
       )}
     </div>
