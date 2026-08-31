@@ -173,6 +173,119 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* Wall of Love preview — shows what a live wall actually looks like
+          after all the collection + approval. Static grid, not interactive,
+          links out to /w/demo for the full experience. Same testimonials as
+          the OG card so the visual identity carries through. */}
+      <section className="border-t bg-muted/30 py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              And this is what you&apos;ll build.
+            </h2>
+            <p className="mt-3 text-base text-muted-foreground">
+              Every workspace gets a public Wall of Love URL on the free
+              plan — share in bios, DMs, or a QR code on your packaging.
+            </p>
+          </div>
+
+          {/* 6-card wall preview — 3 cols on desktop, 2 on tablet, 1 on
+              mobile. Same testimonials as /w/demo so the click-through
+              feels like "yes, exactly what I saw." */}
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                letter: "P",
+                color: "bg-emerald-600",
+                name: "Priya Menon",
+                title: "Founder, LinenLab",
+                quote:
+                  "Live wall up in the time it took me to make coffee. Genuinely wild.",
+              },
+              {
+                letter: "M",
+                color: "bg-blue-600",
+                name: "Marcus Johnson",
+                title: "Head of Growth, Northwind",
+                quote:
+                  "The frameworks are simple but every session moved a stuck problem. Best money I've spent this year.",
+              },
+              {
+                letter: "A",
+                color: "bg-orange-600",
+                name: "Aditi Rao",
+                title: "Solo consultant",
+                quote:
+                  "Signed one enterprise contract in month two — directly from the positioning we built together. Paid back the whole cohort.",
+              },
+              {
+                letter: "E",
+                color: "bg-rose-600",
+                name: "Emily Rodriguez",
+                title: "Product coach",
+                quote:
+                  "Warm, sharp, direct. Neha will tell you the thing you actually need to hear, then help you turn it into a plan.",
+              },
+              {
+                letter: "J",
+                color: "bg-cyan-600",
+                name: "Jamal Wilson",
+                title: "Course creator",
+                quote:
+                  "Weekly accountability was the thing that made it stick. First program I didn't quit halfway through.",
+              },
+              {
+                letter: "S",
+                color: "bg-purple-600",
+                name: "Sarah Chen",
+                title: "CEO, LaunchPad",
+                quote:
+                  "Practical, honest, no hype. I recommend Neha to every founder friend who tells me they're stuck.",
+              },
+            ].map((t) => (
+              <div
+                key={t.name}
+                className="flex flex-col rounded-xl border bg-background p-5 shadow-sm"
+              >
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <Star
+                      key={j}
+                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                </div>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-foreground">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div className="mt-4 flex items-center gap-3">
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white ${t.color}`}
+                  >
+                    {t.letter}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.title}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-8 text-center text-sm">
+            <TrackedLink
+              cta="wall_preview_see_live"
+              surface="home"
+              href="/w/demo"
+              className="font-medium text-primary hover:underline"
+            >
+              See a live Wall of Love →
+            </TrackedLink>
+          </p>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="border-t bg-muted/30 py-20">
         <div className="mx-auto max-w-7xl px-4">

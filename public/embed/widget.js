@@ -5,74 +5,54 @@
   --fw-accent: #7c3aed;
   --fw-border: #e5e7eb;
   --fw-muted: #6b7280;
-  --fw-radius: 14px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --fw-radius: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--fw-text);
   line-height: 1.5;
   text-align: left;
   font-style: normal;
   font-weight: normal;
-  display: block;
-  box-sizing: border-box;
-}
-
-.fw-root *, .fw-root *::before, .fw-root *::after {
-  box-sizing: border-box;
 }
 
 .fw-card {
   background: var(--fw-bg);
   border: 1px solid var(--fw-border);
   border-radius: var(--fw-radius);
-  padding: 20px 22px;
+  padding: 12px 16px;
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  transition: box-shadow 0.2s, transform 0.2s;
+  gap: 12px;
+  align-items: flex-start;
+  transition: box-shadow 0.2s;
 }
 
 .fw-card:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .fw-avatar {
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
 }
 
-.fw-avatar-letter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1;
-  font-family: inherit;
-}
-
 .fw-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   flex: 1;
-  min-height: 0;
+  min-width: 0;
 }
 
 .fw-stars {
   display: flex;
-  gap: 3px;
+  gap: 2px;
+  margin-bottom: 4px;
 }
 
 .fw-star {
   fill: var(--fw-border);
   stroke: none;
-  width: 20px;
-  height: 20px;
+  width: 13px;
+  height: 13px;
 }
 
 .fw-star-filled {
@@ -80,45 +60,25 @@
 }
 
 .fw-content {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.55;
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--fw-text);
-  text-align: left;
-  flex: 1;
-}
-
-.fw-content::before { content: "\\201C"; }
-.fw-content::after  { content: "\\201D"; }
-
-.fw-author-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-top: 2px;
-}
-
-.fw-author-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  min-width: 0;
 }
 
 .fw-author {
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--fw-text);
-  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+}
+
+.fw-name {
+  font-weight: 600;
+  font-size: 13px;
 }
 
 .fw-title {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--fw-muted);
-  font-weight: 500;
-  line-height: 1.3;
-  margin-top: 2px;
 }
 
 .fw-empty {
@@ -129,10 +89,8 @@
 
 .fw-watermark {
   text-align: center;
-  margin-top: 20px;
-  padding: 4px;
-  font-size: 12px;
-  color: var(--fw-muted);
+  margin-top: 16px;
+  padding: 8px;
 }
 
 .fw-watermark a {
@@ -148,37 +106,29 @@
 /* Grid Layout */
 .fw-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
-}
-
-.fw-grid .fw-card {
-  height: 100%;
-}
-
-/* Masonry Layout — flex-wrap based (CSS columns are unreliable with
-   flex children + margin-bottom, causing card overlap at column breaks) */
-.fw-masonry {
-  display: flex;
-  flex-wrap: wrap;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
-  align-items: flex-start;
+}
+
+/* Masonry Layout */
+.fw-masonry {
+  columns: 3;
+  column-gap: 12px;
 }
 
 .fw-masonry .fw-card {
-  flex: 1 1 280px;
-  min-width: 280px;
-  max-width: 100%;
-  box-sizing: border-box;
+  break-inside: avoid;
+  margin-bottom: 12px;
+  display: block;
 }
 
 @media (max-width: 768px) {
+  .fw-masonry { columns: 2; }
   .fw-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-  .fw-masonry .fw-card { flex: 1 1 220px; min-width: 220px; }
 }
 
 @media (max-width: 480px) {
-  .fw-masonry .fw-card { flex: 1 1 100%; min-width: 100%; }
+  .fw-masonry { columns: 1; }
   .fw-grid { grid-template-columns: 1fr; }
 }
 
@@ -427,7 +377,9 @@ function renderWidget(container, data) {
   }
 
   if (showWatermark) {
-    html += '<div class="fw-watermark"><a href="https://testimoni.io" target="_blank" rel="noopener">Powered by Testimoni</a></div>';
+    // UTM-tagged so we can attribute traffic from embedded widgets
+    // on customer sites separately from the hosted wall path.
+    html += '<div class="fw-watermark"><a href="https://testimoni.io/?utm_source=widget&utm_medium=embed&utm_campaign=powered_by" target="_blank" rel="noopener">Powered by Testimoni</a></div>';
   }
 
   container.innerHTML = html;
@@ -438,6 +390,9 @@ function renderWidget(container, data) {
 
 function renderCard(t, widget) {
   var html = '<div class="fw-card">';
+  if (widget.showAvatar !== false && t.customerAvatar) {
+    html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
+  }
   html += '<div class="fw-card-body">';
   if (widget.showRating !== false && t.rating) {
     html += '<div class="fw-stars">' + renderStars(t.rating) + '</div>';
@@ -445,55 +400,13 @@ function renderCard(t, widget) {
   if (t.content) {
     html += '<p class="fw-content">' + escapeHtml(t.content) + '</p>';
   }
-  html += '<div class="fw-author-row">';
-  if (widget.showAvatar !== false) {
-    html += renderAvatar(t);
-  }
-  html += '<div class="fw-author-text">';
-  html += '<div class="fw-author">' + escapeHtml(t.customerName) + '</div>';
+  html += '<div class="fw-author">';
+  html += '<span class="fw-name">' + escapeHtml(t.customerName) + '</span>';
   if (t.customerTitle) {
-    html += '<div class="fw-title">' + escapeHtml(t.customerTitle) + '</div>';
+    html += '<span class="fw-title">' + escapeHtml(t.customerTitle) + '</span>';
   }
-  html += '</div>';
-  html += '</div>';
-  html += '</div></div>';
+  html += '</div></div></div>';
   return html;
-}
-
-/* Colored letter avatar rendered when there's no photo. Palette picked
-   by name so the same person always gets the same color. */
-var FW_LETTER_BG = [
-  "#7c3aed", "#0891b2", "#059669", "#d97706", "#dc2626",
-  "#db2777", "#4f46e5", "#0284c7", "#65a30d", "#c2410c",
-];
-
-function letterAvatarSvg(name) {
-  var letter = (name || "?").trim().charAt(0).toUpperCase() || "?";
-  var idx = 0;
-  for (var i = 0; i < (name || "").length; i++) {
-    idx = (idx + name.charCodeAt(i)) % FW_LETTER_BG.length;
-  }
-  var bg = FW_LETTER_BG[idx];
-  return (
-    '<div class="fw-avatar fw-avatar-letter" style="background:' + bg + '">' +
-    escapeHtml(letter) +
-    '</div>'
-  );
-}
-
-function renderAvatar(t) {
-  if (t.customerAvatar) {
-    // onerror swaps a broken image (e.g. Gravatar 404) for the
-    // letter fallback without needing extra network round trips.
-    var fallback = letterAvatarSvg(t.customerName)
-      .replace(/'/g, "&#39;")
-      .replace(/"/g, "&quot;");
-    return (
-      '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) +
-      '" alt="" onerror="this.outerHTML=&quot;' + fallback + '&quot;" />'
-    );
-  }
-  return letterAvatarSvg(t.customerName);
 }
 
 function renderStars(count) {

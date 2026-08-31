@@ -374,7 +374,7 @@ function openModal(shadow, config, baseUrl, formId) {
     '<p class="fc-error" style="display:none"></p>' +
     '<button class="fc-submit">Submit</button>' +
     "</div>" +
-    '<div class="fc-powered"><a href="https://testimoni.io" target="_blank" rel="noopener">Powered by Testimoni</a></div>';
+    '<div class="fc-powered"><a href="https://testimoni.io/?utm_source=collect_form&utm_medium=embed&utm_campaign=powered_by" target="_blank" rel="noopener">Powered by Testimoni</a></div>';
 
   shadow.appendChild(modal);
 

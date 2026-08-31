@@ -82,7 +82,9 @@ function renderWidget(container, data) {
   }
 
   if (showWatermark) {
-    html += '<div class="fw-watermark"><a href="https://testimoni.io" target="_blank" rel="noopener">Powered by Testimoni</a></div>';
+    // UTM-tagged so we can attribute traffic from embedded widgets
+    // on customer sites separately from the hosted wall path.
+    html += '<div class="fw-watermark"><a href="https://testimoni.io/?utm_source=widget&utm_medium=embed&utm_campaign=powered_by" target="_blank" rel="noopener">Powered by Testimoni</a></div>';
   }
 
   container.innerHTML = html;
