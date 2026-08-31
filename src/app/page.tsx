@@ -176,10 +176,13 @@ export default async function LandingPage() {
       {/* Wall of Love preview — shows what a live wall actually looks like
           after all the collection + approval. Static grid, not interactive,
           links out to /w/demo for the full experience. Same testimonials as
-          the OG card so the visual identity carries through. */}
+          /w/demo so the click-through feels like "yes, exactly what I saw." */}
       <section className="border-t bg-muted/30 py-16">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mx-auto max-w-2xl text-center">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-background px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+              Sample wall
+            </div>
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
               And this is what you&apos;ll build.
             </h2>
@@ -190,57 +193,56 @@ export default async function LandingPage() {
           </div>
 
           {/* 6-card wall preview — 3 cols on desktop, 2 on tablet, 1 on
-              mobile. Same testimonials as /w/demo so the click-through
-              feels like "yes, exactly what I saw." */}
+              mobile. Same product-focused sample quotes as /w/demo. */}
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
-                letter: "P",
+                letter: "S",
                 color: "bg-emerald-600",
-                name: "Priya Menon",
-                title: "Founder, LinenLab",
+                name: "Sarah Chen",
+                title: "SaaS founder",
                 quote:
-                  "Live wall up in the time it took me to make coffee. Genuinely wild.",
+                  "We pasted 8 customer tweets and the homepage finally had proof.",
               },
               {
                 letter: "M",
                 color: "bg-blue-600",
                 name: "Marcus Johnson",
-                title: "Head of Growth, Northwind",
+                title: "Course creator",
                 quote:
-                  "The frameworks are simple but every session moved a stuck problem. Best money I've spent this year.",
+                  "Students fill the form after the cohort. Widget is on the sales page the same day.",
               },
               {
-                letter: "A",
+                letter: "P",
                 color: "bg-orange-600",
-                name: "Aditi Rao",
-                title: "Solo consultant",
+                name: "Priya Menon",
+                title: "Shopify / D2C",
                 quote:
-                  "Signed one enterprise contract in month two — directly from the positioning we built together. Paid back the whole cohort.",
-              },
-              {
-                letter: "E",
-                color: "bg-rose-600",
-                name: "Emily Rodriguez",
-                title: "Product coach",
-                quote:
-                  "Warm, sharp, direct. Neha will tell you the thing you actually need to hear, then help you turn it into a plan.",
+                  "Post-delivery form → 5-star quotes on the product page. No app store install.",
               },
               {
                 letter: "J",
-                color: "bg-cyan-600",
+                color: "bg-rose-600",
                 name: "Jamal Wilson",
-                title: "Course creator",
+                title: "Indie hacker",
                 quote:
-                  "Weekly accountability was the thing that made it stick. First program I didn't quit halfway through.",
+                  "Free plan was enough to replace the Notion doc of screenshots.",
               },
               {
-                letter: "S",
-                color: "bg-purple-600",
-                name: "Sarah Chen",
-                title: "CEO, LaunchPad",
+                letter: "E",
+                color: "bg-cyan-600",
+                name: "Emily Rodriguez",
+                title: "Agency owner",
                 quote:
-                  "Practical, honest, no hype. I recommend Neha to every founder friend who tells me they're stuck.",
+                  "One workspace, different widgets per client site.",
+              },
+              {
+                letter: "A",
+                color: "bg-purple-600",
+                name: "Aditi Rao",
+                title: "Freelance designer",
+                quote:
+                  "One-line embed dropped in Framer. Wall refreshes when I approve.",
               },
             ].map((t) => (
               <div

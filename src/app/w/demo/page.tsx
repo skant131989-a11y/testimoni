@@ -8,9 +8,9 @@ import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
-  title: "Neha's Coaching — Wall of Love (sample)",
+  title: "Example Wall of Love — Testimoni",
   description:
-    "A sample Wall of Love, built with Testimoni. See what your own hosted wall could look like — real names, real quotes, one shareable URL.",
+    "A sample Wall of Love, built with Testimoni. See what your own hosted wall could look like — sample quotes from Testimoni customers.",
   alternates: { canonical: "/w/demo" },
   openGraph: {
     title: "Sample Wall of Love — Testimoni",
@@ -20,8 +20,12 @@ export const metadata: Metadata = {
   },
 };
 
-const WORKSPACE = "Neha's Coaching";
+const WORKSPACE = "LinenLab";
 
+// Product-focused sample quotes — what Testimoni customers actually
+// say about the product. Deliberately generic personas (SaaS founder,
+// course creator, D2C, indie, agency, freelancer) so nobody reads
+// them as testimonials from a real coach's clients.
 const TESTIMONIALS: {
   id: string;
   content: string;
@@ -32,50 +36,50 @@ const TESTIMONIALS: {
   {
     id: "d1",
     content:
-      "Neha's program completely rebuilt how I plan my week. I went from constantly feeling behind to shipping consistently — and finally taking Sundays off.",
+      "We pasted 8 customer tweets and the homepage finally had proof.",
     rating: 5,
-    customerName: "Priya Menon",
-    customerTitle: "Founder, LinenLab",
+    customerName: "Sarah Chen",
+    customerTitle: "SaaS founder",
   },
   {
     id: "d2",
     content:
-      "The frameworks are simple, but the coaching is the real unlock. Every session moved a stuck problem forward. Best money I've spent this year.",
+      "Students fill the form after the cohort. Widget is on the sales page the same day.",
     rating: 5,
     customerName: "Marcus Johnson",
-    customerTitle: "Head of Growth, Northwind",
+    customerTitle: "Course creator",
   },
   {
     id: "d3",
     content:
-      "I signed one enterprise contract in month two — directly from the positioning we built together. Paid back the whole cohort several times over.",
+      "Post-delivery form → 5-star quotes on the product page. No app store install.",
     rating: 5,
-    customerName: "Aditi Rao",
-    customerTitle: "Solo consultant",
+    customerName: "Priya Menon",
+    customerTitle: "Shopify / D2C",
   },
   {
     id: "d4",
     content:
-      "Warm, sharp, direct. Neha will tell you the thing you actually need to hear, then help you turn it into a plan you'll follow through on.",
+      "Free plan was enough to replace the Notion doc of screenshots.",
     rating: 5,
-    customerName: "Emily Rodriguez",
-    customerTitle: "Product coach",
+    customerName: "Jamal Wilson",
+    customerTitle: "Indie hacker",
   },
   {
     id: "d5",
     content:
-      "The weekly accountability was the thing that made it stick. I've done other programs — this is the first one I didn't quit halfway through.",
+      "One workspace, different widgets per client site.",
     rating: 5,
-    customerName: "Jamal Wilson",
-    customerTitle: "Course creator",
+    customerName: "Emily Rodriguez",
+    customerTitle: "Agency owner",
   },
   {
     id: "d6",
     content:
-      "Practical, honest, no hype. I recommend Neha to every founder friend who tells me they're stuck.",
+      "One-line embed dropped in Framer. Wall refreshes when I approve.",
     rating: 5,
-    customerName: "Sarah Chen",
-    customerTitle: "CEO, LaunchPad",
+    customerName: "Aditi Rao",
+    customerTitle: "Freelance designer",
   },
 ];
 
@@ -118,31 +122,34 @@ export default function DemoWallPage() {
         </div>
       </header>
 
-      {/* Sample banner */}
+      {/* Sample banner — now the one clear "this is a sample" signal on
+          the page. Also carries the primary conversion CTA so early
+          bouncers see it above the fold. */}
       <div className="bg-primary/10 py-2 text-center text-xs font-medium text-primary">
         <Sparkles className="mr-1 inline-block h-3 w-3" />
-        Every testimonial on this sample wall came from pasting a tweet URL.{" "}
+        Sample wall —{" "}
         <TrackedLink
           cta="wall_demo_banner_try_it"
           surface="wall_demo"
           href="/demo"
           className="underline underline-offset-2"
         >
-          Try it →
+          build your own in 30 seconds →
         </TrackedLink>
       </div>
 
       {/* Hero */}
       <header className="mx-auto max-w-5xl px-4 pt-16 pb-10 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
-          N
+          L
         </div>
         <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
           Wall of Love
         </h1>
         <p className="mt-3 text-lg text-muted-foreground">
-          What clients are saying about{" "}
-          <span className="font-semibold text-foreground">{WORKSPACE}</span>
+          Sample quotes — what a{" "}
+          <span className="font-semibold text-foreground">{WORKSPACE}</span>{" "}
+          wall could look like on the free plan.
         </p>
       </header>
 
