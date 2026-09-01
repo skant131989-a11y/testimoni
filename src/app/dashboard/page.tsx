@@ -159,8 +159,8 @@ export default async function DashboardPage() {
     if (impressionsTotal === 0 && embedHref) {
       return {
         kind: "copy_embed",
-        title: "Your wall is empty on the web — copy the embed code",
-        desc: "One line of code drops your widget on any site: Framer, Webflow, WordPress, React, plain HTML.",
+        title: "Nobody's seen your wall yet — put it on your site",
+        desc: "One line of code drops your widget on any site: Framer, Webflow, WordPress, React, plain HTML. Or share the public URL directly.",
         href: embedHref,
         label: "Copy embed code",
       };
