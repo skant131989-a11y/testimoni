@@ -243,9 +243,50 @@ export function InboxList({
                 ? "Inbox zero! No pending submissions to review."
                 : `No ${activeFilter.toLowerCase()} submissions yet.`}
             </p>
+            {activeFilter === "NEW" && defaultWidgetId && (
+              <div className="mx-auto mt-6 max-w-md rounded-lg border border-primary/20 bg-primary/5 p-4 text-left">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                    Your Wall of Love is live
+                  </p>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Share it while there&apos;s nothing to review — every view
+                  is potential new social proof.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  <Button asChild size="sm">
+                    <a
+                      href={`/w/${defaultWidgetId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() =>
+                        track("wall_view_clicked", {
+                          surface: "inbox_empty",
+                          via: "button",
+                        })
+                      }
+                    >
+                      View wall <ExternalLink className="ml-1 h-3 w-3" />
+                    </a>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <Link
+                      href={`/dashboard/widgets/${defaultWidgetId}/embed`}
+                      onClick={() =>
+                        track("wall_embed_clicked", { surface: "inbox_empty" })
+                      }
+                    >
+                      Copy embed code
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            )}
             <Button asChild className="mt-4" variant="outline">
               <Link href="/dashboard/collect">
-                Get share links & embed code
+                Get share links &amp; embed code
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

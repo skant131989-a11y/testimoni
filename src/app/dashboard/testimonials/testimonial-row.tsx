@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { LetterAvatar } from "@/components/letter-avatar";
+import { track } from "@/lib/analytics";
 import type { TestimonialStatus, TestimonialSource } from "@prisma/client";
 
 const sourceColors: Record<TestimonialSource, string> = {
@@ -58,6 +59,9 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
   const [editRating, setEditRating] = useState<number>(t.rating ?? 5);
   const [videoUploading, setVideoUploading] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  // 4-second "Wall updated" flash shown after edit save — subtle
+  // reinforcement that the change is now live on the public wall.
+  const [wallUpdatedFlash, setWallUpdatedFlash] = useState(false);
   // Optimistic removal — hide the row locally on successful delete so
   // the UI updates without a full page refresh.
   const [removed, setRemoved] = useState(false);
@@ -132,6 +136,12 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
         rating: data.testimonial?.rating ?? editRating,
       });
       setEditing(false);
+      // Flash a "Wall updated" toast so users know their edit is live
+      // on the public wall — reinforces the connection between what
+      // they change here and what visitors see there. Auto-dismisses.
+      setWallUpdatedFlash(true);
+      setTimeout(() => setWallUpdatedFlash(false), 4000);
+      track("testimonial_edit_saved", { source: "row_edit" });
       router.refresh();
     } catch {
       setError("Could not save. Try again.");
@@ -196,7 +206,12 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
   if (removed) return null;
 
   return (
-    <Card>
+    <Card className="relative">
+      {wallUpdatedFlash && (
+        <div className="pointer-events-none absolute -top-2 left-1/2 z-10 -translate-x-1/2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary shadow-sm animate-in fade-in slide-in-from-top-1">
+          ✨ Updated on your wall
+        </div>
+      )}
       <CardContent className="flex items-start gap-4 p-4">
         {/* Avatar */}
         {t.customerAvatar ? (

@@ -98,7 +98,21 @@ export default function SignupPage() {
       // practice this makes signup one click instead of two.
       if (data.user?.id) identify(data.user.id, { email, name });
       track("signup_completed", { method: "email" }, { instant: true });
-      window.location.assign("/dashboard/welcome");
+      // Show the branded "Setting up your Wall of Love…" overlay
+      // then hard-navigate. window.location.assign keeps the current
+      // DOM (with our overlay) visible until the new page's HTML is
+      // fully ready to paint — router.push unmounts too eagerly and
+      // exposes a gray gap. requestAnimationFrame ensures the browser
+      // paints the overlay at least once before the navigation blocks
+      // the render thread.
+      // Overlay is already showing from the top of handleSubmit,
+      // so just hard-navigate. window.location.assign keeps the
+      // current DOM (with our overlay) painted until the new
+      // page's HTML is ready — router.push unmounts too eagerly
+      // and exposes a gray gap.
+      requestAnimationFrame(() => {
+        window.location.assign("/dashboard/welcome");
+      });
       return;
     } catch {
       setError("An unexpected error occurred. Please try again.");

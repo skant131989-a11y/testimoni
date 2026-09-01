@@ -172,6 +172,19 @@ export default function TwitterImage() {
                 Live on your wall
               </div>
             </div>
+
+            {/* Secondary intake hint — mirrors opengraph-image.tsx */}
+            <div
+              style={{
+                display: "flex",
+                marginTop: 14,
+                fontSize: 15,
+                color: "#6b21a8",
+                fontWeight: 500,
+              }}
+            >
+              Or share a form / QR code to collect fresh ones — same wall.
+            </div>
           </div>
 
           <div

@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MilestoneNudge } from "@/components/milestone-nudge";
+import { MILESTONE_COUNTS } from "@/lib/milestones";
 
 interface StatsCardProps {
   title: string;
@@ -77,6 +79,7 @@ export default async function DashboardPage() {
   // Fetch stats in parallel
   const [
     totalTestimonials,
+    approvedTestimonials,
     activeWidgets,
     pendingSubmissions,
     totalImpressions,
@@ -85,6 +88,9 @@ export default async function DashboardPage() {
     defaultForm,
   ] = await Promise.all([
     prisma.testimonial.count({ where: { workspaceId } }),
+    prisma.testimonial.count({
+      where: { workspaceId, status: "APPROVED" },
+    }),
     prisma.widget.count({ where: { workspaceId, isActive: true } }),
     prisma.submission.count({
       where: {
@@ -114,7 +120,9 @@ export default async function DashboardPage() {
   ]);
 
   const impressionsTotal = totalImpressions._sum.impressions ?? 0;
-  const wallUrl = defaultWidget ? `/w/${defaultWidget.id}` : null;
+  const wallUrl = defaultWidget
+    ? `${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}/w/${defaultWidget.id}`
+    : null;
   const embedHref = defaultWidget ? `/dashboard/widgets/${defaultWidget.id}/embed` : null;
   const formShareHref = defaultForm ? `/collect/${workspaceSlug}/${defaultForm.slug}` : null;
 
@@ -196,8 +204,14 @@ export default async function DashboardPage() {
       </div>
 
       {/* Next best action — one clear CTA above stats so the page
-          always feels forward-moving, never like a dead-end. */}
-      <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 shadow-sm">
+          always feels forward-moving, never like a dead-end.
+          Suppressed when a milestone card is showing below: the
+          milestone is the "hero moment" (celebration + share nudge),
+          so two purple cards stacked would compete for attention.
+          Milestone dismissal is per-session so if the user closes
+          it, they'll see "Do next" again on the next page load. */}
+      {!MILESTONE_COUNTS.includes(approvedTestimonials) && (
+        <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -226,6 +240,18 @@ export default async function DashboardPage() {
           </Button>
         </div>
       </div>
+      )}
+
+      {/* Milestone celebration — fires when approvedTestimonials
+          matches an exact milestone (1, 5, 10, 25, 50, 100). Encourages
+          sharing at the moment social proof crosses a threshold. */}
+      {defaultWidget && wallUrl && (
+        <MilestoneNudge
+          approvedCount={approvedTestimonials}
+          widgetId={defaultWidget.id}
+          wallUrl={wallUrl}
+        />
+      )}
 
       {/* Stats cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

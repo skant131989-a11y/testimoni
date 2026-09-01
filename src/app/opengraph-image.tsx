@@ -193,6 +193,21 @@ export default function OpenGraphImage() {
                 Live on your wall
               </div>
             </div>
+
+            {/* Secondary intake hint — one small line so cold shares
+                also see the form/QR path, without diluting the
+                paste-a-tweet wedge. */}
+            <div
+              style={{
+                display: "flex",
+                marginTop: 14,
+                fontSize: 15,
+                color: "#6b21a8",
+                fontWeight: 500,
+              }}
+            >
+              Or share a form / QR code to collect fresh ones — same wall.
+            </div>
           </div>
 
           {/* RIGHT: mini Wall of Love — two cards, one row, bigger type */}

@@ -497,8 +497,11 @@ export function WelcomeClient({
 
         {/* One-line embed — for users who want the widget on their site
             today. Deliberately ONE snippet, no picker; the full embed
-            page (script/iframe/React variants) lives in the dashboard. */}
-        {embedSnippet && (
+            page (script/iframe/React variants) lives in the dashboard.
+            Skeleton while effectiveWidgetId is null (fresh signup before
+            handleImport returns), so users see progress rather than a
+            missing section. */}
+        {embedSnippet ? (
           <div className="rounded-2xl border bg-card p-5 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -539,6 +542,24 @@ export function WelcomeClient({
                     More embed options →
                   </Button>
                 </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-2xl border bg-card p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <Code className="h-4 w-4 text-primary/60" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-muted-foreground">
+                  Getting your embed code ready…
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Setting up your default widget. This takes a second on first
+                  landing.
+                </p>
+                <div className="mt-3 h-16 animate-pulse rounded-md border bg-muted/60" />
               </div>
             </div>
           </div>

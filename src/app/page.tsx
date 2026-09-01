@@ -13,6 +13,9 @@ import {
   Inbox,
   LibraryBig,
   MonitorSmartphone,
+  Search,
+  Link2,
+  Share2,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ProPriceDual } from "@/components/pricing/price-display";
@@ -101,20 +104,94 @@ export default async function LandingPage() {
               </Button>
             </TrackedLink>
             <TrackedLink cta="hero_pricing" surface="home" href="/pricing">
-              <Button size="lg" variant="ghost">
+              <Button size="lg" variant="outline">
                 View Pricing
               </Button>
             </TrackedLink>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Free plan. No card required. Also collect fresh testimonials via
-            form, QR, or link — every intake path in one library.
-          </p>
+          {/* Trust + scope chips — three small pills replace the old
+              single-line tertiary text. Each claim now has its own
+              visual anchor so scanners catch "Free plan", "No card",
+              and "form/QR/link intake" without reading a full
+              sentence. Still lower priority than the CTAs above. */}
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Free forever plan
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              No credit card
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Also collect via form, QR, or link
+            </span>
+          </div>
           <p className="mt-3 text-sm text-muted-foreground">
             <TrackedLink cta="hero_wall_demo" surface="home" href="/w/demo" className="font-medium text-primary hover:underline">
               See a live Wall of Love →
             </TrackedLink>
           </p>
+        </div>
+      </section>
+
+      {/* How it works — two parallel intake paths meeting at the same
+          wall. Placed after the hero (which sells the paste-a-tweet
+          promise) and before the interactive demo. Shows tweet-import
+          AND form-collection as equal citizens so users without praise
+          tweets don't bounce thinking "not for me". */}
+      <section className="border-y bg-background py-12">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="mb-8 text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
+              How it works
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight md:text-3xl">
+              Two ways to fill your wall — pick whichever you have
+            </h2>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Path A — paste-a-tweet (the wedge) */}
+            <div className="rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-6">
+              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                Path A · Fastest
+              </div>
+              <h3 className="text-lg font-semibold">Have praise tweets or LinkedIn posts?</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Turn any public post into a testimonial in 30 seconds — no screenshots.
+              </p>
+              <ol className="mt-5 space-y-3">
+                <PathStep number={1}>Find a public X or LinkedIn post praising your work</PathStep>
+                <PathStep number={2}>Paste the URL — we pull author, photo, and text</PathStep>
+                <PathStep number={3}>Approve — it&apos;s live on your wall</PathStep>
+              </ol>
+            </div>
+
+            {/* Path B — collect via form */}
+            <div className="rounded-2xl border bg-card p-6">
+              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Path B · For fresh ones
+              </div>
+              <h3 className="text-lg font-semibold">Want to collect new testimonials?</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Share a form link with your customers — text, star ratings, and video (Pro).
+              </p>
+              <ol className="mt-5 space-y-3">
+                <PathStep number={1}>Share your collection form URL, QR code, or embed</PathStep>
+                <PathStep number={2}>Customers submit — lands in your inbox for review</PathStep>
+                <PathStep number={3}>Approve — it&apos;s live on your wall</PathStep>
+              </ol>
+            </div>
+          </div>
+
+          {/* Convergence line — both paths end at the same wall */}
+          <div className="mt-6 flex items-center justify-center">
+            <div className="rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-xs font-medium text-primary">
+              ↓ Both end at your Wall of Love — one URL, one embed, one library ↓
+            </div>
+          </div>
         </div>
       </section>
 
@@ -592,6 +669,61 @@ export default async function LandingPage() {
           </p>
         </div>
       </footer>
+    </div>
+  );
+}
+
+/**
+ * Single step within a "How it works" path column. Numbered circle
+ * + body copy in a tight row. Used by both Path A (paste-a-tweet)
+ * and Path B (form collection) so both paths render the same shape.
+ */
+function PathStep({ number, children }: { number: number; children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-3">
+      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+        {number}
+      </div>
+      <p className="text-sm leading-relaxed text-foreground">{children}</p>
+    </li>
+  );
+}
+
+/**
+ * Single step in the "How it works" strip. Numbered circle + icon +
+ * title + body. Extracted so the three-column grid stays flat and
+ * easy to scan in the JSX above.
+ *
+ * NOTE: no longer used after the two-path refactor, but kept in case
+ * we want to reintroduce a compact strip elsewhere.
+ */
+function HowItWorksStep({
+  number,
+  icon: Icon,
+  title,
+  body,
+}: {
+  number: number;
+  icon: React.ElementType;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="flex flex-col items-start gap-3">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+          {number}
+        </div>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
+      </div>
+      <div>
+        <p className="text-base font-semibold text-foreground">{title}</p>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+          {body}
+        </p>
+      </div>
     </div>
   );
 }

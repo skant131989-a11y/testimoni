@@ -16,11 +16,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
+  ExternalLink,
+  Copy,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { PlanType } from "@/lib/constants";
 import { QuoteOpen } from "@/components/icons/quote-open";
+import { track } from "@/lib/analytics";
 
 const navItems: {
   href: string;
@@ -40,11 +44,27 @@ const navItems: {
 interface SidebarProps {
   workspaceName: string;
   plan: PlanType;
+  /** Wall URL for the workspace's default widget. If null (no widget
+   *  yet — should never happen after signup but defensive), the wall
+   *  link is hidden. Absolute URL preferred so Copy gets the full
+   *  shareable link. */
+  wallUrl: string | null;
 }
 
-export function Sidebar({ workspaceName, plan }: SidebarProps) {
+export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [wallCopied, setWallCopied] = useState(false);
+
+  async function copyWallUrl() {
+    if (!wallUrl) return;
+    try {
+      await navigator.clipboard.writeText(wallUrl);
+      setWallCopied(true);
+      track("wall_url_copied", { surface: "sidebar" });
+      setTimeout(() => setWallCopied(false), 2000);
+    } catch {}
+  }
 
   return (
     <>
@@ -90,6 +110,86 @@ export function Sidebar({ workspaceName, plan }: SidebarProps) {
             <p className="truncate text-sm font-medium text-muted-foreground">
               {workspaceName}
             </p>
+          </div>
+        )}
+
+        {/* Your Wall of Love — always-visible link to the primary
+            shareable asset. Cheap to show, big value if users click
+            through and share. Hidden when there's no widget yet
+            (fresh account still provisioning) so we don't ship a
+            broken link. */}
+        {wallUrl && (
+          <div className={cn("border-b p-3", collapsed && "px-2")}>
+            {collapsed ? (
+              <a
+                href={wallUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Your Wall of Love"
+                className="flex items-center justify-center rounded-md p-2 text-primary hover:bg-primary/10"
+                onClick={() =>
+                  track("wall_view_clicked", { surface: "sidebar", via: "icon" })
+                }
+              >
+                <Sparkles className="h-5 w-5" />
+              </a>
+            ) : (
+              <div className="rounded-md bg-primary/5 p-2.5">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                    Your Wall of Love
+                  </p>
+                </div>
+                <a
+                  href={wallUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={wallUrl}
+                  className="mt-1 block truncate text-xs text-foreground hover:text-primary hover:underline"
+                  onClick={() =>
+                    track("wall_view_clicked", { surface: "sidebar", via: "url_text" })
+                  }
+                >
+                  {wallUrl.replace(/^https?:\/\//, "")}
+                </a>
+                <div className="mt-1.5 flex gap-1">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 flex-1 px-1.5 text-[10px]"
+                  >
+                    <a
+                      href={wallUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() =>
+                        track("wall_view_clicked", { surface: "sidebar", via: "button" })
+                      }
+                    >
+                      <ExternalLink className="mr-0.5 h-3 w-3" /> View
+                    </a>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 flex-1 px-1.5 text-[10px]"
+                    onClick={copyWallUrl}
+                  >
+                    {wallCopied ? (
+                      <>
+                        <Check className="mr-0.5 h-3 w-3" /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-0.5 h-3 w-3" /> Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
