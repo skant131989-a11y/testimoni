@@ -398,12 +398,25 @@ export default async function LandingPage() {
                 title: "Freelance designer",
                 quote:
                   "One-line embed dropped in Framer. Wall refreshes when I approve.",
+              },
+              {
+                // 7th card — video variant, centered on row 3 col 2
+                // via the render loop's grid classes so it doesn't
+                // sit orphaned at the edge of a lonely last row.
+                letter: "M",
+                color: "bg-emerald-600",
+                name: "Marcus Johnson",
+                title: "Course creator · 45s video",
+                quote:
+                  "Recorded a 45-second review from my phone. Now it's the first thing customers see on my product page.",
                 video: true,
               },
             ].map((t) => (
               <div
                 key={t.name}
-                className="flex flex-col rounded-xl border bg-background p-5 shadow-sm"
+                className={`flex flex-col rounded-xl border bg-background p-5 shadow-sm ${
+                  t.video ? "sm:col-span-2 lg:col-span-1 lg:col-start-2" : ""
+                }`}
               >
                 <div className="flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, j) => (
