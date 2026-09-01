@@ -208,7 +208,7 @@ export default async function PricingPage() {
             <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
           </nav>
           <p className="text-sm text-muted-foreground">
-            &copy; 2024 Testimoni. All rights reserved.
+            &copy; 2026 Testimoni. All rights reserved.
           </p>
         </div>
       </footer>

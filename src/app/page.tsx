@@ -588,7 +588,7 @@ export default async function LandingPage() {
             </a>
           </nav>
           <p className="text-sm text-muted-foreground">
-            &copy; 2024 Testimoni. All rights reserved.
+            &copy; 2026 Testimoni. All rights reserved.
           </p>
         </div>
       </footer>

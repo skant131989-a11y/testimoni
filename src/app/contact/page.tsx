@@ -138,7 +138,7 @@ export default async function ContactPage() {
 
       <footer className="border-t py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2024 Testimoni. All rights reserved.
+          &copy; 2026 Testimoni. All rights reserved.
         </div>
       </footer>
     </div>
