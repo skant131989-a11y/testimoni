@@ -196,6 +196,17 @@ export default function ImportClient({ isPro }: ImportClientProps) {
       if (!uploadRes.ok) {
         if (uploadData.upgradeRequired) setUpgradeRequired(true);
         setError(uploadData.error || "Video upload failed");
+        track("video_upload_failed", {
+          status: uploadRes.status,
+          reason: uploadData.upgradeRequired
+            ? "upgrade_required"
+            : uploadRes.status === 413
+              ? "too_large"
+              : uploadRes.status === 415
+                ? "bad_format"
+                : "other",
+          size_mb: videoFile ? +(videoFile.size / 1024 / 1024).toFixed(1) : null,
+        });
         return;
       }
 
@@ -234,6 +245,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
             setMode("url");
             setError("");
             setSuccess(null);
+            track("import_tab_selected", { tab: "url" });
           }}
         >
           <LinkIcon className="mr-2 h-4 w-4" />
@@ -245,6 +257,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
             setMode("manual");
             setError("");
             setSuccess(null);
+            track("import_tab_selected", { tab: "manual" });
           }}
         >
           <FileText className="mr-2 h-4 w-4" />
@@ -257,6 +270,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
             setError("");
             setSuccess(null);
             setUpgradeRequired(false);
+            track("import_tab_selected", { tab: "video", is_pro: isPro });
           }}
           className="relative"
         >
@@ -596,7 +610,15 @@ export default function ImportClient({ isPro }: ImportClientProps) {
                   testimonials, widgets, and forms.
                 </p>
                 <Button asChild size="sm" className="mt-3">
-                  <Link href="/dashboard/settings/billing">
+                  <Link
+                    href="/dashboard/settings/billing"
+                    onClick={() =>
+                      track("video_upgrade_nudge_click", {
+                        source: "video_tab",
+                        seen: upgradeRequired ? "after_submit" : "on_tab_open",
+                      })
+                    }
+                  >
                     Upgrade to Pro <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                   </Link>
                 </Button>
@@ -613,6 +635,13 @@ export default function ImportClient({ isPro }: ImportClientProps) {
                 onChange={(e) => {
                   const file = e.target.files?.[0] ?? null;
                   setVideoFile(file);
+                  if (file) {
+                    track("video_file_selected", {
+                      size_mb: +(file.size / 1024 / 1024).toFixed(1),
+                      type: file.type,
+                      is_pro: isPro,
+                    });
+                  }
                 }}
                 className="mt-1"
               />
