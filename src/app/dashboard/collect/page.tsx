@@ -56,7 +56,16 @@ export default function CollectPage() {
     fetch("/api/submissions?listForms=true")
       .then((r) => r.json())
       .then((data) => {
-        setForms(data.forms || []);
+        const list = data.forms || [];
+        setForms(list);
+        // Auto-expand the first (default) form's share section so
+        // Free-plan users - who have exactly one form - see the
+        // share links + embed code without having to click Share.
+        // Pro users with multiple forms still get the first one
+        // pre-expanded, others collapsed.
+        if (list.length > 0) {
+          setExpanded(list[0].id);
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
