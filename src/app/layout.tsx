@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PricingProvider } from "@/lib/use-pricing";
 import { AnalyticsInit } from "@/components/analytics-init";
+import { TopProgressBar } from "@/components/top-progress-bar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -121,6 +122,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
+        <TopProgressBar />
         <AnalyticsInit />
         <PricingProvider>{children}</PricingProvider>
       </body>
