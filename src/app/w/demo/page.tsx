@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Star, ArrowRight, Sparkles } from "lucide-react";
+import { Star, ArrowRight, Sparkles, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { InlineSignup } from "@/components/inline-signup";
@@ -34,6 +34,10 @@ const TESTIMONIALS: {
   rating: number;
   customerName: string;
   customerTitle: string;
+  /** Marks one card as a video variant so /w/demo shows what a
+   *  video testimonial looks like without shipping actual video
+   *  bytes. Just the thumbnail + play icon + PRO badge. */
+  video?: boolean;
 }[] = [
   {
     id: "d1",
@@ -82,6 +86,18 @@ const TESTIMONIALS: {
     rating: 5,
     customerName: "Aditi Rao",
     customerTitle: "Freelance designer",
+  },
+  {
+    // 7th testimonial — video variant. Positioned in the center of
+    // row 3 (col 2) on the 3-col grid via the render loop's grid
+    // classes so it doesn't sit alone at the edge.
+    id: "d7",
+    content:
+      "Recorded a 45-second review from my phone. Now it's the first thing customers see on my product page.",
+    rating: 5,
+    customerName: "Marcus Johnson",
+    customerTitle: "Course creator",
+    video: true,
   },
 ];
 
@@ -163,7 +179,13 @@ export default function DemoWallPage() {
           {TESTIMONIALS.map((t) => (
             <article
               key={t.id}
-              className="flex flex-col gap-3 rounded-2xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+              className={`flex flex-col gap-3 rounded-2xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md ${
+                // Video variant sits on its own row (7th out of 6+1).
+                // Force it into the center column on the 3-col grid
+                // and span both columns on the 2-col grid so it
+                // never lands orphaned at the edge.
+                t.video ? "md:col-span-2 lg:col-span-1 lg:col-start-2" : ""
+              }`}
             >
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -177,6 +199,21 @@ export default function DemoWallPage() {
                   />
                 ))}
               </div>
+              {/* Video variant — one card in the wall shows what a
+                  video testimonial looks like, complete with PRO
+                  badge in the corner. Static thumbnail (no actual
+                  video bytes) since the sample doesn't need to play,
+                  just demonstrate the visual. */}
+              {t.video && (
+                <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-slate-800 to-slate-900">
+                  <div className="absolute right-3 top-3 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                    Pro · Video
+                  </div>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-lg">
+                    <Play className="ml-0.5 h-5 w-5 fill-black text-black" />
+                  </div>
+                </div>
+              )}
               <p className="text-[15px] leading-relaxed text-foreground">
                 &ldquo;{t.content}&rdquo;
               </p>
@@ -188,6 +225,7 @@ export default function DemoWallPage() {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {t.customerTitle}
+                    {t.video && " · 45s video"}
                   </p>
                 </div>
               </div>
