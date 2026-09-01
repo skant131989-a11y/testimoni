@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getEffectivePlan } from "@/lib/plan";
 import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
+import { VideoTestimonialCard } from "@/components/video-testimonial-card";
 
 interface WallPageProps {
   params: Promise<{ widgetId: string }>;
@@ -36,6 +37,7 @@ async function getWidget(widgetId: string) {
               customerAvatar: true,
               customerTitle: true,
               customerUrl: true,
+              videoUrl: true,
             },
           },
         },
@@ -141,6 +143,12 @@ export default async function HostedWallPage({ params }: WallPageProps) {
                       />
                     ))}
                   </div>
+                )}
+                {t.videoUrl && (
+                  <VideoTestimonialCard
+                    videoUrl={t.videoUrl}
+                    customerName={t.customerName}
+                  />
                 )}
                 {t.content && (
                   <p className="text-[15px] leading-relaxed text-foreground">

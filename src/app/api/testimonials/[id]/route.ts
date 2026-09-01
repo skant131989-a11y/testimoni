@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { updateTestimonialSchema } from "@/lib/validations/testimonial";
+import { createAdminClient, VIDEO_BUCKET } from "@/lib/supabase/admin";
 
 export async function PATCH(
   request: Request,
@@ -36,10 +37,26 @@ export async function PATCH(
     );
   }
 
+  // Video-clear path: if the client explicitly nulled videoUrl, also
+  // clear the storage key AND delete the file from Supabase Storage so
+  // it stops counting against the workspace quota.
+  const clearingVideo = parsed.data.videoUrl === null && existing.videoStorageKey;
   const testimonial = await prisma.testimonial.update({
     where: { id },
-    data: parsed.data,
+    data: {
+      ...parsed.data,
+      ...(clearingVideo ? { videoStorageKey: null, videoDurationSeconds: null } : {}),
+    },
   });
+
+  if (clearingVideo && existing.videoStorageKey) {
+    const supabase = createAdminClient();
+    // Best-effort — a failure here just leaves an orphaned object.
+    await supabase.storage
+      .from(VIDEO_BUCKET)
+      .remove([existing.videoStorageKey])
+      .catch(() => {});
+  }
 
   return NextResponse.json({ testimonial });
 }
@@ -69,5 +86,15 @@ export async function DELETE(
 
   await prisma.testimonial.delete({ where: { id } });
 
+  // Clean up any uploaded video so storage costs match reality.
+  if (existing.videoStorageKey) {
+    const supabase = createAdminClient();
+    await supabase.storage
+      .from(VIDEO_BUCKET)
+      .remove([existing.videoStorageKey])
+      .catch(() => {});
+  }
+
   return NextResponse.json({ success: true });
 }
+

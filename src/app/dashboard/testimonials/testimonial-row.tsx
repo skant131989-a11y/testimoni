@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
@@ -11,6 +11,8 @@ import {
   X,
   Loader2,
   Check,
+  Video,
+  Upload,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,6 +40,7 @@ export interface TestimonialRowData {
   customerName: string;
   customerTitle: string | null;
   customerAvatar: string | null;
+  videoUrl: string | null;
   source: TestimonialSource;
   status: TestimonialStatus;
   createdAt: string;
@@ -53,6 +56,8 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
   const [editName, setEditName] = useState(t.customerName);
   const [editTitle, setEditTitle] = useState(t.customerTitle ?? "");
   const [editRating, setEditRating] = useState<number>(t.rating ?? 5);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   // Optimistic removal — hide the row locally on successful delete so
   // the UI updates without a full page refresh.
   const [removed, setRemoved] = useState(false);
@@ -135,6 +140,58 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
     }
   }
 
+  /**
+   * Video upload — same endpoint as the import page, scoped to this
+   * testimonial. Server handles Pro check + old-file cleanup on
+   * replace.
+   */
+  async function uploadVideo(file: File) {
+    setVideoUploading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("testimonialId", t.id);
+      const res = await fetch("/api/testimonials/upload-video", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Video upload failed");
+        return;
+      }
+      setT((prev) => ({ ...prev, videoUrl: data.videoUrl }));
+      router.refresh();
+    } catch {
+      setError("Video upload failed");
+    } finally {
+      setVideoUploading(false);
+      if (videoInputRef.current) videoInputRef.current.value = "";
+    }
+  }
+
+  async function removeVideo() {
+    if (!confirm("Remove the video from this testimonial?")) return;
+    setError(null);
+    try {
+      const res = await fetch(`/api/testimonials/${t.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoUrl: null }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Could not remove video");
+        return;
+      }
+      setT((prev) => ({ ...prev, videoUrl: null }));
+      router.refresh();
+    } catch {
+      setError("Could not remove video");
+    }
+  }
+
   // Optimistic delete — remove from DOM without waiting for router.refresh().
   if (removed) return null;
 
@@ -163,6 +220,12 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
             <Badge className={cn("text-xs", sourceColors[t.source])} variant="outline">
               {t.source.toLowerCase()}
             </Badge>
+            {t.videoUrl && (
+              <Badge variant="outline" className="gap-1 text-xs">
+                <Video className="h-3 w-3" />
+                Video
+              </Badge>
+            )}
             <Badge
               variant={
                 t.status === "APPROVED"
@@ -251,6 +314,91 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
                   ))}
                 </div>
               </div>
+
+              {/* Video attachment — Pro-only; server enforces the check
+                  and returns 403 with upgradeRequired for the client
+                  to render an upgrade nudge. */}
+              <div className="rounded-md border bg-background p-3">
+                <Label className="text-xs">Video</Label>
+                {t.videoUrl ? (
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <video
+                      src={t.videoUrl}
+                      controls
+                      preload="metadata"
+                      className="w-full max-w-xs rounded border bg-black"
+                    />
+                    <div className="flex gap-1.5">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={videoUploading}
+                        onClick={() => videoInputRef.current?.click()}
+                      >
+                        {videoUploading ? (
+                          <>
+                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                            Uploading…
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="mr-1.5 h-3.5 w-3.5" />
+                            Replace
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={removeVideo}
+                        disabled={videoUploading}
+                      >
+                        <X className="mr-1.5 h-3.5 w-3.5" />
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={videoUploading}
+                      onClick={() => videoInputRef.current?.click()}
+                    >
+                      {videoUploading ? (
+                        <>
+                          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                          Uploading…
+                        </>
+                      ) : (
+                        <>
+                          <Video className="mr-1.5 h-3.5 w-3.5" />
+                          Upload video (MP4, ≤50MB)
+                        </>
+                      )}
+                    </Button>
+                    <p className="mt-1.5 text-[11px] text-muted-foreground">
+                      Pro plan required. Free-plan uploads return an
+                      upgrade prompt.
+                    </p>
+                  </div>
+                )}
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/mp4,video/quicktime"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadVideo(file);
+                  }}
+                />
+              </div>
+
               {error && <p className="text-sm text-destructive">{error}</p>}
               <div className="flex gap-2">
                 <Button
@@ -274,9 +422,20 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
               </div>
             </div>
           ) : (
-            <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
-              {t.content || "No text content"}
-            </p>
+            <div className="mt-1.5 flex flex-col gap-2 sm:flex-row sm:items-start">
+              {t.videoUrl && (
+                <video
+                  src={t.videoUrl}
+                  controls
+                  preload="metadata"
+                  playsInline
+                  className="w-full max-w-[220px] shrink-0 rounded border bg-black"
+                />
+              )}
+              <p className="line-clamp-3 text-sm text-muted-foreground">
+                {t.content || (t.videoUrl ? "Video testimonial" : "No text content")}
+              </p>
+            </div>
           )}
         </div>
 

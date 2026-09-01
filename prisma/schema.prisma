@@ -66,6 +66,8 @@ model Testimonial {
   content       String?
   rating        Int?
   videoUrl      String?  @map("video_url")
+  videoStorageKey String? @map("video_storage_key")
+  videoDurationSeconds Int? @map("video_duration_seconds")
   imageUrls     String[] @map("image_urls")
 
   customerName   String  @map("customer_name")

@@ -176,6 +176,7 @@ export default async function TestimonialsPage({
               customerName: testimonial.customerName,
               customerTitle: testimonial.customerTitle,
               customerAvatar: testimonial.customerAvatar,
+              videoUrl: testimonial.videoUrl,
               source: testimonial.source,
               status: testimonial.status,
               createdAt: testimonial.createdAt.toISOString(),
