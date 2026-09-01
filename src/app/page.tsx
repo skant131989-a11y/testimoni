@@ -16,6 +16,7 @@ import {
   Search,
   Link2,
   Share2,
+  Play,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ProPriceDual } from "@/components/pricing/price-display";
@@ -24,6 +25,7 @@ import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
+import { PageEngagement } from "@/components/page-engagement";
 
 export default async function LandingPage() {
   let isLoggedIn = false;
@@ -36,8 +38,9 @@ export default async function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <StructuredData />
+      <PageEngagement surface="home" />
       {/* Header */}
-      <header className="border-b">
+      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <Image
@@ -243,6 +246,88 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* Video testimonials pitch — sits between the two demos and
+          the wall preview so the reader's mental model expands:
+          text works, forms work, and if you want richer proof
+          there's video. Kept compact so it doesn't dominate. */}
+      <section className="border-y bg-gradient-to-br from-primary/5 via-background to-background py-14">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                Pro · Video
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                Prefer video over text?
+              </h2>
+              <p className="mt-3 text-base text-muted-foreground">
+                Upload short customer videos or record them from your
+                phone. Video testimonials convert around 2× better than
+                text alone — nothing beats seeing a real customer say
+                real words.
+              </p>
+              <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span>MP4 or MOV up to 50MB, played in a modal on your wall</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span>Works the same on the hosted wall and the embed widget</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span>Pro plan — upgrade any time from your workspace</span>
+                </li>
+              </ul>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <TrackedLink cta="video_section_pricing" surface="home" href="/pricing">
+                  <Button variant="outline">
+                    See pricing <ArrowRight className="ml-1.5 h-4 w-4" />
+                  </Button>
+                </TrackedLink>
+              </div>
+            </div>
+
+            {/* Mockup video testimonial card — thumbnail placeholder
+                with a play overlay + customer meta below. No real
+                video (we don't want a 5MB payload on the landing
+                page); the visual conveys the concept. */}
+            <div className="mx-auto w-full max-w-md">
+              <div className="rounded-2xl border bg-background p-4 shadow-sm">
+                <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-slate-800 to-slate-900">
+                  <div className="absolute right-3 top-3 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                    Pro
+                  </div>
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg">
+                    <Play className="ml-0.5 h-6 w-6 fill-black text-black" />
+                  </div>
+                </div>
+                <div className="mt-4 flex gap-0.5">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">
+                    M
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Marcus Johnson</p>
+                    <p className="text-xs text-muted-foreground">
+                      Course creator · 45s video
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                Sample video testimonial card
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Wall of Love preview — shows what a live wall actually looks like
           after all the collection + approval. Static grid, not interactive,
           links out to /w/demo for the full experience. Same testimonials as
@@ -313,6 +398,7 @@ export default async function LandingPage() {
                 title: "Freelance designer",
                 quote:
                   "One-line embed dropped in Framer. Wall refreshes when I approve.",
+                video: true,
               },
             ].map((t) => (
               <div
@@ -327,6 +413,19 @@ export default async function LandingPage() {
                     />
                   ))}
                 </div>
+                {/* Video variant — one card in the grid is a video
+                    testimonial so passive scanners see what video
+                    looks like on the wall without a dedicated CTA. */}
+                {t.video && (
+                  <div className="relative mt-3 flex aspect-video items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-slate-800 to-slate-900">
+                    <div className="absolute right-2 top-2 rounded-full bg-primary/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground">
+                      Pro
+                    </div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md">
+                      <Play className="ml-0.5 h-4 w-4 fill-black text-black" />
+                    </div>
+                  </div>
+                )}
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-foreground">
                   &ldquo;{t.quote}&rdquo;
                 </p>
@@ -338,7 +437,10 @@ export default async function LandingPage() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.title}
+                      {t.video && " · Video"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -404,6 +506,18 @@ export default async function LandingPage() {
                 title: "Paste-a-tweet import",
                 description:
                   "Turn a public X or LinkedIn post into an approved testimonial by pasting the URL. Author and text pulled automatically; you edit the rating if you want.",
+              },
+              {
+                icon: Play,
+                title: "Video testimonials (Pro)",
+                description:
+                  "Upload MP4 or MOV clips up to 50MB. Video plays inline on your hosted wall and embedded widget. Video testimonials convert ~2× better than text.",
+              },
+              {
+                icon: MonitorSmartphone,
+                title: "Public Wall of Love URL",
+                description:
+                  "Every workspace gets a shareable wall URL — testimoni.io/w/… — public, no signup needed. Drop it in bios, DMs, or a QR code on your packaging.",
               },
             ].map((feature) => (
               <div key={feature.title} className="rounded-lg border bg-card p-6">

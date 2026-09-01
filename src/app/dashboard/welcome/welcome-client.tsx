@@ -668,6 +668,29 @@ export function WelcomeClient({
               <span>Post must be public and not deleted.</span>
             </p>
 
+            {/* Example URL — kills the "I don't have anything to paste"
+                freeze that was the #1 reason users abandoned the
+                welcome page. One click prefills the input with a real
+                praise tweet so they can see the flow work end-to-end
+                even without their own URL yet. */}
+            {!url && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                No tweet handy?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const exampleUrl =
+                      "https://twitter.com/vercel/status/1584080605893484544";
+                    setUrl(exampleUrl);
+                    track("welcome_example_url_used");
+                  }}
+                  className="font-medium text-primary hover:underline"
+                >
+                  Try this real one →
+                </button>
+              </p>
+            )}
+
             {/* Mode toggle — one tap to switch to manual entry */}
             <button
               type="button"

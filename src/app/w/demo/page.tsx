@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
+import { PageEngagement } from "@/components/page-engagement";
+import { WallDemoFloatingCta } from "@/components/wall-demo-floating-cta";
 
 export const metadata: Metadata = {
   title: "Example Wall of Love — Testimoni",
@@ -86,10 +88,12 @@ const TESTIMONIALS: {
 export default function DemoWallPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/40 via-background to-background">
+      <PageEngagement surface="wall_demo" />
+      <WallDemoFloatingCta />
       {/* Header — mirrors the landing-page header so /w/demo doesn't feel
           like a stripped-down variant. Same logo size, same nav items,
           same button hierarchy. */}
-      <header className="border-b bg-background">
+      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
             <Image
