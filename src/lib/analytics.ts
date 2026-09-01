@@ -21,16 +21,36 @@ export function initAnalytics() {
   // Suppress the known posthog-js + React 19 web-vitals bug:
   // "Cannot read properties of undefined (reading 'startTime')".
   // It comes from posthog's async web-vitals reporter and can't be
-  // disabled via config in this SDK version. Left uncaught, it
-  // pollutes the console + can break other tracking libs. We only
-  // swallow this ONE specific error signature.
+  // reliably disabled via config in this SDK version. Left uncaught,
+  // it pollutes the console AND some browsers throttle subsequent
+  // React work when an uncaught error fires inside requestIdleCallback,
+  // which was making dashboard navigation feel slow.
+  //
+  // We swallow BOTH the direct error and the unhandledrejection form
+  // (async reporter uses microtasks that can slip past window.error).
+  function isPostHogVitalsError(msg: string, stack: string): boolean {
+    return (
+      msg.includes("startTime") ||
+      msg.includes("reportAllChanges") ||
+      stack.includes("reportAllChanges") ||
+      stack.includes("web_vitals") ||
+      stack.includes("posthog")
+    );
+  }
   window.addEventListener("error", (e) => {
-    if (
-      e.message?.includes("startTime") ||
-      (e.error?.stack ?? "").includes("reportAllChanges")
-    ) {
+    const msg = e.message ?? "";
+    const stack = e.error?.stack ?? "";
+    if (isPostHogVitalsError(msg, stack)) {
       e.preventDefault();
       e.stopImmediatePropagation();
+    }
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    const reason = e.reason;
+    const msg = typeof reason === "string" ? reason : reason?.message ?? "";
+    const stack = reason?.stack ?? "";
+    if (isPostHogVitalsError(msg, stack)) {
+      e.preventDefault();
     }
   });
 
