@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { founderEmailHtml } from "@/lib/emails/founder-checkin";
+import { safeDisplayName } from "@/lib/name-utils";
 
 /**
  * Same lookup-by-email pattern as the welcome preview: enter an email,
@@ -73,8 +74,10 @@ export async function GET(request: Request) {
     } else {
       // Prefer first name only for warmth — "Hi Priya" reads better
       // than "Hi Priya Menon" in a personal note.
-      const rawName = user.name || email.split("@")[0];
-      const firstName = rawName.split(" ")[0];
+      // Sanitize garbage names from password-manager autofill misfires.
+      // First name only for the founder note's warmth ("Hi Priya").
+      const safeName = safeDisplayName(user.name, user.email);
+      const firstName = safeName.split(" ")[0];
       payload = {
         name: firstName,
         email: user.email,

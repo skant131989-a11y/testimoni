@@ -6,6 +6,10 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
 
 const nextConfig: NextConfig = {
   compress: true,
+  // Hide the "N" dev indicator in the bottom-left during local dev so
+  // recordings and screenshots don't show a Next.js badge. No effect
+  // in production (the indicator is dev-only anyway).
+  devIndicators: false,
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

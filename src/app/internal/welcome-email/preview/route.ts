@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { welcomeEmailHtml } from "@/lib/emails/welcome";
+import { safeDisplayName, safeWorkspaceName } from "@/lib/name-utils";
 
 /**
  * Renders the welcome email for a real user, looked up by email.
@@ -81,13 +82,15 @@ export async function GET(request: Request) {
         error: `No user or workspace found for ${email}`,
       };
     } else {
-      // Prefer the name we have; fall back to the local-part of the
-      // email so the greeting still reads like a real greeting.
-      const name = user.name || email.split("@")[0];
+      // Sanitize garbage names from password-manager autofill misfires
+      // (e.g. "uHbGbeZdFIKGwNycJyyQbcY"). Falls back to Title-Cased
+      // email local-part so recipients never see the raw junk.
+      const displayName = safeDisplayName(user.name, user.email);
+      const workspaceName = safeWorkspaceName(workspace.name, displayName);
       payload = {
-        name,
+        name: displayName,
         email: user.email,
-        workspaceName: workspace.name,
+        workspaceName,
         workspaceSlug: workspace.slug,
         widgetId: workspace.widgets[0]?.id ?? "demo",
         formSlug: workspace.forms[0]?.slug ?? "feedback",

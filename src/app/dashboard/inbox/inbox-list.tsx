@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LimitBanner } from "@/components/plan/limit-banner";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/analytics";
 
 export interface InboxSubmission {
   id: string;
@@ -85,6 +86,13 @@ export function InboxList({
     setSubmissions((s) => s.filter((sub) => sub.id !== id));
     setPendingIds((p) => new Set(p).add(id));
 
+    // Fire the intent event before the API call — if PostHog is
+    // ad-blocked, we still get server-side signal via a follow-up
+    // once we add server capture. For now this captures the click.
+    track(action === "approve" ? "submission_approved" : "submission_rejected", {
+      source: "inbox",
+    });
+
     // Show the confirmation now — the widgetId comes from the parent
     // server component (same default widget the approve API adds to),
     // so we don't need to wait for the API response to display it.
@@ -110,6 +118,10 @@ export function InboxList({
         // failed request.
         setSubmissions(previous);
         if (optimisticKey) dismissConfirmation(optimisticKey);
+        track("submission_action_failed", {
+          action,
+          status: res.status,
+        });
         if (res.status === 403) {
           setAtLimit(true);
           setError(data.error || "Testimonial limit reached.");
@@ -121,12 +133,20 @@ export function InboxList({
       if (action === "approve") {
         setTestimonialCount((n) => n + 1);
         if (testimonialCount + 1 >= maxTestimonials) setAtLimit(true);
+        // Approved submissions become testimonials — same canonical
+        // event as the import paths so the "how did they add
+        // testimonials" funnel captures every intake source.
+        track("testimonial_created", {
+          source: "submission_approved",
+          auto_added_to_widget: !!defaultWidgetId,
+        });
       }
       // Refresh tab counts (NEW → APPROVED etc.) without a full navigation
       startTransition(() => router.refresh());
     } catch {
       setSubmissions(previous);
       if (optimisticKey) dismissConfirmation(optimisticKey);
+      track("submission_action_failed", { action, status: 0 });
       setError(`Could not ${action}. Try again.`);
     } finally {
       setPendingIds((p) => {

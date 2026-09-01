@@ -84,6 +84,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
     setError("");
     setSuccess(null);
     setSuccessWidgetId(null);
+    track("testimonial_import_started", { source: "url" });
     try {
       const res = await fetch("/api/testimonials/import-url", {
         method: "POST",
@@ -93,14 +94,21 @@ export default function ImportClient({ isPro }: ImportClientProps) {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Import failed");
+        track("testimonial_import_failed", { source: "url", status: res.status });
         return;
       }
       const name = data.testimonial?.customerName ?? "the author";
       setSuccess(`Imported testimonial from ${name}. Added to your library.`);
       setSuccessWidgetId(data.widget?.id ?? null);
       setUrl("");
+      track("testimonial_created", {
+        source: "url",
+        platform: data.testimonial?.source ?? null,
+        auto_added_to_widget: !!data.widget?.id,
+      });
     } catch {
       setError("Something went wrong");
+      track("testimonial_import_failed", { source: "url", status: 0 });
     } finally {
       setImporting(false);
     }
@@ -112,6 +120,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
     setError("");
     setSuccess(null);
     setSuccessWidgetId(null);
+    track("testimonial_import_started", { source: "manual" });
     try {
       const res = await fetch("/api/testimonials", {
         method: "POST",
@@ -125,6 +134,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Import failed");
+        track("testimonial_import_failed", { source: "manual", status: res.status });
         return;
       }
       setSuccess(`Added testimonial from ${manualData.customerName}.`);
@@ -136,8 +146,13 @@ export default function ImportClient({ isPro }: ImportClientProps) {
         content: "",
         rating: 5,
       });
+      track("testimonial_created", {
+        source: "manual",
+        auto_added_to_widget: !!data.widget?.id,
+      });
     } catch {
       setError("Something went wrong");
+      track("testimonial_import_failed", { source: "manual", status: 0 });
     } finally {
       setImporting(false);
     }
@@ -220,6 +235,13 @@ export default function ImportClient({ isPro }: ImportClientProps) {
       setVideoFile(null);
       if (videoInputRef.current) videoInputRef.current.value = "";
       track("video_testimonial_uploaded", { source: "import_page" });
+      // Also fire the canonical testimonial_created event so this
+      // path shows up in the same top-level "how did they add
+      // testimonials" funnel as URL + manual imports.
+      track("testimonial_created", {
+        source: "video",
+        auto_added_to_widget: !!successWidgetId,
+      });
     } catch {
       setError("Something went wrong");
     } finally {

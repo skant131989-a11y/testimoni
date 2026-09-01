@@ -18,6 +18,27 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 
+/**
+ * Some password managers (LastPass, older 1Password rules) ignore
+ * autoComplete="name" and fill the Name field with a generated
+ * password anyway. Result: users signed up as
+ * "uHbGbeZdFIKGwNycJyyQbcY". We can't stop the fill, but we can
+ * refuse to submit a name that clearly isn't one.
+ *
+ * Heuristic: 15+ chars, no whitespace, and BOTH upper and lower case.
+ * Real names — even single-word ones like "Ravi" or "Aleksandra" —
+ * don't hit all three. Generated passwords always do.
+ */
+function looksLikeGeneratedPassword(name: string): boolean {
+  const trimmed = name.trim();
+  if (trimmed.length < 15) return false;
+  if (/\s/.test(trimmed)) return false;
+  const hasUpper = /[A-Z]/.test(trimmed);
+  const hasLower = /[a-z]/.test(trimmed);
+  return hasUpper && hasLower;
+}
+
+
 export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -36,6 +57,18 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    // Catch the "password manager filled the Name field with a
+    // generated password" case. Heuristic: 15+ chars, no spaces,
+    // and both upper and lower case letters. Real names almost
+    // never match — even single-word names like "Ravi" are short.
+    if (looksLikeGeneratedPassword(name)) {
+      setError(
+        "That looks like a password, not a name. If your password manager autofilled the Name field, please type your real name instead."
+      );
+      return;
+    }
+
     setIsLoading(true);
     track("signup_started", { method: "email", source: "signup_page" }, { instant: true });
 
@@ -159,13 +192,22 @@ export default function SignupPage() {
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"
+              name="name"
               type="text"
               placeholder="John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
               disabled={isLoading}
+              maxLength={80}
               autoComplete="name"
+              // Belt-and-suspenders opt-outs for the common password
+              // managers that ignore autoComplete="name" and fill the
+              // Name field with a generated password. Result was users
+              // signing up as "uHbGbeZdFIKGwNycJyyQbcY" — see checkNameLooksLikePassword.
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-form-type="other"
             />
           </div>
           <div className="space-y-2">
