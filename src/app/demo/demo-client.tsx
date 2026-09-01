@@ -203,7 +203,21 @@ function TestimonialCard({
   );
 }
 
-export default function DemoClient({ isLoggedIn }: { isLoggedIn: boolean }) {
+export default function DemoClient() {
+  // Client-side auth check — falls back to anonymous state until we
+  // know for sure. Keeps this route statically pre-renderable at
+  // build time.
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  useEffect(() => {
+    let cancelled = false;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (!cancelled) setIsLoggedIn(!!data.user);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [layout, setLayout] = useState("grid");
   const [theme, setTheme] = useState(THEMES[0]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(SEED_TESTIMONIALS);

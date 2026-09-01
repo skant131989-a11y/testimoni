@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
 import DemoClient from "./demo-client";
 
 export const metadata: Metadata = {
@@ -15,17 +14,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function DemoPage() {
-  let isLoggedIn = false;
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    isLoggedIn = !!user;
-  } catch {
-    isLoggedIn = false;
-  }
-
-  return <DemoClient isLoggedIn={isLoggedIn} />;
+/**
+ * Statically pre-rendered demo. DemoClient checks auth itself via
+ * the Supabase browser SDK on mount so this page can be served
+ * from the CDN edge.
+ */
+export default function DemoPage() {
+  return <DemoClient />;
 }

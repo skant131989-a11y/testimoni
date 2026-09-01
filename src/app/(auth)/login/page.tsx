@@ -39,7 +39,11 @@ export default function LoginPage() {
         password,
       });
 
-      if (authError) {
+      // Supabase can return authError alongside a valid data.user in
+      // some session-refresh / already-signed-in edge cases. Only
+      // treat as a real failure when we truly have no user. Otherwise
+      // proceed to the success path even if authError is non-null.
+      if (authError && !data.user) {
         setError(authError.message);
         track("login_failed", { method: "email", error: authError.message });
         return;

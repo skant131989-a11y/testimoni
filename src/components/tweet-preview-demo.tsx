@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Loader2, Sparkles, Link2, Code } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { track } from "@/lib/analytics";
+import { createClient } from "@/lib/supabase/client";
 
 interface PreviewResult {
   content: string;

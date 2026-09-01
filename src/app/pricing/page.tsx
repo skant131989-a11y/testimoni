@@ -1,12 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Button } from "@/components/ui/button";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { ProPriceDual } from "@/components/pricing/price-display";
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
-import { TrackedLink } from "@/components/tracked-link";
-import { createClient } from "@/lib/supabase/server";
+import { PricingCta } from "@/components/pricing/pricing-cta";
 
 export const metadata: Metadata = {
   title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",
@@ -21,23 +19,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function PricingPage() {
-  let isLoggedIn = false;
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    isLoggedIn = !!user;
-  } catch {
-    isLoggedIn = false;
-  }
-
-  const proHref = isLoggedIn ? "/dashboard/settings/billing" : "/signup";
-  const proLabel = isLoggedIn ? "Upgrade to Pro" : "Start Free, Upgrade Anytime";
-  const freeHref = isLoggedIn ? "/dashboard" : "/signup";
-  const freeLabel = isLoggedIn ? "Go to Dashboard" : "Get Started Free";
-
+export default function PricingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <PublicNav />
@@ -88,11 +70,7 @@ export default async function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <TrackedLink cta="pricing_free_plan" surface="pricing" href={freeHref} className="mt-8 block">
-                <Button variant="outline" className="w-full" size="lg">
-                  {freeLabel}
-                </Button>
-              </TrackedLink>
+              <PricingCta plan="free" />
             </div>
 
             {/* Pro Plan */}
@@ -127,11 +105,7 @@ export default async function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <TrackedLink cta="pricing_pro_plan" surface="pricing" href={proHref} className="mt-8 block">
-                <Button className="w-full" size="lg">
-                  {proLabel}
-                </Button>
-              </TrackedLink>
+              <PricingCta plan="pro" />
             </div>
           </div>
 

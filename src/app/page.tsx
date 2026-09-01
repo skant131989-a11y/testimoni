@@ -18,7 +18,7 @@ import {
   Share2,
   Play,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { PublicNavAuth, PublicNavAuthMobile } from "@/components/layout/public-nav-auth";
 import { ProPriceDual } from "@/components/pricing/price-display";
 import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
@@ -27,14 +27,7 @@ import { TrackedLink } from "@/components/tracked-link";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { PageEngagement } from "@/components/page-engagement";
 
-export default async function LandingPage() {
-  let isLoggedIn = false;
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    isLoggedIn = !!user;
-  } catch {}
-
+export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <StructuredData />
@@ -63,24 +56,13 @@ export default async function LandingPage() {
             <TrackedLink cta="nav_pricing" surface="home_nav" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
               Pricing
             </TrackedLink>
-            {isLoggedIn ? (
-              <Button size="sm" asChild>
-                <TrackedLink cta="nav_dashboard" surface="home_nav" href="/dashboard">Dashboard</TrackedLink>
-              </Button>
-            ) : (
-              <>
-                <TrackedLink cta="nav_login" surface="home_nav" href="/login">
-                  <Button variant="ghost" size="sm">Log in</Button>
-                </TrackedLink>
-                <TrackedLink cta="nav_signup" surface="home_nav" href="/signup">
-                  <Button size="sm">Get Started Free</Button>
-                </TrackedLink>
-              </>
-            )}
+            {/* Auth buttons — client component with anonymous default,
+                swaps to Dashboard after mount if the visitor is
+                logged in. Keeps this whole page statically renderable
+                so it can be served from the CDN edge. */}
+            <PublicNavAuth />
           </nav>
-          <TrackedLink cta="nav_mobile_cta" surface="home_nav" href={isLoggedIn ? "/dashboard" : "/signup"} className="md:hidden">
-            <Button size="sm">{isLoggedIn ? "Dashboard" : "Get Started"}</Button>
-          </TrackedLink>
+          <PublicNavAuthMobile />
         </div>
       </header>
 
@@ -228,7 +210,7 @@ export default async function LandingPage() {
                 swaps the static Sarah card for the user's imported
                 testimonial. The whole point of this section. */}
             <div className="w-full max-w-sm md:min-w-[380px]">
-              <TweetPreviewDemo isLoggedIn={isLoggedIn} />
+              <TweetPreviewDemo />
             </div>
           </div>
         </div>
@@ -411,9 +393,9 @@ export default async function LandingPage() {
                   "Recorded a 45-second review from my phone. Now it's the first thing customers see on my product page.",
                 video: true,
               },
-            ].map((t) => (
+            ].map((t, i) => (
               <div
-                key={t.name}
+                key={`${t.name}-${i}`}
                 className={`flex flex-col rounded-xl border bg-background p-5 shadow-sm ${
                   t.video ? "sm:col-span-2 lg:col-span-1 lg:col-start-2" : ""
                 }`}
