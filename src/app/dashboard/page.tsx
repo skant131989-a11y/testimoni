@@ -288,9 +288,9 @@ export default async function DashboardPage() {
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/dashboard/widgets?action=create">
+          <Link href="/dashboard/widgets">
             <Code2 className="mr-2 h-4 w-4" />
-            Create Widget
+            Manage Widgets
           </Link>
         </Button>
         <Button variant="outline" asChild>
