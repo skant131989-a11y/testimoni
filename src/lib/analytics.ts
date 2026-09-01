@@ -14,6 +14,24 @@ const DEBUG = process.env.NODE_ENV === "development";
 export function initAnalytics() {
   if (DEBUG) console.log("[analytics] initAnalytics called, ready=", ready);
   if (ready || typeof window === "undefined") return;
+
+  // Skip PostHog entirely on localhost and NODE_ENV=development so
+  // dev clicks don't burn events against the Free plan's monthly
+  // quota. Every track() call becomes a no-op because `ready` stays
+  // false. Set NEXT_PUBLIC_POSTHOG_ALLOW_LOCAL=1 in .env.local to
+  // opt in when you actually want to test event wiring locally.
+  const allowLocal = process.env.NEXT_PUBLIC_POSTHOG_ALLOW_LOCAL === "1";
+  const host = window.location.hostname;
+  const isLocalHost =
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "0.0.0.0" ||
+    host.endsWith(".local");
+  if ((DEBUG || isLocalHost) && !allowLocal) {
+    if (DEBUG) console.log("[analytics] skipping PostHog on local/dev");
+    return;
+  }
+
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
   if (DEBUG) console.log("[analytics] key present?", !!key);
   if (!key) return;
@@ -114,6 +132,7 @@ export function track(
 
 /** Associate the current anonymous visitor with a known user id. */
 export function identify(userId: string, traits?: Record<string, unknown>) {
+  if (DEBUG) console.log(`[analytics] identify(${userId}) ready=${ready}`, traits);
   if (!ready) return;
   try {
     posthog.identify(userId, traits);
@@ -122,6 +141,7 @@ export function identify(userId: string, traits?: Record<string, unknown>) {
 
 /** Clear the current user identity — call on sign-out. */
 export function resetAnalytics() {
+  if (DEBUG) console.log(`[analytics] reset() ready=${ready}`);
   if (!ready) return;
   try {
     posthog.reset();
