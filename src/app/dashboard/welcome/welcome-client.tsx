@@ -601,7 +601,7 @@ export function WelcomeClient({
               track("welcome_view_sample_wall", { source: "welcome_landing" })
             }
           >
-            See what a full Wall of Love looks like →
+            See a sample Wall of Love →
           </Link>
         </p>
       </div>
