@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { Sidebar } from "@/components/layout/sidebar";
+import { AuthIdentifier } from "@/components/auth-identifier";
 import { Header } from "@/components/layout/header";
 import { generateSlug } from "@/lib/utils";
 import { getEffectivePlan } from "@/lib/plan";
@@ -171,6 +172,12 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* Ensure PostHog is identified as the CURRENT user, not
+          whoever was logged in last. Resets if it detects an
+          identity switch. Handles Google OAuth (which can't identify
+          from the callback) and account switching in the same
+          browser. */}
+      <AuthIdentifier userId={authUser.id} />
       <Sidebar workspaceName={workspace.name} plan={plan} wallUrl={wallUrl} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header

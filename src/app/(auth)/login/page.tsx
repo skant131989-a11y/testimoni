@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { track, identify } from "@/lib/analytics";
+import { track, identify, resetAnalytics } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,7 +49,15 @@ export default function LoginPage() {
         return;
       }
 
-      if (data.user?.id) identify(data.user.id, { email });
+      if (data.user?.id) {
+        // Reset first — if a different user was previously identified
+        // in this browser (email/password then Google OAuth, or just
+        // account switching), PostHog would otherwise keep aliasing
+        // events to the older identity. Reset + fresh identify gives
+        // us the right distinct_id for the current user.
+        resetAnalytics();
+        identify(data.user.id, { email });
+      }
       track("login_completed", { method: "email" }, { instant: true });
       // Hard navigation so the fresh auth cookies are attached to the
       // request the server sees (router.push races the cookie handshake

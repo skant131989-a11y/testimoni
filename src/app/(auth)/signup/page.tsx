@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { track, identify } from "@/lib/analytics";
+import { track, identify, resetAnalytics } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -96,7 +96,12 @@ export default function SignupPage() {
       // Supabase returned a session immediately. Middleware will bounce
       // back to /login if the session never actually attached, but in
       // practice this makes signup one click instead of two.
-      if (data.user?.id) identify(data.user.id, { email, name });
+      if (data.user?.id) {
+        // Reset first to clear any prior identity in this browser
+        // (rare on signup but harmless). See login page for details.
+        resetAnalytics();
+        identify(data.user.id, { email, name });
+      }
       track("signup_completed", { method: "email" }, { instant: true });
       // Show the branded "Setting up your Wall of Love…" overlay
       // then hard-navigate. window.location.assign keeps the current
