@@ -62,8 +62,27 @@ export async function POST(request: Request) {
       workspace_name: auth.workspace.name,
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Checkout failed";
-    console.error("[razorpay/checkout] error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Razorpay's Node SDK doesn't throw native Errors — it throws
+    // plain objects like { statusCode, error: { code, description, field } }.
+    // Unwrap so the client sees the real reason instead of the "Checkout
+    // failed" fallback.
+    let message = "Checkout failed";
+    let details: unknown = undefined;
+    if (err instanceof Error) {
+      message = err.message;
+    } else if (err && typeof err === "object") {
+      const anyErr = err as {
+        error?: { description?: string; code?: string; field?: string };
+        statusCode?: number;
+        message?: string;
+      };
+      details = anyErr;
+      message =
+        anyErr.error?.description ||
+        anyErr.message ||
+        (anyErr.statusCode ? `Razorpay HTTP ${anyErr.statusCode}` : "Checkout failed");
+    }
+    console.error("[razorpay/checkout] error:", message, details ?? "");
+    return NextResponse.json({ error: message, details }, { status: 500 });
   }
 }
