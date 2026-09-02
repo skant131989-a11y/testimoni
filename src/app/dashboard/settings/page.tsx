@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { getEffectivePlan } from "@/lib/plan";
 import { TrackedLink } from "@/components/tracked-link";
+import { ChangePasswordCard } from "@/components/change-password-card";
 import {
   Card,
   CardContent,
@@ -169,6 +170,8 @@ export default async function SettingsPage() {
       </Card>
 
       {/* Danger zone */}
+      <ChangePasswordCard />
+
       <Card className="border-destructive/50">
         <CardHeader>
           <CardTitle className="text-destructive">Danger Zone</CardTitle>

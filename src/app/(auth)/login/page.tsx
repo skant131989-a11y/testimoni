@@ -217,7 +217,22 @@ export default function LoginPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!email) {
+                    document.getElementById("email")?.focus();
+                    return;
+                  }
+                  handleMagicLink();
+                }}
+                className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+              >
+                Forgot your password?
+              </button>
+            </div>
             <Input
               id="password"
               type="password"
@@ -322,6 +337,10 @@ export default function LoginPage() {
             <>Email me a magic link {email ? "" : "(enter email above)"}</>
           )}
         </Button>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
+          We&apos;ll email you a one-click sign-in link — no password needed. Also
+          works if you forgot yours.
+        </p>
       </CardContent>
       <CardFooter>
         <p className="text-center text-sm text-muted-foreground w-full">
