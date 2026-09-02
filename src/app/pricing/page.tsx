@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
-import { ProPriceDual } from "@/components/pricing/price-display";
+import { ProPriceDual, FreePrice } from "@/components/pricing/price-display";
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
@@ -9,12 +9,12 @@ import { PricingCta } from "@/components/pricing/pricing-cta";
 export const metadata: Metadata = {
   title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",
   description:
-    "Free plan includes paste-a-tweet import, a hosted Wall of Love URL, 10 testimonials, and one-line embed — no credit card. Pro at $9/month (₹859) for unlimited testimonials, forms, widgets, and video.",
+    "Free plan includes paste-a-tweet import, a hosted Wall of Love URL, 10 testimonials, 1 video testimonial, and one-line embed — no credit card. Pro at $9/month (₹499) for unlimited testimonials, forms, widgets, and video.",
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "Testimoni Pricing — Free forever with paste-a-tweet + Wall of Love",
     description:
-      "Free plan includes paste-a-tweet import and a hosted Wall of Love URL. Pro at $9/mo (₹859) for unlimited testimonials, forms, and widgets.",
+      "Free plan includes paste-a-tweet import and a hosted Wall of Love URL. Pro at $9/mo (₹499) for unlimited testimonials, forms, and widgets.",
     url: "/pricing",
   },
 };
@@ -43,13 +43,7 @@ export default function PricingPage() {
             <div className="rounded-2xl border bg-card p-8">
               <h3 className="text-xl font-semibold">Free</h3>
               <p className="mt-2 text-4xl font-bold">
-                $0
-                <span className="text-base font-normal text-muted-foreground">
-                  /month
-                </span>
-                <span className="ml-2 align-middle text-base font-normal text-muted-foreground">
-                  (₹0)
-                </span>
+                <FreePrice suffix="/month" />
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 Perfect for getting started
@@ -81,7 +75,7 @@ export default function PricingPage() {
               </div>
               <h3 className="text-xl font-semibold">Pro</h3>
               <p className="mt-2 text-4xl font-bold">
-                <ProPriceDual suffix="/month" primary="USD" />
+                <ProPriceDual suffix="/month" />
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 For growing businesses

@@ -44,7 +44,7 @@ export function StructuredData() {
           {
             "@type": "Offer",
             name: "Pro (INR)",
-            price: "859",
+            price: "499",
             priceCurrency: "INR",
             description: "Same Pro plan, billed in INR through Razorpay.",
           },
@@ -115,7 +115,7 @@ export function StructuredData() {
             name: "Is there a free plan?",
             acceptedAnswer: {
               "@type": "Answer",
-              text: "Yes. The free plan includes 10 testimonials, 1 collection form, 1 widget, and grid layout. No credit card required. Upgrade to Pro at $9/month or ₹859/month for unlimited everything.",
+              text: "Yes. The free plan includes 10 testimonials, 1 collection form, 1 widget, and grid layout. No credit card required. Upgrade to Pro at $9/month or ₹499/month for unlimited everything.",
             },
           },
           {

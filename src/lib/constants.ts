@@ -36,7 +36,7 @@ export const PRICING: Record<
   { symbol: string; code: Currency; proMonthly: number; locale: string }
 > = {
   USD: { symbol: "$", code: "USD", proMonthly: 9, locale: "en-US" },
-  INR: { symbol: "₹", code: "INR", proMonthly: 859, locale: "en-IN" },
+  INR: { symbol: "₹", code: "INR", proMonthly: 499, locale: "en-IN" },
 };
 
 export function formatPrice(amount: number, currency: Currency): string {

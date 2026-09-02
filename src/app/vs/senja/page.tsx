@@ -46,10 +46,10 @@ const rows: Row[] = [
     senja: true,
   },
   { feature: "Free plan watermark", testimoni: "Small footer", senja: "Small footer" },
-  { feature: "Pro starting price", testimoni: "$9/mo · ₹859", senja: "$19+/mo", highlight: true },
+  { feature: "Pro starting price", testimoni: "$9/mo · ₹499", senja: "$19+/mo", highlight: true },
   { feature: "Native INR pricing (India-first)", testimoni: true, senja: false, highlight: true },
   { feature: "One library → unlimited widgets (Pro)", testimoni: true, senja: true },
-  { feature: "Video testimonials (Pro)", testimoni: true, senja: true },
+  { feature: "Video testimonials", testimoni: true, senja: true },
   {
     feature: "5 layouts (Grid, Masonry, Carousel, List, Marquee)",
     testimoni: true,

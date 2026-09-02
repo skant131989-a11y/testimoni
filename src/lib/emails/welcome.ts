@@ -10,6 +10,8 @@
  * - Absolute URLs for all links + images — no origin context in an email
  */
 
+import { withUtm } from "./utm";
+
 export interface WelcomeEmailData {
   name: string;
   email: string;
@@ -24,13 +26,27 @@ export interface WelcomeEmailData {
 export function welcomeEmailHtml(data: WelcomeEmailData): string {
   const {
     name,
-    wallUrl,
+    wallUrl: rawWallUrl,
     workspaceName,
-    dashboardUrl,
-    importUrl,
-    collectFormUrl,
-    embedPageUrl,
+    dashboardUrl: rawDashboardUrl,
+    importUrl: rawImportUrl,
+    collectFormUrl: rawCollectFormUrl,
+    embedPageUrl: rawEmbedPageUrl,
   } = data;
+
+  const tag = (u: string, content: string) =>
+    withUtm(u, {
+      source: "email",
+      medium: "email",
+      campaign: "welcome",
+      content,
+    });
+
+  const wallUrl = tag(rawWallUrl, "wall_url");
+  const dashboardUrl = tag(rawDashboardUrl, "open_dashboard");
+  const importUrl = tag(rawImportUrl, "import_tweet");
+  const collectFormUrl = tag(rawCollectFormUrl, "form_url");
+  const embedPageUrl = tag(rawEmbedPageUrl, "embed_code");
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
@@ -145,6 +161,23 @@ export function welcomeEmailHtml(data: WelcomeEmailData): string {
             ctaLabel: "Copy embed code →",
             ctaUrl: embedPageUrl,
           })}
+
+          <tr>
+            <td style="padding:8px 40px 4px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#faf5ff;border:1px solid #ede9fe;border-radius:10px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 4px 0;font-size:14px;font-weight:700;color:#5b21b6;">
+                      🎥 1 free video testimonial on every plan
+                    </p>
+                    <p style="margin:0;font-size:13px;line-height:1.5;color:#4b5563;">
+                      Upload an MP4/MOV or ask a customer to record from their phone. Video converts ~2× better than text. Upgrade to Pro for unlimited.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
           <tr>
             <td style="padding:8px 40px 32px 40px;">

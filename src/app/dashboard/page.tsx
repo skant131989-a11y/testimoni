@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MilestoneNudge } from "@/components/milestone-nudge";
+import { VideoFreeBanner } from "@/components/video-free-banner";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
 import { getEffectiveLimits } from "@/lib/plan";
@@ -88,6 +89,7 @@ export default async function DashboardPage() {
     recentTestimonials,
     defaultWidget,
     defaultForm,
+    videoCount,
   ] = await Promise.all([
     prisma.testimonial.count({ where: { workspaceId } }),
     prisma.testimonial.count({
@@ -118,6 +120,9 @@ export default async function DashboardPage() {
       where: { workspaceId },
       orderBy: { createdAt: "asc" },
       select: { slug: true },
+    }),
+    prisma.testimonial.count({
+      where: { workspaceId, videoStorageKey: { not: null } },
     }),
   ]);
 
@@ -260,6 +265,8 @@ export default async function DashboardPage() {
           wallUrl={wallUrl}
         />
       )}
+
+      <VideoFreeBanner videoCount={videoCount} />
 
       {/* Stats cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

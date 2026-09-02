@@ -86,7 +86,7 @@ export default function AboutPage() {
               </div>
               <h3 className="mt-4 text-lg font-semibold">Honest pricing</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Free plan works forever. Pro at $9/mo (₹859) unlocks unlimited
+                Free plan works forever. Pro at $9/mo (₹499) unlocks unlimited
                 everything. No sneaky per-seat fees, no lock-in, cancel anytime.
               </p>
             </div>

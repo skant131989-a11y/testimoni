@@ -183,7 +183,7 @@ export default function TwitterImage() {
                 fontWeight: 500,
               }}
             >
-              Or share a form / QR code to collect fresh ones — same wall.
+              Or share a form / QR code to collect fresh ones — plus 1 free video testimonial on every plan.
             </div>
           </div>
 

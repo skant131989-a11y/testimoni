@@ -21,9 +21,17 @@ export interface FounderEmailData {
   founderEmail: string;
 }
 
+import { withUtm } from "./utm";
+
 export function founderEmailHtml(data: FounderEmailData): string {
-  const { name, workspaceName, wallUrl, founderName, founderEmail } = data;
+  const { name, workspaceName, wallUrl: rawWallUrl, founderName, founderEmail } = data;
   const firstName = founderName.split(" ")[0];
+  const wallUrl = withUtm(rawWallUrl, {
+    source: "email",
+    medium: "email",
+    campaign: "founder_checkin",
+    content: "wall_url",
+  });
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">

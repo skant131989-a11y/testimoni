@@ -13,6 +13,8 @@
  * imagery. Reads like it was typed just for them.
  */
 
+import { withUtm } from "./utm";
+
 export type PitchAudience = "founder" | "sales" | "marketing";
 
 export interface PitchEmailData {
@@ -35,7 +37,7 @@ const HOOK_BY_AUDIENCE: Record<PitchAudience, { hook: string; body: string; bull
     bullets: [
       "Public <strong>Wall of Love URL</strong> — share in bios, DMs, or a QR code on your packaging. No visitor signup needed to view.",
       "One-line embed for your site — Framer, Webflow, WordPress, React, or plain HTML. Sub-10KB widget, no CSS conflicts.",
-      "<strong>Video testimonials</strong> (Pro) — customers record from their phone; convert ~2× better than text alone.",
+      "<strong>Video testimonials</strong> — 1 free on every plan; customers record from their phone. Converts ~2× better than text alone.",
     ],
     cta: "Free plan is enough for the whole flow — 10 testimonials, unlimited wall views, no credit card. If it doesn't save you an hour this week I'd genuinely like to know why.",
   },
@@ -45,7 +47,7 @@ const HOOK_BY_AUDIENCE: Record<PitchAudience, { hook: string; body: string; bull
     bullets: [
       "Every workspace gets a <strong>public wall URL</strong> — testimoni.io/w/… — no login needed to view. Send it, embed it, QR-code it.",
       "Approve submissions in one click — sales-friendly workflow. Reject anything off-brand.",
-      "<strong>Video testimonials</strong> on Pro — turn a customer call into a 45-second clip that lives on your page.",
+      "<strong>Video testimonials</strong> — 1 free on every plan; turn a customer call into a 45-second clip that lives on your page.",
     ],
     cta: "Free plan builds your wall in 30 seconds, no card. Would love your take on whether it fits the way your team works.",
   },
@@ -55,7 +57,7 @@ const HOOK_BY_AUDIENCE: Record<PitchAudience, { hook: string; body: string; bull
     bullets: [
       "<strong>Public Wall of Love URL</strong> free with every workspace — one shareable link that stays fresh as you approve new posts.",
       "One-line embed — Framer, Webflow, WordPress, React, plain HTML. Sub-10KB, no CSS bleed.",
-      "<strong>Video testimonials</strong> (Pro) with 50MB MP4/MOV upload — plays inline on the wall and embed.",
+      "<strong>Video testimonials</strong> — 1 free on every plan (unlimited on Pro), 50MB MP4/MOV upload — plays inline on the wall and embed.",
     ],
     cta: "Free plan, no card. Paste-a-tweet is the fastest way in — takes about 30 seconds.",
   },
@@ -69,8 +71,15 @@ export function pitchEmailHtml(data: PitchEmailData): string {
     audience,
     senderName,
     senderEmail,
-    landingUrl,
+    landingUrl: rawLandingUrl,
   } = data;
+
+  const landingUrl = withUtm(rawLandingUrl, {
+    source: "email",
+    medium: "email",
+    campaign: `pitch_${audience}`,
+    content: "landing_cta",
+  });
 
   const { hook, body, bullets, cta } = HOOK_BY_AUDIENCE[audience];
   const senderFirst = senderName.split(" ")[0];

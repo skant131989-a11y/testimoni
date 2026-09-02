@@ -15,14 +15,19 @@ interface PricingContextValue {
 const PricingContext = createContext<PricingContextValue | null>(null);
 
 export function PricingProvider({ children }: { children: ReactNode }) {
-  // Default to USD everywhere. Users can switch manually via CurrencySwitcher.
+  // SSR default is USD (safe fallback). On mount we swap to the auto-detected
+  // currency — Asia/Kolkata timezone → INR, everything else → USD. No manual
+  // switcher on public pages: showing both currencies would let non-Indian
+  // visitors notice the ~$6 INR price and arbitrage.
   const [currency, setCurrencyState] = useState<Currency>("USD");
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem("currency") : null;
     if (stored === "USD" || stored === "INR") {
       setCurrencyState(stored);
+      return;
     }
+    setCurrencyState(detectCurrency());
   }, []);
 
   const setCurrency = (c: Currency) => {

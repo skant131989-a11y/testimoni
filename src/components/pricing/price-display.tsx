@@ -21,10 +21,26 @@ export function ProPrice({ suffix = "/mo", className }: ProPriceProps) {
   );
 }
 
+export function FreePrice({ suffix = "/mo", className }: ProPriceProps) {
+  return (
+    <span className={className}>
+      ₹0
+      {suffix && (
+        <span className="text-base font-normal text-muted-foreground">
+          {suffix}
+        </span>
+      )}
+    </span>
+  );
+}
+
 /**
- * Shows USD as primary + INR in muted brackets next to it (or vice-versa).
- * Follows the current currency preference: if user picks INR, INR becomes primary.
- * Pass `primary` to force a specific currency (used on public marketing pages).
+ * Shows ONLY the detected currency's price. Previously showed both
+ * USD and INR side-by-side, which let non-Indian visitors notice
+ * the INR arbitrage (₹499 ≈ $6, cheaper than $9). Auto-detection
+ * means each region sees exactly one price and takes it as the
+ * default. Kept the "Dual" name for API compatibility with existing
+ * imports.
  */
 interface ProPriceDualProps {
   suffix?: string;
@@ -32,56 +48,27 @@ interface ProPriceDualProps {
   primary?: "USD" | "INR";
 }
 
-export function ProPriceDual({ suffix = "/mo", bracketClassName, primary }: ProPriceDualProps) {
+export function ProPriceDual({ suffix = "/mo", primary }: ProPriceDualProps) {
   const { currency, proMonthlyUsd, proMonthlyInr } = usePricing();
   const effective = primary ?? currency;
-  const primaryText = effective === "INR" ? proMonthlyInr : proMonthlyUsd;
-  const secondaryText = effective === "INR" ? proMonthlyUsd : proMonthlyInr;
+  const priceText = effective === "INR" ? proMonthlyInr : proMonthlyUsd;
 
   return (
     <>
-      {primaryText}
+      {priceText}
       {suffix && (
         <span className="text-base font-normal text-muted-foreground">{suffix}</span>
       )}
-      <span
-        className={
-          bracketClassName ??
-          "ml-2 align-middle text-base font-normal text-muted-foreground"
-        }
-      >
-        (≈ {secondaryText})
-      </span>
     </>
   );
 }
 
+/**
+ * DEPRECATED — kept as a stub so any lingering imports compile.
+ * The manual currency switcher is gone; region-based auto-detection
+ * is the only source of truth now, which prevents arbitrage between
+ * the USD and INR plans.
+ */
 export function CurrencySwitcher() {
-  const { currency, setCurrency } = usePricing();
-  return (
-    <div className="inline-flex items-center gap-1 rounded-full border bg-background p-1 text-xs">
-      <button
-        type="button"
-        onClick={() => setCurrency("USD")}
-        className={`rounded-full px-3 py-1 transition ${
-          currency === "USD"
-            ? "bg-primary text-primary-foreground"
-            : "text-muted-foreground hover:text-foreground"
-        }`}
-      >
-        USD
-      </button>
-      <button
-        type="button"
-        onClick={() => setCurrency("INR")}
-        className={`rounded-full px-3 py-1 transition ${
-          currency === "INR"
-            ? "bg-primary text-primary-foreground"
-            : "text-muted-foreground hover:text-foreground"
-        }`}
-      >
-        INR
-      </button>
-    </div>
-  );
+  return null;
 }

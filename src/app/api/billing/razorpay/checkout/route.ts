@@ -9,10 +9,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const planId = process.env.RAZORPAY_PRO_PLAN_ID;
+  const body = await request.json().catch(() => ({}));
+  const currency = body?.currency === "USD" ? "USD" : "INR";
+
+  const planId =
+    currency === "USD"
+      ? process.env.RAZORPAY_PRO_PLAN_ID_USD
+      : process.env.RAZORPAY_PRO_PLAN_ID_INR || process.env.RAZORPAY_PRO_PLAN_ID;
+
   if (!planId) {
     return NextResponse.json(
-      { error: "RAZORPAY_PRO_PLAN_ID is not configured" },
+      {
+        error: `RAZORPAY_PRO_PLAN_ID_${currency} is not configured`,
+      },
       { status: 500 }
     );
   }

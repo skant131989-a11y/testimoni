@@ -97,7 +97,11 @@ export default function BillingPage() {
         });
       }
 
-      const res = await fetch("/api/billing/razorpay/checkout", { method: "POST" });
+      const res = await fetch("/api/billing/razorpay/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currency }),
+      });
       const data = await res.json();
       if (!res.ok || !data.subscription_id) {
         setError(data.error || "Could not start Razorpay checkout.");

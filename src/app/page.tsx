@@ -237,7 +237,7 @@ export default function LandingPage() {
           <div className="grid items-center gap-10 md:grid-cols-2">
             <div>
               <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                Pro · Video
+                1 free · Video
               </div>
               <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
                 Prefer video over text?
@@ -259,7 +259,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>Pro plan — upgrade any time from your workspace</span>
+                  <span>1 free video on every plan — Pro unlocks unlimited</span>
                 </li>
               </ul>
               <div className="mt-6 flex flex-wrap gap-3">
@@ -279,7 +279,7 @@ export default function LandingPage() {
               <div className="rounded-2xl border bg-background p-4 shadow-sm">
                 <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-slate-800 to-slate-900">
                   <div className="absolute right-3 top-3 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-                    Pro
+                    Video
                   </div>
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg">
                     <Play className="ml-0.5 h-6 w-6 fill-black text-black" />
@@ -414,7 +414,7 @@ export default function LandingPage() {
                 {t.video && (
                   <div className="relative mt-3 flex aspect-video items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-slate-800 to-slate-900">
                     <div className="absolute right-2 top-2 rounded-full bg-primary/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground">
-                      Pro
+                      Video
                     </div>
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md">
                       <Play className="ml-0.5 h-4 w-4 fill-black text-black" />
@@ -514,6 +514,12 @@ export default function LandingPage() {
                 description:
                   "Every workspace gets a shareable wall URL — testimoni.io/w/… — public, no signup needed. Drop it in bios, DMs, or a QR code on your packaging.",
               },
+              {
+                icon: Share2,
+                title: "Ready-to-share templates",
+                description:
+                  "Copy-paste WhatsApp, DM, and email asks for customers, plus a downloadable QR code for packaging or receipts. Filling your wall stops being a &ldquo;what do I even say?&rdquo; problem.",
+              },
             ].map((feature) => (
               <div key={feature.title} className="rounded-lg border bg-card p-6">
                 <feature.icon className="h-8 w-8 text-primary" />
@@ -592,45 +598,54 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {/* Wedge — the ONE feature nobody else leads with. Kept
+                first so the reader locks in the differentiator
+                before the pricing/pos tiles below. */}
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
-              <div className="text-3xl">🌐</div>
+              <div className="text-3xl">📋</div>
               <h3 className="mt-3 text-lg font-bold">
-                Hosted wall on the free plan
+                Paste a tweet, done in 30s
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Every workspace gets a public URL you can drop in your
-                Instagram bio on day one. Competitors gate this behind Pro.
+                URL in, live testimonial out — no screenshots, no copy-paste.
+                Senja and Testimonial.to make you build a form and email 20
+                customers before you have anything to show.
               </p>
             </div>
 
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
-              <div className="text-3xl">⚡</div>
-              <h3 className="mt-3 text-lg font-bold">Auto-add on approve</h3>
+              <div className="text-3xl">🎥</div>
+              <h3 className="mt-3 text-lg font-bold">
+                Video on the free plan
+              </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                One click puts a testimonial on your wall instantly. No
-                separate curation step. Others make you pick and drop by hand.
+                1 free video testimonial per workspace, unlimited on Pro.
+                Competitors gate video behind their $50+ plans — we
+                include it in $0.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
+              <div className="text-3xl">🌐</div>
+              <h3 className="mt-3 text-lg font-bold">
+                Free wall URL + share tools
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Every workspace gets a public Wall of Love URL you can drop
+                in your bio day one. Plus ready-to-send WhatsApp / DM / email
+                templates and a QR code for packaging. All on Free.
               </p>
             </div>
 
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
               <div className="text-3xl">💸</div>
               <h3 className="mt-3 text-lg font-bold">
-                $9/mo Pro · ₹859 in India
+                $9 Pro · You email, I ship
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Half the price of Senja. One-fifth of Testimonial.to.
-                Native INR pricing for Indian founders — no forex
-                middleman.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
-              <div className="text-3xl">🚢</div>
-              <h3 className="mt-3 text-lg font-bold">Ships weekly</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Solo founder. Every feature request from a paying customer
-                gets a real answer, and the roadmap is user-driven, not
-                board-driven.
+                Half of Senja, one-fifth of Testimonial.to. Native ₹499 in
+                India — no forex middleman. Every support email lands with
+                me directly and ships as code within days, not quarters.
               </p>
             </div>
           </div>
@@ -668,7 +683,7 @@ export default function LandingPage() {
             {/* Free */}
             <div className="rounded-lg border bg-card p-8 text-left">
               <h3 className="text-lg font-semibold">Free</h3>
-              <p className="mt-2 text-3xl font-bold">$0</p>
+              <p className="mt-2 text-3xl font-bold">₹0</p>
               <p className="text-sm text-muted-foreground">Forever free</p>
               <ul className="mt-6 space-y-3">
                 {["10 testimonials", "1 widget", "Grid layout", "Collection forms"].map((f) => (
@@ -688,7 +703,7 @@ export default function LandingPage() {
                 Most Popular
               </div>
               <h3 className="text-lg font-semibold">Pro</h3>
-              <p className="mt-2 text-3xl font-bold"><ProPriceDual primary="USD" /></p>
+              <p className="mt-2 text-3xl font-bold"><ProPriceDual /></p>
               <p className="text-sm text-muted-foreground">Everything unlimited</p>
               <ul className="mt-6 space-y-3">
                 {[

@@ -330,9 +330,10 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
                 </div>
               </div>
 
-              {/* Video attachment — Pro-only; server enforces the check
-                  and returns 403 with upgradeRequired for the client
-                  to render an upgrade nudge. */}
+              {/* Video attachment — 1 free per workspace, unlimited on
+                  Pro. Server enforces the count check and returns 403
+                  with upgradeRequired if the quota is exceeded, which
+                  the parent import page turns into an upgrade nudge. */}
               <div className="rounded-md border bg-background p-3">
                 <Label className="text-xs">Video</Label>
                 {t.videoUrl ? (

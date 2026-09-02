@@ -71,7 +71,7 @@ export const metadata: Metadata = {
       "Turn any X or LinkedIn post into a testimonial in 30 seconds. Free wall of love, one-line embed.",
     images: [
       {
-        url: "/opengraph-image?v=5",
+        url: "/opengraph-image?v=6",
         width: 1200,
         height: 630,
         alt: "Testimoni — Paste a tweet, get a testimonial in 30 seconds",
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
     title: "Testimoni — Paste a Tweet, Get a Testimonial",
     description:
       "Turn any X or LinkedIn post into a testimonial in 30 seconds. Free plan.",
-    images: ["/twitter-image?v=5"],
+    images: ["/twitter-image?v=6"],
   },
   icons: {
     icon: "/icon.png",

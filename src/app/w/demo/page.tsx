@@ -207,7 +207,7 @@ export default function DemoWallPage() {
               {t.video && (
                 <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-slate-800 to-slate-900">
                   <div className="absolute right-3 top-3 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-                    Pro · Video
+                    Video
                   </div>
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-lg">
                     <Play className="ml-0.5 h-5 w-5 fill-black text-black" />

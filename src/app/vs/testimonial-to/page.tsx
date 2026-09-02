@@ -45,10 +45,10 @@ const rows: Row[] = [
     testimoni: true,
     theirs: true,
   },
-  { feature: "Pro starting price", testimoni: "$9/mo · ₹859", theirs: "$50+/mo", highlight: true },
+  { feature: "Pro starting price", testimoni: "$9/mo · ₹499", theirs: "$50+/mo", highlight: true },
   { feature: "Native INR pricing (India-first)", testimoni: true, theirs: false, highlight: true },
   { feature: "One library → unlimited widgets (Pro)", testimoni: true, theirs: true },
-  { feature: "Video testimonials (Pro)", testimoni: true, theirs: true },
+  { feature: "Video testimonials", testimoni: true, theirs: true },
   {
     feature: "5 layouts (Grid, Masonry, Carousel, List, Marquee)",
     testimoni: true,
@@ -102,7 +102,7 @@ export default function TestimonialToVsPage() {
               <p className="mt-3 text-sm font-bold">One-fifth the Pro price</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Testimoni Pro is $9/mo. Testimonial.to&apos;s Startup tier is
-                $50+. Native INR pricing at ₹859/mo for Indian teams.
+                $50+. Native INR pricing at ₹499/mo for Indian teams.
               </p>
             </div>
           </section>
