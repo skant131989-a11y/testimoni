@@ -53,10 +53,19 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [checkEmail, setCheckEmail] = useState<string | null>(null);
+  // Honeypot + mount timestamp — same anti-bot pattern as the login
+  // form. Bots credential-stuff both endpoints. See login page for
+  // the reasoning.
+  const [botTrap, setBotTrap] = useState("");
+  const [mountedAt] = useState(() => Date.now());
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    // Silent bot rejection — no track event so PostHog stays clean.
+    if (botTrap) return;
+    if (Date.now() - mountedAt < 1500) return;
 
     // Catch the "password manager filled the Name field with a
     // generated password" case. Heuristic: 15+ chars, no spaces,
@@ -91,30 +100,25 @@ export default function SignupPage() {
         return;
       }
 
-      // Email confirmation is currently disabled in Supabase for launch —
-      // always drop straight into the welcome flow regardless of whether
-      // Supabase returned a session immediately. Middleware will bounce
-      // back to /login if the session never actually attached, but in
-      // practice this makes signup one click instead of two.
+      // Email verification path. Supabase returns data.user but NO
+      // session when "Confirm email" is enabled in the project's Auth
+      // settings. In that case we can't drop the user into the
+      // dashboard yet — show the "check your email" screen and let
+      // them confirm via the verification link before they can log in.
+      if (data.user && !data.session) {
+        setCheckEmail(email);
+        track("signup_email_verification_sent", { method: "email" });
+        return;
+      }
+
+      // Session came through immediately — either email verification
+      // is off, or the user's email was already confirmed. Drop
+      // straight into the welcome flow.
       if (data.user?.id) {
-        // Reset first to clear any prior identity in this browser
-        // (rare on signup but harmless). See login page for details.
         resetAnalytics();
         identify(data.user.id, { email, name });
       }
       track("signup_completed", { method: "email" }, { instant: true });
-      // Show the branded "Setting up your Wall of Love…" overlay
-      // then hard-navigate. window.location.assign keeps the current
-      // DOM (with our overlay) visible until the new page's HTML is
-      // fully ready to paint — router.push unmounts too eagerly and
-      // exposes a gray gap. requestAnimationFrame ensures the browser
-      // paints the overlay at least once before the navigation blocks
-      // the render thread.
-      // Overlay is already showing from the top of handleSubmit,
-      // so just hard-navigate. window.location.assign keeps the
-      // current DOM (with our overlay) painted until the new
-      // page's HTML is ready — router.push unmounts too eagerly
-      // and exposes a gray gap.
       requestAnimationFrame(() => {
         window.location.assign("/dashboard/welcome");
       });
@@ -167,12 +171,18 @@ export default function SignupPage() {
           </p>
           <p className="mt-1 font-medium">{checkEmail}</p>
           <p className="mt-4 text-sm text-muted-foreground">
-            Click the link in that email to activate your account. If you
-            don&apos;t see it in a minute or two, check your spam folder.
+            Click the link in that email to activate your account. Once
+            confirmed, log in below to reach your dashboard.
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Don&apos;t see it in a minute or two? Check your spam folder.
           </p>
           <div className="mt-8 flex flex-col gap-2">
+            <Button asChild>
+              <Link href="/login">Log in</Link>
+            </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => {
                 setCheckEmail(null);
                 setEmail("");
@@ -181,9 +191,6 @@ export default function SignupPage() {
               }}
             >
               Use a different email
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/login">Back to log in</Link>
             </Button>
           </div>
         </CardContent>
@@ -258,6 +265,26 @@ export default function SignupPage() {
               Must be at least 8 characters
             </p>
           </div>
+
+          {/* Honeypot field — see login page for details. */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={botTrap}
+            onChange={(e) => setBotTrap(e.target.value)}
+            style={{
+              position: "absolute",
+              left: "-9999px",
+              width: "1px",
+              height: "1px",
+              opacity: 0,
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
+          />
+
           {error && (
             <p className="text-sm text-destructive" role="alert">
               {error}

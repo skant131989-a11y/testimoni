@@ -18,6 +18,35 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 
+/**
+ * Bucket free-form Supabase auth error messages into a small set of
+ * reasons so PostHog can group login failures without full-text
+ * matching. Keep this list ordered — first match wins.
+ */
+function classifyAuthError(msg: string): string {
+  const m = msg.toLowerCase();
+  if (!m) return "unknown";
+  if (m.includes("invalid login credentials") || m.includes("invalid email or password")) {
+    return "invalid_credentials";
+  }
+  if (m.includes("email not confirmed") || m.includes("email link is invalid")) {
+    return "email_not_confirmed";
+  }
+  if (m.includes("email rate limit") || m.includes("too many requests") || m.includes("rate limit")) {
+    return "rate_limited";
+  }
+  if (m.includes("user not found") || m.includes("no user")) {
+    return "user_not_found";
+  }
+  if (m.includes("network") || m.includes("fetch failed")) {
+    return "network";
+  }
+  if (m.includes("locked")) {
+    return "account_locked";
+  }
+  return "other";
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -25,10 +54,30 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  // Honeypot — bots fill every visible field, including hidden ones
+  // named like "phone" or "website". Real humans never see or touch
+  // it. If populated on submit, we silently reject without hitting
+  // Supabase. Stops the noisiest bots without any user-facing friction.
+  const [botTrap, setBotTrap] = useState("");
+  // Timestamp of when the login form mounted. Bots submit within
+  // milliseconds; humans take at least a couple of seconds to type.
+  const [mountedAt] = useState(() => Date.now());
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    // Bot check 1 — honeypot. Silently drop, no event fires so we
+    // don't pollute analytics with the attack traffic.
+    if (botTrap) {
+      return;
+    }
+    // Bot check 2 — submission < 1.5s after mount. No human can
+    // enter an email + password that fast. Silently drop.
+    if (Date.now() - mountedAt < 1500) {
+      return;
+    }
+
     setIsLoading(true);
     track("login_started", { method: "email" }, { instant: true });
 
@@ -45,7 +94,25 @@ export default function LoginPage() {
       // proceed to the success path even if authError is non-null.
       if (authError && !data.user) {
         setError(authError.message);
-        track("login_failed", { method: "email", error: authError.message });
+        // Include as much diagnostic detail as we can pull from the
+        // Supabase error so PostHog properties tell us WHY logins are
+        // failing without needing to correlate console logs.
+        const err = authError as unknown as {
+          message?: string;
+          status?: number;
+          code?: string;
+          name?: string;
+        };
+        track("login_failed", {
+          method: "email",
+          error: err.message ?? "unknown",
+          error_status: err.status ?? null,
+          error_code: err.code ?? null,
+          error_name: err.name ?? null,
+          // A crude but useful categorisation so we can group failures
+          // in PostHog without parsing free-form message text.
+          reason: classifyAuthError(err.message ?? ""),
+        });
         return;
       }
 
@@ -129,6 +196,29 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
           </div>
+
+          {/* Honeypot field — hidden from users via inline styles
+              (bots ignore CSS from stylesheets but usually parse
+              inline). Named "website" so bots that pattern-match
+              on common form fields will happily fill it in. */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={botTrap}
+            onChange={(e) => setBotTrap(e.target.value)}
+            style={{
+              position: "absolute",
+              left: "-9999px",
+              width: "1px",
+              height: "1px",
+              opacity: 0,
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
+          />
+
           {error && (
             <p className="text-sm text-destructive" role="alert">
               {error}
