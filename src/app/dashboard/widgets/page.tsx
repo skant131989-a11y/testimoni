@@ -28,6 +28,7 @@ import Link from "next/link";
 import { useSubscription } from "@/lib/use-subscription";
 import { LimitBanner } from "@/components/plan/limit-banner";
 import { track } from "@/lib/analytics";
+import { WidgetPreviewOnUrl } from "@/components/widget-preview-on-url";
 
 const LAYOUTS = [
   { id: "GRID", label: "Grid", icon: LayoutGrid },
@@ -314,6 +315,20 @@ export default function WidgetsPage() {
                           </Link>
                         </Button>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Preview on customer's own URL — mock browser
+                      chrome with their site's hostname in the address
+                      bar and the widget rendered inside. Answers the
+                      "how will this look on my site?" question that
+                      the layout picker alone can't. */}
+                  {openEmbedFor === widget.id && typeof window !== "undefined" && (
+                    <div className="mt-4">
+                      <WidgetPreviewOnUrl
+                        widgetId={widget.id}
+                        origin={window.location.origin}
+                      />
                     </div>
                   )}
                 </CardContent>

@@ -300,7 +300,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
           Upload video
           {!isPro && (
             <span className="ml-2 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-              Pro
+              1 free
             </span>
           )}
         </Button>
@@ -614,22 +614,24 @@ export default function ImportClient({ isPro }: ImportClientProps) {
           <CardHeader>
             <CardTitle>Upload a video testimonial</CardTitle>
             <CardDescription>
-              Attach an MP4 or MOV (up to 50MB). Pro plan required.
+              Attach an MP4 or MOV (up to 50MB). Free plan includes 1 video;
+              Pro is unlimited.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Upgrade nudge — always visible on Free plan, so users
-                don't have to attempt an upload and hit a 403 to
-                discover the gate. Server still rejects on submit
-                as the source of truth. */}
-            {(!isPro || upgradeRequired) && (
+            {/* Upgrade nudge only shows AFTER a real quota failure
+                now — Free users can attempt the first upload without
+                any gating message. Second attempt hits the server
+                cap and we show the "you've used your free video"
+                variant. Pro users never see this. */}
+            {upgradeRequired && (
               <div className="rounded-md border border-primary/40 bg-primary/5 p-3 text-sm">
                 <p className="font-medium text-primary">
-                  Video testimonials are a Pro feature.
+                  You&apos;ve used your free video.
                 </p>
                 <p className="mt-1 text-muted-foreground">
-                  Upgrade to unlock video uploads plus unlimited
-                  testimonials, widgets, and forms.
+                  Delete the existing one to upload a different clip, or
+                  upgrade to Pro for unlimited video testimonials.
                 </p>
                 <Button asChild size="sm" className="mt-3">
                   <Link
@@ -637,7 +639,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
                     onClick={() =>
                       track("video_upgrade_nudge_click", {
                         source: "video_tab",
-                        seen: upgradeRequired ? "after_submit" : "on_tab_open",
+                        seen: "after_submit",
                       })
                     }
                   >
@@ -769,8 +771,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
               disabled={
                 importing ||
                 !videoFile ||
-                !videoData.customerName.trim() ||
-                !isPro
+                !videoData.customerName.trim()
               }
             >
               {importing ? (
@@ -781,7 +782,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
               ) : (
                 <>
                   <Upload className="mr-2 h-4 w-4" />
-                  {isPro ? "Upload testimonial" : "Upgrade to Pro to upload"}
+                  Upload testimonial
                 </>
               )}
             </Button>

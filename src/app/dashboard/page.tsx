@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MilestoneNudge } from "@/components/milestone-nudge";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
+import { PlanLimitProgress } from "@/components/plan-limit-progress";
+import { getEffectiveLimits } from "@/lib/plan";
 
 interface StatsCardProps {
   title: string;
@@ -118,6 +120,12 @@ export default async function DashboardPage() {
       select: { slug: true },
     }),
   ]);
+
+  const subscription = await prisma.subscription.findUnique({
+    where: { workspaceId },
+    select: { plan: true },
+  });
+  const limits = getEffectiveLimits(workspaceSlug, subscription?.plan);
 
   const impressionsTotal = totalImpressions._sum.impressions ?? 0;
   const wallUrl = defaultWidget
@@ -280,13 +288,19 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick actions */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button asChild>
           <Link href="/dashboard/import">
             <Plus className="mr-2 h-4 w-4" />
             Add Testimonial
           </Link>
         </Button>
+        <PlanLimitProgress
+          current={totalTestimonials}
+          max={limits.maxTestimonials}
+          resource="testimonials"
+          upgradeSurface="dashboard_quick_actions"
+        />
         <Button variant="outline" asChild>
           <Link href="/dashboard/widgets">
             <Code2 className="mr-2 h-4 w-4" />

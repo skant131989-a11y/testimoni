@@ -75,8 +75,8 @@ const features = [
   },
   {
     icon: Video,
-    title: "Video testimonials (Pro)",
-    desc: "Customers submit short video reviews from their phone or laptop. Video testimonials convert ~2x better than text alone.",
+    title: "Video testimonials",
+    desc: "1 free video on every plan, unlimited on Pro. Upload MP4 or MOV up to 50MB — plays inline on your wall and embedded widget. Convert ~2x better than text.",
   },
   {
     icon: Palette,

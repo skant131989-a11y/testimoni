@@ -27,20 +27,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Pro-only. FREE plan gets a friendly upgrade nudge, not a silent fail.
+  // Plan check — Free gets 1 video, Pro gets unlimited. Count only
+  // videos already stored in Supabase Storage (has videoStorageKey);
+  // external videoUrl-only rows are legacy imports and don't touch
+  // our storage quota.
   const subscription = await prisma.subscription.findUnique({
     where: { workspaceId: auth.workspace.id },
   });
   const limits = getEffectiveLimits(auth.workspace.slug, subscription?.plan);
-  if (!limits.video) {
-    return NextResponse.json(
-      {
-        error: "Video testimonials are a Pro feature. Upgrade to unlock.",
-        upgradeRequired: true,
-      },
-      { status: 403 }
-    );
-  }
+  const currentVideoCount = await prisma.testimonial.count({
+    where: {
+      workspaceId: auth.workspace.id,
+      videoStorageKey: { not: null },
+    },
+  });
 
   let formData: FormData;
   try {
@@ -54,6 +54,41 @@ export async function POST(request: Request) {
 
   const file = formData.get("file");
   const testimonialId = formData.get("testimonialId");
+
+  // Uploading to a NEW testimonial counts toward the quota. Replacing
+  // the video on an existing testimonial that already has one does
+  // not (net-zero). Compute the "effective count after this upload"
+  // and gate on that.
+  const isReplacingExistingVideo =
+    typeof testimonialId === "string" &&
+    testimonialId &&
+    (await prisma.testimonial.findFirst({
+      where: {
+        id: testimonialId,
+        workspaceId: auth.workspace.id,
+        videoStorageKey: { not: null },
+      },
+      select: { id: true },
+    })) !== null;
+
+  const projectedCount = isReplacingExistingVideo
+    ? currentVideoCount
+    : currentVideoCount + 1;
+
+  if (projectedCount > limits.maxVideos) {
+    return NextResponse.json(
+      {
+        error:
+          limits.maxVideos === 0
+            ? "Video testimonials are a Pro feature. Upgrade to unlock."
+            : `You've used your ${limits.maxVideos} free video. Delete it to upload a new one, or upgrade to Pro for unlimited.`,
+        upgradeRequired: true,
+        maxVideos: limits.maxVideos,
+        currentVideoCount,
+      },
+      { status: 403 }
+    );
+  }
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Missing file field" }, { status: 400 });

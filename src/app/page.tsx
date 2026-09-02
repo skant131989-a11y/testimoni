@@ -161,7 +161,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-lg font-semibold">Want to collect new testimonials?</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Share a form link with your customers — text, star ratings, and video (Pro).
+                Share a form link with your customers — text, star ratings, and video (1 free, unlimited on Pro).
               </p>
               <ol className="mt-5 space-y-3">
                 <PathStep number={1}>Share your collection form URL, QR code, or embed</PathStep>
@@ -504,9 +504,9 @@ export default function LandingPage() {
               },
               {
                 icon: Play,
-                title: "Video testimonials (Pro)",
+                title: "Video testimonials",
                 description:
-                  "Upload MP4 or MOV clips up to 50MB. Video plays inline on your hosted wall and embedded widget. Video testimonials convert ~2× better than text.",
+                  "1 free video on every plan — upload MP4 or MOV up to 50MB. Plays inline on your hosted wall + embedded widget. Pro unlocks unlimited. Video testimonials convert ~2× better than text.",
               },
               {
                 icon: MonitorSmartphone,

@@ -22,7 +22,10 @@ import {
   Frame,
   ChevronDown,
   ChevronUp,
+  MessageCircle,
+  MessageSquare,
 } from "lucide-react";
+import QRCode from "qrcode";
 
 interface CollectionForm {
   id: string;
@@ -111,7 +114,21 @@ export default function CollectPage() {
   }
 
   function getEmailTemplate(form: CollectionForm) {
-    return `Hi [Name],\n\nWe'd love to hear about your experience with us! Could you share a quick testimonial?\n\nIt only takes 30 seconds: ${getFormUrl(form)}\n\nThank you so much!\n[Your Name]`;
+    return `Hi [Name],\n\nWould you mind leaving a short testimonial about working with us? Text or star rating — whatever's easy. Takes about 30 seconds and there's no signup:\n\n${getFormUrl(form)}\n\nThanks so much,\n[Your Name]`;
+  }
+
+  // Short, casual — for a WhatsApp / iMessage. No subject line,
+  // fits in one sentence. The key phrase is "quick favour" which
+  // primes reciprocity without feeling like a marketing broadcast.
+  function getWhatsAppTemplate(form: CollectionForm) {
+    return `Hey! Quick favour — could you leave me a testimonial? Takes 30 seconds, no signup. ${getFormUrl(form)}`;
+  }
+
+  // Warmer, longer — for a DM to a specific customer you already
+  // have a real relationship with. Doesn't ask permission, states
+  // the ask, gives them a graceful out.
+  function getDmTemplate(form: CollectionForm) {
+    return `Hey — this is a bit awkward but I'm putting together a wall of proof for the site and would love your words on it if you're up for it. Whatever comes to mind. 30 sec, no signup: ${getFormUrl(form)}\n\nTotally cool if not.`;
   }
 
   function getQrUrl(form: CollectionForm) {
@@ -146,10 +163,12 @@ export default function CollectPage() {
 
   const tabs = [
     { id: "link", label: "Share Link", icon: LinkIcon },
-    { id: "embed", label: "Embed Script", icon: Code },
-    { id: "iframe", label: "iFrame", icon: Frame },
+    { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+    { id: "dm", label: "DM", icon: MessageSquare },
     { id: "email", label: "Email", icon: Mail },
     { id: "qr", label: "QR Code", icon: QrCode },
+    { id: "embed", label: "Embed", icon: Code },
+    { id: "iframe", label: "iFrame", icon: Frame },
   ];
 
   return (
@@ -371,6 +390,54 @@ export default function CollectPage() {
                               onClick={() => copy(getIframeCode(form), `iframe-${form.id}`)}
                             >
                               {copiedKey === `iframe-${form.id}` ? (
+                                <Check className="h-3 w-3" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {currentTab === "whatsapp" && (
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground">
+                            Short and casual — send it on WhatsApp / iMessage. One sentence, no signup mentioned.
+                          </p>
+                          <div className="relative">
+                            <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-3 text-xs">
+                              <code>{getWhatsAppTemplate(form)}</code>
+                            </pre>
+                            <Button
+                              size="sm"
+                              className="absolute right-2 top-2"
+                              onClick={() => copy(getWhatsAppTemplate(form), `whatsapp-${form.id}`)}
+                            >
+                              {copiedKey === `whatsapp-${form.id}` ? (
+                                <Check className="h-3 w-3" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {currentTab === "dm" && (
+                        <div className="space-y-2">
+                          <p className="text-sm text-muted-foreground">
+                            Warmer, longer — for a DM to a customer you have a real relationship with. Gives them a graceful out.
+                          </p>
+                          <div className="relative">
+                            <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-3 text-xs">
+                              <code>{getDmTemplate(form)}</code>
+                            </pre>
+                            <Button
+                              size="sm"
+                              className="absolute right-2 top-2"
+                              onClick={() => copy(getDmTemplate(form), `dm-${form.id}`)}
+                            >
+                              {copiedKey === `dm-${form.id}` ? (
                                 <Check className="h-3 w-3" />
                               ) : (
                                 <Copy className="h-3 w-3" />

@@ -624,6 +624,23 @@ export function WelcomeClient({
             ? "Let's get your first testimonial live in 30 seconds. Paste any public tweet or LinkedIn post about your work."
             : "Type in a testimonial you already have — from an email, a DM, or a screenshot."}
         </p>
+
+        {/* First-run collect-3 goal — turns the open-ended paste
+            prompt into a completable checklist. Any source counts:
+            tweet URL, LinkedIn URL, manual entry, or fresh submissions
+            through the collection form. */}
+        {!imported && (
+          <div className="mx-auto mt-6 max-w-lg rounded-xl border border-primary/20 bg-primary/5 p-3 text-sm">
+            <p className="font-medium text-primary">
+              🎯 Fill your wall — aim for 3 testimonials today
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Paste a tweet / LinkedIn URL, type one you already have (email,
+              DM, review), or share your collection form to gather fresh
+              ones. Any source counts.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Primary card — URL input or manual form depending on mode */}

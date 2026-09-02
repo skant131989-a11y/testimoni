@@ -54,6 +54,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isMagicLoading, setIsMagicLoading] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
   // Honeypot — bots fill every visible field, including hidden ones
   // named like "phone" or "website". Real humans never see or touch
   // it. If populated on submit, we silently reject without hitting
@@ -134,6 +136,36 @@ export default function LoginPage() {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleMagicLink() {
+    if (!email) return;
+    setError(null);
+    setIsMagicLoading(true);
+    track("login_started", { method: "magic_link" }, { instant: true });
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard")}`,
+        },
+      });
+      if (authError) {
+        setError(authError.message);
+        track("login_failed", {
+          method: "magic_link",
+          error: authError.message,
+        });
+        return;
+      }
+      setMagicSent(true);
+      track("login_magic_link_sent", { email });
+    } catch {
+      setError("Couldn't send magic link. Try again.");
+    } finally {
+      setIsMagicLoading(false);
     }
   }
 
@@ -270,6 +302,25 @@ export default function LoginPage() {
             </svg>
           )}
           Google
+        </Button>
+
+        {/* Magic link — passwordless. One less thing for users to
+            remember, one fewer step for real humans. Handy for the
+            "I forgot my password" moment too. */}
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-2 w-full"
+          onClick={handleMagicLink}
+          disabled={isMagicLoading || !email}
+        >
+          {isMagicLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : magicSent ? (
+            <>✓ Link sent to {email} — check your inbox</>
+          ) : (
+            <>Email me a magic link {email ? "" : "(enter email above)"}</>
+          )}
         </Button>
       </CardContent>
       <CardFooter>

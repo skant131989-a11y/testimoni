@@ -3,8 +3,15 @@ export const PLAN_LIMITS = {
     maxTestimonials: 10,
     maxWidgets: 1,
     maxForms: 1,
+    // How many videos a Free workspace can host at once. Set to 1 so
+    // Free users experience the full "upload -> plays on wall ->
+    // embed" flow (that's what converts), but can't burn our
+    // Supabase Free-tier storage quota with dozens of large clips.
+    // Delete their video to upload a new one, or upgrade to Pro for
+    // unlimited.
+    maxVideos: 1,
     layouts: ["GRID"] as const,
-    video: false,
+    video: true,
     watermark: true,
     customBranding: false,
   },
@@ -12,6 +19,7 @@ export const PLAN_LIMITS = {
     maxTestimonials: Infinity,
     maxWidgets: Infinity,
     maxForms: Infinity,
+    maxVideos: Infinity,
     layouts: ["GRID", "MASONRY", "CAROUSEL", "LIST", "MARQUEE"] as const,
     video: true,
     watermark: false,
