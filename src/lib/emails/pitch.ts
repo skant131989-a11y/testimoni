@@ -146,15 +146,6 @@ export function pitchEmailHtml(data: PitchEmailData): string {
                 </tr>
               </table>
 
-              <!-- Bare URL below the button so recipients can see /
-                   copy the real link. Some folks always want to
-                   verify a URL before clicking, and some just want
-                   to paste it into a bio / DM instead of following
-                   the button. -->
-              <p style="margin:0 0 20px 0;color:#6b7280;font-size:13px;">
-                Or copy the link: <a href="${escapeAttr(landingUrl)}" target="_blank" style="color:#5b21b6;text-decoration:underline;">${escapeHtml(landingUrl.replace(/^https?:\/\//, ""))}</a>
-              </p>
-
               <p style="margin:0 0 16px 0;">${escapeHtml(cta)}</p>
 
               <p style="margin:0 0 4px 0;">— ${escapeHtml(senderFirst)}</p>

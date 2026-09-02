@@ -73,14 +73,18 @@ export function founderEmailHtml(data: FounderEmailData): string {
                 </li>
               </ol>
 
-              <p style="margin:0 0 8px 0;color:#4b5563;font-size:14px;">
-                Your Wall of Love (in case you need the URL again):
+              <p style="margin:0 0 12px 0;color:#4b5563;font-size:14px;">
+                Your Wall of Love is one click away:
               </p>
-              <p style="margin:0 0 24px 0;">
-                <a href="${escapeAttr(wallUrl)}" target="_blank" style="color:#5b21b6;text-decoration:underline;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;word-break:break-all;">
-                  ${escapeHtml(wallUrl)}
-                </a>
-              </p>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px 0;">
+                <tr>
+                  <td style="background-color:#5b21b6;border-radius:8px;">
+                    <a href="${escapeAttr(wallUrl)}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                      Open my wall &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
 
               <p style="margin:0 0 16px 0;">
                 Just hit reply — this email lands directly in my inbox, not a support queue.
