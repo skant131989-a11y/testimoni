@@ -71,7 +71,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-3xl">
           <div className="mb-4 inline-flex items-center rounded-full border px-3 py-1 text-sm">
             <Star className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400" />
-            Just launched · Free forever plan
+            Free forever plan
           </div>
           <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
             Paste a tweet.{" "}
