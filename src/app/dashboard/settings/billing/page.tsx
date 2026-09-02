@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, CreditCard, Zap, XCircle } from "lucide-react";
-import { PLAN_LIMITS, PRICING } from "@/lib/constants";
+import { PLAN_LIMITS } from "@/lib/constants";
 import { usePricing } from "@/lib/use-pricing";
 import { CurrencySwitcher } from "@/components/pricing/price-display";
 import { track } from "@/lib/analytics";
@@ -115,7 +115,7 @@ export default function BillingPage() {
         key: data.key_id,
         subscription_id: data.subscription_id,
         name: "Testimoni",
-        description: `Pro plan (${PRICING.INR.symbol}${PRICING.INR.proMonthly}/mo)`,
+        description: `Pro plan (${proMonthlyFormatted}/mo)`,
         prefill: data.prefill,
         theme: { color: "#7c3aed" },
         handler: async () => {
@@ -350,7 +350,7 @@ export default function BillingPage() {
             <p className="text-center text-xs text-muted-foreground">
               {currency === "INR"
                 ? "UPI, cards, netbanking — powered by Razorpay"
-                : `Charged as ${PRICING.INR.symbol}${PRICING.INR.proMonthly} in INR (~${proMonthlyFormatted}). International cards supported.`}
+                : "International cards accepted — powered by Razorpay"}
             </p>
           </CardFooter>
         </Card>
