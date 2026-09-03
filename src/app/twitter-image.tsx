@@ -169,7 +169,7 @@ export default function TwitterImage() {
                   fontWeight: 700,
                 }}
               >
-                Live on your wall
+                On your site or ours
               </div>
             </div>
 
