@@ -188,6 +188,29 @@ export async function POST(request: Request) {
         status: "APPROVED",
       },
     });
+
+    // Mirror the manual approve flow: link the fresh testimonial to
+    // the workspace's default (oldest active) widget so it renders
+    // on the wall + embed. Without this step the testimonial stays
+    // in the library but never appears on /w/[widgetId].
+    const defaultWidget = await prisma.widget.findFirst({
+      where: { workspaceId: form.workspaceId, isActive: true },
+      orderBy: { createdAt: "asc" },
+      select: { id: true },
+    });
+    if (defaultWidget) {
+      const nextPosition = await prisma.widgetTestimonial.count({
+        where: { widgetId: defaultWidget.id },
+      });
+      await prisma.widgetTestimonial.create({
+        data: {
+          widgetId: defaultWidget.id,
+          testimonialId: testimonial.id,
+          position: nextPosition,
+        },
+      });
+    }
+
     const response = NextResponse.json(
       { submission: { id: testimonial.id }, message: "Submission received" },
       { status: 201 }
