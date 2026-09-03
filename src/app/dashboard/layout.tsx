@@ -74,13 +74,18 @@ export default async function DashboardLayout({
     const userId = dbUser?.id ?? randomUUID();
     const workspaceId = randomUUID();
 
-    // Only create the User row if it doesn't already exist. Rest of
-    // the operations always run.
+    // Only create the User row if it doesn't already exist. Uses
+    // upsert to survive the race where two dashboard requests hit
+    // provisioning at once — the first commits, the second's
+    // findUnique returned null but by ops-execution time the row
+    // exists. Without upsert we'd hit a unique-constraint on supabaseId.
     const ops = [];
     if (!dbUser) {
       ops.push(
-        prisma.user.create({
-          data: {
+        prisma.user.upsert({
+          where: { supabaseId: authUser.id },
+          update: {},
+          create: {
             id: userId,
             supabaseId: authUser.id,
             email: authUser.email!,
