@@ -135,9 +135,24 @@ export default function OpenGraphImage() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            marginTop: 24,
+            marginTop: 20,
           }}
         >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "12px 26px",
+              borderRadius: 999,
+              background: "#5b21b6",
+              color: "white",
+              fontSize: 28,
+              fontWeight: 800,
+              marginBottom: 22,
+            }}
+          >
+            Paste a tweet → live in 30 seconds
+          </div>
           <div
             style={{
               display: "flex",
