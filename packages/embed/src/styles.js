@@ -12,32 +12,34 @@ var FW_STYLES = `
   text-align: left;
   font-style: normal;
   font-weight: normal;
+  box-sizing: border-box;
+}
+
+.fw-root *, .fw-root *::before, .fw-root *::after {
+  box-sizing: border-box;
 }
 
 .fw-card {
   background: var(--fw-bg);
   border: 1px solid var(--fw-border);
-  border-radius: var(--fw-radius);
-  padding: 12px 16px;
+  border-radius: 16px;
+  padding: 20px;
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: flex-start;
   transition: box-shadow 0.2s;
+  height: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .fw-card:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.fw-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
 .fw-card-body {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
 }
@@ -45,14 +47,14 @@ var FW_STYLES = `
 .fw-stars {
   display: flex;
   gap: 2px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .fw-star {
   fill: var(--fw-border);
   stroke: none;
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
 }
 
 .fw-star-filled {
@@ -60,20 +62,53 @@ var FW_STYLES = `
 }
 
 .fw-content {
-  margin: 0 0 6px;
+  margin: 0 0 12px;
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--fw-text);
 }
 
 .fw-author {
   display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.fw-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.fw-letter {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.fw-author-text {
+  display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .fw-name {
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
+  color: var(--fw-text);
 }
 
 .fw-title {
@@ -89,8 +124,9 @@ var FW_STYLES = `
 
 .fw-watermark {
   text-align: center;
-  margin-top: 16px;
-  padding: 8px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--fw-border);
 }
 
 .fw-watermark a {
@@ -107,7 +143,7 @@ var FW_STYLES = `
 .fw-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
+  gap: 20px;
 }
 
 /* Masonry Layout */

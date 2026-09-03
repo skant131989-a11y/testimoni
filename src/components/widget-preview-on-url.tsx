@@ -38,7 +38,7 @@ export function WidgetPreviewOnUrl({
   }
 
   const displayUrl = userUrl.trim() || "https://your-site.com";
-  const embedHtml = `<!DOCTYPE html><html><head><title>Preview</title><style>body{margin:0;padding:32px;font-family:system-ui;background:#fafafa;color:#111}h1{font-size:32px;margin:0 0 8px}h2{font-size:14px;color:#666;margin:24px 0 12px;text-transform:uppercase;letter-spacing:0.08em}</style></head><body><h1>${escapeHtml(hostFrom(displayUrl))}</h1><p style="color:#666;font-size:15px">This is a preview of how your Wall of Love would look on this page.</p><h2>What our customers say</h2><div id="fw-${widgetId}"></div><script src="${origin}/embed/widget.js" data-widget-id="${widgetId}" async></script></body></html>`;
+  const embedHtml = `<!DOCTYPE html><html><head><title>Preview</title><style>body{margin:0;padding:32px;font-family:system-ui;background:#fafafa;color:#111}h1{font-size:32px;margin:0 0 8px}h2{font-size:14px;color:#666;margin:24px 0 12px;text-transform:uppercase;letter-spacing:0.08em}</style></head><body><h1>${escapeHtml(hostFrom(displayUrl))}</h1><p style="color:#666;font-size:15px">This is a preview of how your Wall of Love would look on this page.</p><h2>What our customers say</h2><div id="fw-${widgetId}"></div><script src="${origin}/embed/widget.js?v=8" data-widget-id="${widgetId}" async></script></body></html>`;
 
   return (
     <div className="rounded-lg border bg-muted/30 p-4">
@@ -91,7 +91,7 @@ export function WidgetPreviewOnUrl({
           </div>
           <iframe
             title="Widget preview"
-            className="h-[520px] w-full border-0"
+            className="h-[700px] w-full border-0"
             srcDoc={embedHtml}
           />
         </div>

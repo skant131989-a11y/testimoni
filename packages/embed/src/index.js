@@ -93,11 +93,30 @@ function renderWidget(container, data) {
   if (layout === "MARQUEE") initMarquee(container);
 }
 
+// Same palette + hash the wall page uses so a person gets the same
+// color everywhere they appear.
+var LETTER_BG = [
+  "#7c3aed", "#0891b2", "#059669", "#d97706", "#dc2626",
+  "#db2777", "#4f46e5", "#0284c7", "#65a30d", "#c2410c"
+];
+function pickLetterColor(name) {
+  var s = name || "";
+  var idx = 0;
+  for (var i = 0; i < s.length; i++) idx = (idx + s.charCodeAt(i)) % LETTER_BG.length;
+  return LETTER_BG[idx];
+}
+function firstLetter(name) {
+  var t = (name || "").trim();
+  var c = t.charAt(0);
+  // Only ASCII letters/digits get a letter circle. Emoji-only or
+  // symbol-only names fall through — the caller skips the avatar
+  // entirely rather than rendering "?" on a colored disc.
+  if (!c || !/[A-Za-z0-9]/.test(c)) return "";
+  return c.toUpperCase();
+}
+
 function renderCard(t, widget) {
   var html = '<div class="fw-card">';
-  if (widget.showAvatar !== false && t.customerAvatar) {
-    html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
-  }
   html += '<div class="fw-card-body">';
   if (widget.showRating !== false && t.rating) {
     html += '<div class="fw-stars">' + renderStars(t.rating) + '</div>';
@@ -106,11 +125,23 @@ function renderCard(t, widget) {
     html += '<p class="fw-content">' + escapeHtml(t.content) + '</p>';
   }
   html += '<div class="fw-author">';
+  if (widget.showAvatar !== false) {
+    if (t.customerAvatar) {
+      html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
+    } else {
+      var letter = firstLetter(t.customerName || "");
+      if (letter) {
+        var bg = pickLetterColor(t.customerName || "");
+        html += '<span class="fw-letter" style="background:' + bg + '">' + letter + '</span>';
+      }
+    }
+  }
+  html += '<div class="fw-author-text">';
   html += '<span class="fw-name">' + escapeHtml(t.customerName) + '</span>';
   if (t.customerTitle) {
     html += '<span class="fw-title">' + escapeHtml(t.customerTitle) + '</span>';
   }
-  html += '</div></div></div>';
+  html += '</div></div></div></div>';
   return html;
 }
 

@@ -12,32 +12,34 @@
   text-align: left;
   font-style: normal;
   font-weight: normal;
+  box-sizing: border-box;
+}
+
+.fw-root *, .fw-root *::before, .fw-root *::after {
+  box-sizing: border-box;
 }
 
 .fw-card {
   background: var(--fw-bg);
   border: 1px solid var(--fw-border);
-  border-radius: var(--fw-radius);
-  padding: 12px 16px;
+  border-radius: 16px;
+  padding: 20px;
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: flex-start;
   transition: box-shadow 0.2s;
+  height: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .fw-card:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.fw-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
 .fw-card-body {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
 }
@@ -45,14 +47,14 @@
 .fw-stars {
   display: flex;
   gap: 2px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .fw-star {
   fill: var(--fw-border);
   stroke: none;
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
 }
 
 .fw-star-filled {
@@ -60,20 +62,53 @@
 }
 
 .fw-content {
-  margin: 0 0 6px;
+  margin: 0 0 12px;
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--fw-text);
 }
 
 .fw-author {
   display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.fw-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.fw-letter {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.fw-author-text {
+  display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .fw-name {
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
+  color: var(--fw-text);
 }
 
 .fw-title {
@@ -89,8 +124,9 @@
 
 .fw-watermark {
   text-align: center;
-  margin-top: 16px;
-  padding: 8px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--fw-border);
 }
 
 .fw-watermark a {
@@ -107,7 +143,7 @@
 .fw-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
+  gap: 20px;
 }
 
 /* Masonry Layout */
@@ -388,11 +424,30 @@ function renderWidget(container, data) {
   if (layout === "MARQUEE") initMarquee(container);
 }
 
+// Same palette + hash the wall page uses so a person gets the same
+// color everywhere they appear.
+var LETTER_BG = [
+  "#7c3aed", "#0891b2", "#059669", "#d97706", "#dc2626",
+  "#db2777", "#4f46e5", "#0284c7", "#65a30d", "#c2410c"
+];
+function pickLetterColor(name) {
+  var s = name || "";
+  var idx = 0;
+  for (var i = 0; i < s.length; i++) idx = (idx + s.charCodeAt(i)) % LETTER_BG.length;
+  return LETTER_BG[idx];
+}
+function firstLetter(name) {
+  var t = (name || "").trim();
+  var c = t.charAt(0);
+  // Only ASCII letters/digits get a letter circle. Emoji-only or
+  // symbol-only names fall through — the caller skips the avatar
+  // entirely rather than rendering "?" on a colored disc.
+  if (!c || !/[A-Za-z0-9]/.test(c)) return "";
+  return c.toUpperCase();
+}
+
 function renderCard(t, widget) {
   var html = '<div class="fw-card">';
-  if (widget.showAvatar !== false && t.customerAvatar) {
-    html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
-  }
   html += '<div class="fw-card-body">';
   if (widget.showRating !== false && t.rating) {
     html += '<div class="fw-stars">' + renderStars(t.rating) + '</div>';
@@ -401,11 +456,23 @@ function renderCard(t, widget) {
     html += '<p class="fw-content">' + escapeHtml(t.content) + '</p>';
   }
   html += '<div class="fw-author">';
+  if (widget.showAvatar !== false) {
+    if (t.customerAvatar) {
+      html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
+    } else {
+      var letter = firstLetter(t.customerName || "");
+      if (letter) {
+        var bg = pickLetterColor(t.customerName || "");
+        html += '<span class="fw-letter" style="background:' + bg + '">' + letter + '</span>';
+      }
+    }
+  }
+  html += '<div class="fw-author-text">';
   html += '<span class="fw-name">' + escapeHtml(t.customerName) + '</span>';
   if (t.customerTitle) {
     html += '<span class="fw-title">' + escapeHtml(t.customerTitle) + '</span>';
   }
-  html += '</div></div></div>';
+  html += '</div></div></div></div>';
   return html;
 }
 
