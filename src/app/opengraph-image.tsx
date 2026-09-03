@@ -6,26 +6,21 @@ export const contentType = "image/png";
 /**
  * OpenGraph card for testimoni.io.
  * Satori requires every div with multiple children to declare
- * display: flex explicitly.
+ * display: flex explicitly. No CSS grid, no @font-face.
  *
- * Design goals (post-feedback):
- * - Density: two testimonial cards, not four — the image is ~500px
- *   wide in an X feed, so a 2×2 grid becomes mud.
- * - Contrast: darker lavender wash with white panels so the wall
- *   pops in dark feeds (X, LinkedIn night mode, Slack dark).
- * - Consistency: full "30 seconds" to match the homepage headline.
- * - Safe margins: footer elements pulled ~48px in from every corner
- *   to survive X/LinkedIn crop.
- * - Fewer distractions: one big star row instead of 4 tiny ones —
- *   feels like proof, not a grid template.
+ * Fresh direction (v7 rewrite):
+ * - Positioning-first, not paste-a-tweet-first. The three-step loop
+ *   Ask → Collect → Publish is the story we now lead with on the
+ *   home page; the OG mirrors it.
+ * - Big centered headline. Feeds compress this card to ~500px wide,
+ *   so anything smaller than ~48px type turns to mud.
+ * - Wall-preview strip at the bottom shows the outcome — three
+ *   testimonial cards in a row, tight, with real-sized author photos.
+ * - No URL bar → arrow → pill diagram. That solved a different
+ *   confusion (paste-a-tweet). We're past it.
  */
 
-/**
- * Small filled 5-point star as an inline SVG. Using SVG instead of the
- * Unicode ★ (U+2605) — Next.js's default Satori font doesn't include
- * that codepoint, so it renders as a tofu/missing-glyph box.
- */
-function StarRow({ size: sz = 18 }: { size?: number }) {
+function StarRow({ size: sz = 14 }: { size?: number }) {
   return (
     <div style={{ display: "flex", gap: 2 }}>
       {[0, 1, 2, 3, 4].map((i) => (
@@ -46,22 +41,27 @@ function StarRow({ size: sz = 18 }: { size?: number }) {
   );
 }
 
-const MINI_TESTIMONIALS = [
+const WALL_STRIP = [
   {
-    letter: "P",
-    color: "#16a34a",
-    name: "Priya Menon",
-    title: "Founder, LinenLab",
-    quote:
-      "Live wall up in the time it took me to make coffee. Genuinely wild.",
+    initial: "P",
+    accent: "#16a34a",
+    name: "Priya",
+    role: "Founder, LinenLab",
+    quote: "Live wall up in the time it took me to make coffee.",
   },
   {
-    letter: "S",
-    color: "#ea580c",
-    name: "Sarah Chen",
-    title: "CEO, LaunchPad",
-    quote:
-      "Turned a mess of tweets into a wall of love in about 30 seconds.",
+    initial: "S",
+    accent: "#ea580c",
+    name: "Sarah",
+    role: "CEO, LaunchPad",
+    quote: "Turned a mess of tweets into a wall of love in 30 seconds.",
+  },
+  {
+    initial: "M",
+    accent: "#7c3aed",
+    name: "Marcus",
+    role: "Founder, ShipFast",
+    quote: "Embed took me one line. Wall was live before lunch.",
   },
 ];
 
@@ -74,292 +74,201 @@ export default function OpenGraphImage() {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "48px 56px",
+          padding: "44px 56px 36px 56px",
           background:
-            "linear-gradient(135deg, #ede9fe 0%, #c4b5fd 50%, #a78bfa 100%)",
+            "linear-gradient(135deg, #f5f3ff 0%, #ddd6fe 50%, #a78bfa 100%)",
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
-        {/* Word mark */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              background: "#5b21b6",
-              color: "white",
-              fontSize: 32,
-              fontWeight: 900,
-              paddingBottom: 8,
-              fontFamily: "Georgia, serif",
-            }}
-          >
-            &ldquo;
-          </div>
-          <div style={{ fontSize: 34, fontWeight: 800, color: "#1a1a1a" }}>
-            Testimoni
-          </div>
-        </div>
-
-        {/* Body row */}
-        <div
-          style={{
-            display: "flex",
-            flex: 1,
-            marginTop: 28,
-            alignItems: "center",
-            gap: 40,
-          }}
-        >
-          {/* LEFT: pitch */}
-          <div style={{ display: "flex", flexDirection: "column", width: 540 }}>
-            <div
-              style={{
-                display: "flex",
-                fontSize: 64,
-                fontWeight: 800,
-                color: "#1a1a1a",
-                lineHeight: 1.02,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Paste a tweet.
-            </div>
-            <div
-              style={{
-                display: "flex",
-                fontSize: 60,
-                fontWeight: 800,
-                color: "#4c1d95",
-                lineHeight: 1.05,
-                letterSpacing: "-0.02em",
-                marginTop: 6,
-              }}
-            >
-              Get a testimonial in 30 seconds.
-            </div>
-
-            {/* URL bar → arrow → destination pill */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                marginTop: 28,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "10px 16px",
-                  borderRadius: 10,
-                  background: "white",
-                  border: "2px solid rgba(76, 29, 149, 0.25)",
-                  fontSize: 18,
-                  fontWeight: 500,
-                  color: "#4b5563",
-                  fontFamily: "ui-monospace, SFMono-Regular, monospace",
-                }}
-              >
-                https://x.com/…
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  fontSize: 30,
-                  color: "#4c1d95",
-                  fontWeight: 800,
-                }}
-              >
-                →
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "10px 16px",
-                  borderRadius: 10,
-                  background: "#4c1d95",
-                  color: "white",
-                  fontSize: 17,
-                  fontWeight: 700,
-                }}
-              >
-                On your site or ours
-              </div>
-            </div>
-
-            {/* Secondary intake hint — one small line so cold shares
-                also see the form/QR path, without diluting the
-                paste-a-tweet wedge. */}
-            <div
-              style={{
-                display: "flex",
-                marginTop: 14,
-                fontSize: 15,
-                color: "#6b21a8",
-                fontWeight: 500,
-              }}
-            >
-              Or share a form / QR code to collect fresh ones — plus 1 free video testimonial on every plan.
-            </div>
-          </div>
-
-          {/* RIGHT: mini Wall of Love — two cards, one row, bigger type */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              flex: 1,
-              padding: 18,
-              borderRadius: 20,
-              background: "white",
-              border: "1px solid rgba(76, 29, 149, 0.15)",
-              boxShadow: "0 10px 30px rgba(76, 29, 149, 0.15)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#4c1d95",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                marginBottom: 12,
-              }}
-            >
-              Wall of Love — live preview
-            </div>
-            <div
-              style={{
-                display: "flex",
-                gap: 12,
-              }}
-            >
-              {MINI_TESTIMONIALS.map((t) => (
-                <div
-                  key={t.name}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    flex: 1,
-                    padding: 14,
-                    borderRadius: 12,
-                    background: "#faf9fc",
-                    border: "1px solid #e5e7eb",
-                  }}
-                >
-                  <StarRow size={18} />
-                  <div
-                    style={{
-                      display: "flex",
-                      fontSize: 16,
-                      color: "#1f2937",
-                      lineHeight: 1.4,
-                      marginTop: 8,
-                    }}
-                  >
-                    &ldquo;{t.quote}&rdquo;
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      marginTop: 12,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 30,
-                        height: 30,
-                        borderRadius: 15,
-                        background: t.color,
-                        color: "white",
-                        fontSize: 14,
-                        fontWeight: 800,
-                      }}
-                    >
-                      {t.letter}
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: "#1a1a1a",
-                        }}
-                      >
-                        {t.name}
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          fontSize: 12,
-                          color: "#6b7280",
-                        }}
-                      >
-                        {t.title}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer — pulled ~8px in from the section padding to give
-            X/LinkedIn crop a safety buffer. */}
+        {/* Wordmark row */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginTop: 18,
-            paddingLeft: 8,
-            paddingRight: 8,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              fontSize: 24,
-              fontWeight: 700,
-              color: "#4c1d95",
-            }}
-          >
-            testimoni.io
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                background: "#5b21b6",
+                color: "white",
+                fontSize: 30,
+                fontWeight: 900,
+                paddingBottom: 8,
+                fontFamily: "Georgia, serif",
+              }}
+            >
+              &ldquo;
+            </div>
+            <div style={{ fontSize: 30, fontWeight: 800, color: "#1a1a1a" }}>
+              Testimoni
+            </div>
           </div>
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              padding: "8px 20px",
+              padding: "8px 16px",
               borderRadius: 999,
               background: "white",
-              border: "2px solid #4c1d95",
-              fontSize: 18,
+              border: "1.5px solid #4c1d95",
+              fontSize: 14,
               fontWeight: 700,
               color: "#4c1d95",
             }}
           >
-            Free plan — no card required
+            Free plan · No card required
+          </div>
+        </div>
+
+        {/* Center: massive 3-word positioning headline */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 24,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              fontSize: 96,
+              fontWeight: 900,
+              color: "#1a1a1a",
+              lineHeight: 1,
+              letterSpacing: "-0.03em",
+              gap: 24,
+            }}
+          >
+            <span>Ask.</span>
+            <span style={{ color: "#7c3aed" }}>Collect.</span>
+            <span>Publish.</span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              marginTop: 18,
+              fontSize: 24,
+              color: "#4b5563",
+              fontWeight: 500,
+              textAlign: "center",
+            }}
+          >
+            One tool for your Wall of Love — on your site or ours.
+          </div>
+        </div>
+
+        {/* Wall preview strip — three testimonial cards */}
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            marginTop: 36,
+          }}
+        >
+          {WALL_STRIP.map((t) => (
+            <div
+              key={t.name}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flex: 1,
+                padding: 16,
+                borderRadius: 14,
+                background: "white",
+                border: "1px solid rgba(76, 29, 149, 0.15)",
+                boxShadow: "0 8px 24px rgba(76, 29, 149, 0.10)",
+              }}
+            >
+              <StarRow size={14} />
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: 15,
+                  color: "#1f2937",
+                  lineHeight: 1.4,
+                  marginTop: 10,
+                }}
+              >
+                &ldquo;{t.quote}&rdquo;
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginTop: 12,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 28,
+                    height: 28,
+                    borderRadius: 14,
+                    background: t.accent,
+                    color: "white",
+                    fontSize: 13,
+                    fontWeight: 800,
+                  }}
+                >
+                  {t.initial}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: "#1a1a1a",
+                    }}
+                  >
+                    {t.name}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      fontSize: 11,
+                      color: "#6b7280",
+                    }}
+                  >
+                    {t.role}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 22,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              fontSize: 22,
+              fontWeight: 700,
+              color: "#4c1d95",
+            }}
+          >
+            testimoni.io
           </div>
         </div>
       </div>
