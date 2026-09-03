@@ -23,6 +23,8 @@ import { ProPriceDual } from "@/components/pricing/price-display";
 import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
+import { HeroEmailCta } from "@/components/hero-email-cta";
+import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { PageEngagement } from "@/components/page-engagement";
@@ -81,19 +83,7 @@ export default function LandingPage() {
             No screenshots. No copy-paste. Just a URL and your first
             testimonial is live on your wall.
           </p>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <TrackedLink cta="hero_signup" surface="home" href="/signup">
-              <Button size="lg" className="gap-2">
-                Get started free
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </TrackedLink>
-            <TrackedLink cta="hero_pricing" surface="home" href="/pricing">
-              <Button size="lg" variant="outline">
-                View Pricing
-              </Button>
-            </TrackedLink>
-          </div>
+          <HeroEmailCta source="home_hero" />
           {/* Trust + scope chips — three small pills replace the old
               single-line tertiary text. Each claim now has its own
               visual anchor so scanners catch "Free plan", "No card",
@@ -793,6 +783,7 @@ export default function LandingPage() {
           </p>
         </div>
       </footer>
+      <StickyMobileCta source="home" />
     </div>
   );
 }

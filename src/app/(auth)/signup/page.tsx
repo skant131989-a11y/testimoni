@@ -47,7 +47,7 @@ export default function SignupPage() {
   // headline so the user knows exactly why they're here.
   const isImportFlow = searchParams.get("import") === "1";
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
