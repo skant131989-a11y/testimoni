@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Loader2, MailCheck } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { track, identify, resetAnalytics } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
@@ -18,65 +18,29 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 
-/**
- * Some password managers (LastPass, older 1Password rules) ignore
- * autoComplete="name" and fill the Name field with a generated
- * password anyway. Result: users signed up as
- * "uHbGbeZdFIKGwNycJyyQbcY". We can't stop the fill, but we can
- * refuse to submit a name that clearly isn't one.
- *
- * Heuristic: 15+ chars, no whitespace, and BOTH upper and lower case.
- * Real names — even single-word ones like "Ravi" or "Aleksandra" —
- * don't hit all three. Generated passwords always do.
- */
-function looksLikeGeneratedPassword(name: string): boolean {
-  const trimmed = name.trim();
-  if (trimmed.length < 15) return false;
-  if (/\s/.test(trimmed)) return false;
-  const hasUpper = /[A-Z]/.test(trimmed);
-  const hasLower = /[a-z]/.test(trimmed);
-  return hasUpper && hasLower;
-}
-
-
 export default function SignupPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   // The landing-page tweet preview redirects here with ?import=1 after
   // "Save to my Wall". Show a specific "your testimonial is waiting"
   // headline so the user knows exactly why they're here.
   const isImportFlow = searchParams.get("import") === "1";
-  const [name, setName] = useState("");
   const [email, setEmail] = useState(() => searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [checkEmail, setCheckEmail] = useState<string | null>(null);
+  const [isMagicLoading, setIsMagicLoading] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
   // Honeypot + mount timestamp — same anti-bot pattern as the login
-  // form. Bots credential-stuff both endpoints. See login page for
-  // the reasoning.
+  // form. Silent reject; bots credential-stuff both endpoints.
   const [botTrap, setBotTrap] = useState("");
   const [mountedAt] = useState(() => Date.now());
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-
-    // Silent bot rejection — no track event so PostHog stays clean.
     if (botTrap) return;
     if (Date.now() - mountedAt < 1500) return;
-
-    // Catch the "password manager filled the Name field with a
-    // generated password" case. Heuristic: 15+ chars, no spaces,
-    // and both upper and lower case letters. Real names almost
-    // never match — even single-word names like "Ravi" are short.
-    if (looksLikeGeneratedPassword(name)) {
-      setError(
-        "That looks like a password, not a name. If your password manager autofilled the Name field, please type your real name instead."
-      );
-      return;
-    }
 
     setIsLoading(true);
     track("signup_started", { method: "email", source: "signup_page" }, { instant: true });
@@ -87,9 +51,6 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          data: { full_name: name },
-          // ?next=/dashboard/welcome so users landing via the
-          // email verification link also drop onto the paste-tweet welcome flow.
           emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/welcome")}`,
         },
       });
@@ -100,23 +61,11 @@ export default function SignupPage() {
         return;
       }
 
-      // Email verification path. Supabase returns data.user but NO
-      // session when "Confirm email" is enabled in the project's Auth
-      // settings. In that case we can't drop the user into the
-      // dashboard yet — show the "check your email" screen and let
-      // them confirm via the verification link before they can log in.
-      if (data.user && !data.session) {
-        setCheckEmail(email);
-        track("signup_email_verification_sent", { method: "email" });
-        return;
-      }
-
-      // Session came through immediately — either email verification
-      // is off, or the user's email was already confirmed. Drop
-      // straight into the welcome flow.
+      // With email confirmation off in Supabase, signUp returns a
+      // session immediately — drop the user straight into welcome.
       if (data.user?.id) {
         resetAnalytics();
-        identify(data.user.id, { email, name });
+        identify(data.user.id, { email });
       }
       track("signup_completed", { method: "email" }, { instant: true });
       requestAnimationFrame(() => {
@@ -140,8 +89,6 @@ export default function SignupPage() {
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          // ?next=/dashboard/welcome lands new Google signups
-          // on the paste-tweet welcome flow, same as email/password signups.
           redirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/welcome")}`,
         },
       });
@@ -156,46 +103,30 @@ export default function SignupPage() {
     }
   }
 
-  // Check-your-inbox screen — shown after a successful signup that
-  // requires email verification.
-  if (checkEmail) {
-    return (
-      <Card>
-        <CardContent className="pt-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-            <MailCheck className="h-7 w-7 text-primary" />
-          </div>
-          <h2 className="mt-6 text-2xl font-bold">Check your email</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            We sent a verification link to
-          </p>
-          <p className="mt-1 font-medium">{checkEmail}</p>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Click the link in that email to activate your account. Once
-            confirmed, log in below to reach your dashboard.
-          </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Don&apos;t see it in a minute or two? Check your spam folder.
-          </p>
-          <div className="mt-8 flex flex-col gap-2">
-            <Button asChild>
-              <Link href="/login">Log in</Link>
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setCheckEmail(null);
-                setEmail("");
-                setPassword("");
-                setName("");
-              }}
-            >
-              Use a different email
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+  async function handleMagicLink() {
+    setError(null);
+    if (!email) return;
+    setIsMagicLoading(true);
+    track("signup_started", { method: "magic_link", source: "signup_page" }, { instant: true });
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/welcome")}`,
+        },
+      });
+      if (authError) {
+        setError(authError.message);
+        track("signup_failed", { method: "magic_link", error: authError.message });
+        return;
+      }
+      setMagicSent(true);
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsMagicLoading(false);
+    }
   }
 
   return (
@@ -204,109 +135,17 @@ export default function SignupPage() {
         <CardTitle className="text-2xl">
           {isImportFlow
             ? "One more step — save your testimonial"
-            : "Paste a tweet. Get a testimonial in 30 seconds."}
+            : "Get your Wall of Love in 30 seconds"}
         </CardTitle>
         <CardDescription>
           {isImportFlow
-            ? "The tweet you just imported is waiting in your workspace. Sign up (30 seconds) and we'll drop it on your Wall of Love."
-            : "Create your free account. Every workspace gets a public Wall of Love URL and a one-line embed on day one."}
+            ? "The tweet you just imported is waiting in your workspace. Sign up and we'll drop it on your Wall of Love."
+            : "Free forever · No credit card"}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              disabled={isLoading}
-              maxLength={80}
-              autoComplete="name"
-              // Belt-and-suspenders opt-outs for the common password
-              // managers that ignore autoComplete="name" and fill the
-              // Name field with a generated password. Result was users
-              // signing up as "uHbGbeZdFIKGwNycJyyQbcY" — see checkNameLooksLikePassword.
-              data-lpignore="true"
-              data-1p-ignore="true"
-              data-form-type="other"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-              autoComplete="email"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-              minLength={8}
-              autoComplete="new-password"
-            />
-            <p className="text-xs text-muted-foreground">
-              Must be at least 8 characters
-            </p>
-          </div>
-
-          {/* Honeypot field — see login page for details. */}
-          <input
-            type="text"
-            name="website"
-            tabIndex={-1}
-            autoComplete="off"
-            value={botTrap}
-            onChange={(e) => setBotTrap(e.target.value)}
-            style={{
-              position: "absolute",
-              left: "-9999px",
-              width: "1px",
-              height: "1px",
-              opacity: 0,
-              pointerEvents: "none",
-            }}
-            aria-hidden="true"
-          />
-
-          {error && (
-            <p className="text-sm text-destructive" role="alert">
-              {error}
-            </p>
-          )}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Create account
-          </Button>
-        </form>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">
-              Or continue with
-            </span>
-          </div>
-        </div>
-
+        {/* Google first — zero typing conversion path. Top of the
+            form so it's the visitor's first option, not an afterthought. */}
         <Button
           variant="outline"
           className="w-full"
@@ -335,7 +174,98 @@ export default function SignupPage() {
               />
             </svg>
           )}
-          Google
+          Continue with Google
+        </Button>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">
+              Or sign up with email
+            </span>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@work.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+              autoComplete="email"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isLoading}
+              minLength={6}
+              autoComplete="new-password"
+            />
+          </div>
+
+          {/* Honeypot field — bots fill it, humans never see it. */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={botTrap}
+            onChange={(e) => setBotTrap(e.target.value)}
+            style={{
+              position: "absolute",
+              left: "-9999px",
+              width: "1px",
+              height: "1px",
+              opacity: 0,
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
+          />
+
+          {error && (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          )}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            Create account
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            Free forever · No credit card
+          </p>
+        </form>
+
+        {/* Magic link — passwordless alternative. Co-equal path for
+            anyone who doesn't want to think of a password. One-field
+            signup: type email, click link in inbox, in. */}
+        <Button
+          type="button"
+          variant="ghost"
+          className="mt-3 w-full"
+          onClick={handleMagicLink}
+          disabled={isMagicLoading || !email}
+        >
+          {isMagicLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : magicSent ? (
+            <>✓ Link sent to {email} — check your inbox</>
+          ) : (
+            <>Or email me a sign-in link {email ? "" : "(enter email above)"}</>
+          )}
         </Button>
       </CardContent>
       <CardFooter>
