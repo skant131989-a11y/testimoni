@@ -31,6 +31,26 @@ export default function DashboardError({
         <p className="mt-2 text-muted-foreground">
           We couldn&apos;t load your dashboard. Try again, or sign in fresh.
         </p>
+
+        {/* Show error details so we can debug production failures.
+            error.message is safe to show (Next hides server details by
+            default; the boundary only receives the message + digest). */}
+        {(error.message || error.digest) && (
+          <div className="mt-4 rounded-md border bg-muted/40 p-3 text-left text-xs font-mono text-muted-foreground">
+            {error.message && (
+              <p className="break-words">
+                <span className="font-semibold text-foreground">Error:</span>{" "}
+                {error.message}
+              </p>
+            )}
+            {error.digest && (
+              <p className="mt-1 break-words">
+                <span className="font-semibold text-foreground">Digest:</span>{" "}
+                {error.digest}
+              </p>
+            )}
+          </div>
+        )}
         <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
           <Button onClick={reset}>Try again</Button>
           <Button variant="outline" asChild>
