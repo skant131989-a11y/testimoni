@@ -120,6 +120,12 @@ export default async function DashboardLayout({
           slug: "customer-feedback",
           headline: "Share your experience",
           description: `We'd love to hear what you think about ${fullName}'s work.`,
+          // Demo accounts skip the moderation step so the wall fills
+          // up as soon as a visitor tries the form. Real signups keep
+          // the default (autoApprove=false) so their inbox is real.
+          autoApprove: /^demo-[a-f0-9]+@testimoni\.dev$/i.test(
+            authUser.email ?? ""
+          ),
         },
       }),
       prisma.widget.create({

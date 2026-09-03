@@ -119,6 +119,7 @@ model CollectionForm {
   allowVideo      Boolean @default(false) @map("allow_video")
   allowRating     Boolean @default(true) @map("allow_rating")
   thankYouMessage String  @default("Thank you for your feedback!") @map("thank_you_message")
+  autoApprove     Boolean @default(false) @map("auto_approve")
 
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")

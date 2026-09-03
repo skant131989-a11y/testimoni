@@ -170,6 +170,32 @@ export async function POST(request: Request) {
     );
   }
 
+  // Auto-approve path — insert directly into the Testimonial library
+  // with APPROVED status so it shows on the wall immediately, no
+  // manual moderation. Used on demo workspaces to make the product
+  // feel alive when a visitor pokes at it.
+  if (form.autoApprove) {
+    const testimonial = await prisma.testimonial.create({
+      data: {
+        workspaceId: form.workspaceId,
+        customerName: submissionData.customerName,
+        customerEmail: submissionData.customerEmail,
+        content: submissionData.content,
+        rating: submissionData.rating,
+        videoUrl: submissionData.videoUrl,
+        imageUrls: submissionData.imageUrls ?? [],
+        source: "FORM",
+        status: "APPROVED",
+      },
+    });
+    const response = NextResponse.json(
+      { submission: { id: testimonial.id }, message: "Submission received" },
+      { status: 201 }
+    );
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    return response;
+  }
+
   const submission = await prisma.submission.create({
     data: {
       formId,
