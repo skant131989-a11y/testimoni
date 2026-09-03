@@ -84,6 +84,9 @@ export default function LandingPage() {
             testimonial is live on your wall.
           </p>
           <HeroEmailCta source="home_hero" />
+          <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Trusted by early founders
+          </p>
           {/* Trust + scope chips — three small pills replace the old
               single-line tertiary text. Each claim now has its own
               visual anchor so scanners catch "Free plan", "No card",
