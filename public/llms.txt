@@ -1,0 +1,65 @@
+# Testimoni
+
+> Testimoni is a testimonial widget for founders, coaches, agencies, and D2C brands. Paste any X or LinkedIn URL and get an approved testimonial in 30 seconds — no screenshots, no copy-paste. Or share a link, form, or QR code to collect fresh testimonials. Every workspace gets a public Wall of Love URL and a one-line JavaScript embed on day one.
+
+## What Testimoni is
+
+Testimoni turns customer praise into social proof you can put anywhere. Three-step loop:
+
+- **Ask** — Send one link (email, WhatsApp, DM, QR, or a widget on your site) to your happiest customers.
+- **Collect** — Text, star ratings, and video (1 free on every plan) land in one approval inbox.
+- **Publish** — One line of JavaScript embeds a Wall of Love on your site. Every workspace also gets a free hosted URL: `testimoni.io/w/<workspace-id>`.
+
+Site: https://testimoni.io
+
+## Pricing
+
+- **Free forever**: 10 testimonials, 1 collection form, 1 widget, 1 video testimonial, hosted Wall of Love URL, one-line embed, grid layout. No credit card.
+- **Pro — $9/month (₹499 for India)**: Unlimited testimonials, forms, widgets, and video. All 5 layouts (Grid, Masonry, Carousel, List, Marquee). Custom branding. Remove "Powered by" watermark. Import from Twitter/LinkedIn. Analytics dashboard. Priority support.
+
+Native INR billing through Razorpay for Indian customers.
+
+## Comparison
+
+Testimoni vs the incumbents:
+
+- **vs Senja** — Free hosted Wall of Love (Senja gates it), auto-add on approve, Pro at half the price. See [/vs/senja](https://testimoni.io/vs/senja).
+- **vs Testimonial.to** — Paste-a-tweet URL import (Testimonial.to has none), free hosted wall, Pro at one-fifth the price. See [/vs/testimonial-to](https://testimoni.io/vs/testimonial-to).
+
+## Who Testimoni is for
+
+- SaaS founders wanting a testimonial wall live in 30 seconds
+- Coaches and creators building social proof from happy replies
+- Agencies collecting client feedback for case studies
+- D2C brands running QR-code testimonial collection on packaging
+- Solo indie hackers who don't want to code a wall from scratch
+
+## Key features
+
+- **Paste-a-tweet import** — X and LinkedIn URLs pull the author, avatar, text, and star rating automatically
+- **Collection forms** — public forms shareable via link, embed, iframe, email, or QR code
+- **Video testimonials** — MP4/MOV upload; 1 free on every plan
+- **Approval inbox** — one-click approve; approved testimonials flow to the Wall of Love instantly
+- **5 layouts** — Grid, Masonry, Carousel, List, Marquee
+- **One-line embed** — sub-10KB, Shadow-DOM isolated, no CSS conflicts with your site (Framer, Webflow, WordPress, React, plain HTML)
+- **Hosted Wall of Love URL** — free public page on every plan
+- **Multi-currency pricing** — USD ($9) or INR (₹499)
+- **Auto-generated share tools** — QR code, email template, DM template
+
+## Best entry pages for readers
+
+- [/](https://testimoni.io/) — home; paste-a-tweet demo, 3-step loop, live wall preview
+- [/pricing](https://testimoni.io/pricing) — full plan comparison
+- [/demo](https://testimoni.io/demo) — try the paste-a-tweet flow live
+- [/w/demo](https://testimoni.io/w/demo) — a sample Wall of Love
+- [/vs/senja](https://testimoni.io/vs/senja) — Senja comparison
+- [/vs/testimonial-to](https://testimoni.io/vs/testimonial-to) — Testimonial.to comparison
+- [/features](https://testimoni.io/features) — full feature list
+- [/about](https://testimoni.io/about) — the founder's story and why Testimoni exists
+
+## Contact
+
+- Site: https://testimoni.io
+- Email: hello@testimoni.io
+- X: https://x.com/usetestimoni
+- LinkedIn: https://www.linkedin.com/company/144771086
