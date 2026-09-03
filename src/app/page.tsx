@@ -80,8 +80,9 @@ export default function LandingPage() {
             <span className="text-primary">Get a testimonial in 30 seconds.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-            No screenshots. No copy-paste. Just a URL and your first
-            testimonial is live on your wall.
+            Collect testimonials from customers, then embed the Wall of
+            Love on your site — or share our free hosted URL. One tool,
+            end-to-end.
           </p>
           <HeroEmailCta source="home_hero" />
           <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -111,6 +112,48 @@ export default function LandingPage() {
               See a live Wall of Love →
             </TrackedLink>
           </p>
+        </div>
+      </section>
+
+      {/* Ask → Collect → Publish strip. Answers the #1 unspoken question
+          from cold traffic — "do the testimonials live on your site or
+          mine?" — before it becomes a bounce. Sits above "How it works"
+          which goes deeper on the two intake paths. */}
+      <section className="border-y bg-primary/[0.03] py-10">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                num: "1",
+                title: "Ask",
+                body: "Send one link — via email, WhatsApp, DM, QR code, or an embed on your site. Or paste a customer's tweet directly.",
+              },
+              {
+                num: "2",
+                title: "Collect",
+                body: "Text, ratings, and video (1 free on every plan) all land in one inbox. Approve with one click.",
+              },
+              {
+                num: "3",
+                title: "Publish",
+                body: "One line of JavaScript embeds the wall on your site — or share our free hosted Wall of Love URL anywhere.",
+              },
+            ].map((step) => (
+              <div key={step.num} className="flex gap-4">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                  {step.num}
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-foreground">
+                    {step.title}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    {step.body}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

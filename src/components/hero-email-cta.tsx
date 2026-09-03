@@ -19,7 +19,7 @@ interface HeroEmailCtaProps {
   ctaLabel?: string;
 }
 
-export function HeroEmailCta({ source, ctaLabel = "Start free" }: HeroEmailCtaProps) {
+export function HeroEmailCta({ source, ctaLabel = "Get my Wall of Love" }: HeroEmailCtaProps) {
   const [email, setEmail] = useState("");
   const router = useRouter();
 
