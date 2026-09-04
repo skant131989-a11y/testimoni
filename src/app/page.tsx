@@ -73,20 +73,29 @@ export default function LandingPage() {
         <div className="mx-auto max-w-3xl">
           <div className="mb-4 inline-flex items-center rounded-full border px-3 py-1 text-sm">
             <Star className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400" />
-            Free forever plan
+            Paste a tweet · Live in 30s
           </div>
           <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-            Paste a tweet.{" "}
-            <span className="text-primary">Get a testimonial in 30 seconds.</span>
+            Customer quotes{" "}
+            <span className="text-primary">on your site today.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-            Collect testimonials from customers, then embed the Wall of
-            Love on your site — or share our free hosted URL. One tool,
-            end-to-end.
+            Paste a tweet, share a form, or drop a QR. Approve once —
+            embed a wall on your site or share our free hosted URL.
+            No credit card.
           </p>
           <HeroEmailCta source="home_hero" />
-          <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Trusted by early founders
+          {/* White-glove offer — the honest advantage.
+              Founder-led setup replaces the anonymous "trusted by"
+              tagline that had no names behind it. */}
+          <p className="mt-4 text-sm text-muted-foreground">
+            Want it live this week?{" "}
+            <a
+              href="mailto:hello@testimoni.io?subject=Set%20up%20my%20widget"
+              className="font-semibold text-primary hover:underline"
+            >
+              Email me — I&apos;ll set it up with you.
+            </a>
           </p>
           {/* Trust + scope chips — three small pills replace the old
               single-line tertiary text. Each claim now has its own
@@ -353,15 +362,17 @@ export default function LandingPage() {
       <section className="border-t bg-muted/30 py-16">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-background px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-              Sample wall
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border-2 border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+              ✨ Example — this is what yours could look like
             </div>
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              And this is what you&apos;ll build.
+              Your Wall of Love in 5 minutes.
             </h2>
             <p className="mt-3 text-base text-muted-foreground">
-              Every workspace gets a public Wall of Love URL on the free
-              plan — share in bios, DMs, or a QR code on your packaging.
+              Every workspace gets a free hosted URL —{" "}
+              <span className="font-medium text-foreground">testimoni.io/w/you</span> —
+              plus a one-line embed for your site.
+              The cards below are illustrative, not real customers.
             </p>
           </div>
 
