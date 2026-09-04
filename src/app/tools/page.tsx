@@ -109,12 +109,12 @@ export default function ToolsPage() {
           <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <h2 className="text-2xl font-bold">
-                Testimoni is the main product.
+                Beyond one-off cards — build a whole Wall of Love.
               </h2>
               <p className="mt-2 text-muted-foreground">
-                Collect testimonials from customers, host them at a shareable
-                URL, and embed on your site with one line of code. Free plan
-                includes 10 testimonials, 1 form, hosted wall.
+                Testimoni collects testimonials from customers, hosts them at
+                a shareable URL, and embeds on your site with one line of
+                code. Free plan includes 10 testimonials, 1 form, hosted wall.
               </p>
             </div>
             <Link href="/signup">

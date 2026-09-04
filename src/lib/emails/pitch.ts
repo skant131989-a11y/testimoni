@@ -81,6 +81,19 @@ export function pitchEmailHtml(data: PitchEmailData): string {
     content: "landing_cta",
   });
 
+  // Tools index URL used in the P.S. — always the current site's
+  // /tools page, UTM-tagged so the free-tool traffic is attributable
+  // to this specific pitch campaign in analytics.
+  const toolsBase = new URL(rawLandingUrl);
+  toolsBase.pathname = "/tools";
+  toolsBase.search = "";
+  const toolsUrl = withUtm(toolsBase.toString(), {
+    source: "email",
+    medium: "email",
+    campaign: `pitch_${audience}`,
+    content: "tools_ps",
+  });
+
   const { hook, body, bullets, cta } = HOOK_BY_AUDIENCE[audience];
   const senderFirst = senderName.split(" ")[0];
   const companyLine = companyName
@@ -147,6 +160,15 @@ export function pitchEmailHtml(data: PitchEmailData): string {
               </table>
 
               <p style="margin:0 0 16px 0;">${escapeHtml(cta)}</p>
+
+              <!-- P.S. — soft mention of the free tools. Low-commitment
+                   hook for readers who don't want to sign up yet. -->
+              <p style="margin:0 0 16px 0;color:#4b5563;font-size:14px;">
+                P.S. Also built 3 free tools — no signup, use them anywhere:
+                <a href="${escapeAttr(toolsUrl)}" style="color:#5b21b6;text-decoration:underline;">testimoni.io/tools</a>.
+                Card generator (paste a quote → shareable image),
+                praise tweet finder, and a testimonial writer.
+              </p>
 
               <p style="margin:0 0 4px 0;">— ${escapeHtml(senderFirst)}</p>
               <p style="margin:0;color:#6b7280;font-size:13px;">

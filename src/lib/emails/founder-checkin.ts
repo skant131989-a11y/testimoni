@@ -33,6 +33,19 @@ export function founderEmailHtml(data: FounderEmailData): string {
     content: "wall_url",
   });
 
+  // Tools URL derived from the same origin as the user's wall URL,
+  // UTM-tagged so free-tool clicks from this email are attributable
+  // in analytics. Kept as a soft P.S. — the primary CTA is the wall.
+  const toolsBase = new URL(rawWallUrl);
+  toolsBase.pathname = "/tools";
+  toolsBase.search = "";
+  const toolsUrl = withUtm(toolsBase.toString(), {
+    source: "email",
+    medium: "email",
+    campaign: "founder_checkin",
+    content: "tools_ps",
+  });
+
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -101,6 +114,12 @@ export function founderEmailHtml(data: FounderEmailData): string {
 
               <p style="margin:0;padding-top:16px;border-top:1px solid #f1f0f7;color:#9ca3af;font-size:12px;line-height:1.5;">
                 P.S. If you&rsquo;d rather do this over a 15-minute call, I&rsquo;m happy to jump on. Just say when.
+              </p>
+
+              <p style="margin:12px 0 0 0;color:#9ca3af;font-size:12px;line-height:1.5;">
+                P.P.S. Also shipped 3 free tools — no signup, use them anywhere:
+                <a href="${escapeAttr(toolsUrl)}" style="color:#7c3aed;text-decoration:underline;">testimoni.io/tools</a>.
+                Try the card generator on your favorite testimonial.
               </p>
             </td>
           </tr>
