@@ -86,7 +86,7 @@ export default function BlogIndexPage() {
           <div className="mt-16 rounded-2xl bg-primary/5 p-8 text-center">
             <h2 className="text-2xl font-bold">Ready to collect testimonials?</h2>
             <p className="mt-2 text-muted-foreground">
-              Free forever plan. Set up in 5 minutes. No credit card.
+              Free forever plan. Set up in 30 seconds. No credit card.
             </p>
             <Link
               href="/signup"

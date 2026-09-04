@@ -196,7 +196,7 @@ export default async function HostedWallPage({ params }: WallPageProps) {
             </Link>
           </Button>
           <p className="mt-3 text-xs text-muted-foreground">
-            No credit card. Set up in 5 minutes.
+            No credit card. Set up in 30 seconds.
           </p>
         </div>
       </main>

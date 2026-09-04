@@ -47,7 +47,7 @@ export default function NotFound() {
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
             It might have been moved, renamed, or never existed. Try one of
-            these instead — or start collecting testimonials in five minutes
+            these instead — or start collecting testimonials in 30 seconds
             with a free plan.
           </p>
 

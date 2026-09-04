@@ -129,7 +129,7 @@ export default function FoundersPage() {
               <h2 className="text-2xl font-bold">Try Testimoni free</h2>
               <p className="mt-2 text-muted-foreground">
                 Free forever plan: 10 testimonials, 1 form, 1 widget. Set up in
-                5 minutes. No credit card.
+                30 seconds. No credit card.
               </p>
               <Button size="lg" asChild className="mt-6">
                 <Link href="/signup">

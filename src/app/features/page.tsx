@@ -165,7 +165,7 @@ export default function FeaturesPage() {
               <div>
                 <h2 className="text-2xl font-bold md:text-3xl">Try every feature free</h2>
                 <p className="mt-2 text-muted-foreground">
-                  5-minute setup. Free plan works forever. Every feature above
+                  30-second setup. Free plan works forever. Every feature above
                   is on the free tier — you only upgrade when you outgrow the
                   limits.
                 </p>

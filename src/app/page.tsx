@@ -366,7 +366,7 @@ export default function LandingPage() {
               ✨ Example — this is what yours could look like
             </div>
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Your Wall of Love in 5 minutes.
+              Your Wall of Love in 30 seconds.
             </h2>
             <p className="mt-3 text-base text-muted-foreground">
               Every workspace gets a free hosted URL —{" "}
@@ -784,7 +784,7 @@ export default function LandingPage() {
                 Ready to showcase your customer love?
               </h2>
               <p className="mt-4 text-muted-foreground">
-                Get set up in 5 minutes. Free forever plan. No credit card required.
+                Get set up in 30 seconds. Free forever plan. No credit card required.
               </p>
               <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
                 <li>✓ 10 testimonials, 1 form, 1 widget on the Free plan</li>

@@ -843,7 +843,7 @@ export default function DemoClient() {
                 <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
                   <li>✓ Free forever plan · no credit card</li>
                   <li>✓ Public wall URL you can share today</li>
-                  <li>✓ 5-minute setup, cancel anytime</li>
+                  <li>✓ 30-second setup, cancel anytime</li>
                 </ul>
               </div>
 
@@ -1111,7 +1111,7 @@ export default function DemoClient() {
           </h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
             You just experienced the full Testimoni flow — collect, approve, display.
-            Set it up for your own site in under 5 minutes.
+            Set it up for your own site in under 30 seconds.
           </p>
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <TrackedLink cta="demo_bottom_signup" surface="demo" href="/signup">

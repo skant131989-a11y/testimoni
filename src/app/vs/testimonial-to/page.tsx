@@ -180,7 +180,7 @@ export default function TestimonialToVsPage() {
 
           <div className="mt-16 rounded-2xl bg-primary/5 p-8 text-center">
             <h2 className="text-2xl font-bold">
-              Try Testimoni free — 5-minute setup
+              Try Testimoni free — 30-second setup
             </h2>
             <p className="mt-2 text-muted-foreground">
               10 testimonials, 1 form, 1 widget, hosted Wall of Love. No credit card.

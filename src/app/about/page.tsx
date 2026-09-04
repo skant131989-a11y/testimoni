@@ -66,7 +66,7 @@ export default function AboutPage() {
               </div>
               <h3 className="mt-4 text-lg font-semibold">Ship in minutes</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Set up your first form in under five minutes. Embed on any site with
+                Set up your first testimonial in under 30 seconds. Embed on any site with
                 one line of code — no build steps, no CSS conflicts.
               </p>
             </div>

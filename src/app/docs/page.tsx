@@ -24,7 +24,7 @@ export default function DocsPage() {
               Docs
             </div>
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-              Get started in 5 minutes
+              Get started in 30 seconds
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
               Everything you need to collect and display testimonials on your

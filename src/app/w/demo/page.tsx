@@ -155,7 +155,7 @@ export default function DemoWallPage() {
           href="#signup"
           className="underline underline-offset-2"
         >
-          Yours free in 5 minutes →
+          Yours free in 30 seconds →
         </TrackedLink>
       </div>
 
@@ -249,7 +249,7 @@ export default function DemoWallPage() {
           <div className="grid gap-6 md:grid-cols-[1fr_1.1fr] md:gap-8">
             <div>
               <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
-                <Sparkles className="h-3 w-3" /> Yours in 5 minutes
+                <Sparkles className="h-3 w-3" /> Yours in 30 seconds
               </div>
               <h2 className="text-2xl font-bold md:text-3xl">
                 Want a Wall of Love like this?
