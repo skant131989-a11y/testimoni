@@ -407,11 +407,16 @@ export default function DemoClient() {
               </Link>
             ) : (
               <>
-                <TrackedLink cta="demo_nav_login" surface="demo" href="/login">
+                {/* Log in — desktop only. Cold-visitor page: keep the
+                    header focused on the primary CTA on small screens. */}
+                <TrackedLink cta="demo_nav_login" surface="demo" href="/login" className="hidden sm:block">
                   <Button variant="ghost" size="sm">Log in</Button>
                 </TrackedLink>
                 <TrackedLink cta="demo_nav_signup" surface="demo" href="/signup">
-                  <Button size="sm">Get Started Free</Button>
+                  <Button size="sm">
+                    <span className="sm:hidden">Start free</span>
+                    <span className="hidden sm:inline">Get Started Free</span>
+                  </Button>
                 </TrackedLink>
               </>
             )}

@@ -152,10 +152,10 @@ export default function DemoWallPage() {
         <TrackedLink
           cta="wall_demo_banner_try_it"
           surface="wall_demo"
-          href="/demo"
+          href="#signup"
           className="underline underline-offset-2"
         >
-          build your own in 30 seconds →
+          Yours free in 5 minutes →
         </TrackedLink>
       </div>
 
@@ -243,8 +243,9 @@ export default function DemoWallPage() {
           caption="Paste a tweet → live testimonial → embed on any site."
         />
 
-        {/* Signup CTA — inline form, converts directly on the wall */}
-        <div className="mx-auto mt-16 max-w-4xl rounded-2xl border-2 border-primary/30 bg-primary/5 p-6 md:p-8">
+        {/* Signup CTA — inline form, converts directly on the wall.
+            Anchored at #signup so the top banner can scroll here. */}
+        <div id="signup" className="mx-auto mt-16 max-w-4xl scroll-mt-24 rounded-2xl border-2 border-primary/30 bg-primary/5 p-6 md:p-8">
           <div className="grid gap-6 md:grid-cols-[1fr_1.1fr] md:gap-8">
             <div>
               <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
