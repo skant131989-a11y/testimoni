@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { TrackedLink } from "@/components/tracked-link";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
+import { DemoVideo } from "@/components/demo-video";
 import { track } from "@/lib/analytics";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -1087,6 +1088,15 @@ export default function DemoClient() {
             </div>
           )}
         </div>
+
+        {/* Full-loop demo video — placed after the interactive demo so
+            the user has already felt the flow. Reinforces "here's the
+            whole 30s loop" right before the sign-up CTA below. */}
+        <DemoVideo
+          surface="demo"
+          title="You just tried the form path. Here's the full 30-second loop."
+          caption="Paste a tweet → live testimonial on your wall. That's it."
+        />
 
         {/* Bottom CTA */}
         <div className="mt-16 rounded-2xl bg-primary/5 border border-primary/20 p-12 text-center">

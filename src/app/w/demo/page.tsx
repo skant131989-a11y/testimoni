@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
+import { DemoVideo } from "@/components/demo-video";
 import { PageEngagement } from "@/components/page-engagement";
 import { WallDemoFloatingCta } from "@/components/wall-demo-floating-cta";
 
@@ -233,6 +234,15 @@ export default function DemoWallPage() {
           ))}
         </div>
 
+        {/* Full-loop demo video — sits between the wall (proof) and the
+            sign-up CTA. Answers "how do I get this?" with a live 30s
+            walkthrough right before the ask. */}
+        <DemoVideo
+          surface="wall_demo"
+          title="This wall was built in ~30 seconds. Here's how."
+          caption="Paste a tweet → live testimonial → embed on any site."
+        />
+
         {/* Signup CTA — inline form, converts directly on the wall */}
         <div className="mx-auto mt-16 max-w-4xl rounded-2xl border-2 border-primary/30 bg-primary/5 p-6 md:p-8">
           <div className="grid gap-6 md:grid-cols-[1fr_1.1fr] md:gap-8">
@@ -265,13 +275,6 @@ export default function DemoWallPage() {
           Powered by{" "}
           <Link href="/" className="font-semibold text-primary hover:underline">
             Testimoni
-          </Link>
-          <span className="mx-2 text-muted-foreground/50">·</span>
-          <Link
-            href="/#demo-video"
-            className="font-medium text-primary hover:underline"
-          >
-            How was this built? (30s →)
           </Link>
         </p>
       </footer>

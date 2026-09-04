@@ -5,11 +5,24 @@ import { Play } from "lucide-react";
 import { track } from "@/lib/analytics";
 
 /**
- * Home-page demo video — plays silently on load, loops, no controls.
- * A tap on mobile unmutes/plays (some browsers gate autoplay on
- * cellular). Anchored at #demo-video so /w/demo can jump to it.
+ * Full-loop demo video — plays silently on load, loops, no controls.
+ * Used at the BOTTOM of /demo and /w/demo as reinforcement after the
+ * user has already seen an interactive demo or the wall itself.
+ *
+ * Not used on home page — the interactive TweetPreviewDemo +
+ * AnimatedDemo already carry the "watch it work" job there.
  */
-export function HeroVideo() {
+interface DemoVideoProps {
+  surface: "demo" | "wall_demo";
+  caption?: string;
+  title?: string;
+}
+
+export function DemoVideo({
+  surface,
+  caption = "Paste a URL → live testimonial. That's the whole loop.",
+  title,
+}: DemoVideoProps) {
   const ref = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
 
@@ -18,11 +31,16 @@ export function HeroVideo() {
     if (!v) return;
     v.muted = !v.muted;
     setMuted(v.muted);
-    if (!v.muted) track("hero_video_unmuted", { surface: "home" });
+    if (!v.muted) track("demo_video_unmuted", { surface });
   }
 
   return (
-    <section id="demo-video" className="mx-auto max-w-4xl px-4 pb-4">
+    <section id="demo-video" className="mx-auto max-w-4xl px-4 py-10">
+      {title && (
+        <p className="mb-4 text-center text-lg font-semibold text-foreground">
+          {title}
+        </p>
+      )}
       <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-black shadow-xl">
         <video
           ref={ref}
@@ -33,7 +51,7 @@ export function HeroVideo() {
           loop
           preload="metadata"
           className="block w-full"
-          onPlay={() => track("hero_video_played", { surface: "home" })}
+          onPlay={() => track("demo_video_played", { surface })}
         />
         <button
           type="button"
@@ -46,7 +64,7 @@ export function HeroVideo() {
         </button>
       </div>
       <p className="mt-2 text-center text-xs text-muted-foreground">
-        Paste a URL → live testimonial. That&apos;s the whole loop.
+        {caption}
       </p>
     </section>
   );
