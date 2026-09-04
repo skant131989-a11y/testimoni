@@ -77,16 +77,13 @@ export function PraiseTweetFinderClient() {
     .map((k) => `"${k}"`)
     .join(" OR ");
 
-  const googleQuery = canSearch
-    ? `site:x.com OR site:twitter.com "@${cleanedHandle}" (${keywordUnion})`
-    : "";
-  const googleUrl = canSearch
-    ? `https://www.google.com/search?q=${encodeURIComponent(googleQuery)}`
-    : "#";
-
   // X's own advanced search. `to:handle` catches replies to the user;
   // combined with an OR of positive keywords this surfaces the actual
-  // praise tweets, not just any mentions.
+  // praise tweets, not just any mentions. We use X directly (not Google
+  // site:x.com) because Google's index of tweets is unreliable since
+  // 2023 — Musk has toggled Googlebot access repeatedly, so reply
+  // tweets in particular are poorly indexed. X's own search is the
+  // source of truth here.
   const xQuery = canSearch
     ? `to:${cleanedHandle} (${keywordUnion}) filter:replies`
     : "";
@@ -103,9 +100,8 @@ export function PraiseTweetFinderClient() {
     });
   }
 
-  function fireSearch(kind: "google" | "x", url: string) {
+  function fireSearch(url: string) {
     track("praise_finder_search_clicked", {
-      kind,
       handle: cleanedHandle,
       keyword_count: selected.size,
     });
@@ -147,11 +143,9 @@ export function PraiseTweetFinderClient() {
           </p>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
             Enter your @handle, pick the words you want to search for, and
-            we&apos;ll build a smart search across{" "}
-            <span className="font-semibold text-foreground">Google</span> and{" "}
-            <span className="font-semibold text-foreground">X</span>. We
-            don&apos;t store anything — you find your own tweets, you decide
-            which to save.
+            we&apos;ll open X with a smart query built for you. We don&apos;t
+            store anything — you find your own tweets, you decide which to
+            save.
           </p>
         </div>
 
@@ -215,34 +209,21 @@ export function PraiseTweetFinderClient() {
             </div>
           </div>
 
-          {/* Two search buttons — open in new tab, we track click.
-              X is the primary CTA because we're looking for TWEETS —
-              searching X directly surfaces replies in chronological
-              order, which is where praise usually lives. Google is a
-              backup for when X's search is filtered / gated. */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Button
-              size="lg"
-              disabled={!canSearch}
-              onClick={() => fireSearch("x", xUrl)}
-              className="gap-2"
-            >
-              <Search className="h-4 w-4" />
-              Search on X
-              <ExternalLink className="h-3.5 w-3.5 opacity-70" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              disabled={!canSearch}
-              onClick={() => fireSearch("google", googleUrl)}
-              className="gap-2"
-            >
-              <Search className="h-4 w-4" />
-              Search on Google
-              <ExternalLink className="h-3.5 w-3.5 opacity-70" />
-            </Button>
-          </div>
+          {/* Single primary search button — X only. Dropped the
+              Google option: since 2023 Google's index of tweets has
+              been unreliable, and reply tweets (where praise usually
+              lives) are especially poorly indexed. One obvious action
+              beats two competing ones. */}
+          <Button
+            size="lg"
+            disabled={!canSearch}
+            onClick={() => fireSearch(xUrl)}
+            className="w-full gap-2"
+          >
+            <Search className="h-4 w-4" />
+            Search on X
+            <ExternalLink className="h-3.5 w-3.5 opacity-70" />
+          </Button>
 
           {!hasHandle && (
             <p className="text-center text-xs text-muted-foreground">
@@ -256,13 +237,8 @@ export function PraiseTweetFinderClient() {
               <summary className="cursor-pointer font-medium text-muted-foreground">
                 What are we searching for?
               </summary>
-              <div className="mt-2 space-y-2 font-mono text-[11px] text-muted-foreground">
-                <div>
-                  <span className="text-primary">Google:</span> {googleQuery}
-                </div>
-                <div>
-                  <span className="text-primary">X:</span> {xQuery}
-                </div>
+              <div className="mt-2 font-mono text-[11px] text-muted-foreground">
+                <span className="text-primary">X search:</span> {xQuery}
               </div>
             </details>
           )}
@@ -278,7 +254,7 @@ export function PraiseTweetFinderClient() {
               {
                 num: "1",
                 title: "Search",
-                body: "Enter your handle. Pick praise keywords. We open a pre-built search in Google or X.",
+                body: "Enter your handle. Pick praise keywords. We open X with a smart query built just for you.",
               },
               {
                 num: "2",
