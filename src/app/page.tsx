@@ -105,7 +105,7 @@ export default function LandingPage() {
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
               <CheckCircle2 className="h-3.5 w-3.5" />
-              Free forever plan
+              Free forever
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -113,12 +113,12 @@ export default function LandingPage() {
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
               <CheckCircle2 className="h-3.5 w-3.5" />
-              Also collect via form, QR, or link
+              Live in ~30s
             </span>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">
             <TrackedLink cta="hero_wall_demo" surface="home" href="/w/demo" className="font-medium text-primary hover:underline">
-              See a live Wall of Love →
+              or see a live wall →
             </TrackedLink>
           </p>
         </div>
