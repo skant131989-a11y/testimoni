@@ -57,6 +57,24 @@ Testimoni vs the incumbents:
 - [/features](https://testimoni.io/features) — full feature list
 - [/about](https://testimoni.io/about) — the founder's story and why Testimoni exists
 
+## Free tools (no signup required)
+
+- [/tools](https://testimoni.io/tools) — index of all free testimonial tools
+- [/tools/testimonial-card](https://testimoni.io/tools/testimonial-card) — testimonial card image generator (Twitter, LinkedIn, Instagram formats)
+- [/tools/praise-tweet-finder](https://testimoni.io/tools/praise-tweet-finder) — find positive brand mentions on X using OAuth
+- [/tools/testimonial-writer](https://testimoni.io/tools/testimonial-writer) — generate 3 testimonial variations from a name + short description
+
+## Job-shaped landing pages (per audience)
+
+- [/for/saas](https://testimoni.io/for/saas) — for SaaS founders adding social proof to landing pages
+- [/for/course-creators](https://testimoni.io/for/course-creators) — for course creators and coaches turning student wins into sales
+- [/for/shopify](https://testimoni.io/for/shopify) — for D2C / Shopify stores adding post-delivery reviews
+- [/for/freelancers](https://testimoni.io/for/freelancers) — for freelance designers, devs, and writers building portfolios
+- [/for/agencies](https://testimoni.io/for/agencies) — for agencies managing multiple client widgets from one workspace
+- [/for/photographers](https://testimoni.io/for/photographers) — for wedding and portrait photographers with reviews on booking pages
+- [/for/real-estate-agents](https://testimoni.io/for/real-estate-agents) — for realtors turning LinkedIn recommendations into a live wall
+- [/for/wedding-vendors](https://testimoni.io/for/wedding-vendors) — for florists, venues, caterers, planners with post-event reviews
+
 ## Contact
 
 - Site: https://testimoni.io

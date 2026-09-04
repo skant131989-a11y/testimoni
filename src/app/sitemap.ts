@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { NICHES } from "@/lib/niches";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
@@ -111,6 +112,39 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    // Free tools — high SEO priority, target long-tail queries and
+    // pull organic traffic that converts to signup via the gates.
+    {
+      url: `${SITE_URL}/tools`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/tools/testimonial-card`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/tools/praise-tweet-finder`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/tools/testimonial-writer`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    // Job-shaped landing pages — one per audience
+    ...NICHES.map((n) => ({
+      url: `${SITE_URL}/for/${n.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
+    })),
     {
       url: `${SITE_URL}/login`,
       lastModified: now,

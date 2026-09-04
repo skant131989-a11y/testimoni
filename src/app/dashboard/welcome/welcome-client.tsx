@@ -152,6 +152,84 @@ export function WelcomeClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Auto-import a testimonial the user generated in /tools/*
+  // before signing up. Same sessionStorage handoff pattern — the
+  // tool page stashes a payload, this effect reads it once on
+  // mount and POSTs to /api/testimonials so the user lands on the
+  // dashboard with their tool output already saved.
+  const autoToolImportRef = useRef(false);
+  useEffect(() => {
+    if (autoToolImportRef.current) return;
+    let payloadJson: string | null = null;
+    try {
+      payloadJson = sessionStorage.getItem("pending_tool_testimonial");
+    } catch {}
+    if (!payloadJson) return;
+    autoToolImportRef.current = true;
+    try {
+      sessionStorage.removeItem("pending_tool_testimonial");
+    } catch {}
+
+    let payload: {
+      content: string;
+      customerName: string;
+      customerTitle?: string | null;
+      rating?: number;
+      tool: string;
+    };
+    try {
+      payload = JSON.parse(payloadJson);
+    } catch {
+      return;
+    }
+    if (!payload.content?.trim() || !payload.customerName?.trim()) return;
+
+    track("auto_import_from_tool", { tool: payload.tool });
+
+    // Optimistic render — user sees the imported card immediately.
+    setImported({
+      id: "pending",
+      content: payload.content,
+      customerName: payload.customerName,
+      customerTitle: payload.customerTitle ?? null,
+      rating: payload.rating ?? 5,
+      source: "MANUAL",
+      sourceUrl: null,
+    });
+    if (defaultWidgetId) setImportedWidgetId(defaultWidgetId);
+
+    // Persist in background.
+    (async () => {
+      try {
+        const res = await fetch("/api/testimonials", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerName: payload.customerName.trim(),
+            customerTitle: payload.customerTitle?.trim() || undefined,
+            content: payload.content.trim(),
+            rating: payload.rating ?? 5,
+            source: "MANUAL",
+            status: "APPROVED",
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data.testimonial) {
+          setImported((prev) =>
+            prev
+              ? { ...prev, id: data.testimonial.id }
+              : prev
+          );
+          if (data.widget?.id) setImportedWidgetId(data.widget.id);
+        }
+      } catch {
+        // Silent — user still sees the optimistic render and can
+        // retry via the "Add another" button.
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // handleImport is defined below with closures over state; keep a
   // ref so the auto-import effect (which must run once on mount)
   // can call the latest version.

@@ -88,14 +88,24 @@ export function PublicNavAuthMobile() {
   return (
     <div className="flex items-center gap-3 md:hidden">
       {!isLoggedIn && (
-        <TrackedLink
-          cta="nav_mobile_demo"
-          surface="public_nav"
-          href="/demo"
-          className="text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          Demo
-        </TrackedLink>
+        <>
+          <TrackedLink
+            cta="nav_mobile_demo"
+            surface="public_nav"
+            href="/demo"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Demo
+          </TrackedLink>
+          <TrackedLink
+            cta="nav_mobile_tools"
+            surface="public_nav"
+            href="/tools"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Tools
+          </TrackedLink>
+        </>
       )}
       <TrackedLink
         cta="nav_mobile_cta"
