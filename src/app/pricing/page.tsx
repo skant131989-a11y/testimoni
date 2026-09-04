@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
-import { ProPriceDual, FreePrice } from "@/components/pricing/price-display";
+import { ProPriceDual, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
@@ -73,11 +73,15 @@ export default function PricingPage() {
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground">
                 Most Popular
               </div>
+              <div className="mb-2">
+                <FoundingBadge />
+              </div>
               <h3 className="text-xl font-semibold">Pro</h3>
               <p className="mt-2 text-4xl font-bold">
                 <ProPriceDual suffix="/month" />
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <FoundingExplainer className="mt-2" />
+              <p className="mt-3 text-sm text-muted-foreground">
                 For growing businesses
               </p>
               <ul className="mt-8 space-y-4">
