@@ -28,6 +28,7 @@ import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { PageEngagement } from "@/components/page-engagement";
+import { HeroVideo } from "@/components/hero-video";
 
 export default function LandingPage() {
   return (
@@ -123,6 +124,10 @@ export default function LandingPage() {
           </p>
         </div>
       </section>
+
+      {/* Hero demo video — silent, autoplay, loops. Shows the paste-a-tweet
+          loop in ~10-15s. Anchored at #demo-video so /w/demo can jump here. */}
+      <HeroVideo />
 
       {/* Ask → Collect → Publish strip. Answers the #1 unspoken question
           from cold traffic — "do the testimonials live on your site or

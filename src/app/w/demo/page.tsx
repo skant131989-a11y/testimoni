@@ -266,6 +266,13 @@ export default function DemoWallPage() {
           <Link href="/" className="font-semibold text-primary hover:underline">
             Testimoni
           </Link>
+          <span className="mx-2 text-muted-foreground/50">·</span>
+          <Link
+            href="/#demo-video"
+            className="font-medium text-primary hover:underline"
+          >
+            How was this built? (30s →)
+          </Link>
         </p>
       </footer>
     </div>
