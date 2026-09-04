@@ -215,27 +215,31 @@ export function PraiseTweetFinderClient() {
             </div>
           </div>
 
-          {/* Two big search buttons — open in new tab, we track click */}
+          {/* Two search buttons — open in new tab, we track click.
+              X is the primary CTA because we're looking for TWEETS —
+              searching X directly surfaces replies in chronological
+              order, which is where praise usually lives. Google is a
+              backup for when X's search is filtered / gated. */}
           <div className="grid gap-3 sm:grid-cols-2">
             <Button
               size="lg"
-              disabled={!canSearch}
-              onClick={() => fireSearch("google", googleUrl)}
-              className="gap-2"
-            >
-              <Search className="h-4 w-4" />
-              Search on Google
-              <ExternalLink className="h-3.5 w-3.5 opacity-70" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
               disabled={!canSearch}
               onClick={() => fireSearch("x", xUrl)}
               className="gap-2"
             >
               <Search className="h-4 w-4" />
               Search on X
+              <ExternalLink className="h-3.5 w-3.5 opacity-70" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              disabled={!canSearch}
+              onClick={() => fireSearch("google", googleUrl)}
+              className="gap-2"
+            >
+              <Search className="h-4 w-4" />
+              Search on Google
               <ExternalLink className="h-3.5 w-3.5 opacity-70" />
             </Button>
           </div>
