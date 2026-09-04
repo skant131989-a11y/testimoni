@@ -19,7 +19,7 @@ import {
   Play,
 } from "lucide-react";
 import { PublicNavAuth, PublicNavAuthMobile } from "@/components/layout/public-nav-auth";
-import { ProPriceDual } from "@/components/pricing/price-display";
+import { ProPriceDual, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
 import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
@@ -51,6 +51,9 @@ export default function LandingPage() {
           <nav className="hidden items-center gap-6 md:flex">
             <TrackedLink cta="nav_demo" surface="home_nav" href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
               Live Demo
+            </TrackedLink>
+            <TrackedLink cta="nav_tools" surface="home_nav" href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
+              Free Tools
             </TrackedLink>
             <TrackedLink cta="nav_features" surface="home_nav" href="/features" className="text-sm text-muted-foreground hover:text-foreground">
               Features
@@ -162,6 +165,48 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Free tools strip — surfaces /tools/* from the home page.
+          Slim, single-row so it doesn't compete with the Ask/Collect/
+          Publish or the paste-a-tweet demo below. */}
+      <section className="border-b bg-background py-6">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
+            <p className="text-sm text-muted-foreground">
+              <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-primary">
+                Also free
+              </span>
+              — 3 tools no signup required:
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <TrackedLink
+                cta="tools_strip_card"
+                surface="home"
+                href="/tools/testimonial-card"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                🖼️ Card generator
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_finder"
+                surface="home"
+                href="/tools/praise-tweet-finder"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                🔎 Praise tweet finder
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_writer"
+                surface="home"
+                href="/tools/testimonial-writer"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                ✍️ Testimonial writer
+              </TrackedLink>
+            </div>
           </div>
         </div>
       </section>
@@ -730,7 +775,7 @@ export default function LandingPage() {
             {/* Free */}
             <div className="rounded-lg border bg-card p-8 text-left">
               <h3 className="text-lg font-semibold">Free</h3>
-              <p className="mt-2 text-3xl font-bold">₹0</p>
+              <p className="mt-2 text-3xl font-bold"><FreePrice suffix="" /></p>
               <p className="text-sm text-muted-foreground">Forever free</p>
               <ul className="mt-6 space-y-3">
                 {["10 testimonials", "1 widget", "Grid layout", "Collection forms"].map((f) => (
@@ -749,9 +794,13 @@ export default function LandingPage() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
                 Most Popular
               </div>
+              <div className="mb-2">
+                <FoundingBadge />
+              </div>
               <h3 className="text-lg font-semibold">Pro</h3>
               <p className="mt-2 text-3xl font-bold"><ProPriceDual /></p>
-              <p className="text-sm text-muted-foreground">Everything unlimited</p>
+              <FoundingExplainer className="mt-2" />
+              <p className="mt-3 text-sm text-muted-foreground">Everything unlimited</p>
               <ul className="mt-6 space-y-3">
                 {[
                   "Unlimited testimonials",
@@ -771,6 +820,40 @@ export default function LandingPage() {
                 <Button className="w-full">Start Free, Upgrade Anytime</Button>
               </TrackedLink>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Built-for strip — surfaces the /for/[niche] landing pages
+          so first-time visitors know an industry-tailored page exists
+          for them. Slim, single-row, near the bottom of the marketing
+          flow so it doesn't compete with the hero. */}
+      <section className="border-y bg-primary/[0.03] py-10">
+        <div className="mx-auto max-w-5xl px-4 text-center">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+            Built for
+          </p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {[
+              { slug: "saas", label: "SaaS founders" },
+              { slug: "course-creators", label: "Course creators" },
+              { slug: "shopify", label: "Shopify / D2C" },
+              { slug: "freelancers", label: "Freelancers" },
+              { slug: "agencies", label: "Agencies" },
+              { slug: "photographers", label: "Photographers" },
+              { slug: "real-estate-agents", label: "Real estate agents" },
+              { slug: "wedding-vendors", label: "Wedding vendors" },
+            ].map((n) => (
+              <TrackedLink
+                key={n.slug}
+                cta={`home_builtfor_${n.slug}`}
+                surface="home"
+                href={`/for/${n.slug}`}
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                {n.label}
+              </TrackedLink>
+            ))}
           </div>
         </div>
       </section>
@@ -798,8 +881,28 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
+      <footer className="border-t">
+        {/* By industry — surfaces the /for/[niche] pages so someone
+            reading the footer sees they can find an industry-specific
+            landing page. Bigger than the existing bottom nav, sits
+            above it as its own strip. */}
+        <div className="mx-auto max-w-7xl px-4 py-8">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            By industry
+          </p>
+          <div className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2 md:grid-cols-4">
+            <Link href="/for/saas" className="text-muted-foreground hover:text-foreground">SaaS founders</Link>
+            <Link href="/for/course-creators" className="text-muted-foreground hover:text-foreground">Course creators</Link>
+            <Link href="/for/shopify" className="text-muted-foreground hover:text-foreground">Shopify / D2C</Link>
+            <Link href="/for/freelancers" className="text-muted-foreground hover:text-foreground">Freelancers</Link>
+            <Link href="/for/agencies" className="text-muted-foreground hover:text-foreground">Agencies</Link>
+            <Link href="/for/photographers" className="text-muted-foreground hover:text-foreground">Photographers</Link>
+            <Link href="/for/real-estate-agents" className="text-muted-foreground hover:text-foreground">Real estate agents</Link>
+            <Link href="/for/wedding-vendors" className="text-muted-foreground hover:text-foreground">Wedding vendors</Link>
+          </div>
+        </div>
+        <div className="border-t py-8">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
           <div className="flex items-center gap-2">
             <Image
               src="/icon.png"
@@ -812,6 +915,7 @@ export default function LandingPage() {
           </div>
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
             <Link href="/demo" className="text-muted-foreground hover:text-foreground">Demo</Link>
+            <Link href="/tools" className="text-muted-foreground hover:text-foreground">Free Tools</Link>
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
             <Link href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy</Link>
@@ -838,6 +942,7 @@ export default function LandingPage() {
           <p className="text-sm text-muted-foreground">
             &copy; 2026 Testimoni. All rights reserved.
           </p>
+          </div>
         </div>
       </footer>
       <StickyMobileCta source="home" />
