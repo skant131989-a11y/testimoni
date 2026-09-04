@@ -8,7 +8,7 @@ import { usePricing } from "@/lib/use-pricing";
  * that date will pay the regular price. Existing founding members keep
  * $9 forever.
  */
-export const FOUNDING_MEMBER_DEADLINE = "Dec 31, 2026";
+export const FOUNDING_MEMBER_DEADLINE = "Nov 30, 2026";
 const REGULAR_USD = "$20";
 const REGULAR_INR = "₹1099";
 
