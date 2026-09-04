@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Download, Copy, Star, Check, Sparkles, ArrowRight, Lock } from "lucide-react";
+import { Download, Copy, Star, Check, Sparkles, ArrowRight, Lock, ShieldAlert } from "lucide-react";
 import { toPng } from "html-to-image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +46,10 @@ export function BeautifierClient() {
   const [formatId, setFormatId] = useState<typeof FORMATS[number]["id"]>("twitter");
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Tamper alert — set when the watermark integrity check fails.
+  // Clears when the user changes any input (they've likely refreshed
+  // the card by editing text/theme/etc).
+  const [tamperError, setTamperError] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
   const theme = THEMES.find((t) => t.id === themeId)!;
@@ -77,11 +81,10 @@ export function BeautifierClient() {
     const wmText = wm?.textContent?.toLowerCase() ?? "";
     if (!wm || !wmText.includes("testimoni.io")) {
       track("beautifier_watermark_tampered");
-      window.alert(
-        "The watermark looks modified. Refresh the page and try again — or sign up (free, 30 seconds) to remove it properly."
-      );
+      setTamperError(true);
       return;
     }
+    setTamperError(false);
 
     setDownloading(true);
     track("beautifier_download_clicked", { theme: themeId, format: formatId, rating });
@@ -246,6 +249,45 @@ export function BeautifierClient() {
                 </span>
               </label>
             </div>
+
+            {/* Watermark integrity error — appears if the user edits
+                or removes the "Made with testimoni.io" node via DevTools
+                and then tries to download. Doubles as a signup CTA. */}
+            {tamperError && (
+              <div className="rounded-lg border-2 border-destructive/40 bg-destructive/5 p-3">
+                <div className="flex items-start gap-2">
+                  <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-destructive">
+                      Watermark modified — download blocked
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      The &ldquo;Made with testimoni.io&rdquo; line looks tampered.
+                      Refresh the page to reset it, or sign up (free, 30 seconds) to
+                      remove the watermark properly.
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Link href="/signup?tool=testimonial-card&unlock=watermark">
+                        <Button size="sm" className="h-7 gap-1 text-xs">
+                          Sign up to remove <ArrowRight className="h-3 w-3" />
+                        </Button>
+                      </Link>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setTamperError(false);
+                          if (typeof window !== "undefined") window.location.reload();
+                        }}
+                        className="h-7 text-xs"
+                      >
+                        Refresh page
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-2">
               <Button onClick={handleDownload} disabled={downloading || !quote.trim() || !name.trim()} size="lg" className="flex-1 gap-2">
