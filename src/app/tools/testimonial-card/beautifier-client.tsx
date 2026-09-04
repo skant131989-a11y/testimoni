@@ -344,13 +344,39 @@ export function BeautifierClient() {
                         )}
                       </div>
                     </div>
-                    <p
+                    <div
                       data-fw-watermark="testimoni"
                       className={theme.muted}
-                      style={{ fontSize: "16px", marginTop: "auto", paddingTop: "32px", opacity: 0.7 }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        marginTop: "auto",
+                        paddingTop: "32px",
+                        opacity: 0.85,
+                      }}
                     >
-                      Made with testimoni.io
-                    </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "8px",
+                          background: "#7c3aed",
+                          color: "white",
+                          fontSize: "18px",
+                          fontWeight: 900,
+                          lineHeight: 1,
+                        }}
+                      >
+                        &ldquo;
+                      </div>
+                      <span style={{ fontSize: "22px", fontWeight: 600, letterSpacing: "-0.01em" }}>
+                        testimoni.io
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
