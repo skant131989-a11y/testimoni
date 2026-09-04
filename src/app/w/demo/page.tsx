@@ -137,9 +137,16 @@ export default function DemoWallPage() {
               <Button size="sm">Get Started Free</Button>
             </TrackedLink>
           </nav>
-          <TrackedLink cta="wall_demo_nav_mobile_cta" surface="wall_demo" href="/signup" className="md:hidden">
-            <Button size="sm">Get Started</Button>
-          </TrackedLink>
+          {/* Mobile — Demo link + primary CTA. Mirrors PublicNavAuthMobile
+              behavior for consistency across marketing pages. */}
+          <div className="flex items-center gap-3 md:hidden">
+            <TrackedLink cta="wall_demo_nav_mobile_demo" surface="wall_demo" href="/demo" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+              Demo
+            </TrackedLink>
+            <TrackedLink cta="wall_demo_nav_mobile_cta" surface="wall_demo" href="/signup">
+              <Button size="sm">Start free</Button>
+            </TrackedLink>
+          </div>
         </div>
       </header>
 

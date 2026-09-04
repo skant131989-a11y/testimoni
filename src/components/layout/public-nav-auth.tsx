@@ -63,8 +63,13 @@ export function PublicNavAuth() {
 }
 
 /**
- * Mobile version — just one primary CTA. Same anonymous default
- * with a logged-in swap after mount.
+ * Mobile version — Demo link + one primary CTA. Same anonymous
+ * default with a logged-in swap after mount.
+ *
+ * "Demo" text link is kept because on desktop it lives in the full
+ * nav (Live Demo / Features / Pricing); on mobile the rest are OK to
+ * hide but the demo is a real conversion path for the curious-but-
+ * not-ready visitor, so it stays as a small text link next to the CTA.
  */
 export function PublicNavAuthMobile() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -81,13 +86,24 @@ export function PublicNavAuthMobile() {
   }, []);
 
   return (
-    <TrackedLink
-      cta="nav_mobile_cta"
-      surface="public_nav"
-      href={isLoggedIn ? "/dashboard" : "/signup"}
-      className="md:hidden"
-    >
-      <Button size="sm">{isLoggedIn ? "Dashboard" : "Get Started"}</Button>
-    </TrackedLink>
+    <div className="flex items-center gap-3 md:hidden">
+      {!isLoggedIn && (
+        <TrackedLink
+          cta="nav_mobile_demo"
+          surface="public_nav"
+          href="/demo"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          Demo
+        </TrackedLink>
+      )}
+      <TrackedLink
+        cta="nav_mobile_cta"
+        surface="public_nav"
+        href={isLoggedIn ? "/dashboard" : "/signup"}
+      >
+        <Button size="sm">{isLoggedIn ? "Dashboard" : "Start free"}</Button>
+      </TrackedLink>
+    </div>
   );
 }
