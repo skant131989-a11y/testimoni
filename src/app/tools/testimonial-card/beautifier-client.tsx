@@ -67,6 +67,22 @@ export function BeautifierClient() {
 
   async function handleDownload() {
     if (!cardRef.current) return;
+
+    // Watermark integrity check — signup unlocks the toggle, so anyone
+    // downloading without signup MUST ship the watermark. Blocks casual
+    // devtool poking (delete node, change text). Not a real security
+    // measure — a determined user can override this in the debugger —
+    // but stops the 90%.
+    const wm = cardRef.current.querySelector('[data-fw-watermark="testimoni"]');
+    const wmText = wm?.textContent?.toLowerCase() ?? "";
+    if (!wm || !wmText.includes("testimoni.io")) {
+      track("beautifier_watermark_tampered");
+      window.alert(
+        "The watermark looks modified. Refresh the page and try again — or sign up (free, 30 seconds) to remove it properly."
+      );
+      return;
+    }
+
     setDownloading(true);
     track("beautifier_download_clicked", { theme: themeId, format: formatId, rating });
     try {
@@ -286,7 +302,11 @@ export function BeautifierClient() {
                         )}
                       </div>
                     </div>
-                    <p className={theme.muted} style={{ fontSize: "16px", marginTop: "auto", paddingTop: "32px", opacity: 0.7 }}>
+                    <p
+                      data-fw-watermark="testimoni"
+                      className={theme.muted}
+                      style={{ fontSize: "16px", marginTop: "auto", paddingTop: "32px", opacity: 0.7 }}
+                    >
                       Made with testimoni.io
                     </p>
                   </div>
