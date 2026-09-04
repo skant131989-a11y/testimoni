@@ -40,11 +40,11 @@ async function main() {
       console.log(`  workspace: ${ws.name}`);
       console.log(`  testimonials: ${ws.testimonials.length}`);
       for (const t of ws.testimonials) {
-        console.log(`    [${t.status}] ${t.source} · ${t.customerName}: "${t.content.slice(0, 70)}"`);
+        console.log(`    [${t.status}] ${t.source} · ${t.customerName}: "${(t.content ?? "").slice(0, 70)}"`);
       }
       console.log(`  submissions: ${allSubs.length}`);
       for (const s of allSubs) {
-        console.log(`    [${s.status}] ${s.customerName}: "${s.content.slice(0, 70)}"`);
+        console.log(`    [${s.status}] ${s.customerName}: "${(s.content ?? "").slice(0, 70)}"`);
       }
     }
   }
