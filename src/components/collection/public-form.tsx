@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, CheckCircle2, Loader2 } from "lucide-react";
+import { track } from "@/lib/analytics";
 
 interface FormConfig {
   id: string;
@@ -32,6 +33,19 @@ export default function PublicCollectionForm({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+
+  // Fire once per page mount — anonymous funnel start.
+  // Kept privacy-safe: we send form/workspace metadata but never
+  // customer name/email/testimonial text. PostHog auto-generates a
+  // session id for the submitter; no cross-site identity is sent.
+  useEffect(() => {
+    track("form_viewed", {
+      form_id: formConfig.id,
+      workspace_name: formConfig.workspace.name,
+      allow_rating: formConfig.allowRating,
+      allow_video: formConfig.allowVideo,
+    });
+  }, [formConfig.id, formConfig.workspace.name, formConfig.allowRating, formConfig.allowVideo]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,12 +79,36 @@ export default function PublicCollectionForm({
 
       if (!res.ok) {
         const data = await res.json();
+        track("form_submit_failed", {
+          form_id: formConfig.id,
+          workspace_name: formConfig.workspace.name,
+          error: data.error || "unknown",
+        });
         setError(data.error || "Something went wrong");
         return;
       }
 
+      // Successful submission — anonymous funnel completion. Flags
+      // let us compute what got filled without shipping PII: only
+      // booleans for text/rating/email/title presence, plus the
+      // content length bucket (not the content itself).
+      track("form_submitted", {
+        form_id: formConfig.id,
+        workspace_name: formConfig.workspace.name,
+        has_text: !!content.trim(),
+        has_rating: !!rating,
+        has_email: !!email.trim(),
+        has_title: !!jobTitle.trim(),
+        rating: rating || undefined,
+        text_length_bucket: bucketTextLength(content.trim().length),
+      });
       setSubmitted(true);
     } catch {
+      track("form_submit_failed", {
+        form_id: formConfig.id,
+        workspace_name: formConfig.workspace.name,
+        error: "network",
+      });
       setError("Failed to submit. Please try again.");
     } finally {
       setSubmitting(false);
@@ -205,4 +243,17 @@ export default function PublicCollectionForm({
       </Card>
     </div>
   );
+}
+
+/**
+ * Coarse-grained bucketing for testimonial length so analytics can
+ * see "did they write anything meaningful?" without shipping any of
+ * the actual text. Buckets are ranges, not exact counts.
+ */
+function bucketTextLength(len: number): "0" | "1-40" | "41-120" | "121-300" | "300+" {
+  if (len === 0) return "0";
+  if (len <= 40) return "1-40";
+  if (len <= 120) return "41-120";
+  if (len <= 300) return "121-300";
+  return "300+";
 }
