@@ -108,13 +108,10 @@ export function welcomeEmailHtml(data: WelcomeEmailData): string {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#faf5ff;border:1px solid #ede9fe;border-radius:10px;">
                 <tr>
                   <td style="padding:20px 22px;">
-                    <p style="margin:0 0 6px 0;font-size:11px;font-weight:700;color:#5b21b6;letter-spacing:0.08em;text-transform:uppercase;">
+                    <p style="margin:0 0 12px 0;font-size:11px;font-weight:700;color:#5b21b6;letter-spacing:0.08em;text-transform:uppercase;">
                       Your public Wall of Love URL
                     </p>
-                    <a href="${escapeAttr(wallUrl)}" target="_blank" style="color:#5b21b6;font-size:14px;font-weight:600;text-decoration:none;word-break:break-all;">
-                      ${escapeHtml(wallUrl)}
-                    </a>
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td style="background-color:#5b21b6;border-radius:6px;">
                           <a href="${escapeAttr(wallUrl)}" target="_blank" style="display:inline-block;padding:8px 16px;color:#ffffff;font-size:13px;font-weight:600;text-decoration:none;">
@@ -267,4 +264,15 @@ function escapeHtml(s: string): string {
 
 function escapeAttr(s: string): string {
   return escapeHtml(s);
+}
+
+/**
+ * Standard subject line for the welcome email. Uses the recipient's
+ * first name when available so the message doesn't feel templated.
+ */
+export function welcomeEmailSubject(name: string): string {
+  const first = (name || "").split(" ")[0].trim();
+  return first
+    ? `Welcome to Testimoni, ${first} — your wall is ready`
+    : "Welcome to Testimoni — your wall is ready";
 }

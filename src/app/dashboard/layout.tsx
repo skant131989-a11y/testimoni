@@ -9,6 +9,8 @@ import { generateSlug } from "@/lib/utils";
 import { getEffectivePlan } from "@/lib/plan";
 import { safeDisplayName } from "@/lib/name-utils";
 import { DashboardPageTracker } from "@/components/dashboard-page-tracker";
+import { sendEmail } from "@/lib/emails/send";
+import { welcomeEmailHtml, welcomeEmailSubject } from "@/lib/emails/welcome";
 
 export default async function DashboardLayout({
   children,
@@ -144,6 +146,54 @@ export default async function DashboardLayout({
     );
 
     await prisma.$transaction(ops);
+
+    // First-time signup path — everything above just created the
+    // user's workspace + form + widget + subscription. Fire a
+    // welcome email (fire-and-forget so response TTFB is unaffected).
+    // Skips demo accounts (email starts with demo-) since those are
+    // provisioning fixtures, not real signups.
+    const isDemoAccount = /^demo-[a-f0-9]+@testimoni\.dev$/i.test(
+      authUser.email ?? "",
+    );
+    if (!isDemoAccount && authUser.email) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
+      // Find the default widget id we just created to build the wall URL.
+      // The widget was created with a Prisma-generated cuid, so we
+      // re-query — cheap read that runs off the main render path.
+      (async () => {
+        try {
+          const w = await prisma.widget.findFirst({
+            where: { workspaceId, isActive: true },
+            orderBy: { createdAt: "asc" },
+            select: { id: true },
+          });
+          const wallUrl = w ? `${appUrl}/w/${w.id}` : `${appUrl}/dashboard`;
+          const html = welcomeEmailHtml({
+            name: fullName,
+            email: authUser.email!,
+            wallUrl,
+            workspaceName: `${fullName}'s Workspace`,
+            dashboardUrl: `${appUrl}/dashboard`,
+            importUrl: `${appUrl}/dashboard/import`,
+            collectFormUrl: `${appUrl}/collect/${slug}/customer-feedback`,
+            embedPageUrl: w
+              ? `${appUrl}/dashboard/widgets/${w.id}/embed`
+              : `${appUrl}/dashboard/widgets`,
+          });
+          await sendEmail({
+            to: authUser.email!,
+            // Welcome-touch mails come from hello@ (replyable) instead
+            // of the transactional no-reply@. Users who reply hit a
+            // real inbox — early feedback goldmine.
+            from: "Testimoni <hello@testimoni.io>",
+            subject: welcomeEmailSubject(fullName),
+            html,
+          });
+        } catch {
+          // Silent — welcome email failure must never break signup.
+        }
+      })();
+    }
 
     dbUser = await prisma.user.findUnique({
       where: { supabaseId: authUser.id },

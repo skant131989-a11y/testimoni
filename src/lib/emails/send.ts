@@ -36,6 +36,13 @@ export interface SendEmailInput {
   /** Optional reply-to — for submission notifications, we set this to
    *  the submitter's email so owners can reply directly. */
   replyTo?: string;
+  /** Optional per-call from-address override. Defaults to
+   *  EMAIL_FROM_ADDRESS env / "Testimoni <no-reply@testimoni.io>".
+   *  Use for founder-touch emails (welcome, founder-checkin) that
+   *  should come from a replyable address like hello@ instead of
+   *  the transactional no-reply@. Domain must still be verified
+   *  in Resend. */
+  from?: string;
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; error?: string }> {
@@ -49,7 +56,7 @@ export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; e
 
   try {
     const res = await client.emails.send({
-      from: FROM_ADDRESS,
+      from: input.from || FROM_ADDRESS,
       to: input.to,
       subject: input.subject,
       html: input.html,
