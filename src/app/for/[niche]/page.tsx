@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { NICHES, getNiche } from "@/lib/niches";
 import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
+import { ExitIntent } from "@/components/exit-intent";
 
 interface PageProps {
   params: Promise<{ niche: string }>;
@@ -310,6 +311,11 @@ export default async function NichePage({ params }: PageProps) {
           <p>© 2026 Testimoni. All rights reserved.</p>
         </div>
       </footer>
+
+      <ExitIntent
+        surface={`for_${niche.slug}`}
+        headline={`Wait — build a Wall of Love for ${niche.audience.toLowerCase()}.`}
+      />
     </div>
   );
 }

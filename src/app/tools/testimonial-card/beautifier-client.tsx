@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { track } from "@/lib/analytics";
+import { ExitIntent } from "@/components/exit-intent";
 
 /**
  * Public, no-signup testimonial card generator.
@@ -414,6 +415,8 @@ export function BeautifierClient() {
           <p>Free tool. No signup needed.</p>
         </div>
       </footer>
+
+      <ExitIntent surface="tools_testimonial_card" />
     </div>
   );
 }

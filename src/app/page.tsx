@@ -179,7 +179,7 @@ export default function LandingPage() {
               <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-primary">
                 Also free
               </span>
-              — 3 tools no signup required:
+              — 6 tools no signup required:
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <TrackedLink
@@ -205,6 +205,30 @@ export default function LandingPage() {
                 className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
               >
                 ✍️ Testimonial writer
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_ask"
+                surface="home"
+                href="/tools/ask-templates"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                💬 Ask templates
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_linkedin"
+                surface="home"
+                href="/tools/linkedin-recommendation"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                💼 LinkedIn recommendation
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_badge"
+                surface="home"
+                href="/tools/star-badge"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                ⭐ Star badge
               </TrackedLink>
             </div>
           </div>

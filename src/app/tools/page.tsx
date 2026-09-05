@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, Image as ImageIcon, Search, PenLine, ArrowRight } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Search, PenLine, ArrowRight, MessageCircle, Linkedin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -32,7 +32,7 @@ const TOOLS = [
     icon: Search,
     title: "Praise tweet finder",
     description:
-      "Find every tweet praising your brand in the last 90 days. Log in with X — we filter for positive-sentiment keywords.",
+      "Enter your @handle + keywords. We build a smart X search to surface tweets praising your work. Paste them back to save.",
     cta: "Find mentions →",
   },
   {
@@ -42,6 +42,30 @@ const TOOLS = [
     description:
       "Stuck writing a testimonial? Enter a name, what they did, and how it felt. Get 3 versions to choose from.",
     cta: "Write one →",
+  },
+  {
+    href: "/tools/ask-templates",
+    icon: MessageCircle,
+    title: "Ask templates",
+    description:
+      "“What do I even say?” — copy-paste templates to ask customers for testimonials via WhatsApp, email, DM, LinkedIn, or SMS.",
+    cta: "Get templates →",
+  },
+  {
+    href: "/tools/linkedin-recommendation",
+    icon: Linkedin,
+    title: "LinkedIn recommendation writer",
+    description:
+      "Write a LinkedIn recommendation in 30 seconds. Enter a name, role, and their strengths. Get 3 versions.",
+    cta: "Write one →",
+  },
+  {
+    href: "/tools/star-badge",
+    icon: Star,
+    title: "Star rating badge",
+    description:
+      "Design a star rating badge for your website. Pick colors, style, and size. Download SVG or copy embed code.",
+    cta: "Design a badge →",
   },
 ] as const;
 
@@ -82,8 +106,8 @@ export default function ToolsPage() {
           </p>
         </div>
 
-        {/* Tools grid */}
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        {/* Tools grid — 3 across on desktop, 2 rows of 3 for 6 tools */}
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           {TOOLS.map((t) => (
             <Link
               key={t.href}

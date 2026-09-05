@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { track } from "@/lib/analytics";
+import { ExitIntent } from "@/components/exit-intent";
 
 /**
  * Public testimonial writer tool. Calls /api/tools/generate-testimonial
@@ -400,6 +401,8 @@ export function TestimonialWriterClient() {
           <p>Free tool. No signup needed.</p>
         </div>
       </footer>
+
+      <ExitIntent surface="tools_testimonial_writer" />
     </div>
   );
 }

@@ -61,8 +61,11 @@ Testimoni vs the incumbents:
 
 - [/tools](https://testimoni.io/tools) — index of all free testimonial tools
 - [/tools/testimonial-card](https://testimoni.io/tools/testimonial-card) — testimonial card image generator (Twitter, LinkedIn, Instagram formats)
-- [/tools/praise-tweet-finder](https://testimoni.io/tools/praise-tweet-finder) — find positive brand mentions on X using OAuth
+- [/tools/praise-tweet-finder](https://testimoni.io/tools/praise-tweet-finder) — smart X search URL builder for finding praise tweets about your @handle
 - [/tools/testimonial-writer](https://testimoni.io/tools/testimonial-writer) — generate 3 testimonial variations from a name + short description
+- [/tools/ask-templates](https://testimoni.io/tools/ask-templates) — copy-paste templates for asking customers for testimonials via WhatsApp, email, DM, LinkedIn, or SMS
+- [/tools/linkedin-recommendation](https://testimoni.io/tools/linkedin-recommendation) — write a LinkedIn recommendation in 30 seconds with 3 versions to choose from
+- [/tools/star-badge](https://testimoni.io/tools/star-badge) — design a star rating badge for your website (SVG download + embed code)
 
 ## Job-shaped landing pages (per audience)
 

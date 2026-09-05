@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { track } from "@/lib/analytics";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
+import { ExitIntent } from "@/components/exit-intent";
 
 /**
  * Praise Tweet Finder — search-URL builder.
@@ -326,6 +327,8 @@ export function PraiseTweetFinderClient() {
           <p>Free tool. No signup needed to search.</p>
         </div>
       </footer>
+
+      <ExitIntent surface="tools_praise_tweet_finder" />
     </div>
   );
 }
