@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MilestoneNudge } from "@/components/milestone-nudge";
 import { VideoFreeBanner } from "@/components/video-free-banner";
+import { FormUrlCard } from "@/components/form-url-card";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
 import { getEffectiveLimits } from "@/lib/plan";
@@ -171,6 +172,21 @@ export default async function DashboardPage() {
         label: "Import a tweet",
       };
     }
+    // Under-3 testimonials — sharing the form to collect more matters
+    // MORE than embedding an almost-empty wall. Users who ship the
+    // embed at 1-2 testimonials just display a thin wall. Get to real
+    // proof first, then embed. (An embed CTA still fires below at
+    // impressionsTotal === 0 once they have 3+ testimonials, and the
+    // general "share your form" CTA fires at <5 as a fallback.)
+    if (totalTestimonials < 3 && formShareHref) {
+      return {
+        kind: "share_form",
+        title: `Only ${totalTestimonials} testimonial${totalTestimonials === 1 ? "" : "s"} so far — get more before you embed`,
+        desc: "Share your collection form with your last few customers. Every submission lands in your inbox for one-click approval.",
+        href: "/dashboard/collect",
+        label: "Share your form",
+      };
+    }
     if (impressionsTotal === 0 && embedHref) {
       return {
         kind: "copy_embed",
@@ -217,6 +233,17 @@ export default async function DashboardPage() {
           Welcome back! Here&apos;s an overview of your testimonials.
         </p>
       </div>
+
+      {/* Persistent form-link card. Always visible when a form exists —
+          the form URL is the #1 asset new users need to share, and
+          hiding it behind an NBA that only fires under specific
+          conditions made it feel missing. See <FormUrlCard>. */}
+      {formShareHref && (
+        <FormUrlCard
+          formUrl={`${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}${formShareHref}`}
+          surface="dashboard"
+        />
+      )}
 
       {/* Next best action — one clear CTA above stats so the page
           always feels forward-moving, never like a dead-end.
@@ -268,7 +295,13 @@ export default async function DashboardPage() {
         />
       )}
 
-      <VideoFreeBanner videoCount={videoCount} />
+      {/* Video-upgrade nudge — only show once the user has real
+          proof to build on. Pushing "get your free video" while they
+          still have zero text testimonials is a distraction from the
+          primary "collect first" job. */}
+      {totalTestimonials > 0 && (
+        <VideoFreeBanner videoCount={videoCount} />
+      )}
 
       {/* Stats cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
