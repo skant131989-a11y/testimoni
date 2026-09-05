@@ -130,6 +130,35 @@ export function welcomeEmailHtml(data: WelcomeEmailData): string {
           </tr>
 
           <tr>
+            <td style="padding:16px 40px 0 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#faf5ff;border:1px solid #ede9fe;border-radius:10px;">
+                <tr>
+                  <td style="padding:20px 22px;">
+                    <p style="margin:0 0 8px 0;font-size:11px;font-weight:700;color:#5b21b6;letter-spacing:0.08em;text-transform:uppercase;">
+                      Your collection form — send this to customers
+                    </p>
+                    <a href="${escapeAttr(rawCollectFormUrl)}" target="_blank" style="display:block;font-size:13px;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;color:#5b21b6;text-decoration:none;word-break:break-all;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;margin-bottom:10px;">
+                      ${escapeHtml(rawCollectFormUrl)}
+                    </a>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background-color:#5b21b6;border-radius:6px;">
+                          <a href="${escapeAttr(collectFormUrl)}" target="_blank" style="display:inline-block;padding:8px 16px;color:#ffffff;font-size:13px;font-weight:600;text-decoration:none;">
+                            Preview form &rarr;
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="margin:12px 0 0 0;font-size:13px;line-height:1.5;color:#6b7280;">
+                      Copy the URL above and send it to customers — email, DM, follow-up message. Every reply lands in your inbox for approval.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
             <td style="padding:32px 40px 8px 40px;">
               <h2 style="margin:0 0 4px 0;font-size:16px;font-weight:700;color:#1a1a1a;">
                 Three things you can do in the next 5 minutes

@@ -898,47 +898,56 @@ export function WelcomeClient({
         )}
       </div>
 
-      {/* Secondary — share collection form. Always visible now (was
-          previously collapsed behind a "Also — share…" button which
-          most users never noticed). Sits below the paste-a-tweet
-          primary CTA so it's a clear "other path" without competing
-          for first-viewport attention. */}
-      {defaultFormUrl && (
-        <div className="rounded-2xl border bg-card p-5 text-left">
-          <p className="text-sm font-semibold">📮 Your form — send this link to customers</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Send this link anywhere — email, DM, follow-up message. Every reply
-            lands in your inbox for you to approve.
-          </p>
-          {fullFormUrl && (
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <div className="min-w-0 flex-1 truncate rounded-md border bg-muted/60 px-3 py-2 font-mono text-xs">
-                {fullFormUrl}
-              </div>
-              <Button
-                onClick={copyForm}
-                variant={formCopied ? "default" : "outline"}
-                className="shrink-0"
-              >
-                {formCopied ? (
-                  <>
-                    <Check className="mr-2 h-4 w-4" /> Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="mr-2 h-4 w-4" /> Copy link
-                  </>
-                )}
-              </Button>
-              <Button asChild variant="outline" className="shrink-0">
-                <a href={fullFormUrl} target="_blank" rel="noopener noreferrer">
-                  Preview <ExternalLink className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-            </div>
-          )}
+      {/* Secondary — share collection form. ALWAYS rendered, no
+          conditional gating on defaultFormUrl. Even in the rare
+          edge case where the workspace hasn't auto-provisioned a
+          form yet (a race during first-visit provisioning), the
+          panel still shows with a fallback so users see the second
+          path exists. Sits below the paste-a-tweet primary CTA. */}
+      <div className="rounded-2xl border bg-card p-5 text-left">
+        <p className="text-sm font-semibold">📮 Your form — send this link to customers</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Send this link anywhere — email, DM, follow-up message. Every reply
+          lands in your inbox for you to approve.
+        </p>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          <div className="min-w-0 flex-1 truncate rounded-md border bg-muted/60 px-3 py-2 font-mono text-xs">
+            {fullFormUrl ?? "Setting up your form… refresh in a moment."}
+          </div>
+          <Button
+            onClick={copyForm}
+            variant={formCopied ? "default" : "outline"}
+            className="shrink-0"
+            disabled={!fullFormUrl}
+          >
+            {formCopied ? (
+              <>
+                <Check className="mr-2 h-4 w-4" /> Copied
+              </>
+            ) : (
+              <>
+                <Copy className="mr-2 h-4 w-4" /> Copy link
+              </>
+            )}
+          </Button>
+          <Button
+            asChild={!!fullFormUrl}
+            variant="outline"
+            className="shrink-0"
+            disabled={!fullFormUrl}
+          >
+            {fullFormUrl ? (
+              <a href={fullFormUrl} target="_blank" rel="noopener noreferrer">
+                Preview <ExternalLink className="ml-2 h-4 w-4" />
+              </a>
+            ) : (
+              <span>
+                Preview <ExternalLink className="ml-2 h-4 w-4" />
+              </span>
+            )}
+          </Button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
