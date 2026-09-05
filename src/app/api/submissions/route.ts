@@ -205,14 +205,20 @@ export async function POST(request: Request) {
    * silently no-ops. The DB submission still lands regardless.
    */
   function fireOwnerNotification() {
-    const owner = form?.workspace?.members?.[0]?.user;
+    // Rebind `form` to a local const so TypeScript can narrow it
+    // inside this closure. Without this, TS treats the outer `form`
+    // as still-possibly-null even though the code above returned
+    // on `!form`.
+    const f = form;
+    if (!f) return;
+    const owner = f.workspace?.members?.[0]?.user;
     if (!owner?.email) return;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
     const inboxUrl = `${appUrl}/dashboard/inbox`;
     const html = submissionNotifyEmailHtml({
       ownerName: owner.name || "there",
-      workspaceName: form.workspace.name,
-      formName: form.headline || form.slug,
+      workspaceName: f.workspace.name,
+      formName: f.headline || f.slug,
       customerName: submissionData.customerName,
       customerEmail: submissionData.customerEmail,
       content: submissionData.content,
@@ -224,7 +230,7 @@ export async function POST(request: Request) {
       to: owner.email,
       subject: submissionNotifyEmailSubject(
         submissionData.customerName,
-        form.workspace.name,
+        f.workspace.name,
       ),
       html,
       replyTo: submissionData.customerEmail ?? undefined,
