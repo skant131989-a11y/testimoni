@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/header";
 import { generateSlug } from "@/lib/utils";
 import { getEffectivePlan } from "@/lib/plan";
 import { safeDisplayName } from "@/lib/name-utils";
+import { DashboardPageTracker } from "@/components/dashboard-page-tracker";
 
 export default async function DashboardLayout({
   children,
@@ -189,6 +190,10 @@ export default async function DashboardLayout({
           from the callback) and account switching in the same
           browser. */}
       <AuthIdentifier userId={authUser.id} />
+      {/* Auto-track page views + engagement (scroll depth, time on
+          page) for every dashboard route. See DashboardPageTracker
+          for details — pathname-keyed so counters reset per route. */}
+      <DashboardPageTracker />
       <Sidebar workspaceName={workspace.name} plan={plan} wallUrl={wallUrl} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
