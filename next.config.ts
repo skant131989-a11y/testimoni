@@ -39,6 +39,16 @@ const nextConfig: NextConfig = {
       { source: "/how-it-works", destination: "/demo", permanent: true },
       { source: "/use-cases", destination: "/", permanent: true },
       { source: "/customers", destination: "/", permanent: true },
+      // Short, brandable URL for the founder's "fill this 30-second
+      // form" CTA on the home page. Redirects to the actual Testimoni
+      // collection form so we can swap the underlying form later
+      // without touching the public URL or the home page copy.
+      // Non-permanent so we can retarget without SEO baggage.
+      {
+        source: "/setup",
+        destination: "/collect/founder/customer-feedback",
+        permanent: false,
+      },
     ];
   },
 };

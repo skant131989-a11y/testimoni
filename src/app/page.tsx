@@ -130,15 +130,37 @@ export default function LandingPage() {
               </span>
             </div>
 
-            {/* Personal setup offer — text link only, no button. */}
+            {/* Personal setup offer — dual path.
+                • Email me → mailto for people who prefer async
+                • 30-second form → the actual Testimoni collection form
+                  the founder uses. Doubles as a live product demo:
+                  the visitor experiences the exact flow their own
+                  customers will go through, and their submission is
+                  a warm lead that also becomes a real testimonial on
+                  our own Wall of Love. Meta move — dogfooding as
+                  proof. */}
             <p className="mt-6 text-sm text-muted-foreground">
               Want it live this week?{" "}
-              <a
+              <TrackedLink
+                cta="hero_founder_email"
+                surface="home_hero"
                 href="mailto:hello@testimoni.io?subject=Set%20up%20my%20widget"
                 className="font-semibold text-primary hover:underline"
               >
-                Email me — I&apos;ll set it up with you.
-              </a>
+                Email me
+              </TrackedLink>
+              {" "}or{" "}
+              <TrackedLink
+                cta="hero_founder_form"
+                surface="home_hero"
+                href="/setup"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary hover:underline"
+              >
+                fill this 30-second form
+              </TrackedLink>
+              {" "}— I&apos;ll set the wall up with you.
             </p>
           </div>
 
