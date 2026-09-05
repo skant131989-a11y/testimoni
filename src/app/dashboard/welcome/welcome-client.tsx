@@ -912,7 +912,7 @@ export function WelcomeClient({
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <div className="min-w-0 flex-1 truncate rounded-md border bg-muted/60 px-3 py-2 font-mono text-xs">
-            {fullFormUrl ?? "Setting up your form… refresh in a moment."}
+            {fullFormUrl ?? "Setting up your form and widget…"}
           </div>
           <Button
             onClick={copyForm}
