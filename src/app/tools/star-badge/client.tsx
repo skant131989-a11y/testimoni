@@ -18,6 +18,7 @@ import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
 import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
+import { buildBadgeSvg, BADGE_THEMES, BADGE_SIZES, type BadgeStyle, type BadgeThemeId, type BadgeSizeId } from "@/lib/badge-svg";
 
 /**
  * Star Rating Badge generator.
@@ -34,35 +35,22 @@ import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
  */
 
 const STYLES = [
-  { id: "pill", label: "Pill (rounded)" },
-  { id: "flat", label: "Flat (rectangle)" },
-  { id: "minimal", label: "Minimal (just stars)" },
+  { id: "pill" as BadgeStyle, label: "Pill (rounded)" },
+  { id: "flat" as BadgeStyle, label: "Flat (rectangle)" },
+  { id: "minimal" as BadgeStyle, label: "Minimal (just stars)" },
 ] as const;
 
-const THEMES = [
-  { id: "light", label: "Light", bg: "#ffffff", fg: "#0f172a", muted: "#64748b", star: "#f59e0b" },
-  { id: "dark", label: "Dark", bg: "#0f172a", fg: "#f8fafc", muted: "#94a3b8", star: "#fbbf24" },
-  { id: "brand", label: "Brand purple", bg: "#7c3aed", fg: "#ffffff", muted: "#e9d5ff", star: "#facc15" },
-  { id: "trust", label: "Trust green", bg: "#059669", fg: "#ffffff", muted: "#a7f3d0", star: "#fef08a" },
-] as const;
-
-const SIZES = [
-  { id: "sm", label: "Small", scale: 0.85 },
-  { id: "md", label: "Medium", scale: 1.0 },
-  { id: "lg", label: "Large", scale: 1.2 },
-] as const;
+const THEMES = Object.values(BADGE_THEMES);
+const SIZES = Object.values(BADGE_SIZES);
 
 export function StarBadgeClient() {
   const [rating, setRating] = useState(4.8);
   const [reviewCount, setReviewCount] = useState(132);
   const [businessName, setBusinessName] = useState("");
-  const [styleId, setStyleId] = useState<typeof STYLES[number]["id"]>("pill");
-  const [themeId, setThemeId] = useState<typeof THEMES[number]["id"]>("light");
-  const [sizeId, setSizeId] = useState<typeof SIZES[number]["id"]>("md");
+  const [styleId, setStyleId] = useState<BadgeStyle>("pill");
+  const [themeId, setThemeId] = useState<BadgeThemeId>("light");
+  const [sizeId, setSizeId] = useState<BadgeSizeId>("md");
   const [copied, setCopied] = useState(false);
-
-  const theme = THEMES.find((t) => t.id === themeId)!;
-  const size = SIZES.find((s) => s.id === sizeId)!;
 
   const svgString = useMemo(
     () =>
@@ -71,10 +59,10 @@ export function StarBadgeClient() {
         reviewCount,
         businessName,
         style: styleId,
-        theme,
-        scale: size.scale,
+        themeId,
+        sizeId,
       }),
-    [rating, reviewCount, businessName, styleId, theme, size.scale]
+    [rating, reviewCount, businessName, styleId, themeId, sizeId]
   );
 
   const embedSnippet = useMemo(
@@ -287,126 +275,3 @@ export function StarBadgeClient() {
   );
 }
 
-/**
- * Build the badge SVG as a string. Kept as a pure function so the
- * same output ships in three places: the live preview, the
- * downloaded .svg file, and the copy-embed snippet.
- *
- * Rendering: horizontal card with 5 stars + rating text + review
- * count. The 5-star row fills proportionally to `rating` (e.g. 4.8
- * = 4 full stars + 80% of the fifth).
- */
-function buildBadgeSvg(opts: {
-  rating: number;
-  reviewCount: number;
-  businessName: string;
-  style: "pill" | "flat" | "minimal";
-  theme: { bg: string; fg: string; muted: string; star: string };
-  scale: number;
-}): string {
-  const { rating, reviewCount, businessName, style, theme, scale } = opts;
-
-  const clamped = Math.max(1, Math.min(5, rating));
-  const fillPct = (clamped / 5) * 100;
-
-  const STAR_PATH =
-    "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
-
-  // Base sizes (scaled by `scale`)
-  const baseHeight = style === "minimal" ? 32 : 48;
-  const paddingX = style === "minimal" ? 0 : 16;
-  const paddingY = style === "minimal" ? 0 : 8;
-  const starSize = style === "minimal" ? 24 : 20;
-  const gap = 6;
-  const textFontSize = 14;
-  const smallFontSize = 12;
-
-  const height = Math.round(baseHeight * scale);
-  const starPx = Math.round(starSize * scale);
-  const gapPx = Math.round(gap * scale);
-  const textFont = Math.round(textFontSize * scale);
-  const smallFont = Math.round(smallFontSize * scale);
-  const padX = Math.round(paddingX * scale);
-  const padY = Math.round(paddingY * scale);
-  const radius = style === "pill" ? Math.round(height / 2) : style === "flat" ? 8 : 0;
-
-  // Stars row width
-  const starsRowWidth = starPx * 5 + gapPx * 4;
-
-  // Text
-  const ratingText = `${clamped.toFixed(1)}`;
-  const countText = `(${reviewCount.toLocaleString()})`;
-
-  // Approx text width for layout
-  const ratingWidth = Math.round(ratingText.length * textFont * 0.62);
-  const countWidth = Math.round(countText.length * smallFont * 0.58);
-  const brandWidth = businessName
-    ? Math.round(businessName.length * smallFont * 0.58)
-    : 0;
-
-  const contentWidth =
-    starsRowWidth + gapPx + ratingWidth + (countWidth ? gapPx + countWidth : 0);
-  const totalWidth = padX * 2 + Math.max(contentWidth, brandWidth);
-
-  const centerY = height / 2;
-  const starY = Math.round(centerY - starPx / 2);
-  const contentX = padX;
-  let cursorX = contentX;
-
-  // Build 5 stars: each rendered as a rect-clipped fill on top of a
-  // muted outline. This lets a fractional star (e.g. 4.8) render as
-  // a partially-filled last star.
-  const starsSvg = Array.from({ length: 5 })
-    .map((_, i) => {
-      const starX = cursorX + (starPx + gapPx) * i;
-      // Fraction filled for THIS star
-      const filledFrom = i * 20; // 0, 20, 40, 60, 80
-      const starFillPct = Math.max(0, Math.min(100, (fillPct - filledFrom) * 5));
-      const clipId = `sb-clip-${i}`;
-      return `
-        <g transform="translate(${starX} ${starY}) scale(${starPx / 24})">
-          <defs>
-            <clipPath id="${clipId}"><rect x="0" y="0" width="${(starFillPct / 100) * 24}" height="24"/></clipPath>
-          </defs>
-          <path d="${STAR_PATH}" fill="${theme.muted}" opacity="0.3"/>
-          <path d="${STAR_PATH}" fill="${theme.star}" clip-path="url(#${clipId})"/>
-        </g>`;
-    })
-    .join("");
-
-  cursorX += starsRowWidth + gapPx;
-
-  const ratingSvg = `<text x="${cursorX}" y="${centerY + Math.round(textFont * 0.35)}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="${textFont}" font-weight="700" fill="${theme.fg}">${ratingText}</text>`;
-  cursorX += ratingWidth + (countWidth ? gapPx : 0);
-
-  const countSvg = countText
-    ? `<text x="${cursorX}" y="${centerY + Math.round(smallFont * 0.35)}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="${smallFont}" fill="${theme.muted}">${escapeXml(countText)}</text>`
-    : "";
-
-  const brandSvg = businessName
-    ? `<text x="${totalWidth - padX}" y="${centerY + Math.round(smallFont * 0.35)}" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="${smallFont}" fill="${theme.muted}">${escapeXml(businessName)}</text>`
-    : "";
-
-  const bgRect =
-    style === "minimal"
-      ? ""
-      : `<rect x="0" y="0" width="${totalWidth}" height="${height}" rx="${radius}" ry="${radius}" fill="${theme.bg}"/>`;
-
-  // Final SVG. Includes xmlns for standalone use in files/embeds.
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="${height + Math.max(padY - 4, 0)}" viewBox="0 0 ${totalWidth} ${height}" role="img" aria-label="Rated ${ratingText} out of 5 based on ${reviewCount} reviews">
-    ${bgRect}
-    ${starsSvg}
-    ${ratingSvg}
-    ${countSvg}
-    ${brandSvg}
-  </svg>`;
-}
-
-function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}

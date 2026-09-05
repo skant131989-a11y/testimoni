@@ -23,7 +23,9 @@ import {
   Eye,
   Star,
   Check,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 
 const LAYOUTS = [
   { id: "GRID", label: "Grid", icon: LayoutGrid, description: "Responsive grid of cards" },
@@ -334,6 +336,36 @@ export default function WidgetBuilderPage() {
 
         {/* Testimonial Selection Sidebar */}
         <div className="space-y-4">
+          {/* Star Rating Badge shortcut — surfaces the badge feature
+              on the widget overview page so owners actually find it.
+              Small preview via the live SVG endpoint + one-click
+              route to the Embed tab's badge section. */}
+          <Card className="border-primary/30 bg-primary/[0.03]">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                Star Rating Badge
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Live ★ rating for your site&apos;s footer, product pages, or email signature.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-center rounded-lg border bg-background py-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/badge/${widgetId}?style=pill&theme=light&size=md`}
+                  alt="Live star rating badge preview"
+                />
+              </div>
+              <Button asChild size="sm" className="w-full gap-2">
+                <Link href={`/dashboard/widgets/${widgetId}/embed#badge`}>
+                  Get embed code <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Select Testimonials</CardTitle>
