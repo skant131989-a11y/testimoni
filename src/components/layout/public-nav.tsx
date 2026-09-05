@@ -46,12 +46,12 @@ export function PublicNav({ right }: PublicNavProps) {
             Live Demo
           </TrackedLink>
           <TrackedLink
-            cta="nav_features"
+            cta="nav_tools"
             surface="public_nav"
-            href="/features"
+            href="/tools"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Features
+            Free Tools
           </TrackedLink>
           <TrackedLink
             cta="nav_pricing"
@@ -60,14 +60,6 @@ export function PublicNav({ right }: PublicNavProps) {
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             Pricing
-          </TrackedLink>
-          <TrackedLink
-            cta="nav_blog"
-            surface="public_nav"
-            href="/blog"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Blog
           </TrackedLink>
           {right}
           <PublicNavAuth />

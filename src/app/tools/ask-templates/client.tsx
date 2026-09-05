@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
+import { ToolsHeader } from "@/components/tools-header";
 
 const CHANNELS = [
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
@@ -101,18 +102,7 @@ export function AskTemplatesClient() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/icon.png" alt="Testimoni logo" width={28} height={28} className="rounded-full" />
-            <span className="text-xl font-bold">Testimoni</span>
-          </Link>
-          <Link href="/signup">
-            <Button size="sm">Start free</Button>
-          </Link>
-        </div>
-      </header>
+      <ToolsHeader backToTools />
 
       <main className="mx-auto max-w-3xl px-4 py-14">
         {/* Hero */}

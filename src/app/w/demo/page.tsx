@@ -128,6 +128,9 @@ export default function DemoWallPage() {
             <TrackedLink cta="wall_demo_nav_demo" surface="wall_demo" href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
               Live Demo
             </TrackedLink>
+            <TrackedLink cta="wall_demo_nav_tools" surface="wall_demo" href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
+              Free Tools
+            </TrackedLink>
             <TrackedLink cta="wall_demo_nav_pricing" surface="wall_demo" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
               Pricing
             </TrackedLink>
@@ -292,6 +295,22 @@ export default function DemoWallPage() {
             </div>
             <InlineSignup source="wall_demo" idPrefix="wall-demo" />
           </div>
+
+          {/* Escape hatch — curious-but-not-committed visitors get a
+              path back to the tools ecosystem instead of bouncing.
+              Each tool has its own save-to-wall bridge, so this
+              still funnels to signup, just via a warmer route. */}
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Not ready?{" "}
+            <TrackedLink
+              cta="wall_demo_try_tools"
+              surface="wall_demo"
+              href="/tools"
+              className="font-medium text-primary hover:underline"
+            >
+              Try our free tools first →
+            </TrackedLink>
+          </p>
         </div>
       </main>
 
@@ -301,6 +320,10 @@ export default function DemoWallPage() {
           Powered by{" "}
           <Link href="/" className="font-semibold text-primary hover:underline">
             Testimoni
+          </Link>
+          {" · "}
+          <Link href="/tools" className="text-primary hover:underline">
+            Free Tools
           </Link>
         </p>
       </footer>

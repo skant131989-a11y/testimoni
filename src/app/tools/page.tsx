@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { Sparkles, Image as ImageIcon, Search, PenLine, ArrowRight, MessageCircle, Linkedin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ToolsHeader } from "@/components/tools-header";
 
 export const metadata: Metadata = {
   title: "Free testimonial tools — Testimoni",
@@ -72,24 +72,7 @@ const TOOLS = [
 export default function ToolsPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/icon.png"
-              alt="Testimoni logo"
-              width={28}
-              height={28}
-              className="rounded-full"
-            />
-            <span className="text-xl font-bold">Testimoni</span>
-          </Link>
-          <Link href="/signup">
-            <Button size="sm">Start free</Button>
-          </Link>
-        </div>
-      </header>
+      <ToolsHeader />
 
       <main className="mx-auto max-w-5xl px-4 py-14">
         {/* Hero */}

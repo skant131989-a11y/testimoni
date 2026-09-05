@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
+import { ToolsHeader } from "@/components/tools-header";
 
 const RELATIONSHIPS = [
   { id: "worked_with", label: "Worked with them" },
@@ -83,18 +84,7 @@ export function RecommendationClient() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/icon.png" alt="Testimoni logo" width={28} height={28} className="rounded-full" />
-            <span className="text-xl font-bold">Testimoni</span>
-          </Link>
-          <Link href="/signup">
-            <Button size="sm">Start free</Button>
-          </Link>
-        </div>
-      </header>
+      <ToolsHeader backToTools />
 
       <main className="mx-auto max-w-3xl px-4 py-14">
         {/* Hero */}

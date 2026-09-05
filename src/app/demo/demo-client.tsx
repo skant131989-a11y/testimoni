@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { TrackedLink } from "@/components/tracked-link";
+import { InlineSignup } from "@/components/inline-signup";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { DemoVideo } from "@/components/demo-video";
 import { track } from "@/lib/analytics";
@@ -400,7 +401,24 @@ export default function DemoClient() {
             <span className="text-xl font-bold">Testimoni</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="hidden sm:flex">Interactive Demo</Badge>
+            {/* Standardized nav to match /w/demo + /tools/* + home:
+                Live Demo · Free Tools · Pricing · Log in · CTA.
+                Dropped the "Interactive Demo" badge that used to sit
+                here — it was cute but broke the nav consistency
+                across pages. */}
+            {!isLoggedIn && (
+              <div className="hidden items-center gap-5 md:flex">
+                <TrackedLink cta="demo_nav_live_demo" surface="demo" href="/demo" className="text-sm font-medium text-primary hover:underline">
+                  Live Demo
+                </TrackedLink>
+                <TrackedLink cta="demo_nav_tools" surface="demo" href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
+                  Free Tools
+                </TrackedLink>
+                <TrackedLink cta="demo_nav_pricing" surface="demo" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
+                  Pricing
+                </TrackedLink>
+              </div>
+            )}
             {isLoggedIn ? (
               <Link href="/dashboard">
                 <Button size="sm">Dashboard</Button>
@@ -1103,38 +1121,51 @@ export default function DemoClient() {
           caption="Paste a tweet → live testimonial on your wall. That's it."
         />
 
-        {/* Bottom CTA */}
-        <div className="mt-16 rounded-2xl bg-primary/5 border border-primary/20 p-12 text-center">
-          <Sparkles className="mx-auto h-8 w-8 text-primary" />
-          <h2 className="mt-4 text-3xl font-bold">
-            Like what you see?
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            You just experienced the full Testimoni flow — collect, approve, display.
-            Set it up for your own site in under 30 seconds.
-          </p>
-          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <TrackedLink cta="demo_bottom_signup" surface="demo" href="/signup">
-              <Button size="lg" className="gap-2">
-                Get started free
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </TrackedLink>
-            {/* Escape hatch — secondary path stays a quiet text link
-                rather than a competing loud button so the primary
-                CTA reads as the one action. */}
-            <TrackedLink
-              cta="demo_bottom_wall_demo"
-              surface="demo"
-              href="/w/demo"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              or see a sample wall →
-            </TrackedLink>
+        {/* Bottom CTA — matches home + /w/demo: inline signup form
+            beside the pitch. Replaces the older button-only version so
+            visitors can convert without a page hop. */}
+        <div className="mt-16 rounded-2xl border border-primary/20 bg-primary/5 p-8 md:p-10">
+          <div className="grid gap-8 md:grid-cols-2 md:gap-10">
+            <div>
+              <Sparkles className="h-8 w-8 text-primary" />
+              <h2 className="mt-4 text-3xl font-bold">
+                Like what you see?
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                You just experienced the full Testimoni flow — collect,
+                approve, display. Set it up for your own site in under 30
+                seconds.
+              </p>
+              <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
+                <li>✓ 10 testimonials, 1 form, 1 widget on the Free plan</li>
+                <li>✓ Public Wall of Love URL — shareable anywhere</li>
+                <li>✓ One-line embed for any site</li>
+              </ul>
+              {/* Escape hatch — free tools first for the curious-but-
+                  not-committed visitor. Mirrors the /w/demo pattern. */}
+              <p className="mt-6 text-sm text-muted-foreground">
+                Not ready?{" "}
+                <TrackedLink
+                  cta="demo_try_tools"
+                  surface="demo"
+                  href="/tools"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Try our free tools first →
+                </TrackedLink>
+                {" · "}
+                <TrackedLink
+                  cta="demo_bottom_wall_demo"
+                  surface="demo"
+                  href="/w/demo"
+                  className="font-medium text-primary hover:underline"
+                >
+                  or see a sample wall →
+                </TrackedLink>
+              </p>
+            </div>
+            <InlineSignup source="demo_bottom" idPrefix="demo-bottom" />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Free forever plan. No credit card required.
-          </p>
         </div>
       </main>
 
@@ -1153,6 +1184,7 @@ export default function DemoClient() {
           <nav className="flex items-center gap-5 text-sm">
             <Link href="/w/demo" className="text-muted-foreground hover:text-foreground">Sample Wall</Link>
             <Link href="/demo" className="text-muted-foreground hover:text-foreground">Demo</Link>
+            <Link href="/tools" className="text-muted-foreground hover:text-foreground">Free Tools</Link>
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
           </nav>
