@@ -173,7 +173,7 @@ export default function PublicCollectionForm({
           <form onSubmit={handleSubmit} className="space-y-4">
             {formConfig.allowRating && (
               <div>
-                <Label>Rating</Label>
+                <Label>Rating *</Label>
                 <div className="mt-1 flex gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -198,7 +198,7 @@ export default function PublicCollectionForm({
             )}
 
             <div>
-              <Label htmlFor="content">Your testimonial</Label>
+              <Label htmlFor="content">Your testimonial *</Label>
               <Textarea
                 id="content"
                 placeholder="Tell us about your experience..."
@@ -206,6 +206,13 @@ export default function PublicCollectionForm({
                 onChange={(e) => setContent(e.target.value)}
                 rows={4}
               />
+              {/* Both Rating and Your testimonial are marked required
+                  with *, but only ONE needs a value. Adding the shared
+                  footnote here (below the second of the two fields) so
+                  users see it before they scroll to the submit button. */}
+              <p className="mt-1 text-xs text-muted-foreground">
+                * Provide at least one — stars, testimonial, or both.
+              </p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
