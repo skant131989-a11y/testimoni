@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { MilestoneNudge } from "@/components/milestone-nudge";
 import { VideoFreeBanner } from "@/components/video-free-banner";
 import { FormUrlCard } from "@/components/form-url-card";
+import { TrackedLink } from "@/components/tracked-link";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
 import { getEffectiveLimits } from "@/lib/plan";
@@ -33,11 +34,23 @@ interface StatsCardProps {
   value: number;
   icon: React.ReactNode;
   description?: string;
+  /** Optional destination — when set, the whole card becomes a link.
+   *  Adds hover state (border tint + subtle lift) so it reads as
+   *  interactive, and fires stat_card_clicked with the analytics
+   *  key so we can see which stat drives the most curiosity. */
+  href?: string;
+  analyticsKey?: string;
 }
 
-function StatsCard({ title, value, icon, description }: StatsCardProps) {
-  return (
-    <Card>
+function StatsCard({ title, value, icon, description, href, analyticsKey }: StatsCardProps) {
+  const inner = (
+    <Card
+      className={
+        href
+          ? "transition-shadow hover:border-primary/40 hover:shadow-md"
+          : undefined
+      }
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         {icon}
@@ -49,6 +62,18 @@ function StatsCard({ title, value, icon, description }: StatsCardProps) {
         )}
       </CardContent>
     </Card>
+  );
+
+  if (!href) return inner;
+  return (
+    <TrackedLink
+      cta={`stat_card_${analyticsKey ?? "unknown"}`}
+      surface="dashboard"
+      href={href}
+      className="block"
+    >
+      {inner}
+    </TrackedLink>
   );
 }
 
@@ -303,7 +328,10 @@ export default async function DashboardPage() {
         <VideoFreeBanner videoCount={videoCount} />
       )}
 
-      {/* Stats cards */}
+      {/* Stats cards — each links to the natural drill-down page for
+          its value so users can click a number to see what's behind
+          it. Impressions falls back to the widget page when no
+          default widget exists yet. */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Testimonials"
@@ -311,21 +339,29 @@ export default async function DashboardPage() {
           icon={
             <MessageSquareQuote className="h-4 w-4 text-muted-foreground" />
           }
+          href="/dashboard/testimonials"
+          analyticsKey="testimonials"
         />
         <StatsCard
           title="Active Widgets"
           value={activeWidgets}
           icon={<Code2 className="h-4 w-4 text-muted-foreground" />}
+          href="/dashboard/widgets"
+          analyticsKey="widgets"
         />
         <StatsCard
           title="Pending Submissions"
           value={pendingSubmissions}
           icon={<Inbox className="h-4 w-4 text-muted-foreground" />}
+          href="/dashboard/inbox"
+          analyticsKey="inbox"
         />
         <StatsCard
           title="Total Impressions"
           value={impressionsTotal}
           icon={<Eye className="h-4 w-4 text-muted-foreground" />}
+          href="/dashboard/analytics"
+          analyticsKey="impressions"
         />
       </div>
 
