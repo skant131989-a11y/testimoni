@@ -709,12 +709,12 @@ export function WelcomeClient({
         {!imported && (
           <div className="mx-auto mt-6 max-w-lg rounded-xl border border-primary/20 bg-primary/5 p-3 text-sm">
             <p className="font-medium text-primary">
-              🎯 Fill your wall — aim for 3 testimonials today
+              🎯 Get your first 3 customer quotes today
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Paste a tweet / LinkedIn URL, type one you already have (email,
-              DM, review), or share your collection form to gather fresh
-              ones. Any source counts.
+              Paste a customer&apos;s tweet or LinkedIn post, type in a quote
+              from an email/DM/review, or send customers your form to collect
+              new ones. All of them count.
             </p>
           </div>
         )}
@@ -795,7 +795,7 @@ export function WelcomeClient({
               }}
               className="mt-4 text-sm font-medium text-primary hover:underline"
             >
-              Don&apos;t have a tweet handy? Type one in manually →
+              Have a customer&apos;s words from an email or DM? Type them in here →
             </button>
           </>
         ) : (
@@ -905,10 +905,10 @@ export function WelcomeClient({
           for first-viewport attention. */}
       {defaultFormUrl && (
         <div className="rounded-2xl border bg-card p-5 text-left">
-          <p className="text-sm font-semibold">📮 Share your collection form</p>
+          <p className="text-sm font-semibold">📮 Your form — send this link to customers</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Send this URL to your customers — drop it in an email, DM, or
-            follow-up message. Submissions land in your inbox as they come in.
+            Send this link anywhere — email, DM, follow-up message. Every reply
+            lands in your inbox for you to approve.
           </p>
           {fullFormUrl && (
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
