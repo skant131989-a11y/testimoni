@@ -15,43 +15,51 @@ export const metadata: Metadata = {
 /**
  * Public contact / feedback page.
  *
- * Dogfoods Testimoni's own collection form: reads NEXT_PUBLIC_FEEDBACK_FORM_ID
- * from env vars and renders the same form embed a customer of yours would see.
- * If the env var is missing, shows a graceful "email us" fallback.
+ * Dogfoods Testimoni's own collection form. Points at the same form
+ * the home page's "fill this 30-second form" link uses (via /setup),
+ * so /contact submissions land in the same founder inbox and use the
+ * same public workspace name. Previously we read NEXT_PUBLIC_FEEDBACK_FORM_ID
+ * from env; the hardcoded slug lookup is more portable and doesn't
+ * silently break when someone forgets to set the env var.
  */
 export default async function ContactPage() {
-  const formId = process.env.NEXT_PUBLIC_FEEDBACK_FORM_ID;
   const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "hello@testimoni.io";
 
+  // Same workspace + form as /setup and /collect/founder/customer-feedback.
+  const FOUNDER_WORKSPACE_SLUG = "founder";
+  const FOUNDER_FORM_SLUG = "customer-feedback";
+
   let formConfig: React.ComponentProps<typeof PublicCollectionForm>["formConfig"] | null = null;
-  if (formId) {
-    try {
-      const form = await prisma.collectionForm.findFirst({
-        where: { id: formId, isActive: true },
-        select: {
-          id: true,
-          headline: true,
-          description: true,
-          allowRating: true,
-          allowVideo: true,
-          thankYouMessage: true,
-          workspace: { select: { name: true, logoUrl: true } },
-        },
-      });
-      if (form) {
-        formConfig = {
-          id: form.id,
-          headline: form.headline,
-          description: form.description,
-          allowRating: form.allowRating,
-          allowVideo: form.allowVideo,
-          thankYouMessage: form.thankYouMessage,
-          workspace: { name: form.workspace.name, logoUrl: form.workspace.logoUrl },
-        };
-      }
-    } catch {
-      formConfig = null;
+  try {
+    const form = await prisma.collectionForm.findFirst({
+      where: {
+        workspace: { slug: FOUNDER_WORKSPACE_SLUG },
+        slug: FOUNDER_FORM_SLUG,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        headline: true,
+        description: true,
+        allowRating: true,
+        allowVideo: true,
+        thankYouMessage: true,
+        workspace: { select: { name: true, logoUrl: true } },
+      },
+    });
+    if (form) {
+      formConfig = {
+        id: form.id,
+        headline: form.headline,
+        description: form.description,
+        allowRating: form.allowRating,
+        allowVideo: form.allowVideo,
+        thankYouMessage: form.thankYouMessage,
+        workspace: { name: form.workspace.name, logoUrl: form.workspace.logoUrl },
+      };
     }
+  } catch {
+    formConfig = null;
   }
 
   return (
