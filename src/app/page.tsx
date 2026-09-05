@@ -23,10 +23,10 @@ import { ProPriceDual, FreePrice, FoundingBadge, FoundingExplainer } from "@/com
 import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
-import { HeroEmailCta } from "@/components/hero-email-cta";
+import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
-import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
+import { HeroScrollLink } from "@/components/hero-scroll-link";
 import { PageEngagement } from "@/components/page-engagement";
 
 export default function LandingPage() {
@@ -55,9 +55,6 @@ export default function LandingPage() {
             <TrackedLink cta="nav_tools" surface="home_nav" href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
               Free Tools
             </TrackedLink>
-            <TrackedLink cta="nav_features" surface="home_nav" href="/features" className="text-sm text-muted-foreground hover:text-foreground">
-              Features
-            </TrackedLink>
             <TrackedLink cta="nav_pricing" surface="home_nav" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
               Pricing
             </TrackedLink>
@@ -72,58 +69,138 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-7xl px-4 py-10 text-center md:py-16">
-        <div className="mx-auto max-w-3xl">
-          <div className="mb-4 inline-flex items-center rounded-full border px-3 py-1 text-sm">
-            <Star className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400" />
-            Paste a tweet · Live in 30s
+      <section className="mx-auto max-w-7xl px-4 py-10 md:py-16">
+        <div className="grid gap-10 md:grid-cols-2 md:items-center">
+          {/* Left column — words + single CTA */}
+          <div>
+            <div className="mb-4 inline-flex items-center rounded-full border px-3 py-1 text-sm">
+              <Star className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400" />
+              Paste a tweet · Live in 30s
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
+              Customer quotes{" "}
+              <span className="text-primary">on your site today.</span>
+            </h1>
+            <p className="mt-6 text-lg text-muted-foreground md:text-xl">
+              Paste a customer tweet or share a form. Approve once.
+              Embed the wall on your site — or share the free hosted URL.
+            </p>
+
+            {/* One loud button. Everything else is a text link. */}
+            <div className="mt-8 flex flex-col items-start gap-3">
+              <TrackedLink cta="hero_signup" surface="home_hero" href="/signup">
+                <Button size="lg" className="gap-2 px-6 py-6 text-base">
+                  Get my first testimonial <ArrowRight className="h-4 w-4" />
+                </Button>
+              </TrackedLink>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                <HeroScrollLink
+                  targetId="paste-tweet-demo"
+                  cta="hero_try_no_account"
+                  surface="home_hero"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Paste a tweet first — no account →
+                </HeroScrollLink>
+                <span className="text-muted-foreground">·</span>
+                <TrackedLink
+                  cta="hero_wall_demo"
+                  surface="home"
+                  href="/w/demo"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  See a live wall →
+                </TrackedLink>
+              </div>
+            </div>
+
+            {/* Trust + scope chips */}
+            <div className="mt-6 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Free forever
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                No credit card
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Live in ~30s
+              </span>
+            </div>
+
+            {/* Personal setup offer — text link only, no button. */}
+            <p className="mt-6 text-sm text-muted-foreground">
+              Want it live this week?{" "}
+              <a
+                href="mailto:hello@testimoni.io?subject=Set%20up%20my%20widget"
+                className="font-semibold text-primary hover:underline"
+              >
+                Email me — I&apos;ll set it up with you.
+              </a>
+            </p>
           </div>
-          <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-            Customer quotes{" "}
-            <span className="text-primary">on your site today.</span>
-          </h1>
-          <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-            Paste a tweet, share a form, or drop a QR. Approve once —
-            embed a wall on your site or share our free hosted URL.
-            No credit card.
-          </p>
-          <HeroEmailCta source="home_hero" />
-          {/* White-glove offer — the honest advantage.
-              Founder-led setup replaces the anonymous "trusted by"
-              tagline that had no names behind it. */}
-          <p className="mt-4 text-sm text-muted-foreground">
-            Want it live this week?{" "}
-            <a
-              href="mailto:hello@testimoni.io?subject=Set%20up%20my%20widget"
-              className="font-semibold text-primary hover:underline"
-            >
-              Email me — I&apos;ll set it up with you.
-            </a>
-          </p>
-          {/* Trust + scope chips — three small pills replace the old
-              single-line tertiary text. Each claim now has its own
-              visual anchor so scanners catch "Free plan", "No card",
-              and "form/QR/link intake" without reading a full
-              sentence. Still lower priority than the CTAs above. */}
-          <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Free forever
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              No credit card
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Live in ~30s
-            </span>
+
+          {/* Right column — first-viewport product visual.
+              A mini wall showing 3 sample cards (real-looking, not
+              real customers) so the visitor sees WHAT they'll get
+              before scrolling. */}
+          <div className="relative mx-auto w-full max-w-md">
+            {/* Attached pill — sits on the mock card, ties the promise
+                to the product. */}
+            <div className="absolute -top-3 left-6 z-10 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-primary-foreground shadow-md">
+              <Star className="h-3 w-3 fill-current" /> Live wall preview
+            </div>
+            <div className="rounded-2xl border-2 border-primary/20 bg-card p-4 shadow-xl">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  testimoni.io/w/you
+                </p>
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                  +1 new
+                </span>
+              </div>
+              <div className="space-y-3">
+                <div className="rounded-lg border bg-background p-3">
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed">
+                    &ldquo;Pasted 8 customer tweets and the homepage finally had proof.&rdquo;
+                  </p>
+                  <p className="mt-2 text-[11px] text-muted-foreground">Sarah Chen · SaaS founder</p>
+                </div>
+                <div className="rounded-lg border bg-background p-3">
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed">
+                    &ldquo;Students fill the form after each cohort. Widget updates the same day.&rdquo;
+                  </p>
+                  <p className="mt-2 text-[11px] text-muted-foreground">Marcus Johnson · Course creator</p>
+                </div>
+                <div className="rounded-lg border bg-background p-3">
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed">
+                    &ldquo;One-line embed dropped in Framer. Wall refreshes when I approve.&rdquo;
+                  </p>
+                  <p className="mt-2 text-[11px] text-muted-foreground">Aditi Rao · Designer</p>
+                </div>
+              </div>
+              <p className="mt-3 text-center text-[10px] text-muted-foreground">
+                Illustrative preview · Your wall will show your own testimonials.
+              </p>
+            </div>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">
-            <TrackedLink cta="hero_wall_demo" surface="home" href="/w/demo" className="font-medium text-primary hover:underline">
-              or see a live wall →
-            </TrackedLink>
-          </p>
         </div>
       </section>
 
@@ -165,6 +242,46 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Tweet-import callout — visual proof of the hero's "paste a tweet"
+          promise. Moved to sit right after Ask/Collect/Publish because
+          this IS the mechanism — should be visible on first scroll,
+          not buried below tools + How-it-works. #paste-tweet-demo is
+          the hero anchor target for "Paste a tweet first — no account". */}
+      <section
+        id="paste-tweet-demo"
+        className="scroll-mt-16 border-y bg-gradient-to-br from-blue-50/40 via-background to-purple-50/40 py-14"
+      >
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs font-medium">
+                <Zap className="h-3 w-3" />
+                Instant library
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                Have a tweet? Paste it right here.
+              </h2>
+              <p className="mt-3 text-base text-muted-foreground">
+                Paste any public{" "}
+                <span className="font-semibold text-foreground">X (Twitter)</span>{" "}
+                or{" "}
+                <span className="font-semibold text-foreground">LinkedIn</span>{" "}
+                post URL — we pull the author and text right now, no signup
+                needed. When you like what you see, save it to your library
+                with one click.
+              </p>
+            </div>
+
+            {/* Live paste-a-URL demo — anonymous, hits /api/tweet-preview,
+                swaps the static Sarah card for the user's imported
+                testimonial. */}
+            <div className="w-full max-w-sm md:min-w-[380px]">
+              <TweetPreviewDemo />
+            </div>
           </div>
         </div>
       </section>
@@ -289,42 +406,6 @@ export default function LandingPage() {
           <div className="mt-6 flex items-center justify-center">
             <div className="rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-xs font-medium text-primary">
               ↓ Both end at your Wall of Love — one URL, one embed, one library ↓
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Tweet-import callout — visual proof of the hero's "paste a tweet"
-          promise. Placed right after the hero (before the animated demo,
-          which shows the form path) so the reader gets the promised
-          paste-a-tweet demo first. */}
-      <section className="border-y bg-gradient-to-br from-blue-50/40 via-background to-purple-50/40 py-14">
-        <div className="mx-auto max-w-4xl px-4">
-          <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs font-medium">
-                <Zap className="h-3 w-3" />
-                Instant library
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                Have a tweet? Paste it right here.
-              </h2>
-              <p className="mt-3 text-base text-muted-foreground">
-                Paste any public{" "}
-                <span className="font-semibold text-foreground">X (Twitter)</span>{" "}
-                or{" "}
-                <span className="font-semibold text-foreground">LinkedIn</span>{" "}
-                post URL — we pull the author and text right now, no signup
-                needed. When you like what you see, save it to your library
-                with one click.
-              </p>
-            </div>
-
-            {/* Live paste-a-URL demo — anonymous, hits /api/tweet-preview,
-                swaps the static Sarah card for the user's imported
-                testimonial. The whole point of this section. */}
-            <div className="w-full max-w-sm md:min-w-[380px]">
-              <TweetPreviewDemo />
             </div>
           </div>
         </div>
