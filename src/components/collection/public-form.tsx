@@ -77,7 +77,12 @@ export default function PublicCollectionForm({
           // treats "" as an invalid email on the server otherwise.
           customerEmail: email.trim() || undefined,
           content: content.trim() || undefined,
-          rating: rating || null,
+          // Rating is `.optional()` in the Zod schema — that accepts
+          // undefined but NOT null. Sending null (when the user didn't
+          // pick stars) caused a "Validation failed" error on every
+          // submission that omitted a rating. Send undefined instead
+          // so the field is truly absent from the payload.
+          rating: rating || undefined,
           answers: jobTitle.trim() ? { jobTitle: jobTitle.trim() } : {},
         }),
       });
