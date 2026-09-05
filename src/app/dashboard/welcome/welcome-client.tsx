@@ -67,7 +67,6 @@ export function WelcomeClient({
   const [editName, setEditName] = useState("");
   const [editTitle, setEditTitle] = useState("");
   const [editRating, setEditRating] = useState<number>(5);
-  const [showFormShare, setShowFormShare] = useState(false);
   const [formCopied, setFormCopied] = useState(false);
   const [embedCopied, setEmbedCopied] = useState(false);
   // Intake mode — "url" is the primary path, "manual" reveals when the
@@ -899,57 +898,44 @@ export function WelcomeClient({
         )}
       </div>
 
-      {/* Secondary — share collection form. Collapsed by default; one
-          click reveals the URL. Kept as an "also" so users with zero
-          content still have a path forward. */}
+      {/* Secondary — share collection form. Always visible now (was
+          previously collapsed behind a "Also — share…" button which
+          most users never noticed). Sits below the paste-a-tweet
+          primary CTA so it's a clear "other path" without competing
+          for first-viewport attention. */}
       {defaultFormUrl && (
-        <div className="text-center">
-          {!showFormShare ? (
-            <button
-              type="button"
-              onClick={() => {
-                setShowFormShare(true);
-                track("welcome_form_share_opened", { source: "welcome_landing" });
-              }}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
-            >
-              Also — share a collection form with customers →
-            </button>
-          ) : (
-            <div className="rounded-2xl border bg-card p-5 text-left">
-              <p className="text-sm font-semibold">📮 Share your collection form</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Send this URL to your last 5 customers, drop it in an email,
-                or add it to a follow-up message. Submissions land in your
-                inbox as they come in.
-              </p>
-              {fullFormUrl && (
-                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                  <div className="min-w-0 flex-1 truncate rounded-md border bg-muted/60 px-3 py-2 font-mono text-xs">
-                    {fullFormUrl}
-                  </div>
-                  <Button
-                    onClick={copyForm}
-                    variant={formCopied ? "default" : "outline"}
-                    className="shrink-0"
-                  >
-                    {formCopied ? (
-                      <>
-                        <Check className="mr-2 h-4 w-4" /> Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="mr-2 h-4 w-4" /> Copy link
-                      </>
-                    )}
-                  </Button>
-                  <Button asChild variant="outline" className="shrink-0">
-                    <a href={fullFormUrl} target="_blank" rel="noopener noreferrer">
-                      Preview <ExternalLink className="ml-2 h-4 w-4" />
-                    </a>
-                  </Button>
-                </div>
-              )}
+        <div className="rounded-2xl border bg-card p-5 text-left">
+          <p className="text-sm font-semibold">📮 Share your collection form</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Send this URL to your last 5 customers, drop it in an email,
+            or add it to a follow-up message. Submissions land in your
+            inbox as they come in.
+          </p>
+          {fullFormUrl && (
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <div className="min-w-0 flex-1 truncate rounded-md border bg-muted/60 px-3 py-2 font-mono text-xs">
+                {fullFormUrl}
+              </div>
+              <Button
+                onClick={copyForm}
+                variant={formCopied ? "default" : "outline"}
+                className="shrink-0"
+              >
+                {formCopied ? (
+                  <>
+                    <Check className="mr-2 h-4 w-4" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="mr-2 h-4 w-4" /> Copy link
+                  </>
+                )}
+              </Button>
+              <Button asChild variant="outline" className="shrink-0">
+                <a href={fullFormUrl} target="_blank" rel="noopener noreferrer">
+                  Preview <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
             </div>
           )}
         </div>
