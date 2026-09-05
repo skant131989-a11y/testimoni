@@ -35,16 +35,21 @@ export default function PublicCollectionForm({
   const [error, setError] = useState("");
 
   // Fire once per page mount — anonymous funnel start.
-  // Kept privacy-safe: we send form/workspace metadata but never
-  // customer name/email/testimonial text. PostHog auto-generates a
-  // session id for the submitter; no cross-site identity is sent.
+  // Uses anonymous: true so PostHog does NOT attach the current
+  // logged-in user's identity even if the workspace owner is
+  // testing their own form in the same browser session. The event
+  // properties never include customer name/email/testimonial text.
   useEffect(() => {
-    track("form_viewed", {
-      form_id: formConfig.id,
-      workspace_name: formConfig.workspace.name,
-      allow_rating: formConfig.allowRating,
-      allow_video: formConfig.allowVideo,
-    });
+    track(
+      "form_viewed",
+      {
+        form_id: formConfig.id,
+        workspace_name: formConfig.workspace.name,
+        allow_rating: formConfig.allowRating,
+        allow_video: formConfig.allowVideo,
+      },
+      { anonymous: true },
+    );
   }, [formConfig.id, formConfig.workspace.name, formConfig.allowRating, formConfig.allowVideo]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -79,11 +84,15 @@ export default function PublicCollectionForm({
 
       if (!res.ok) {
         const data = await res.json();
-        track("form_submit_failed", {
-          form_id: formConfig.id,
-          workspace_name: formConfig.workspace.name,
-          error: data.error || "unknown",
-        });
+        track(
+          "form_submit_failed",
+          {
+            form_id: formConfig.id,
+            workspace_name: formConfig.workspace.name,
+            error: data.error || "unknown",
+          },
+          { anonymous: true },
+        );
         setError(data.error || "Something went wrong");
         return;
       }
@@ -92,23 +101,31 @@ export default function PublicCollectionForm({
       // let us compute what got filled without shipping PII: only
       // booleans for text/rating/email/title presence, plus the
       // content length bucket (not the content itself).
-      track("form_submitted", {
-        form_id: formConfig.id,
-        workspace_name: formConfig.workspace.name,
-        has_text: !!content.trim(),
-        has_rating: !!rating,
-        has_email: !!email.trim(),
-        has_title: !!jobTitle.trim(),
-        rating: rating || undefined,
-        text_length_bucket: bucketTextLength(content.trim().length),
-      });
+      track(
+        "form_submitted",
+        {
+          form_id: formConfig.id,
+          workspace_name: formConfig.workspace.name,
+          has_text: !!content.trim(),
+          has_rating: !!rating,
+          has_email: !!email.trim(),
+          has_title: !!jobTitle.trim(),
+          rating: rating || undefined,
+          text_length_bucket: bucketTextLength(content.trim().length),
+        },
+        { anonymous: true },
+      );
       setSubmitted(true);
     } catch {
-      track("form_submit_failed", {
-        form_id: formConfig.id,
-        workspace_name: formConfig.workspace.name,
-        error: "network",
-      });
+      track(
+        "form_submit_failed",
+        {
+          form_id: formConfig.id,
+          workspace_name: formConfig.workspace.name,
+          error: "network",
+        },
+        { anonymous: true },
+      );
       setError("Failed to submit. Please try again.");
     } finally {
       setSubmitting(false);

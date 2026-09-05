@@ -8,6 +8,7 @@ import { getEffectivePlan } from "@/lib/plan";
 import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { VideoTestimonialCard } from "@/components/video-testimonial-card";
+import { PageEngagement } from "@/components/page-engagement";
 
 interface WallPageProps {
   params: Promise<{ widgetId: string }>;
@@ -226,6 +227,10 @@ export default async function HostedWallPage({ params }: WallPageProps) {
           </div>
         </footer>
       )}
+      {/* Anonymous engagement tracking — never attributes wall
+          views to the logged-in user (workspace owners visit their
+          own walls a lot; that would inflate anonymous-view metrics). */}
+      <PageEngagement surface="wall" anonymous />
     </div>
   );
 }

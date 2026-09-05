@@ -106,7 +106,7 @@ const TESTIMONIALS: {
 export default function DemoWallPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/40 via-background to-background">
-      <PageEngagement surface="wall_demo" />
+      <PageEngagement surface="wall_demo" anonymous />
       <WallDemoFloatingCta />
       {/* Header — mirrors the landing-page header so /w/demo doesn't feel
           like a stripped-down variant. Same logo size, same nav items,

@@ -16,8 +16,19 @@ import { track } from "@/lib/analytics";
  *   usePageEngagement({ surface: "home" });
  *
  * Passive listeners so we never block scroll performance.
+ *
+ * Set `anonymous: true` for PUBLIC pages (Wall of Love, collect
+ * forms, sample pages) so the events never carry the current
+ * logged-in user's identity — even if the workspace owner is
+ * testing their own public page in the same browser session.
  */
-export function usePageEngagement({ surface }: { surface: string }) {
+export function usePageEngagement({
+  surface,
+  anonymous = false,
+}: {
+  surface: string;
+  anonymous?: boolean;
+}) {
   // Track which thresholds already fired so we don't spam.
   const firedScroll = useRef<Set<number>>(new Set());
   const firedTime = useRef<Set<number>>(new Set());
@@ -25,6 +36,7 @@ export function usePageEngagement({ surface }: { surface: string }) {
   useEffect(() => {
     const SCROLL_THRESHOLDS = [25, 50, 75, 100];
     const TIME_THRESHOLDS = [10, 30, 60];
+    const trackOpts = anonymous ? { anonymous: true } : undefined;
 
     function checkScroll() {
       const doc = document.documentElement;
@@ -37,7 +49,7 @@ export function usePageEngagement({ surface }: { surface: string }) {
       for (const t of SCROLL_THRESHOLDS) {
         if (pct >= t && !firedScroll.current.has(t)) {
           firedScroll.current.add(t);
-          track("scroll_depth", { pct: t, surface });
+          track("scroll_depth", { pct: t, surface }, trackOpts);
         }
       }
     }
@@ -51,7 +63,7 @@ export function usePageEngagement({ surface }: { surface: string }) {
         setTimeout(() => {
           if (document.visibilityState === "visible") {
             firedTime.current.add(seconds);
-            track("time_on_page", { seconds, surface });
+            track("time_on_page", { seconds, surface }, trackOpts);
           }
         }, seconds * 1000),
     );
@@ -65,5 +77,5 @@ export function usePageEngagement({ surface }: { surface: string }) {
       window.removeEventListener("scroll", checkScroll);
       timeouts.forEach(clearTimeout);
     };
-  }, [surface]);
+  }, [surface, anonymous]);
 }

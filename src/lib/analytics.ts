@@ -110,23 +110,63 @@ export function initAnalytics() {
  * queuing for its 30-second batch, so the event isn't dropped when
  * the page unloads. Non-instant tracks (form_published, logout,
  * signup_completed on a landed page) can safely batch.
+ *
+ * Pass `anonymous: true` for events fired on PUBLIC pages that
+ * should never be attributed to the current logged-in user (e.g.
+ * anonymous form_viewed on a workspace's public collect form, or
+ * page_view on a shared /w/[widgetId] wall). PostHog otherwise
+ * attaches the logged-in user's identity to every event fired from
+ * that browser session, which pollutes anonymous-visitor funnels
+ * when the workspace owner tests their own public pages. We attach
+ * a session-scoped random distinct_id (one per browser tab per
+ * public surface) instead, and keep the logged-in identity intact
+ * for regular in-app events.
  */
 export function track(
   event: string,
   props?: Record<string, unknown>,
-  options?: { instant?: boolean },
+  options?: { instant?: boolean; anonymous?: boolean },
 ) {
   if (DEBUG) console.log(`[analytics] track(${event}) ready=${ready}`, props);
   if (!ready) return;
   try {
-    if (options?.instant) {
-      posthog.capture(event, props, { send_instantly: true });
-    } else {
-      posthog.capture(event, props);
+    const captureOptions: Record<string, unknown> = {};
+    if (options?.instant) captureOptions.send_instantly = true;
+    if (options?.anonymous) {
+      // Force this event to leave the logged-in identity out.
+      // $process_person_profile: false tells PostHog to skip the
+      // user profile merge for this specific event.
+      captureOptions.$process_person_profile = false;
+      // Anonymous distinct_id scoped to this tab session so
+      // form_viewed and form_submitted from the same visitor group
+      // together for funnel analysis.
+      captureOptions.distinct_id = getAnonymousDistinctId();
     }
+    posthog.capture(event, props, captureOptions);
   } catch (e) {
     if (DEBUG) console.warn("[analytics] capture threw", e);
     // Swallow — never let analytics break the app.
+  }
+}
+
+/**
+ * Per-tab anonymous distinct_id. Kept in sessionStorage so events
+ * within one tab's lifetime group together (form_viewed and
+ * form_submitted from the same visitor share a distinct_id) but
+ * don't leak across tabs or persist after the tab is closed.
+ */
+function getAnonymousDistinctId(): string {
+  if (typeof window === "undefined") return `anon-${Date.now()}`;
+  try {
+    const key = "testimoni_anon_distinct_id";
+    let id = sessionStorage.getItem(key);
+    if (!id) {
+      id = `anon-${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
+      sessionStorage.setItem(key, id);
+    }
+    return id;
+  } catch {
+    return `anon-${Date.now()}`;
   }
 }
 
