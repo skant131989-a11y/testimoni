@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
+import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
 
 const CHANNELS = [
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
@@ -302,25 +303,17 @@ export function AskTemplatesClient() {
         )}
 
         {/* Signup upsell */}
-        <div className="mt-16 rounded-2xl border-2 border-primary/30 bg-primary/5 p-8">
-          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <h2 className="text-2xl font-bold">
-                Sent the ask? Get a real form URL to include.
-              </h2>
-              <p className="mt-2 text-muted-foreground">
-                Testimoni gives you a real form URL that customers can fill in
-                30 seconds. Responses land in your inbox for one-click approval,
-                then live on your Wall of Love.
-              </p>
-            </div>
-            <Link href="/signup?tool=ask-templates">
-              <Button size="lg" className="gap-2">
-                Start free <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <ToolSignupUpsell
+          tool="ask-templates"
+          headline="Sent the ask? Get a real form URL to include."
+          description={
+            <>
+              Testimoni gives you a real form URL that customers can fill in
+              30 seconds. Responses land in your inbox for one-click approval,
+              then live on your Wall of Love.
+            </>
+          }
+        />
       </main>
 
       <footer className="border-t py-8">

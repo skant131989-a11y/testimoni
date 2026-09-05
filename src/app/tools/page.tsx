@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Sparkles, Image as ImageIcon, Search, PenLine, ArrowRight, MessageCircle, Linkedin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolsHeader } from "@/components/tools-header";
+import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
   title: "Free testimonial tools — Testimoni",
@@ -92,8 +93,10 @@ export default function ToolsPage() {
         {/* Tools grid — 3 across on desktop, 2 rows of 3 for 6 tools */}
         <div className="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           {TOOLS.map((t) => (
-            <Link
+            <TrackedLink
               key={t.href}
+              cta={`tools_index_${t.href.split("/").pop()}`}
+              surface="tools_index"
               href={t.href}
               className="group rounded-2xl border-2 border-primary/10 bg-card p-6 shadow-sm transition hover:border-primary/40 hover:shadow-md"
             >
@@ -107,7 +110,7 @@ export default function ToolsPage() {
               <p className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:underline">
                 {t.cta}
               </p>
-            </Link>
+            </TrackedLink>
           ))}
         </div>
 
@@ -124,11 +127,11 @@ export default function ToolsPage() {
                 code. Free plan includes 10 testimonials, 1 form, hosted wall.
               </p>
             </div>
-            <Link href="/signup">
+            <TrackedLink cta="tools_index_signup" surface="tools_index" href="/signup">
               <Button size="lg" className="gap-2">
                 Start free <ArrowRight className="h-4 w-4" />
               </Button>
-            </Link>
+            </TrackedLink>
           </div>
         </div>
       </main>

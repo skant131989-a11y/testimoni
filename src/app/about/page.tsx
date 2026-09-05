@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ArrowRight, Target, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
+import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
   title: "About Testimoni — Turn happy customers into social proof",
@@ -101,12 +102,12 @@ export default function AboutPage() {
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Button asChild>
-                <Link href="/signup">
+                <TrackedLink cta="about_bottom_signup" surface="about" href="/signup">
                   Get started free <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                </TrackedLink>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/founders">Meet the founder</Link>
+                <TrackedLink cta="about_meet_founder" surface="about" href="/founders">Meet the founder</TrackedLink>
               </Button>
             </div>
           </section>

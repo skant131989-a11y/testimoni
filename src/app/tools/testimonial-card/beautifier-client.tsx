@@ -13,6 +13,7 @@ import { LetterAvatar } from "@/components/letter-avatar";
 import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
+import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
 
 /**
  * Public, no-signup testimonial card generator.
@@ -380,23 +381,18 @@ export function BeautifierClient() {
         </div>
 
         {/* Signup upsell */}
-        <div className="mx-auto mt-16 max-w-3xl rounded-2xl border-2 border-primary/30 bg-primary/5 p-8">
-          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                <Sparkles className="h-3 w-3" /> Free signup unlocks
-              </div>
-              <h2 className="text-2xl font-bold">Want a whole Wall of Love, not just one card?</h2>
-              <p className="mt-2 text-muted-foreground">
+        <div className="mx-auto max-w-3xl">
+          <ToolSignupUpsell
+            tool="testimonial-card"
+            badge="Free signup unlocks"
+            headline="Want a whole Wall of Love, not just one card?"
+            ctaLabel="Unlock free"
+            description={
+              <>
                 Signup unlocks: <span className="font-semibold text-foreground">no watermark</span>, <span className="font-semibold text-foreground">2 Pro themes</span>, and the full Testimoni product — collect, host, and embed testimonials on your site. Free plan includes 10 testimonials.
-              </p>
-            </div>
-            <Link href="/signup?tool=testimonial-card">
-              <Button size="lg" className="gap-2">
-                Unlock free <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+              </>
+            }
+          />
         </div>
       </main>
 

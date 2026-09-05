@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Check, X, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
+import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
   title: "Testimonial.to alternative — Paste a Tweet, Free Wall of Love",
@@ -187,12 +188,12 @@ export default function TestimonialToVsPage() {
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Button size="lg" asChild>
-                <Link href="/signup">
+                <TrackedLink cta="vs_ttto_bottom_signup" surface="vs_testimonial_to" href="/signup">
                   Get started free <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                </TrackedLink>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/w/demo">See a Sample Wall</Link>
+                <TrackedLink cta="vs_ttto_bottom_wall" surface="vs_testimonial_to" href="/w/demo">See a Sample Wall</TrackedLink>
               </Button>
             </div>
           </div>

@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
+import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
 
 /**
  * Public testimonial writer tool. Calls /api/tools/generate-testimonial
@@ -356,25 +357,17 @@ export function TestimonialWriterClient() {
         )}
 
         {/* Signup upsell */}
-        <div className="mt-16 rounded-2xl border-2 border-primary/30 bg-primary/5 p-8">
-          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <h2 className="text-2xl font-bold">
-                Collecting testimonials from customers?
-              </h2>
-              <p className="mt-2 text-muted-foreground">
-                Testimoni sends a form your customers can fill in 30 seconds —
-                no login. Approve, and it&apos;s on your Wall of Love with one
-                click. Free plan includes 10 testimonials.
-              </p>
-            </div>
-            <Link href="/signup">
-              <Button size="lg" className="gap-2">
-                Start free <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <ToolSignupUpsell
+          tool="writer"
+          headline="Collecting testimonials from customers?"
+          description={
+            <>
+              Testimoni sends a form your customers can fill in 30 seconds —
+              no login. Approve, and it&apos;s on your Wall of Love with one
+              click. Free plan includes 10 testimonials.
+            </>
+          }
+        />
       </main>
 
       <footer className="border-t py-8">

@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
+import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
 
 /**
  * Star Rating Badge generator.
@@ -256,27 +257,19 @@ export function StarBadgeClient() {
         </div>
 
         {/* Signup upsell */}
-        <div className="mx-auto mt-16 max-w-3xl rounded-2xl border-2 border-primary/30 bg-primary/5 p-8">
-          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                <Sparkles className="h-3 w-3" /> Signed up? Get it live.
-              </div>
-              <h2 className="text-2xl font-bold">
-                Show your real average — auto-updating.
-              </h2>
-              <p className="mt-2 text-muted-foreground">
+        <div className="mx-auto max-w-3xl">
+          <ToolSignupUpsell
+            tool="star-badge"
+            badge="Signed up? Get it live."
+            headline="Show your real average — auto-updating."
+            description={
+              <>
                 With a free Testimoni account, this badge pulls your actual
                 testimonial rating and count automatically. Collect testimonials,
                 and the badge updates itself.
-              </p>
-            </div>
-            <Link href="/signup?tool=star-badge">
-              <Button size="lg" className="gap-2">
-                Start free <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+              </>
+            }
+          />
         </div>
       </main>
 

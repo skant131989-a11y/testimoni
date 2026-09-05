@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Check, X, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
+import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
   title: "Senja alternative — Paste a Tweet, Free Wall of Love",
@@ -192,12 +193,12 @@ export default function SenjaVsPage() {
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Button size="lg" asChild>
-                <Link href="/signup">
+                <TrackedLink cta="vs_senja_bottom_signup" surface="vs_senja" href="/signup">
                   Get started free <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                </TrackedLink>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/w/demo">See a Sample Wall</Link>
+                <TrackedLink cta="vs_senja_bottom_wall" surface="vs_senja" href="/w/demo">See a Sample Wall</TrackedLink>
               </Button>
             </div>
           </div>

@@ -243,6 +243,7 @@ export default function DemoClient() {
       return;
     }
     setSignupLoading(true);
+    track("signup_started", { method: "email", source: "demo_keep" });
     try {
       const supabase = createClient();
       const { error: authError } = await supabase.auth.signUp({
@@ -253,14 +254,17 @@ export default function DemoClient() {
         },
       });
       if (authError) {
+        track("signup_failed", { method: "email", source: "demo_keep", error: authError.message });
         setSignupError(authError.message);
         return;
       }
+      track("signup_completed", { method: "email", source: "demo_keep" });
       // Whether Supabase issued a session or is emailing a verification
       // link, land the user on /dashboard/welcome — middleware bounces
       // to /login if verification is required and they aren't confirmed yet.
       window.location.assign("/dashboard/welcome?src=demo");
     } catch {
+      track("signup_failed", { method: "email", source: "demo_keep", error: "unknown" });
       setSignupError("Something went wrong. Try again or use the signup page.");
     } finally {
       setSignupLoading(false);
@@ -270,6 +274,7 @@ export default function DemoClient() {
   async function handleInlineGoogle() {
     setSignupError(null);
     setGoogleLoading(true);
+    track("signup_started", { method: "google", source: "demo_keep" });
     try {
       const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithOAuth({
@@ -279,10 +284,15 @@ export default function DemoClient() {
         },
       });
       if (authError) {
+        track("signup_failed", { method: "google", source: "demo_keep", error: authError.message });
         setSignupError(authError.message);
         setGoogleLoading(false);
       }
+      // signup_completed fires from the /callback route after the OAuth
+      // roundtrip. Not fired here because navigateWithOAuth blows the
+      // tab away before this function returns.
     } catch {
+      track("signup_failed", { method: "google", source: "demo_keep", error: "unknown" });
       setSignupError("Something went wrong. Try again or use the signup page.");
       setGoogleLoading(false);
     }

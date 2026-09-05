@@ -61,9 +61,9 @@ export default async function NichePage({ params }: PageProps) {
             />
             <span className="text-xl font-bold">Testimoni</span>
           </Link>
-          <Link href="/signup">
+          <TrackedLink cta="niche_header_signup" surface={`for_${niche.slug}`} href="/signup">
             <Button size="sm">Start free</Button>
-          </Link>
+          </TrackedLink>
         </div>
       </header>
 

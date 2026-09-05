@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight, BookOpen, Clock } from "lucide-react";
 import { PublicNav } from "@/components/layout/public-nav";
+import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
   title: "Blog — Testimoni",
@@ -88,12 +89,14 @@ export default function BlogIndexPage() {
             <p className="mt-2 text-muted-foreground">
               Free forever plan. Set up in 30 seconds. No credit card.
             </p>
-            <Link
+            <TrackedLink
+              cta="blog_index_signup"
+              surface="blog_index"
               href="/signup"
               className="mt-6 inline-flex items-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Get started free <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
+            </TrackedLink>
           </div>
         </div>
       </main>
