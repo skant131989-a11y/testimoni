@@ -308,72 +308,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Free tools strip — surfaces /tools/* from the home page.
-          Slim, single-row so it doesn't compete with the Ask/Collect/
-          Publish or the paste-a-tweet demo below. */}
-      <section className="border-b bg-background py-6">
-        <div className="mx-auto max-w-5xl px-4">
-          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
-            <p className="text-sm text-muted-foreground">
-              <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-primary">
-                Also free
-              </span>
-              — 6 tools no signup required:
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <TrackedLink
-                cta="tools_strip_card"
-                surface="home"
-                href="/tools/testimonial-card"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                🖼️ Card generator
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_finder"
-                surface="home"
-                href="/tools/praise-tweet-finder"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                🔎 Praise tweet finder
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_writer"
-                surface="home"
-                href="/tools/testimonial-writer"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                ✍️ Testimonial writer
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_ask"
-                surface="home"
-                href="/tools/ask-templates"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                💬 Ask templates
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_linkedin"
-                surface="home"
-                href="/tools/linkedin-recommendation"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                💼 LinkedIn recommendation
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_badge"
-                surface="home"
-                href="/tools/star-badge"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                ⭐ Star badge
-              </TrackedLink>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Path B (form) callout — sits AFTER the paste-a-tweet demo
           above, so we frame it as "here's the second path" rather
           than "two ways to pick from" (redundant when the visitor has
@@ -673,6 +607,76 @@ export default function LandingPage() {
               See a live Wall of Love →
             </TrackedLink>
           </p>
+        </div>
+      </section>
+
+      {/* Free tools strip — moved down from just after paste-a-tweet
+          to here (after all four product demos: paste-a-tweet, form
+          path, video pitch, example wall). Reason: the tools compete
+          with the main product story if surfaced too early; placing
+          them after the visitor has SEEN what the product does frames
+          them as a nice-to-have bonus rather than a distraction.
+          Still above Features/Pricing so scanners find them. */}
+      <section className="border-b bg-background py-6">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
+            <p className="text-sm text-muted-foreground">
+              <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-primary">
+                Also free
+              </span>
+              — 6 tools no signup required:
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <TrackedLink
+                cta="tools_strip_card"
+                surface="home"
+                href="/tools/testimonial-card"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                🖼️ Card generator
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_finder"
+                surface="home"
+                href="/tools/praise-tweet-finder"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                🔎 Praise tweet finder
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_writer"
+                surface="home"
+                href="/tools/testimonial-writer"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                ✍️ Testimonial writer
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_ask"
+                surface="home"
+                href="/tools/ask-templates"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                💬 Ask templates
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_linkedin"
+                surface="home"
+                href="/tools/linkedin-recommendation"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                💼 LinkedIn recommendation
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_badge"
+                surface="home"
+                href="/tools/star-badge"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                ⭐ Star badge
+              </TrackedLink>
+            </div>
+          </div>
         </div>
       </section>
 
