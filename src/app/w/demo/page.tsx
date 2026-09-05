@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
+import { HeroScrollLink } from "@/components/hero-scroll-link";
 import { DemoVideo } from "@/components/demo-video";
 import { PageEngagement } from "@/components/page-engagement";
 import { WallDemoFloatingCta } from "@/components/wall-demo-floating-cta";
@@ -152,18 +153,19 @@ export default function DemoWallPage() {
 
       {/* Sample banner — now the one clear "this is a sample" signal on
           the page. Also carries the primary conversion CTA so early
-          bouncers see it above the fold. */}
+          bouncers see it above the fold. Uses HeroScrollLink so
+          repeated clicks always re-scroll (no sticky URL hash). */}
       <div className="bg-primary/10 py-2 text-center text-xs font-medium text-primary">
         <Sparkles className="mr-1 inline-block h-3 w-3" />
         Sample wall —{" "}
-        <TrackedLink
+        <HeroScrollLink
+          targetId="signup"
           cta="wall_demo_banner_try_it"
           surface="wall_demo"
-          href="#signup"
           className="underline underline-offset-2"
         >
-          Yours free in 30 seconds →
-        </TrackedLink>
+          Yours in 30s — free →
+        </HeroScrollLink>
       </div>
 
       {/* Hero */}
@@ -183,6 +185,22 @@ export default function DemoWallPage() {
 
       {/* Testimonials grid */}
       <main className="mx-auto max-w-6xl px-4 pb-16">
+        {/* "This could be yours" bridge — sits above the wall grid so
+            the visitor immediately reads the sample as a mirror of
+            their future workspace, not just an anonymous demo. */}
+        <div className="mb-6 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 px-4 py-3 text-center text-sm">
+          <p className="text-foreground">
+            <span className="font-semibold">Your wall renders the same way with your testimonials.</span>{" "}
+            <span className="text-muted-foreground">
+              Free hosted URL at{" "}
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground">
+                testimoni.io/w/yourname
+              </code>
+              {" "}+ one-line embed for your site.
+            </span>
+          </p>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {TESTIMONIALS.map((t) => (
             <article

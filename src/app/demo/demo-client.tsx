@@ -1120,10 +1120,16 @@ export default function DemoClient() {
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </TrackedLink>
-            <TrackedLink cta="demo_bottom_wall_demo" surface="demo" href="/w/demo">
-              <Button size="lg" variant="outline">
-                See a Sample Wall
-              </Button>
+            {/* Escape hatch — secondary path stays a quiet text link
+                rather than a competing loud button so the primary
+                CTA reads as the one action. */}
+            <TrackedLink
+              cta="demo_bottom_wall_demo"
+              surface="demo"
+              href="/w/demo"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              or see a sample wall →
             </TrackedLink>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
