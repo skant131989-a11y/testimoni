@@ -4,6 +4,11 @@ import { getAuthContext } from "@/lib/auth";
 import { createSubmissionSchema } from "@/lib/validations/submission";
 import { generateSlug } from "@/lib/utils";
 import { getEffectiveLimits } from "@/lib/plan";
+import { sendEmail } from "@/lib/emails/send";
+import {
+  submissionNotifyEmailHtml,
+  submissionNotifyEmailSubject,
+} from "@/lib/emails/submission-notify";
 
 export async function GET(request: Request) {
   const auth = await getAuthContext(request);
@@ -154,9 +159,27 @@ export async function POST(request: Request) {
 
   const { formId, ...submissionData } = parsed.data;
 
-  // Verify form exists and is active
+  // Verify form exists and is active. Also pull the workspace's
+  // primary owner so we can email them when a submission arrives —
+  // one query, no extra round-trips on the hot path.
   const form = await prisma.collectionForm.findUnique({
     where: { id: formId },
+    include: {
+      workspace: {
+        select: {
+          name: true,
+          slug: true,
+          members: {
+            where: { role: "OWNER" },
+            orderBy: { createdAt: "asc" },
+            take: 1,
+            select: {
+              user: { select: { name: true, email: true } },
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!form) {
@@ -168,6 +191,44 @@ export async function POST(request: Request) {
       { error: "This form is no longer accepting submissions" },
       { status: 403 }
     );
+  }
+
+  /**
+   * Fire-and-forget email notification to the workspace owner.
+   *
+   * We don't await it — the submission response should return as
+   * fast as possible for the visitor. sendEmail() has its own
+   * try/catch so a Resend outage never blocks or errors the API.
+   *
+   * If no owner email is available (edge case) or Resend isn't
+   * configured (RESEND_API_KEY missing in staging), sendEmail
+   * silently no-ops. The DB submission still lands regardless.
+   */
+  function fireOwnerNotification() {
+    const owner = form?.workspace?.members?.[0]?.user;
+    if (!owner?.email) return;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
+    const inboxUrl = `${appUrl}/dashboard/inbox`;
+    const html = submissionNotifyEmailHtml({
+      ownerName: owner.name || "there",
+      workspaceName: form.workspace.name,
+      formName: form.headline || form.slug,
+      customerName: submissionData.customerName,
+      customerEmail: submissionData.customerEmail,
+      content: submissionData.content,
+      rating: submissionData.rating ?? null,
+      inboxUrl,
+    });
+    // Fire without await
+    sendEmail({
+      to: owner.email,
+      subject: submissionNotifyEmailSubject(
+        submissionData.customerName,
+        form.workspace.name,
+      ),
+      html,
+      replyTo: submissionData.customerEmail ?? undefined,
+    }).catch(() => {});
   }
 
   // Auto-approve path — insert directly into the Testimonial library
@@ -216,6 +277,9 @@ export async function POST(request: Request) {
       { status: 201 }
     );
     response.headers.set("Access-Control-Allow-Origin", "*");
+    // Auto-approve path — still notify the owner. Owner may want to
+    // know a submission arrived even if it's already live on the wall.
+    fireOwnerNotification();
     return response;
   }
 
@@ -238,6 +302,9 @@ export async function POST(request: Request) {
     { status: 201 }
   );
   response.headers.set("Access-Control-Allow-Origin", "*");
+  // Manual-approval path — this is the primary case owners want a
+  // notification for. Fires fire-and-forget so response TTFB is unaffected.
+  fireOwnerNotification();
   return response;
 }
 
