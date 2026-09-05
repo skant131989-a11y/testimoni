@@ -374,40 +374,42 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How it works — two parallel intake paths meeting at the same
-          wall. Placed after the hero (which sells the paste-a-tweet
-          promise) and before the interactive demo. Shows tweet-import
-          AND form-collection as equal citizens so users without praise
-          tweets don't bounce thinking "not for me". */}
+      {/* Path B (form) callout — sits AFTER the paste-a-tweet demo
+          above, so we frame it as "here's the second path" rather
+          than "two ways to pick from" (redundant when the visitor has
+          already seen paste-a-tweet live). Path A gets a compact
+          recap; Path B gets the fuller treatment. */}
       <section className="border-y bg-background py-12">
         <div className="mx-auto max-w-5xl px-4">
           <div className="mb-8 text-center">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-              How it works
+              The other path
             </p>
             <h2 className="mt-2 text-2xl font-bold tracking-tight md:text-3xl">
-              Two ways to fill your wall — pick whichever you have
+              No praise tweets yet? Send a form.
             </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
+              You just tried paste-a-tweet. If you don&apos;t have public praise
+              yet, this is the second way — share a form with your customers,
+              approve their responses, embed the wall.
+            </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Path A — paste-a-tweet (the wedge) */}
+            {/* Path A — recap. Compact card so paste-a-tweet gets
+                credit as a real path without pretending the visitor
+                hasn't seen it. */}
             <div className="rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-6">
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                Path A · Fastest
+                ✓ Path A — you just saw this
               </div>
-              <h3 className="text-lg font-semibold">Have praise tweets or LinkedIn posts?</h3>
+              <h3 className="text-lg font-semibold">Paste-a-tweet</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Turn any public post into a testimonial in 30 seconds — no screenshots.
+                Any public X or LinkedIn post URL → live testimonial in 30 seconds. No screenshots, no signup to preview.
               </p>
-              <ol className="mt-5 space-y-3">
-                <PathStep number={1}>Find a public X or LinkedIn post praising your work</PathStep>
-                <PathStep number={2}>Paste the URL — we pull author, photo, and text</PathStep>
-                <PathStep number={3}>Approve — it&apos;s live on your wall</PathStep>
-              </ol>
             </div>
 
-            {/* Path B — collect via form */}
+            {/* Path B — collect via form (the new information here) */}
             <div className="rounded-2xl border bg-card p-6">
               <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Path B · For fresh ones
