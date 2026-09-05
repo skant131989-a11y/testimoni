@@ -907,9 +907,8 @@ export function WelcomeClient({
         <div className="rounded-2xl border bg-card p-5 text-left">
           <p className="text-sm font-semibold">📮 Share your collection form</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Send this URL to your last 5 customers, drop it in an email,
-            or add it to a follow-up message. Submissions land in your
-            inbox as they come in.
+            Send this URL to your customers — drop it in an email, DM, or
+            follow-up message. Submissions land in your inbox as they come in.
           </p>
           {fullFormUrl && (
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
