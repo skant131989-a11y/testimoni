@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sanitizeImportedText } from "@/lib/sanitize-imported-text";
+import { fetchTweetViaSyndication } from "@/lib/twitter-syndication";
 
 /**
  * Public read-only tweet/LinkedIn preview endpoint. Used by the
@@ -51,6 +52,21 @@ function stripHtml(html: string): string {
 }
 
 async function fetchTwitter(url: string): Promise<PreviewResult | null> {
+  // Primary: syndication API (cleaner text + author metadata).
+  const syndicated = await fetchTweetViaSyndication(url);
+  if (syndicated && syndicated.content) {
+    return {
+      content: syndicated.truncated
+        ? `${syndicated.content}…`
+        : syndicated.content,
+      customerName: syndicated.authorName,
+      customerUrl: syndicated.authorProfileUrl,
+      source: "TWITTER",
+      sourceUrl: url,
+    };
+  }
+
+  // Fallback: oEmbed.
   const oembed = `https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&omit_script=1&hide_thread=1`;
   try {
     const res = await fetch(oembed, { headers: { Accept: "application/json" } });
@@ -62,7 +78,8 @@ async function fetchTwitter(url: string): Promise<PreviewResult | null> {
     };
     const html = data.html || "";
     const paragraphMatch = html.match(/<p[^>]*>([\s\S]*?)<\/p>/);
-    const content = paragraphMatch ? stripHtml(paragraphMatch[1]) : stripHtml(html);
+    const rawContent = paragraphMatch ? stripHtml(paragraphMatch[1]) : stripHtml(html);
+    const content = sanitizeImportedText(rawContent);
     if (!content) return null;
     return {
       content,

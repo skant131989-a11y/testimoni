@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { getEffectiveLimits } from "@/lib/plan";
 import { sanitizeImportedText } from "@/lib/sanitize-imported-text";
+import { fetchTweetViaSyndication } from "@/lib/twitter-syndication";
 
 interface ImportResult {
   content: string;
@@ -46,7 +47,29 @@ function stripHtml(html: string): string {
 }
 
 async function fetchTwitter(url: string): Promise<ImportResult | null> {
-  // Twitter's public oEmbed endpoint — no auth needed, works for x.com URLs too.
+  // Primary: Twitter's public syndication endpoint. Returns the tweet's
+  // canonical text (no HTML wrapping, no oEmbed-appended "…" on
+  // full-length tweets) plus author metadata. Falls back to oEmbed if
+  // it 404s or rate-limits — mostly a safety net for URL patterns
+  // syndication rejects.
+  const syndicated = await fetchTweetViaSyndication(url);
+  if (syndicated && syndicated.content) {
+    return {
+      // For X-Premium note_tweets (long tweets) the syndication API
+      // returns only the visible portion — append "…" so readers know
+      // there is more on X.
+      content: syndicated.truncated
+        ? `${syndicated.content}…`
+        : syndicated.content,
+      customerName: syndicated.authorName,
+      customerAvatar: syndicated.authorAvatarUrl,
+      customerUrl: syndicated.authorProfileUrl,
+      source: "TWITTER",
+      sourceUrl: url,
+    };
+  }
+
+  // Fallback: Twitter's public oEmbed endpoint.
   const oembed = `https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&omit_script=1&hide_thread=1`;
   try {
     const res = await fetch(oembed, { headers: { Accept: "application/json" } });

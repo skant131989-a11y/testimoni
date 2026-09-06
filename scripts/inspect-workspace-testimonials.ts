@@ -24,7 +24,7 @@ async function main() {
   for (const t of testimonials) {
     console.log(`--- ${t.id}  [${t.source}]  ${t.customerName}`);
     console.log(`  sourceUrl: ${t.sourceUrl}`);
-    console.log(`  chars: ${t.content.length}`);
+    console.log(`  chars: ${(t.content ?? "").length}`);
     console.log(`  DB content: ${JSON.stringify(t.content)}`);
 
     // If it's a tweet, re-fetch the oembed to compare
