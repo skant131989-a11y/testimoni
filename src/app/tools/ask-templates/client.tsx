@@ -22,6 +22,7 @@ import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
 import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
+import { EmailMeThis } from "@/components/email-me-this";
 
 const CHANNELS = [
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
@@ -299,6 +300,20 @@ export function AskTemplatesClient() {
                 </Button>
               </div>
             ))}
+            {/* Email capture — send all 3 messages to their inbox
+                so they can copy from wherever they normally message
+                customers, and drip nurture toward signup. */}
+            <div className="mt-2 flex justify-center">
+              <EmailMeThis
+                tool="ask-templates"
+                size="default"
+                getContent={() =>
+                  variants
+                    ? variants.map((v) => `${v.angle}:\n${v.body}`).join("\n\n---\n\n")
+                    : ""
+                }
+              />
+            </div>
           </div>
         )}
 

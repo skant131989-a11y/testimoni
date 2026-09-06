@@ -18,6 +18,7 @@ import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
 import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
+import { EmailMeThis } from "@/components/email-me-this";
 import { buildBadgeSvg, BADGE_THEMES, BADGE_SIZES, type BadgeStyle, type BadgeThemeId, type BadgeSizeId } from "@/lib/badge-svg";
 
 /**
@@ -214,14 +215,36 @@ export function StarBadgeClient() {
               </div>
             </div>
 
+            {/* Two-button row: Download SVG (quiet outline) + Email
+                embed code (prominent primary). Email leads because it
+                captures the visitor. Copy-embed drops to a quiet
+                secondary link below since most users want the file or
+                the email, not raw HTML paste. */}
             <div className="space-y-2">
-              <Button onClick={handleDownload} size="lg" className="w-full gap-2">
-                <Download className="h-4 w-4" /> Download SVG
-              </Button>
-              <Button onClick={handleCopyEmbed} variant="outline" size="lg" className="w-full gap-2">
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Copied" : "Copy embed code"}
-              </Button>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button
+                  onClick={handleDownload}
+                  variant="outline"
+                  size="lg"
+                  className="min-w-0 flex-1 gap-2"
+                >
+                  <Download className="h-4 w-4" /> Download SVG
+                </Button>
+                <EmailMeThis
+                  tool="star-badge"
+                  size="lg"
+                  className="flex-1"
+                  getContent={() => embedSnippet}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyEmbed}
+                className="inline-flex w-full items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:underline"
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? "Embed code copied" : "or copy the embed code"}
+              </button>
             </div>
           </div>
 

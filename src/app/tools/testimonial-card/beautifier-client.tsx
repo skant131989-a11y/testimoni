@@ -14,6 +14,7 @@ import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
 import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
+import { EmailMeThis } from "@/components/email-me-this";
 
 /**
  * Public, no-signup testimonial card generator.
@@ -282,29 +283,53 @@ export function BeautifierClient() {
               </div>
             )}
 
-            <div className="flex gap-2">
-              <Button onClick={handleDownload} disabled={downloading || !quote.trim() || !name.trim()} size="lg" className="flex-1 gap-2">
+            {/* Two-button row: Download (quiet outline) + Email
+                (prominent primary purple). Email leads the eye because
+                it's the conversion action — captures a lead we can
+                nurture. Download stays available but visually
+                secondary. Previous quiet Copy icon dropped — users
+                can select+copy from the preview text if they want. */}
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                onClick={handleDownload}
+                disabled={downloading || !quote.trim() || !name.trim()}
+                variant="outline"
+                size="lg"
+                className="min-w-0 flex-1 gap-2"
+              >
                 <Download className="h-4 w-4" />
                 {downloading ? "Rendering…" : "Download PNG"}
               </Button>
-              <Button onClick={copyQuote} variant="outline" size="lg" title="Copy quote text">
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
+              <EmailMeThis
+                tool="testimonial-card"
+                size="lg"
+                className="flex-1"
+                getContent={() =>
+                  `"${quote}"\n\n— ${name}${title ? `, ${title}` : ""}${rating ? `\n\n${rating}/5 stars` : ""}`
+                }
+              />
             </div>
 
-            {/* Save-to-product bridge — stashes the current quote and
-                routes to signup. Welcome page auto-persists it as a
-                Manual testimonial in the new user's workspace. */}
-            <Button
-              onClick={saveToWall}
-              variant="secondary"
-              size="lg"
-              className="w-full gap-2 border-2 border-primary/30 bg-primary/5 hover:bg-primary/10"
-              disabled={!quote.trim() || !name.trim()}
-            >
-              <Sparkles className="h-4 w-4 text-primary" />
-              Save this quote to my Wall of Love
-            </Button>
+            {/* Save-to-wall bridge — the conversion moment. Wrapped
+                in its own dashed-border section with an "OR — unlock
+                more" divider so it reads as a distinct commitment
+                action, not a fourth button competing with the
+                Download/Email/Copy row above. Slightly different
+                bg (primary/5) reinforces the separation. */}
+            <div className="relative mt-2 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 p-3">
+              <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-primary">
+                <Sparkles className="h-3 w-3" />
+                Or save it — signup free
+              </div>
+              <Button
+                onClick={saveToWall}
+                size="lg"
+                className="w-full gap-2"
+                disabled={!quote.trim() || !name.trim()}
+              >
+                Save this quote to my Wall of Love
+              </Button>
+            </div>
           </div>
 
           {/* Preview panel */}

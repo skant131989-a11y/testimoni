@@ -20,6 +20,7 @@ import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
 import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
+import { EmailMeThis } from "@/components/email-me-this";
 
 /**
  * Public testimonial writer tool. Calls /api/tools/generate-testimonial
@@ -352,6 +353,27 @@ export function TestimonialWriterClient() {
                   Free signup unlocks all 3 + unlimited regenerations →
                 </Link>
               </p>
+              {/* Lightweight email capture — user gets the visible
+                  variant delivered to their inbox with a soft signup
+                  CTA. Compact so it doesn't compete with the primary
+                  signup nudge above. */}
+              <div className="mt-3 flex justify-center">
+                <EmailMeThis
+                  tool="testimonial-writer"
+                  size="default"
+                  getContent={() =>
+                    variants.length
+                      ? variants
+                          .map((v, i) =>
+                            i === 0
+                              ? `${v.angle}\n"${v.text}"`
+                              : `${v.angle} (sign up to unlock)`,
+                          )
+                          .join("\n\n")
+                      : ""
+                  }
+                />
+              </div>
             </div>
           </div>
         )}

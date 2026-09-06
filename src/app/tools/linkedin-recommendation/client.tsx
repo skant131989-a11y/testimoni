@@ -19,6 +19,7 @@ import { track } from "@/lib/analytics";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
 import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
+import { EmailMeThis } from "@/components/email-me-this";
 
 const RELATIONSHIPS = [
   { id: "worked_with", label: "Worked with them" },
@@ -244,6 +245,19 @@ export function RecommendationClient() {
                 </Button>
               </div>
             ))}
+            {/* Email capture — deliver the 3 recommendations to their
+                inbox so they can paste into LinkedIn directly. */}
+            <div className="mt-2 flex justify-center">
+              <EmailMeThis
+                tool="linkedin-recommendation"
+                size="default"
+                getContent={() =>
+                  variants
+                    ? variants.map((v) => `${v.angle}:\n${v.text}`).join("\n\n---\n\n")
+                    : ""
+                }
+              />
+            </div>
           </div>
         )}
 
