@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sanitizeImportedText } from "@/lib/sanitize-imported-text";
 
 /**
  * Public read-only tweet/LinkedIn preview endpoint. Used by the
@@ -99,7 +100,7 @@ async function fetchLinkedIn(url: string): Promise<PreviewResult | null> {
     if (!content) return null;
     const customerName = title ? title.split(" on LinkedIn")[0].split(" | ")[0].trim() : "LinkedIn user";
     return {
-      content: content.trim(),
+      content: sanitizeImportedText(content),
       customerName,
       source: "LINKEDIN",
       sourceUrl: url,

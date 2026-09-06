@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { getEffectiveLimits } from "@/lib/plan";
+import { sanitizeImportedText } from "@/lib/sanitize-imported-text";
 
 interface ImportResult {
   content: string;
@@ -58,7 +59,8 @@ async function fetchTwitter(url: string): Promise<ImportResult | null> {
     const html = data.html || "";
     // The <p>...</p> inside the blockquote contains the tweet body.
     const paragraphMatch = html.match(/<p[^>]*>([\s\S]*?)<\/p>/);
-    const content = paragraphMatch ? stripHtml(paragraphMatch[1]) : stripHtml(html);
+    const rawContent = paragraphMatch ? stripHtml(paragraphMatch[1]) : stripHtml(html);
+    const content = sanitizeImportedText(rawContent);
     if (!content) return null;
     return {
       content,
@@ -98,7 +100,7 @@ async function fetchLinkedIn(url: string): Promise<ImportResult | null> {
     if (!content) return null;
     const customerName = title ? title.split(" on LinkedIn")[0].split(" | ")[0].trim() : "LinkedIn user";
     return {
-      content: content.trim(),
+      content: sanitizeImportedText(content),
       customerName,
       source: "LINKEDIN",
       sourceUrl: url,
