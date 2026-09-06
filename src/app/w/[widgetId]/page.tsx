@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Star, ArrowRight, Twitter, Linkedin, Share2 } from "lucide-react";
+import { Star, ArrowRight, Twitter, Linkedin, Share2, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getEffectivePlan } from "@/lib/plan";
 import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { VideoTestimonialCard } from "@/components/video-testimonial-card";
 import { PageEngagement } from "@/components/page-engagement";
+import { InlineSignup } from "@/components/inline-signup";
 import { absoluteUrl } from "@/lib/utils";
 
 interface WallPageProps {
@@ -447,6 +448,52 @@ export default async function HostedWallPage({ params }: WallPageProps) {
           </>
         )}
       </main>
+
+      {/* Aspirational "get your own" section — free plan only. Sits
+          BELOW the testimonials on purpose: visitors read the wall
+          first, feel the momentum, then see the form. Left side sells
+          the outcome, right side is the actual signup — same
+          component the home page uses, so conversion behaves the same
+          across surfaces. */}
+      {showWatermark && (
+        <section className="border-t bg-gradient-to-b from-primary/[0.03] to-primary/[0.08] py-16">
+          <div className="mx-auto grid max-w-5xl gap-10 px-4 md:grid-cols-2 md:items-center">
+            <div>
+              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                <Sparkles className="h-3.5 w-3.5" /> Your turn
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                Get a wall like this — in 30 seconds.
+              </h2>
+              <p className="mt-3 text-lg text-muted-foreground">
+                Free forever. Collect testimonials from your customers,
+                embed with one line, or share a page like this one.
+              </p>
+              <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-primary">✓</span>
+                  Hosted Wall of Love URL (like the one you&rsquo;re on)
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-primary">✓</span>
+                  Import from X, LinkedIn, or a collection form
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-primary">✓</span>
+                  One-line embed for your site
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-primary">✓</span>
+                  No credit card. Set up in 30 seconds.
+                </li>
+              </ul>
+            </div>
+            <div>
+              <InlineSignup source="wall_of_love" idPrefix="wall" />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Testimoni watermark — small, footer-only. Free plan gets it,
           Pro removes. Never competes with the workspace's content for
