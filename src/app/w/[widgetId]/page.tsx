@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Star, ArrowRight, Twitter, Linkedin, Share2, Sparkles } from "lucide-react";
+import { Star, ArrowRight, Twitter, Linkedin, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getEffectivePlan } from "@/lib/plan";
-import { Button } from "@/components/ui/button";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { VideoTestimonialCard } from "@/components/video-testimonial-card";
 import { PageEngagement } from "@/components/page-engagement";
 import { InlineSignup } from "@/components/inline-signup";
+import { WallShareButtons } from "@/components/wall-share-buttons";
 import { absoluteUrl } from "@/lib/utils";
 
 interface WallPageProps {
@@ -273,15 +273,6 @@ export default async function HostedWallPage({ params }: WallPageProps) {
   const workspaceName = widget.workspace.name;
   const wallUrl = absoluteUrl(`/w/${widgetId}`);
 
-  // Share-CTA URLs. Any visitor who's impressed can amplify the wall
-  // in one click. Pre-filled caption reads as a genuine recommendation,
-  // not marketing — "Real reviews of X 🩷".
-  const shareText = count
-    ? `Real reviews of ${workspaceName} 🩷`
-    : `Check out ${workspaceName}'s Wall of Love`;
-  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(wallUrl)}`;
-  const linkedinShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(wallUrl)}`;
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/60 via-background to-background">
       {/* Hero — leads with aggregate proof, not a generic label */}
@@ -344,46 +335,16 @@ export default async function HostedWallPage({ params }: WallPageProps) {
             </p>
           )}
 
-          {/* Share buttons — visitors who love the wall can amplify.
-              Every share is a free acquisition surface for the workspace
-              owner. */}
+          {/* Share buttons — 6 surfaces across two rows. See
+              WallShareButtons for the full rationale. Only rendered
+              once the wall actually has content; a bare page with
+              share icons feels performative. */}
           {count > 0 && (
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="gap-1.5 rounded-full"
-              >
-                <a
-                  href={twitterShareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Twitter className="h-3.5 w-3.5" />
-                  Share on X
-                </a>
-              </Button>
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="gap-1.5 rounded-full"
-              >
-                <a
-                  href={linkedinShareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Linkedin className="h-3.5 w-3.5" />
-                  Share on LinkedIn
-                </a>
-              </Button>
-              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                <Share2 className="h-3 w-3" />
-                Loved this? Pass it on.
-              </span>
-            </div>
+            <WallShareButtons
+              wallUrl={wallUrl}
+              workspaceName={workspaceName}
+              reviewCount={count}
+            />
           )}
         </div>
       </header>
