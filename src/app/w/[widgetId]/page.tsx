@@ -39,6 +39,8 @@ async function getWidget(widgetId: string) {
               customerTitle: true,
               customerUrl: true,
               videoUrl: true,
+              source: true,
+              sourceUrl: true,
             },
           },
         },
@@ -151,11 +153,33 @@ export default async function HostedWallPage({ params }: WallPageProps) {
                     customerName={t.customerName}
                   />
                 )}
-                {t.content && (
-                  <p className="text-[15px] leading-relaxed text-foreground">
-                    &ldquo;{t.content}&rdquo;
-                  </p>
-                )}
+                {t.content && (() => {
+                  // Twitter oEmbed / syndication truncates long tweets and
+                  // signals it with a trailing "…". A dead ellipsis on a
+                  // wall card reads as broken; swap it for an actionable
+                  // "read full →" link back to the source tweet when we
+                  // have one.
+                  const trimmed = t.content.replace(/\s*…\s*$/, "");
+                  const wasTruncated = trimmed !== t.content;
+                  return (
+                    <p className="text-[15px] leading-relaxed text-foreground">
+                      &ldquo;{trimmed}&rdquo;
+                      {wasTruncated && t.sourceUrl && (
+                        <>
+                          {" "}
+                          <a
+                            href={t.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-primary"
+                          >
+                            read full →
+                          </a>
+                        </>
+                      )}
+                    </p>
+                  );
+                })()}
                 <div className="mt-auto flex items-center gap-3 pt-1">
                   {widget.showAvatar &&
                     (t.customerAvatar ? (
