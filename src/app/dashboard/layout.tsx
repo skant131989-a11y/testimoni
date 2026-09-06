@@ -225,6 +225,26 @@ export default async function DashboardLayout({
   const workspace = dbUser.workspaceMembers[0].workspace;
   const plan = getEffectivePlan(workspace.slug, workspace.subscription?.plan);
 
+  // Background sync: pull the latest avatar_url from Supabase auth
+  // (populated by Google / GitHub OAuth) whenever it drifts from
+  // what we cached at signup. Users who connect a new provider later,
+  // or whose upstream provider photo changes, then see their real
+  // avatar in the header instead of the letter fallback. Fire-and-
+  // forget — the render never waits.
+  const upstreamAvatar =
+    (authUser.user_metadata?.avatar_url as string | undefined) ?? null;
+  const displayAvatar = upstreamAvatar || dbUser.avatarUrl;
+  if (upstreamAvatar && upstreamAvatar !== dbUser.avatarUrl) {
+    prisma.user
+      .update({
+        where: { id: dbUser.id },
+        data: { avatarUrl: upstreamAvatar },
+      })
+      .catch(() => {
+        // Silent — a failed avatar sync must never break dashboard.
+      });
+  }
+
   // Wall URL for the sidebar link — comes from the widgets we already
   // fetched in the single findUnique above (no extra round-trip).
   // Falls back to null if none exists (rare defensive path).
@@ -249,7 +269,7 @@ export default async function DashboardLayout({
         <Header
           userName={dbUser.name}
           userEmail={dbUser.email}
-          userAvatarUrl={dbUser.avatarUrl}
+          userAvatarUrl={displayAvatar}
           workspaceName={workspace.name}
         />
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
