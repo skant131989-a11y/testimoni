@@ -7,6 +7,44 @@ let ready = false;
 const DEBUG = process.env.NODE_ENV === "development";
 
 /**
+ * Route prefixes that must NEVER carry the workspace owner's identity
+ * out to PostHog. The workspace owner often visits their own public
+ * pages (wall, collect form, marketing) in the same browser session
+ * they were logged into the dashboard from — without this guard,
+ * PostHog attaches their email to every anonymous-visitor event on
+ * those pages, breaking funnels and leaking PII into shared analytics.
+ *
+ * Kept in one place so `track()`, `initAnalytics()`, and the
+ * route-change guard all agree on what "public" means.
+ */
+const PUBLIC_PATH_PREFIXES = [
+  "/w/",       // hosted Wall of Love
+  "/collect/", // hosted collection forms
+  "/tools/",   // free tools
+  "/for/",     // niche landing pages
+  "/demo",     // demo playground
+  "/pricing",  // marketing
+  "/login",    // pre-auth
+  "/signup",   // pre-auth
+  "/forgot-password",
+  "/reset-password",
+];
+
+const PUBLIC_EXACT_PATHS = new Set(["/", "/pricing"]);
+
+/**
+ * True if the current window location is a page a non-logged-in
+ * visitor could land on. SSR-safe (returns false when there is no
+ * window — server-side analytics never fires anyway).
+ */
+export function isPublicPath(): boolean {
+  if (typeof window === "undefined") return false;
+  const path = window.location.pathname;
+  if (PUBLIC_EXACT_PATHS.has(path)) return true;
+  return PUBLIC_PATH_PREFIXES.some((p) => path.startsWith(p));
+}
+
+/**
  * Initialize PostHog on the client. Safe to call multiple times — only
  * runs once. No-ops if env vars are missing (e.g., local dev without
  * a project set up) or if init throws for any reason.
@@ -90,6 +128,21 @@ export function initAnalytics() {
       disable_surveys: true,
       loaded: () => {
         if (DEBUG) console.log("[analytics] posthog loaded");
+        // Landed on a public page while PostHog still holds an
+        // identified user in its localStorage/cookie? Wipe that
+        // identity NOW so nothing on this page can send events
+        // attributed to the logged-in workspace owner. When the
+        // user navigates back to /dashboard, AuthIdentifier
+        // re-identifies them.
+        if (isPublicPath()) {
+          try {
+            posthog.reset();
+            if (DEBUG)
+              console.log(
+                "[analytics] reset PostHog identity on public path"
+              );
+          } catch {}
+        }
       },
     });
     ready = true;
@@ -130,10 +183,16 @@ export function track(
   if (DEBUG) console.log(`[analytics] track(${event}) ready=${ready}`, props);
   if (!ready) return;
   try {
+    // Defense in depth: any event fired from a public URL is
+    // FORCED anonymous — even if the caller forgot to pass the
+    // anonymous flag. Prevents the workspace owner's email leaking
+    // into anonymous-visitor funnels on /w, /tools, /collect, etc.
+    const forceAnonymous = isPublicPath();
+    const anonymous = options?.anonymous || forceAnonymous;
+
     const captureOptions: Record<string, unknown> = {};
     if (options?.instant) captureOptions.send_instantly = true;
-    if (options?.anonymous) {
-      // Force this event to leave the logged-in identity out.
+    if (anonymous) {
       // $process_person_profile: false tells PostHog to skip the
       // user profile merge for this specific event.
       captureOptions.$process_person_profile = false;
@@ -174,6 +233,15 @@ function getAnonymousDistinctId(): string {
 export function identify(userId: string, traits?: Record<string, unknown>) {
   if (DEBUG) console.log(`[analytics] identify(${userId}) ready=${ready}`, traits);
   if (!ready) return;
+  // Never identify from a public URL. Signup/login pages redirect to
+  // /dashboard after auth, and AuthIdentifier re-identifies there —
+  // but a stray identify() from a public surface would immediately
+  // re-attach PII to the current tab's events.
+  if (isPublicPath()) {
+    if (DEBUG)
+      console.log("[analytics] identify skipped — on public path");
+    return;
+  }
   try {
     posthog.identify(userId, traits);
   } catch {}
