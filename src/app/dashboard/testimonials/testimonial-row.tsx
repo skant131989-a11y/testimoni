@@ -31,6 +31,9 @@ const sourceColors: Record<TestimonialSource, string> = {
   TWITTER: "bg-sky-100 text-sky-700",
   LINKEDIN: "bg-indigo-100 text-indigo-700",
   GOOGLE: "bg-red-100 text-red-700",
+  REDDIT: "bg-orange-100 text-orange-700",
+  HACKER_NEWS: "bg-amber-100 text-amber-700",
+  PRODUCT_HUNT: "bg-rose-100 text-rose-700",
   IMPORT: "bg-purple-100 text-purple-700",
 };
 

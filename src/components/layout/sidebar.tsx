@@ -206,7 +206,7 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   isActive
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -215,7 +215,25 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
                 title={collapsed ? item.label : undefined}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
-                {!collapsed && <span>{item.label}</span>}
+                {!collapsed && (
+                  <span className="flex-1">{item.label}</span>
+                )}
+                {/* Small "NEW" pill on the Import link — surfaces the
+                    Reddit / HN / Product Hunt import sources shipped
+                    2026-09. Rendered in the collapsed sidebar too as
+                    a bare purple dot so the signal survives. */}
+                {item.href === "/dashboard/import" && (
+                  <>
+                    {!collapsed && (
+                      <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                        New
+                      </span>
+                    )}
+                    {collapsed && (
+                      <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
+                    )}
+                  </>
+                )}
               </Link>
             );
           })}

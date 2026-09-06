@@ -98,6 +98,9 @@ enum TestimonialSource {
   TWITTER
   LINKEDIN
   GOOGLE
+  REDDIT
+  HACKER_NEWS
+  PRODUCT_HUNT
   IMPORT
 }
 

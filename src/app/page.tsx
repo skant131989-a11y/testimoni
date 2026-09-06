@@ -23,6 +23,7 @@ import { ProPriceDual, FreePrice, FoundingBadge, FoundingExplainer } from "@/com
 import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
+import { ImportSourcesRow } from "@/components/import-sources-row";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
@@ -85,6 +86,10 @@ export default function LandingPage() {
               Paste a customer tweet or share a form. Approve once.
               Embed the wall on your site — or share the free hosted URL.
             </p>
+            {/* Small signal that import isn't tweet-only. Uses the
+                shared ImportSourcesRow with the "New" pill so home
+                visitors also see Reddit/HN/PH added. */}
+            <ImportSourcesRow variant="inline" className="mt-4" />
 
             {/* One loud button. Everything else is a text link. */}
             <div className="mt-8 flex flex-col items-start gap-3">

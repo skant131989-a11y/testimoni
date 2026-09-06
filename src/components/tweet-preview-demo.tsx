@@ -138,14 +138,19 @@ export function TweetPreviewDemo({ isLoggedIn = false }: TweetPreviewDemoProps) 
   return (
     <div className="rounded-2xl border bg-card p-4 shadow-sm">
       <form onSubmit={handleSubmit}>
-        <div className="mb-2 text-xs text-muted-foreground">
-          Paste a public X or LinkedIn post URL
+        <div className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs">
+          <span className="text-muted-foreground">
+            Paste a public X or LinkedIn post URL
+          </span>
+          <span className="text-muted-foreground/70">
+            · signup unlocks Reddit · Hacker News · Product Hunt
+          </span>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
             type="url"
             inputMode="url"
-            placeholder="https://x.com/user/status/…"
+            placeholder="Paste a tweet, LinkedIn post, Reddit thread, or HN comment"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onPaste={handlePaste}

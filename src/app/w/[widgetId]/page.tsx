@@ -79,8 +79,8 @@ export async function generateMetadata(
 
 // Small chip that surfaces where a testimonial came from. Instant
 // credibility signal — "these aren't fabricated, they came from real
-// public accounts on X / LinkedIn." Manual entries render nothing;
-// no source is better than a vague label.
+// public accounts on X / LinkedIn / Reddit / HN / PH." Manual entries
+// render nothing; no source is better than a vague label.
 function SourceBadge({
   source,
   sourceUrl,
@@ -89,15 +89,45 @@ function SourceBadge({
   sourceUrl: string | null;
 }) {
   if (!source || source === "MANUAL" || source === "IMPORT") return null;
-  const isTwitter = source === "TWITTER";
-  const isLinkedIn = source === "LINKEDIN";
-  if (!isTwitter && !isLinkedIn) return null;
-  const label = isTwitter ? "Posted on X" : "Posted on LinkedIn";
-  const Icon = isTwitter ? Twitter : Linkedin;
+
+  // Map every recognised source to its display config. Reddit / HN /
+  // PH don't have lucide icons, so we render the mono glyph inline.
+  const config: Record<
+    string,
+    { label: string; iconKey: "twitter" | "linkedin" | "reddit" | "hn" | "ph" }
+  > = {
+    TWITTER: { label: "Posted on X", iconKey: "twitter" },
+    LINKEDIN: { label: "Posted on LinkedIn", iconKey: "linkedin" },
+    REDDIT: { label: "Posted on Reddit", iconKey: "reddit" },
+    HACKER_NEWS: { label: "Posted on Hacker News", iconKey: "hn" },
+    PRODUCT_HUNT: { label: "Posted on Product Hunt", iconKey: "ph" },
+  };
+  const c = config[source];
+  if (!c) return null;
+
+  const icon =
+    c.iconKey === "twitter" ? (
+      <Twitter className="h-3 w-3" />
+    ) : c.iconKey === "linkedin" ? (
+      <Linkedin className="h-3 w-3" />
+    ) : c.iconKey === "reddit" ? (
+      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5.2 11.8c.03.2.05.4.05.61 0 3.1-3.6 5.61-8.05 5.61s-8.05-2.51-8.05-5.61c0-.21.02-.41.05-.61C.34 13.42 0 12.76 0 12c0-1.24.94-2.24 2.1-2.24.59 0 1.13.26 1.51.68 1.5-1.05 3.55-1.73 5.83-1.83l1.11-5.16c.03-.11.15-.19.26-.16l3.62.77c.24-.5.77-.85 1.38-.85.85 0 1.55.68 1.55 1.53 0 .84-.7 1.52-1.55 1.52-.83 0-1.51-.65-1.55-1.47l-3.28-.7-1 4.66c2.27.1 4.32.79 5.83 1.84.38-.42.92-.68 1.51-.68 1.16 0 2.1 1 2.1 2.24 0 .76-.34 1.42-.86 1.8z" />
+      </svg>
+    ) : c.iconKey === "hn" ? (
+      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M0 0v24h24V0H0zm13.5 12.5V19h-3v-6.5L6 5h3l3 5 3-5h3l-4.5 7.5z" />
+      </svg>
+    ) : (
+      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm1.4 13.5H10v3.7H7.2V6.7H13c2.6 0 4.4 1.7 4.4 3.9-.1 2.2-1.9 2.9-4 2.9zm-.1-4.4H10v2.7h3.3c1 0 1.6-.5 1.6-1.4-.1-.8-.7-1.3-1.6-1.3z" />
+      </svg>
+    );
+
   const inner = (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-      <Icon className="h-3 w-3" />
-      {label}
+      {icon}
+      {c.label}
     </span>
   );
   if (!sourceUrl) return inner;
@@ -108,8 +138,8 @@ function SourceBadge({
       rel="noopener noreferrer"
       className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary"
     >
-      <Icon className="h-3 w-3" />
-      {label}
+      {icon}
+      {c.label}
     </a>
   );
 }

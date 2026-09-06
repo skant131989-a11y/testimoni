@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { LetterAvatar } from "@/components/letter-avatar";
+import { ImportSourcesRow } from "@/components/import-sources-row";
 import { track, identify } from "@/lib/analytics";
 
 interface ImportedTestimonial {
@@ -58,6 +59,13 @@ export function WelcomeClient({
   const [url, setUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Manual-paste fallback state — mirrors the pattern on the main
+  // /dashboard/import page. Revealed when auto-fetch fails
+  // recoverably (Reddit block, PH parse fail, deleted post) so the
+  // user can paste the text without leaving the welcome card.
+  const [manualFallback, setManualFallback] = useState(false);
+  const [manualText, setManualText] = useState("");
+  const [manualAuthor, setManualAuthor] = useState("");
   const [imported, setImported] = useState<ImportedTestimonial | null>(null);
   const [importedWidgetId, setImportedWidgetId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -268,23 +276,41 @@ export function WelcomeClient({
     // in the DB (only in the optimistic UI).
     const target = (opts?.urlOverride ?? url).trim();
     if (!target) return;
+    // Guard the manual-fallback submit path — an empty textarea
+    // shouldn't hit the server (the user opened the fallback but
+    // hasn't pasted anything yet).
+    if (manualFallback && !manualText.trim()) return;
     if (!opts?.silent) setImporting(true);
     setError(null);
     try {
       const res = await fetch("/api/testimonials/import-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: target }),
+        body: JSON.stringify({
+          url: target,
+          ...(manualFallback && {
+            manualText: manualText.trim(),
+            manualAuthor: manualAuthor.trim(),
+          }),
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Couldn't import that URL. Try another one.");
+        // Auto-fetch failed recoverably — reveal the paste-text
+        // form so the user retries in place with the URL preserved.
+        if (data.manualFallback) setManualFallback(true);
         return;
       }
       setImported(data.testimonial);
       if (data.widget?.id) {
         setImportedWidgetId(data.widget.id);
       }
+      // Reset the fallback state on a successful save so the next
+      // URL attempt starts clean.
+      setManualFallback(false);
+      setManualText("");
+      setManualAuthor("");
     } catch {
       setError("Something went wrong. Try again.");
     } finally {
@@ -725,14 +751,25 @@ export function WelcomeClient({
         {mode === "url" ? (
           <>
             <label htmlFor="import-url" className="text-sm font-semibold">
-              Public tweet or LinkedIn post URL
+              Paste any public post URL
             </label>
+            <ImportSourcesRow className="mt-2" />
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               <Input
                 id="import-url"
-                placeholder="https://x.com/user/status/..."
+                placeholder="X · LinkedIn · Reddit · Hacker News · Product Hunt"
                 value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                  // A fresh URL cancels any active fallback so the
+                  // next Import click re-tries auto-fetch instead
+                  // of blindly reusing the last pasted text.
+                  if (manualFallback) {
+                    setManualFallback(false);
+                    setManualText("");
+                    setManualAuthor("");
+                  }
+                }}
                 onKeyDown={(e) => e.key === "Enter" && handleImport()}
                 className="text-base"
               />
@@ -894,6 +931,61 @@ export function WelcomeClient({
         {error && (
           <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
             {error}
+          </div>
+        )}
+
+        {/* Inline manual-paste fallback — mirrors the same pattern on
+            /dashboard/import. Auto-fetch failed recoverably; user
+            pastes the text + optional author and re-submits without
+            leaving the welcome flow. sourceUrl stays what they
+            originally pasted so the wall card still links back with
+            "read full →". */}
+        {manualFallback && (
+          <div className="mt-3 rounded-lg border-2 border-primary/40 bg-primary/5 p-4">
+            <div className="mb-3 flex items-start gap-2 text-sm">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p className="text-foreground">
+                Paste the quote text below — we&apos;ll save it with
+                the source URL you pasted above.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="welcome-manual-text" className="text-xs font-semibold">
+                  The quote *
+                </label>
+                <Textarea
+                  id="welcome-manual-text"
+                  value={manualText}
+                  onChange={(e) => setManualText(e.target.value)}
+                  placeholder="Paste the comment or post text here…"
+                  rows={4}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label htmlFor="welcome-manual-author" className="text-xs font-semibold">
+                  Author name{" "}
+                  <span className="font-normal text-muted-foreground">
+                    (optional)
+                  </span>
+                </label>
+                <Input
+                  id="welcome-manual-author"
+                  value={manualAuthor}
+                  onChange={(e) => setManualAuthor(e.target.value)}
+                  placeholder="e.g. u/theirusername"
+                  className="mt-1"
+                />
+              </div>
+              <Button
+                onClick={() => handleImport()}
+                disabled={importing || !manualText.trim()}
+                className="w-full gap-2"
+              >
+                {importing ? "Saving…" : "Save testimonial"}
+              </Button>
+            </div>
           </div>
         )}
       </div>
