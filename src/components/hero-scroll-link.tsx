@@ -10,6 +10,11 @@ import { track } from "@/lib/analytics";
  * the URL to #foo and treats subsequent clicks as no-ops (already
  * at anchor). We scroll programmatically and clear the hash after
  * the animation so every click works.
+ *
+ * Mobile fix: the base padding gives the button a real 44px touch
+ * target (iOS/Android accessibility floor) so taps don't get
+ * swallowed near the edges. `text-left` keeps multiline text aligned
+ * to the flex flow on narrow viewports.
  */
 export function HeroScrollLink({
   targetId,
@@ -44,7 +49,7 @@ export function HeroScrollLink({
           } catch {}
         }, 900);
       }}
-      className={`cursor-pointer border-0 bg-transparent p-0 ${className}`}
+      className={`inline-flex min-h-[44px] cursor-pointer items-center border-0 bg-transparent py-2 text-left ${className}`}
     >
       {children}
     </button>

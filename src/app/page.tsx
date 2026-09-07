@@ -103,7 +103,7 @@ export default function LandingPage() {
                   targetId="paste-tweet-demo"
                   cta="hero_try_no_account"
                   surface="home_hero"
-                  className="font-medium text-primary hover:underline"
+                  className="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
                 >
                   Paste a tweet first — no account →
                 </HeroScrollLink>
@@ -112,7 +112,7 @@ export default function LandingPage() {
                   cta="hero_wall_demo"
                   surface="home"
                   href="/w/demo"
-                  className="text-muted-foreground hover:text-foreground"
+                  className="font-medium text-muted-foreground underline decoration-muted-foreground/30 underline-offset-4 hover:text-foreground hover:decoration-foreground"
                 >
                   See a live wall →
                 </TrackedLink>
