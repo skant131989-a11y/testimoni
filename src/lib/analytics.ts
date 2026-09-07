@@ -114,8 +114,26 @@ export function initAnalytics() {
     posthog.init(key, {
       api_host:
         process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+      // We keep capture_pageview OFF and fire $pageview manually
+      // from <PageviewTracker /> — that lets us reset the identity
+      // FIRST when the route lands on a public path, so pageview
+      // events never leak the workspace owner's id on /w/, /tools/,
+      // /for/ etc. See src/components/pageview-tracker.tsx.
       capture_pageview: false,
-      autocapture: false,
+      // Pageleave gives PostHog Web Analytics accurate session
+      // duration + bounce rate. Cheap to enable — one event per
+      // page + on unload.
+      capture_pageleave: true,
+      // Autocapture: clicks, form submits, top-clicked selectors.
+      // Powers PostHog's Web Analytics "top clicks" + funnels
+      // without us having to instrument every button by hand.
+      autocapture: true,
+      // Anonymous visitors DON'T create person profiles — they
+      // still count in Web Analytics (unique visitors, pageviews,
+      // sessions) but don't burn person-profile quota or store PII.
+      // identify() still promotes to identified profile for
+      // logged-in users. Recommended default in PostHog docs.
+      person_profiles: "identified_only",
       persistence: "localStorage+cookie",
       // Full-stack shutdown of the perf/vitals + recording features
       // we don't use. The nested capture_performance object is what

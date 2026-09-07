@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PricingProvider } from "@/lib/use-pricing";
 import { AnalyticsInit } from "@/components/analytics-init";
+import { PageviewTracker } from "@/components/pageview-tracker";
 import { TopProgressBar } from "@/components/top-progress-bar";
 
 const geistSans = Geist({
@@ -124,6 +125,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-background font-sans antialiased">
         <TopProgressBar />
         <AnalyticsInit />
+        <PageviewTracker />
         <PricingProvider>{children}</PricingProvider>
       </body>
     </html>
