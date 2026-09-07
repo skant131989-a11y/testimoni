@@ -13,6 +13,7 @@ import { absoluteUrl } from "@/lib/utils";
 
 interface WallPageProps {
   params: Promise<{ widgetId: string }>;
+  searchParams: Promise<{ showcase?: string }>;
 }
 
 async function getWidget(widgetId: string) {
@@ -21,10 +22,21 @@ async function getWidget(widgetId: string) {
     include: {
       workspace: {
         select: {
+          id: true,
           name: true,
           slug: true,
           logoUrl: true,
           subscription: { select: { plan: true } },
+          // First active collection form — used as the target of the
+          // "Testify for X" flow. Every workspace has at least one
+          // form after provisioning; guard for the rare zero-forms
+          // case downstream anyway.
+          forms: {
+            where: { isActive: true },
+            orderBy: { createdAt: "asc" },
+            take: 1,
+            select: { slug: true },
+          },
         },
       },
       testimonials: {
@@ -263,8 +275,12 @@ function AuthorStrip({
   );
 }
 
-export default async function HostedWallPage({ params }: WallPageProps) {
+export default async function HostedWallPage({
+  params,
+  searchParams,
+}: WallPageProps) {
   const { widgetId } = await params;
+  const { showcase } = await searchParams;
   const widget = await getWidget(widgetId);
 
   if (!widget || !widget.isActive) {
@@ -275,7 +291,19 @@ export default async function HostedWallPage({ params }: WallPageProps) {
     widget.workspace.slug,
     widget.workspace.subscription?.plan
   );
-  const showWatermark = plan === "FREE";
+  // The signup + testify surfaces normally render only on FREE plan
+  // walls (Pro users pay to remove Testimoni nudges). Two overrides
+  // force them ON regardless of plan:
+  //   1. `?showcase=1` — used by /w/demo redirects so visitors from
+  //      marketing pages always hit a wall that converts.
+  //   2. The founder's own workspace ("founder") — /w/... links to
+  //      this wall are the primary marketing surface for signup and
+  //      cross-founder testify. It's the demo destination, so it
+  //      needs to convert every visitor, not fall silent because
+  //      the founder happens to be on Pro.
+  const isShowcase = showcase === "1";
+  const isShowcaseWorkspace = widget.workspace.slug === "founder";
+  const showWatermark = plan === "FREE" || isShowcase || isShowcaseWorkspace;
 
   const testimonialsRaw = widget.testimonials.map((wt) => wt.testimonial);
   const testimonials = widget.maxItems
@@ -446,6 +474,43 @@ export default async function HostedWallPage({ params }: WallPageProps) {
           the outcome, right side is the actual signup — same
           component the home page uses, so conversion behaves the same
           across surfaces. */}
+      {/* "Add your voice" — visitor-endorsement surface. Anyone who
+          used or interacted with the workspace can drop a 2-line
+          testimonial directly into the workspace's own collection
+          form. Every submission lands as PENDING for the owner to
+          approve before appearing on the wall. Anchor id="testify"
+          so any future cross-linking (founder profiles, share
+          buttons, external prompts) can jump straight here. */}
+      {widget.workspace.forms[0] && (
+        <section
+          id="testify"
+          className="scroll-mt-16 border-t bg-background py-14"
+        >
+          <div className="mx-auto max-w-3xl px-4 text-center">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
+              <Sparkles className="h-3.5 w-3.5" /> Add your voice
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+              Used {workspaceName}? Say something.
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-base text-muted-foreground">
+              Share what worked (or didn&rsquo;t) in 2 sentences — it
+              lands in the inbox for review before appearing.
+            </p>
+            <a
+              href={`/collect/${widget.workspace.slug}/${widget.workspace.forms[0].slug}?src=testify`}
+              className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Write a testimonial <ArrowRight className="h-4 w-4" />
+            </a>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Takes 30 seconds · Owner approves before it appears
+              on the wall
+            </p>
+          </div>
+        </section>
+      )}
+
       {showWatermark && (
         <section className="border-t bg-gradient-to-b from-primary/[0.03] to-primary/[0.08] py-16">
           <div className="mx-auto grid max-w-5xl gap-10 px-4 md:grid-cols-2 md:items-center">
@@ -486,35 +551,54 @@ export default async function HostedWallPage({ params }: WallPageProps) {
         </section>
       )}
 
-      {/* Testimoni watermark — small, footer-only. Free plan gets it,
-          Pro removes. Never competes with the workspace's content for
-          attention above the fold. */}
-      {showWatermark && (
-        <footer className="border-t bg-muted/30 py-8">
-          <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 px-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              Made with{" "}
-              <span aria-hidden className="text-primary">
-                🩷
-              </span>{" "}
-              on{" "}
+      {/* Wall footer — split into two logical blocks:
+          • Marketing block ("Made with Testimoni" + "Build your own"
+            pill) — plan-gated. Free plan renders it; Pro pays to
+            remove the promotion.
+          • Utility block ("Log in →") — always renders. It's a
+            tiny text link visitors need if they already have an
+            account and clicked here from a shared wall URL. Even
+            Pro walls keep this: it's utility, not commerce.
+
+          Both blocks live inside a single <footer> so vertical
+          spacing stays consistent whether one or both render. */}
+      <footer className="border-t bg-muted/30 py-8">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 px-4 text-center">
+          {showWatermark && (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Made with{" "}
+                <span aria-hidden className="text-primary">
+                  🩷
+                </span>{" "}
+                on{" "}
+                <Link
+                  href="/?utm_source=wall_of_love&utm_medium=hosted&utm_campaign=made_with"
+                  className="font-semibold text-primary hover:underline"
+                >
+                  Testimoni
+                </Link>
+              </p>
               <Link
-                href="/?utm_source=wall_of_love&utm_medium=hosted&utm_campaign=made_with"
-                className="font-semibold text-primary hover:underline"
+                href="/signup?utm_source=wall_of_love&utm_medium=hosted&utm_campaign=build_your_own"
+                className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10"
               >
-                Testimoni
+                Build your own Wall of Love — free{" "}
+                <ArrowRight className="h-3 w-3" />
               </Link>
-            </p>
+            </>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Already have an account?{" "}
             <Link
-              href="/signup?utm_source=wall_of_love&utm_medium=hosted&utm_campaign=build_your_own"
-              className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+              href="/login?utm_source=wall_of_love&utm_medium=hosted&utm_campaign=login_link"
+              className="font-medium text-primary hover:underline"
             >
-              Build your own Wall of Love — free{" "}
-              <ArrowRight className="h-3 w-3" />
+              Log in →
             </Link>
-          </div>
-        </footer>
-      )}
+          </p>
+        </div>
+      </footer>
       {/* Anonymous view tracking — never attributes wall views to the
           logged-in user (workspace owners visit their own walls a lot;
           that would inflate metrics). */}

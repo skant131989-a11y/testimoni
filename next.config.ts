@@ -39,6 +39,26 @@ const nextConfig: NextConfig = {
       { source: "/how-it-works", destination: "/demo", permanent: true },
       { source: "/use-cases", destination: "/", permanent: true },
       { source: "/customers", destination: "/", permanent: true },
+      // /founder (singular founder story) was too close to /founders
+      // (plural directory) — renamed to /story for zero-ambiguity.
+      // Redirect preserves inbound SEO + any external links pointing
+      // at the old URL.
+      { source: "/founder", destination: "/story", permanent: true },
+      // Old sample /w/demo wall (LinenLab mock content) redirects
+      // to the founder's real Wall of Love. Every incoming link
+      // across the codebase — home hero "See a live wall →", demo
+      // page CTAs, /vs pages, /features, /not-found, etc. — now
+      // lands on the real wall without touching those callsites.
+      // Permanent (308) so Google consolidates ranking signal onto
+      // the destination URL. `?showcase=1` forces the signup +
+      // testify surfaces ON regardless of the workspace's plan, so
+      // marketing-redirected traffic always hits a wall that
+      // converts (a Pro upgrade normally hides those surfaces).
+      {
+        source: "/w/demo",
+        destination: "/w/cmtedlomj0009w0btzyi3yweh?showcase=1",
+        permanent: true,
+      },
       // Short, brandable URL for the founder's "fill this 30-second
       // form" CTA on the home page. Redirects to the actual Testimoni
       // collection form so we can swap the underlying form later

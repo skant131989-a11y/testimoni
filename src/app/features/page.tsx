@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
+import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 
 export const metadata: Metadata = {
   title: "Features — Paste a Tweet, Build a Wall of Love",
@@ -99,6 +100,11 @@ export default function FeaturesPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <PublicNav />
+
+      {/* Social proof between nav and features hero — grounds the
+          feature-list marketing that follows in a real founder's
+          voice. Same strip as home / pricing. */}
+      <LovedByFoundersStrip />
 
       <main className="flex-1 py-16">
         <div className="mx-auto max-w-5xl px-4">

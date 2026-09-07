@@ -107,7 +107,7 @@ export default function AboutPage() {
                 </TrackedLink>
               </Button>
               <Button variant="outline" asChild>
-                <TrackedLink cta="about_meet_founder" surface="about" href="/founders">Meet the founder</TrackedLink>
+                <TrackedLink cta="about_meet_founder" surface="about" href="/story">Meet the founder</TrackedLink>
               </Button>
             </div>
           </section>

@@ -27,6 +27,17 @@ model Workspace {
   name      String
   slug      String   @unique
   logoUrl   String?  @map("logo_url")
+  // Public founder directory opt-in. When true, this workspace shows
+  // up on /founders and gets a public /founders/[slug] profile page.
+  // Default false — nothing goes public until the owner explicitly
+  // toggles it in Settings → Public listing.
+  publicListing Boolean @default(false) @map("public_listing")
+  // Short one-liner shown on the founder directory card + profile.
+  // Free text, max 200 chars, sanitized before display.
+  pitch     String? @db.VarChar(240)
+  // Optional links surfaced on the profile page.
+  websiteUrl String? @map("website_url") @db.VarChar(400)
+  xHandle   String? @map("x_handle") @db.VarChar(60)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -36,6 +47,7 @@ model Workspace {
   forms        CollectionForm[]
   subscription Subscription?
 
+  @@index([publicListing])
   @@map("workspaces")
 }
 

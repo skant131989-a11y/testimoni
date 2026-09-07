@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { TrackedLink } from "@/components/tracked-link";
+import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { InlineSignup } from "@/components/inline-signup";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { DemoVideo } from "@/components/demo-video";
@@ -451,6 +452,12 @@ export default function DemoClient() {
           </div>
         </div>
       </header>
+
+      {/* Loved-by-founders strip — placed right below the demo's own
+          header. Same position as on /pricing: nav → strip → hero.
+          Grounds the demo experience in real founder proof before
+          the visitor starts clicking through the mock flow. */}
+      <LovedByFoundersStrip />
 
       <main className="mx-auto max-w-7xl px-4 py-12">
         {/* Hero */}

@@ -61,6 +61,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${SITE_URL}/founders`,
       lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/wall`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.75,
+    },
+    {
+      url: `${SITE_URL}/story`,
+      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.6,
     },

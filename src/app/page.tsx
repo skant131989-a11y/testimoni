@@ -28,14 +28,9 @@ import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { HeroScrollLink } from "@/components/hero-scroll-link";
 import { PageEngagement } from "@/components/page-engagement";
-import { pickDailyPraise } from "@/lib/home-praise";
+import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 
 export default function LandingPage() {
-  // Hand-curated real-testimonial rotator ("Loved by founders"). No
-  // DB fetch — hardcoded array in src/lib/home-praise.ts, deterministic
-  // per-UTC-day so the pick is stable throughout the day. Keeps the
-  // home page pure static / <100ms application-code.
-  const praise = pickDailyPraise();
   return (
     <div className="flex min-h-screen flex-col">
       <StructuredData />
@@ -180,50 +175,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* "Loved by founders" — hand-curated real testimonial rotator.
-          One quote per UTC day, deterministic (no A/B flicker on
-          refresh). Uses hardcoded pool in src/lib/home-praise.ts to
-          keep the home page zero-DB / static-fast. Refresh the array
-          as new great testimonials come in.
-
-          Layout has TWO clickable regions instead of one:
-            - Left (pill + quote + author) → opens the source tweet
-            - Right ("See all praise") → opens the full wall
-          Nested <a> tags are invalid HTML, so we use a flex row of
-          two siblings with a subtle separator. */}
-      <section className="border-b bg-muted/20 py-6">
-        <div className="mx-auto max-w-5xl px-4">
-          <div className="flex flex-col overflow-hidden rounded-lg border bg-card shadow-sm sm:flex-row">
-            <a
-              href={praise.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-1 flex-col gap-3 p-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center"
-            >
-              <span className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                Loved by founders
-              </span>
-              <blockquote className="min-w-0 flex-1 text-sm italic text-foreground line-clamp-3 sm:text-base sm:line-clamp-2">
-                &ldquo;{praise.content}&rdquo;
-              </blockquote>
-              <span className="shrink-0 text-xs text-muted-foreground">
-                — {praise.customerName}
-              </span>
-            </a>
-            <a
-              href={praise.wallUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex shrink-0 items-center justify-center gap-1.5 border-t border-border bg-primary/5 px-5 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 sm:border-l sm:border-t-0 sm:py-4"
-            >
-              See all praise
-              <span className="transition-transform group-hover:translate-x-0.5">
-                →
-              </span>
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* "Loved by founders" — hand-curated real testimonial strip.
+          Extracted to <LovedByFoundersStrip /> so we drop the same
+          social-proof surface on /pricing, /features, and /demo
+          without duplicating the layout. */}
+      <LovedByFoundersStrip />
 
       {/* Ask → Collect → Publish strip. Answers the #1 unspoken question
           from cold traffic — "do the testimonials live on your site or

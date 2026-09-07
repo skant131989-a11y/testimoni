@@ -5,6 +5,7 @@ import { ProPriceDual, FreePrice, FoundingBadge, FoundingExplainer } from "@/com
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
+import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 
 export const metadata: Metadata = {
   title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",
@@ -23,6 +24,11 @@ export default function PricingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <PublicNav />
+
+      {/* Social proof directly above the pricing table — a real
+          founder quote in the hesitation window right before the
+          buyer sees the tiers. Same strip as home / features. */}
+      <LovedByFoundersStrip />
 
       {/* Pricing */}
       <main className="flex-1 py-20">

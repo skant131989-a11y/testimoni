@@ -18,6 +18,11 @@ export const metadata: Metadata = {
  * Statically pre-rendered demo. DemoClient checks auth itself via
  * the Supabase browser SDK on mount so this page can be served
  * from the CDN edge.
+ *
+ * The Loved-by-founders strip renders inside DemoClient right
+ * after its custom <header>, matching /pricing (strip below nav,
+ * above hero). Inserting it here at the page level would push it
+ * above DemoClient's header — wrong stacking order.
  */
 export default function DemoPage() {
   return <DemoClient />;
