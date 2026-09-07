@@ -21,8 +21,16 @@ interface FormConfig {
 
 export default function PublicCollectionForm({
   formConfig,
+  contentLabel = "Your testimonial",
+  contentPlaceholder = "Tell us about your experience...",
 }: {
   formConfig: FormConfig;
+  /** Label above the message textarea. Defaults to "Your testimonial"
+   *  which fits the customer-collection use case; the founder /contact
+   *  page overrides to "Your message" since those submissions aren't
+   *  customer praise. */
+  contentLabel?: string;
+  contentPlaceholder?: string;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,6 +41,10 @@ export default function PublicCollectionForm({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  // Honeypot — real users never see or fill this. Bots that auto-
+  // populate every input trip it and we drop the submission silently
+  // via server-side rejection (schema.honeypot must be empty).
+  const [honeypot, setHoneypot] = useState("");
 
   // Fire once per page mount — anonymous funnel start.
   // Uses anonymous: true so PostHog does NOT attach the current
@@ -59,7 +71,15 @@ export default function PublicCollectionForm({
       return;
     }
     if (!content.trim() && !rating) {
-      setError("Please provide a testimonial or rating");
+      setError(`Please provide a ${contentLabel.toLowerCase()} or rating`);
+      return;
+    }
+    // Client-side min-length — matches the server schema (20 chars).
+    // Also fires when the field was optional but they still typed a
+    // one-liner. Fail fast so the user gets a friendly hint, not a
+    // generic "Validation failed" from the API.
+    if (content.trim() && content.trim().length < 20) {
+      setError("Please write at least 20 characters.");
       return;
     }
 
@@ -84,6 +104,9 @@ export default function PublicCollectionForm({
           // so the field is truly absent from the payload.
           rating: rating || undefined,
           answers: jobTitle.trim() ? { jobTitle: jobTitle.trim() } : {},
+          // Honeypot value — real users send "" (rejected as spam
+          // only when a bot filled the hidden field with something).
+          honeypot,
         }),
       });
 
@@ -198,21 +221,50 @@ export default function PublicCollectionForm({
             )}
 
             <div>
-              <Label htmlFor="content">Your testimonial *</Label>
+              <Label htmlFor="content">{contentLabel} *</Label>
               <Textarea
                 id="content"
-                placeholder="Tell us about your experience..."
+                placeholder={contentPlaceholder}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={4}
+                minLength={20}
               />
-              {/* Both Rating and Your testimonial are marked required
-                  with *, but only ONE needs a value. Adding the shared
-                  footnote here (below the second of the two fields) so
-                  users see it before they scroll to the submit button. */}
+              {/* Both Rating and the message are marked required with *,
+                  but only ONE needs a value. Adding the shared footnote
+                  here (below the second of the two fields) so users see
+                  it before they scroll to the submit button. */}
               <p className="mt-1 text-xs text-muted-foreground">
-                * Provide at least one — stars, testimonial, or both.
+                * Provide at least one — stars, {contentLabel.toLowerCase()}, or
+                both. Minimum 20 characters if you write a message.
               </p>
+            </div>
+
+            {/* Honeypot — labelled "Website" but hidden from human
+                view via CSS. Bots that auto-fill every input by
+                name trip this and the server rejects them silently.
+                aria-hidden + tabIndex -1 + autoComplete off makes
+                sure screen readers + keyboard users skip past it. */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: "-9999px",
+                width: 1,
+                height: 1,
+                overflow: "hidden",
+              }}
+            >
+              <label htmlFor="website-url">Website</label>
+              <input
+                id="website-url"
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+              />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

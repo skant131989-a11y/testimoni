@@ -138,19 +138,19 @@ export function TweetPreviewDemo({ isLoggedIn = false }: TweetPreviewDemoProps) 
   return (
     <div className="rounded-2xl border bg-card p-4 shadow-sm">
       <form onSubmit={handleSubmit}>
-        <div className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs">
+        <div className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
           <span className="text-muted-foreground">
-            Paste a public X or LinkedIn post URL
+            Paste a public X or LinkedIn URL
           </span>
-          <span className="text-muted-foreground/70">
-            · signup unlocks Reddit · Hacker News · Product Hunt
+          <span className="text-muted-foreground/60">
+            · Reddit · HN · Product Hunt on signup
           </span>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
             type="url"
             inputMode="url"
-            placeholder="Paste a tweet, LinkedIn post, Reddit thread, or HN comment"
+            placeholder="Paste an X or LinkedIn URL"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onPaste={handlePaste}
@@ -293,15 +293,22 @@ export function TweetPreviewDemo({ isLoggedIn = false }: TweetPreviewDemoProps) 
           </>
         ) : (
           <>
+            {/* Real testimonial praising Testimoni — pulled verbatim
+                from octaviamotiondesigns' reply on X. Grounds the
+                demo card in real social proof instead of a generic
+                fabricated line, and directly reinforces the H1's
+                "paste a tweet, 30 seconds" promise. Replaced on
+                paste with the visitor's own imported card. */}
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                S
+                O
               </div>
-              <div className="text-xs font-semibold">Sarah Chen</div>
+              <div className="text-xs font-semibold">octaviamotiondesigns</div>
             </div>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              &ldquo;Testimoni turned a mess of tweets into a wall of love
-              in about 30 seconds.&rdquo;
+              &ldquo;&lsquo;Paste a tweet, live in 30 seconds&rsquo; is a
+              strong promise — most social proof tools bury the setup
+              behind onboarding steps first.&rdquo;
             </p>
           </>
         )}

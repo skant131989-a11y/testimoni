@@ -95,7 +95,11 @@ export default async function ContactPage() {
               </div>
 
               <div className="mt-6">
-                <PublicCollectionForm formConfig={formConfig} />
+                <PublicCollectionForm
+                  formConfig={formConfig}
+                  contentLabel="Your message"
+                  contentPlaceholder="What's on your mind? Feedback, feature request, bug, or setup help — anything."
+                />
               </div>
 
               {/* Always show the email escape hatch — some people prefer email */}
