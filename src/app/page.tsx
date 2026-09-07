@@ -26,6 +26,7 @@ import { InlineSignup } from "@/components/inline-signup";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
+import { HeroScrollLink } from "@/components/hero-scroll-link";
 import { PageEngagement } from "@/components/page-engagement";
 
 export default function LandingPage() {
@@ -90,8 +91,9 @@ export default function LandingPage() {
               <span className="text-primary">It&rsquo;s on your site today.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-              No account to preview. Embed on your site — or share
-              your wall URL.
+              No account to preview. Keep what you like, embed the
+              wall on your site with one line — or share the free
+              hosted URL.
             </p>
 
             {/* Trust caption sits close to the sub — reads as
@@ -131,6 +133,27 @@ export default function LandingPage() {
                 See a live wall →
               </TrackedLink>
             </div>
+
+            {/* Escape hatch for visitors whose customers don't tweet
+                yet. Without this line the hero shouts "paste a tweet"
+                so hard it hides the form path, and anyone without
+                public praise bounces before scrolling. One quiet
+                text link keeps the hero focused while signalling
+                the alternative path exists. Uses HeroScrollLink so
+                the hash gets cleaned up after scrolling — a plain
+                <a href="#form-path"> would leave #form-path stuck in
+                the URL, making the SECOND click a no-op. */}
+            <p className="mt-3 text-xs text-muted-foreground">
+              No public praise yet?{" "}
+              <HeroScrollLink
+                targetId="form-path"
+                cta="hero_form_path"
+                surface="home_hero"
+                className="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+              >
+                Share a form instead →
+              </HeroScrollLink>
+            </p>
           </div>
 
           {/* Right column — LIVE paste-a-URL demo. The whole point of
@@ -197,8 +220,11 @@ export default function LandingPage() {
           above, so we frame it as "here's the second path" rather
           than "two ways to pick from" (redundant when the visitor has
           already seen paste-a-tweet live). Path A gets a compact
-          recap; Path B gets the fuller treatment. */}
-      <section className="border-y bg-background py-12">
+          recap; Path B gets the fuller treatment. The hero's
+          "No public praise yet? Share a form →" escape-hatch link
+          targets this section's #form-path anchor so visitors
+          without tweetable praise can jump straight to the alternative. */}
+      <section id="form-path" className="scroll-mt-16 border-y bg-background py-12">
         <div className="mx-auto max-w-5xl px-4">
           <div className="mb-8 text-center">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
