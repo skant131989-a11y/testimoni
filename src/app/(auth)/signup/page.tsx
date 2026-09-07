@@ -39,8 +39,26 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    if (botTrap) return;
-    if (Date.now() - mountedAt < 1500) return;
+    // Silent bot rejects — but ALSO track them now so we can see in
+    // PostHog when real users are getting caught. Password managers
+    // (1Password, LastPass, Bitwarden, Chrome autofill) sometimes
+    // populate any input named "website" — including our off-screen
+    // honeypot — which used to silently drop real signups with no
+    // trace. See name="fx-check-2b7c" on the honeypot below: random
+    // string autofillers don't pattern-match on.
+    if (botTrap) {
+      track("signup_rejected", { reason: "honeypot", method: "email" });
+      setError("Signup blocked. If your password manager filled a hidden field, refresh and try again.");
+      return;
+    }
+    // 800ms window (was 1500ms) — still blocks scripted spam that
+    // fires within one animation frame, doesn't punish real users
+    // who paste a saved password and hit Enter fast.
+    if (Date.now() - mountedAt < 800) {
+      track("signup_rejected", { reason: "too_fast", method: "email" });
+      setError("Slow down a bit and try again.");
+      return;
+    }
 
     setIsLoading(true);
     track("signup_started", { method: "email", source: "signup_page" }, { instant: true });
@@ -172,10 +190,14 @@ export default function SignupPage() {
             />
           </div>
 
-          {/* Honeypot field — bots fill it, humans never see it. */}
+          {/* Honeypot field — bots fill it, humans never see it.
+              name="fx-check-2b7c" is a random string that password
+              managers (1Password, LastPass, Bitwarden, Chrome
+              autofill) don't pattern-match on. Was previously
+              name="website" which was catching real users. */}
           <input
             type="text"
-            name="website"
+            name="fx-check-2b7c"
             tabIndex={-1}
             autoComplete="off"
             value={botTrap}

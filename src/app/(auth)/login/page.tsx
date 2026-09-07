@@ -69,14 +69,24 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
 
-    // Bot check 1 — honeypot. Silently drop, no event fires so we
-    // don't pollute analytics with the attack traffic.
+    // Bot check 1 — honeypot. Track the reject so we see in PostHog
+    // when real users get caught by an autofilling password manager.
+    // Field is renamed to a random string (see markup below) so
+    // 1Password / LastPass / Bitwarden / Chrome autofill don't
+    // pattern-match on the previous name="website" and drop real
+    // logins silently.
     if (botTrap) {
+      track("login_rejected", { reason: "honeypot", method: "email" });
+      setError("Login blocked. If your password manager filled a hidden field, refresh and try again.");
       return;
     }
-    // Bot check 2 — submission < 1.5s after mount. No human can
-    // enter an email + password that fast. Silently drop.
-    if (Date.now() - mountedAt < 1500) {
+    // Bot check 2 — submission < 800ms after mount (was 1500ms).
+    // Real users paste saved passwords and hit Enter fast; 800ms
+    // still blocks scripted spam that fires within one animation
+    // frame.
+    if (Date.now() - mountedAt < 800) {
+      track("login_rejected", { reason: "too_fast", method: "email" });
+      setError("Slow down a bit and try again.");
       return;
     }
 
@@ -246,11 +256,15 @@ export default function LoginPage() {
 
           {/* Honeypot field — hidden from users via inline styles
               (bots ignore CSS from stylesheets but usually parse
-              inline). Named "website" so bots that pattern-match
-              on common form fields will happily fill it in. */}
+              inline). Renamed from name="website" to a random slug
+              because password managers (1Password, LastPass,
+              Bitwarden, Chrome autofill) commonly fill any field
+              named "website" — including off-screen ones — which
+              was silently rejecting real users. Random names don't
+              pattern-match. */}
           <input
             type="text"
-            name="website"
+            name="fx-check-2b7c"
             tabIndex={-1}
             autoComplete="off"
             value={botTrap}
