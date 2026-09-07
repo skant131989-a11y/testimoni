@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { AskTemplatesClient } from "./client";
+import { StructuredData } from "@/components/seo/structured-data";
+import { PageFAQ } from "@/components/seo/page-faq";
+import { PAGE_FAQS, toolBreadcrumbs } from "@/lib/seo-faqs";
+
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
   title: "Free testimonial ask templates — WhatsApp, email, DM, LinkedIn · Testimoni",
@@ -16,5 +21,19 @@ export const metadata: Metadata = {
 };
 
 export default function AskTemplatesPage() {
-  return <AskTemplatesClient />;
+  return (
+    <>
+      <StructuredData
+        faqs={[...PAGE_FAQS.askTemplates]}
+        faqId={`${SITE_URL}/tools/ask-templates#faq`}
+        breadcrumbs={toolBreadcrumbs("Ask templates", "ask-templates")}
+      />
+      <AskTemplatesClient />
+      <PageFAQ
+        heading="Asking for testimonials FAQ"
+        subheading="Timing, phrasing, and follow-up answered."
+        faqs={PAGE_FAQS.askTemplates}
+      />
+    </>
+  );
 }

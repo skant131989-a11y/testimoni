@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { BeautifierClient } from "./beautifier-client";
+import { StructuredData } from "@/components/seo/structured-data";
+import { PageFAQ } from "@/components/seo/page-faq";
+import { PAGE_FAQS, toolBreadcrumbs } from "@/lib/seo-faqs";
+
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
   title: "Free testimonial card generator — Testimoni",
@@ -16,5 +21,19 @@ export const metadata: Metadata = {
 };
 
 export default function TestimonialCardPage() {
-  return <BeautifierClient />;
+  return (
+    <>
+      <StructuredData
+        faqs={[...PAGE_FAQS.testimonialCard]}
+        faqId={`${SITE_URL}/tools/testimonial-card#faq`}
+        breadcrumbs={toolBreadcrumbs("Testimonial card maker", "testimonial-card")}
+      />
+      <BeautifierClient />
+      <PageFAQ
+        heading="Testimonial card FAQ"
+        subheading="Everything about generating and sharing testimonial cards."
+        faqs={PAGE_FAQS.testimonialCard}
+      />
+    </>
+  );
 }

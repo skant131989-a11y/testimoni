@@ -4,6 +4,11 @@ import { Check, X, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
 import { TrackedLink } from "@/components/tracked-link";
+import { StructuredData } from "@/components/seo/structured-data";
+import { PageFAQ } from "@/components/seo/page-faq";
+import { PAGE_FAQS, vsBreadcrumbs } from "@/lib/seo-faqs";
+
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
   title: "Testimonial.to alternative — Paste a Tweet, Free Wall of Love",
@@ -61,6 +66,11 @@ const rows: Row[] = [
 export default function TestimonialToVsPage() {
   return (
     <div className="flex min-h-screen flex-col">
+      <StructuredData
+        faqs={[...PAGE_FAQS.vsTestimonialTo]}
+        faqId={`${SITE_URL}/vs/testimonial-to#faq`}
+        breadcrumbs={vsBreadcrumbs("Testimonial.to", "testimonial-to")}
+      />
       <PublicNav />
 
       <main className="flex-1 py-16">
@@ -213,6 +223,12 @@ export default function TestimonialToVsPage() {
           </div>
         </div>
       </main>
+
+      <PageFAQ
+        heading="Testimoni vs Testimonial.to FAQ"
+        subheading="Five questions we get from people choosing between us."
+        faqs={PAGE_FAQS.vsTestimonialTo}
+      />
 
       <footer className="border-t py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">

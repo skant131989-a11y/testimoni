@@ -4,6 +4,11 @@ import { Check, X, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
 import { TrackedLink } from "@/components/tracked-link";
+import { StructuredData } from "@/components/seo/structured-data";
+import { PageFAQ } from "@/components/seo/page-faq";
+import { PAGE_FAQS, vsBreadcrumbs } from "@/lib/seo-faqs";
+
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
   title: "Senja alternative — Paste a Tweet, Free Wall of Love",
@@ -64,6 +69,14 @@ const rows: Row[] = [
 export default function SenjaVsPage() {
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Per-page structured data — comparison FAQs answering the
+          typical "X vs Y" queries. Breadcrumbs render `Home ›
+          Compare › Testimoni vs Senja` under the SERP link. */}
+      <StructuredData
+        faqs={[...PAGE_FAQS.vsSenja]}
+        faqId={`${SITE_URL}/vs/senja#faq`}
+        breadcrumbs={vsBreadcrumbs("Senja", "senja")}
+      />
       <PublicNav />
 
       <main className="flex-1 py-16">
@@ -218,6 +231,12 @@ export default function SenjaVsPage() {
           </div>
         </div>
       </main>
+
+      <PageFAQ
+        heading="Testimoni vs Senja FAQ"
+        subheading="Five questions we get from people comparing the two."
+        faqs={PAGE_FAQS.vsSenja}
+      />
 
       <footer className="border-t py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">

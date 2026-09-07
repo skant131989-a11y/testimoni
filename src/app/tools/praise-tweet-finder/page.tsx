@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { PraiseTweetFinderClient } from "./client";
+import { StructuredData } from "@/components/seo/structured-data";
+import { PageFAQ } from "@/components/seo/page-faq";
+import { PAGE_FAQS, toolBreadcrumbs } from "@/lib/seo-faqs";
+
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
   title: "Praise tweet finder — for founders, creators & freelancers · Testimoni",
@@ -16,5 +21,22 @@ export const metadata: Metadata = {
 };
 
 export default function PraiseTweetFinderPage() {
-  return <PraiseTweetFinderClient />;
+  return (
+    <>
+      <StructuredData
+        faqs={[...PAGE_FAQS.praiseTweetFinder]}
+        faqId={`${SITE_URL}/tools/praise-tweet-finder#faq`}
+        breadcrumbs={toolBreadcrumbs(
+          "Praise tweet finder",
+          "praise-tweet-finder"
+        )}
+      />
+      <PraiseTweetFinderClient />
+      <PageFAQ
+        heading="Praise tweet finder FAQ"
+        subheading="How the search works and what happens after you find one."
+        faqs={PAGE_FAQS.praiseTweetFinder}
+      />
+    </>
+  );
 }

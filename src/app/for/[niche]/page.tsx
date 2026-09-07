@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { NICHES, getNiche } from "@/lib/niches";
 import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
+import { StructuredData } from "@/components/seo/structured-data";
 import { ExitIntent } from "@/components/exit-intent";
 
 interface PageProps {
@@ -41,13 +42,60 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
+
+// Per-niche FAQ generator. Each niche gets its OWN set of 5 questions
+// so Google surfaces distinct FAQ rich results for /for/photographers
+// vs /for/shopify vs /for/agencies — instead of one folded blob. The
+// question phrasing swaps in the audience noun so it reads natural in
+// SERP snippets and matches how people actually search ("testimonial
+// tool for photographers", not just "testimonial tool").
+function buildNicheFaqs(audience: string) {
+  return [
+    {
+      question: `Is Testimoni free for ${audience}?`,
+      answer: `Yes. The free forever plan includes 10 testimonials, 1 collection form, 1 widget, and a hosted Wall of Love URL — no credit card. Pro is $9/month or ₹499/month for unlimited testimonials, forms, widgets, and video testimonials.`,
+    },
+    {
+      question: `How do ${audience} collect testimonials with Testimoni?`,
+      answer: `Two paths. Path A: paste any public X/Twitter, LinkedIn, Reddit, Hacker News, or Product Hunt URL where a customer praised you — Testimoni pulls the text and author in 30 seconds. Path B: share a collection form via link, embed script, iframe, email, or QR code with your customers, and their responses land in your inbox for one-click approval.`,
+    },
+    {
+      question: `Can ${audience} embed Testimoni on Framer, Webflow, WordPress, or Shopify?`,
+      answer: `Yes. One line of JavaScript embeds a Wall of Love widget on any site. Shadow DOM isolation prevents CSS conflicts. Alternatively, share the free hosted Wall of Love URL — every workspace gets one at testimoni.io/w/your-workspace.`,
+    },
+    {
+      question: `Does Testimoni support video testimonials for ${audience}?`,
+      answer: `Yes. Every plan includes 1 free video testimonial. Pro unlocks unlimited video testimonials with hosted playback, no extra storage cost.`,
+    },
+    {
+      question: `How long does setup take for ${audience}?`,
+      answer: `About 30 seconds for the first testimonial. Paste a customer tweet on the home page (no signup needed to preview), see the card render live, then sign up to save it. The Wall of Love URL is live the moment you create your workspace.`,
+    },
+  ];
+}
+
 export default async function NichePage({ params }: PageProps) {
   const { niche: slug } = await params;
   const niche = getNiche(slug);
   if (!niche) notFound();
+  const nicheFaqs = buildNicheFaqs(niche.audience);
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Per-page structured data — the FAQPage schema uses niche-
+          specific questions so Google surfaces distinct rich results
+          for each /for/[niche] URL. Breadcrumbs improve CTR by
+          rendering `Home › For › {Audience}` under the SERP link. */}
+      <StructuredData
+        faqs={nicheFaqs}
+        faqId={`${SITE_URL}/for/${niche.slug}#faq`}
+        breadcrumbs={[
+          { name: "Home", url: SITE_URL },
+          { name: "Audiences", url: `${SITE_URL}/for` },
+          { name: niche.audience, url: `${SITE_URL}/for/${niche.slug}` },
+        ]}
+      />
       {/* Header */}
       <header className="border-b bg-background">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
@@ -249,6 +297,43 @@ export default async function NichePage({ params }: PageProps) {
                   </p>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Visible FAQ section — mirrors the schema.org FAQPage
+          markup above so users AND Google see the same 5 questions.
+          Google renders these as expandable accordions in SERP
+          rich results — big CTR win. Uses <details>/<summary> for
+          zero-JS accordion + accessible by default. */}
+      <section className="border-t bg-muted/10 py-16">
+        <div className="mx-auto max-w-3xl px-4">
+          <h2 className="text-3xl font-bold tracking-tight">
+            {niche.audience} FAQ
+          </h2>
+          <p className="mt-2 text-muted-foreground">
+            Quick answers to the questions {niche.audience.toLowerCase()} ask
+            most before signing up.
+          </p>
+          <div className="mt-8 space-y-3">
+            {nicheFaqs.map((faq) => (
+              <details
+                key={faq.question}
+                className="group rounded-lg border bg-card px-5 py-4"
+              >
+                <summary className="cursor-pointer list-none text-base font-semibold marker:hidden">
+                  <span className="flex items-start justify-between gap-3">
+                    <span>{faq.question}</span>
+                    <span className="mt-0.5 text-primary transition-transform group-open:rotate-180">
+                      ⌄
+                    </span>
+                  </span>
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  {faq.answer}
+                </p>
+              </details>
             ))}
           </div>
         </div>
