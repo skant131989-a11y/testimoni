@@ -423,23 +423,23 @@ export default function DemoClient() {
           </Link>
           <div className="flex items-center gap-3">
             {/* Standardized nav to match /w/demo + /tools/* + home:
-                Live Demo · Free Tools · Pricing · Log in · CTA.
-                Dropped the "Interactive Demo" badge that used to sit
-                here — it was cute but broke the nav consistency
-                across pages. */}
-            {!isLoggedIn && (
-              <div className="hidden items-center gap-5 md:flex">
-                <TrackedLink cta="demo_nav_live_demo" surface="demo" href="/demo" className="text-sm font-medium text-primary hover:underline">
-                  Live Demo
-                </TrackedLink>
-                <TrackedLink cta="demo_nav_tools" surface="demo" href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
-                  Free Tools
-                </TrackedLink>
-                <TrackedLink cta="demo_nav_pricing" surface="demo" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
-                  Pricing
-                </TrackedLink>
-              </div>
-            )}
+                Live Demo · Free Tools · Pricing · [CTA].
+                Rendered UNCONDITIONALLY (was previously gated by
+                !isLoggedIn, which meant logged-in visitors saw only
+                the Dashboard button and no nav links at all — no
+                way back to Free Tools or Pricing without hitting the
+                logo). Home page never hid these; parity restored. */}
+            <div className="hidden items-center gap-5 md:flex">
+              <TrackedLink cta="demo_nav_live_demo" surface="demo" href="/demo" className="text-sm font-medium text-primary hover:underline">
+                Live Demo
+              </TrackedLink>
+              <TrackedLink cta="demo_nav_tools" surface="demo" href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
+                Free Tools
+              </TrackedLink>
+              <TrackedLink cta="demo_nav_pricing" surface="demo" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
+                Pricing
+              </TrackedLink>
+            </div>
             {isLoggedIn ? (
               <Link href="/dashboard">
                 <Button size="sm">Dashboard</Button>

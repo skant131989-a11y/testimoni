@@ -12,16 +12,18 @@ import { Sparkles } from "lucide-react";
  * provisioned. But without this splash, they see the paste form
  * cold and read the page as static. The rotating text gives their
  * brain the "wow, they set this up fast" story that a real signup
- * moment deserves. Same pattern Notion, Linear, Loom use.
+ * moment deserves.
  *
- * Total time: 4 steps × ~700ms = ~2.8s. Then fade + reveal.
+ * Total time: 3 steps × 400ms + 150ms buffer + 300ms fade ≈ 1.65s
+ * (previously ~3.3s). Users complained the welcome page felt slow;
+ * shortening the splash was the single biggest perceived-speed win
+ * because it was the very first thing they saw post-signup.
  * If the user is NOT a new signup (returning, mid-flow), splash
  * skips entirely.
  */
 const STEPS = [
   "Creating your workspace…",
-  "Spinning up your collection form…",
-  "Building your first widget…",
+  "Building your form + widget…",
   "Preparing your Wall of Love URL…",
 ];
 
@@ -40,19 +42,22 @@ export function WelcomeSplash({ active }: Props) {
       setVisible(false);
       return;
     }
-    // Advance one step every ~700ms. On the last step's tick, fade
+    // Advance one step every ~400ms (was 700ms — too slow post-signup,
+    // real perceived-slowness culprit). On the last step's tick, fade
     // out — the reveal is a CSS transition, not a hard swap.
     const t = setInterval(() => {
       setStep((s) => {
         if (s + 1 >= STEPS.length) {
           clearInterval(t);
-          // Give the last step ~500ms of read time before fading.
-          setTimeout(() => setVisible(false), 500);
+          // Give the last step ~150ms of read time before fading
+          // (was 500ms — the whole splash used to burn ~3.3s post-
+          // signup which read as "the app is slow" not "wow, quick").
+          setTimeout(() => setVisible(false), 150);
           return s;
         }
         return s + 1;
       });
-    }, 700);
+    }, 400);
     return () => clearInterval(t);
   }, [active]);
 
@@ -60,7 +65,7 @@ export function WelcomeSplash({ active }: Props) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-background transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-background transition-opacity duration-300 ${
         visible ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
       aria-hidden={!visible}
@@ -92,7 +97,7 @@ export function WelcomeSplash({ active }: Props) {
         </div>
 
         <p className="mt-8 text-xs text-muted-foreground">
-          Setting up your workspace — 2 seconds.
+          Setting up your workspace — 1 second.
         </p>
       </div>
     </div>

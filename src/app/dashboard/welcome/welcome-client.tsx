@@ -269,17 +269,21 @@ export function WelcomeClient({
   // form URL (dashboard layout provisioning + this page's query
   // race-conditioned, or a Prisma read-replica returned stale rows),
   // the client is otherwise stuck showing "Setting up your form and
-  // widget…" forever. Poll with router.refresh() every 2s, up to 5x,
-  // to give provisioning a chance to complete + re-render server
-  // components with the new form URL.
+  // widget…" forever. Poll with router.refresh() up to 5x. Cadence
+  // starts at 600ms and doubles each attempt (600 → 1200 → 2400 →
+  // 4800 → 9600ms) — was previously fixed 2s × 5 = up to 10s of
+  // spinner even when the DB was actually ready 100ms in. In
+  // practice the layout $transaction commits before this page's
+  // findUnique so retry #0 catches it almost always.
   const refreshAttempts = useRef(0);
   useEffect(() => {
     if (defaultFormUrl) return;
     if (refreshAttempts.current >= 5) return;
+    const delay = 600 * Math.pow(2, refreshAttempts.current);
     const t = setTimeout(() => {
       refreshAttempts.current += 1;
       router.refresh();
-    }, 2000);
+    }, delay);
     return () => clearTimeout(t);
   }, [defaultFormUrl, router]);
 

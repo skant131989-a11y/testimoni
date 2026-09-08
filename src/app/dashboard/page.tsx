@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import {
   MessageSquareQuote,
@@ -16,20 +17,21 @@ import { prisma } from "@/lib/prisma";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { MilestoneNudge } from "@/components/milestone-nudge";
 import { VideoFreeBanner } from "@/components/video-free-banner";
 import { FormUrlCard } from "@/components/form-url-card";
-import { DashboardEmptyState } from "@/components/dashboard-empty-state";
 import { TrackedLink } from "@/components/tracked-link";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
 import { getEffectiveLimits } from "@/lib/plan";
+import {
+  RecentTestimonialsCard,
+  RecentTestimonialsSkeleton,
+} from "./recent-testimonials";
 
 interface StatsCardProps {
   title: string;
@@ -110,13 +112,19 @@ export default async function DashboardPage() {
   // Batch every dashboard read into a single $transaction so Prisma
   // pipelines them as ONE round-trip instead of 10. On serverless with
   // 50-100ms cold DB RTT this cuts dashboard TTFB from ~700ms → ~100ms.
+  //
+  // NOTE: recentTestimonials.findMany is deliberately NOT in this
+  // batch — it's the slowest query (joins on the testimonial row's
+  // wider columns) and blocking above-the-fold stats + FormUrlCard
+  // on it made the dashboard feel sluggish. It now lives in the
+  // <Suspense>-wrapped RecentTestimonialsCard component below and
+  // streams in independently.
   const [
     totalTestimonials,
     approvedTestimonials,
     activeWidgets,
     pendingSubmissions,
     totalImpressions,
-    recentTestimonials,
     defaultWidget,
     defaultForm,
     videoCount,
@@ -136,11 +144,6 @@ export default async function DashboardPage() {
     prisma.widgetAnalytics.aggregate({
       where: { widget: { workspaceId } },
       _sum: { impressions: true },
-    }),
-    prisma.testimonial.findMany({
-      where: { workspaceId },
-      orderBy: { createdAt: "desc" },
-      take: 5,
     }),
     prisma.widget.findFirst({
       where: { workspaceId, isActive: true },
@@ -420,100 +423,17 @@ export default async function DashboardPage() {
         </Button>
       </div>
 
-      {/* Recent testimonials */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Testimonials</CardTitle>
-          <CardDescription>
-            Your latest testimonials across all sources.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {recentTestimonials.length === 0 ? (
-            <div className="py-2">
-              <DashboardEmptyState
-                formUrl={
-                  formShareHref
-                    ? `${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}${formShareHref}`
-                    : null
-                }
-              />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentTestimonials.map((testimonial: (typeof recentTestimonials)[number]) => (
-                <div
-                  key={testimonial.id}
-                  className="flex items-start gap-4 rounded-lg border p-4"
-                >
-                  {/* Avatar */}
-                  {testimonial.customerAvatar ? (
-                    <img
-                      src={testimonial.customerAvatar}
-                      alt={testimonial.customerName}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                      {testimonial.customerName.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">
-                        {testimonial.customerName}
-                      </p>
-                      <Badge
-                        variant={
-                          testimonial.status === "APPROVED"
-                            ? "default"
-                            : testimonial.status === "PENDING"
-                              ? "secondary"
-                              : "outline"
-                        }
-                      >
-                        {testimonial.status.toLowerCase()}
-                      </Badge>
-                    </div>
-                    {testimonial.rating && (
-                      <div className="mt-0.5 flex items-center gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span
-                            key={i}
-                            className={
-                              i < testimonial.rating!
-                                ? "text-yellow-500"
-                                : "text-muted-foreground/30"
-                            }
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                      {testimonial.content}
-                    </p>
-                  </div>
-
-                  {/* Date */}
-                  <time className="shrink-0 text-xs text-muted-foreground">
-                    {new Date(testimonial.createdAt).toLocaleDateString()}
-                  </time>
-                </div>
-              ))}
-
-              <div className="pt-2 text-center">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/dashboard/testimonials">View all testimonials</Link>
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Recent testimonials — streamed in via <Suspense> so the
+          stats + FormUrlCard render immediately and this card fills
+          in when its findMany returns. Was previously part of the
+          big $transaction above and blocked everything on the
+          slowest query. */}
+      <Suspense fallback={<RecentTestimonialsSkeleton />}>
+        <RecentTestimonialsCard
+          workspaceId={workspaceId}
+          formShareHref={formShareHref}
+        />
+      </Suspense>
     </div>
   );
 }
