@@ -24,11 +24,13 @@ import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
+import { TiltCard } from "@/components/tilt-card";
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { HeroScrollLink } from "@/components/hero-scroll-link";
 import { PageEngagement } from "@/components/page-engagement";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
+import { LiveSignupTicker } from "@/components/live-signup-ticker";
 
 export default function LandingPage() {
   return (
@@ -83,6 +85,9 @@ export default function LandingPage() {
               The interactive paste demo lives in the right column
               and IS the primary action for skeptics. */}
           <div>
+            <div className="mb-3">
+              <LiveSignupTicker />
+            </div>
             <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm">
               <Zap className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
               From tweet to embed in 30 seconds
@@ -169,8 +174,11 @@ export default function LandingPage() {
             {/* Pill removed — the sub-headline already promises "no
                 account to preview" and the card itself makes the try-
                 it-now nature obvious. Keeping the pill was redundant
-                repetition. */}
-            <TweetPreviewDemo />
+                repetition. Subtle 3D tilt on cursor for a premium
+                feel — see TiltCard. */}
+            <TiltCard>
+              <TweetPreviewDemo />
+            </TiltCard>
           </div>
         </div>
       </section>

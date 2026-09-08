@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { ImportSourcesRow } from "@/components/import-sources-row";
 import { WelcomeSplash } from "@/components/welcome-splash";
+import { celebrateFirstTestimonial } from "@/lib/confetti";
 import { track, identify } from "@/lib/analytics";
 
 interface ImportedTestimonial {
@@ -243,6 +244,12 @@ export function WelcomeClient({
   // can call the latest version.
   const handleImportRef = useRef<((opts?: { silent?: boolean; urlOverride?: string }) => void) | null>(null);
 
+  // Track whether we've fired the first-testimonial celebration
+  // already this session — the "wow" moment only lands on the
+  // first paste. Subsequent imports on the same page load are
+  // silent (avoids stroboscopic confetti chains).
+  const celebratedRef = useRef(false);
+
   // Absolute form URL — computed in an effect so SSR and first-
   // client render both output the same string (empty), then the
   // effect runs and swaps in the full URL. Doing the join inline
@@ -347,6 +354,13 @@ export function WelcomeClient({
       setImported(data.testimonial);
       if (data.widget?.id) {
         setImportedWidgetId(data.widget.id);
+      }
+      // Cinematic celebration on the very first testimonial. Skip
+      // on subsequent imports (welcome page usually only sees one,
+      // but the ref check is defensive against re-renders).
+      if (!celebratedRef.current) {
+        celebratedRef.current = true;
+        celebrateFirstTestimonial();
       }
       // Reset the fallback state on a successful save so the next
       // URL attempt starts clean.

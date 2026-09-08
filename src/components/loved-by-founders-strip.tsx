@@ -1,24 +1,50 @@
-import { pickDailyPraise } from "@/lib/home-praise";
+"use client";
+
+import { useEffect, useState } from "react";
+import { HOME_PRAISE, pickDailyPraise } from "@/lib/home-praise";
 
 /**
- * "Loved by founders" strip — one hand-curated real testimonial with
- * a link to the source tweet + a link to see the full wall. Same
- * component renders on the home, /pricing, /features, /demo, and any
- * marketing page that needs a low-friction social-proof injection.
+ * "Loved by founders" strip — auto-rotates through the hand-curated
+ * real-testimonial pool. First quote is the deterministic per-UTC-
+ * day pick (see pickDailyPraise), so the strip is stable on first
+ * paint and doesn't hydration-mismatch. After mount, we rotate to
+ * the next quote every 6 seconds with a subtle slide + fade
+ * transition — the page feels alive, users can't scroll past
+ * without noticing.
  *
- * Uses pickDailyPraise() — deterministic per UTC day, so refreshes
- * are stable AND multiple instances on the same page show the same
- * quote (no cognitive dissonance from seeing two different "loved
- * by founders" pull-quotes on the same URL).
- *
- * Two clickable regions instead of one nested <a> (invalid HTML):
+ * Two clickable regions (nested <a> is invalid HTML):
  *   - Left (pill + quote + author) opens the source tweet
  *   - Right ("See all praise →") opens the Wall of Love
  *
- * Server component — zero client bundle.
+ * Client component now — needs setInterval + transition state.
+ * Was a server component before the rotation; kept the same JSX
+ * shell so styling / SSR position is unchanged.
  */
 export function LovedByFoundersStrip() {
-  const praise = pickDailyPraise();
+  const initial = pickDailyPraise();
+  const initialIdx = HOME_PRAISE.findIndex(
+    (p) => p.sourceUrl === initial.sourceUrl
+  );
+  const [index, setIndex] = useState(initialIdx >= 0 ? initialIdx : 0);
+  // Slide direction — used for the enter animation. Always "in from
+  // right" while auto-rotating, so keep it a constant.
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      // Fade the current quote OUT, swap the index, fade IN. The
+      // 250ms out matches the CSS transition on opacity below.
+      setVisible(false);
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % HOME_PRAISE.length);
+        setVisible(true);
+      }, 250);
+    }, 6000);
+    return () => clearInterval(t);
+  }, []);
+
+  const praise = HOME_PRAISE[index];
+
   return (
     <section className="border-b bg-muted/20 py-6">
       <div className="mx-auto max-w-5xl px-4">
@@ -32,10 +58,18 @@ export function LovedByFoundersStrip() {
             <span className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
               Loved by founders
             </span>
-            <blockquote className="min-w-0 flex-1 text-sm italic text-foreground line-clamp-3 sm:text-base sm:line-clamp-2">
+            <blockquote
+              className={`min-w-0 flex-1 text-sm italic text-foreground line-clamp-3 transition-all duration-300 sm:text-base sm:line-clamp-2 ${
+                visible ? "translate-x-0 opacity-100" : "translate-x-2 opacity-0"
+              }`}
+            >
               &ldquo;{praise.content}&rdquo;
             </blockquote>
-            <span className="shrink-0 text-xs text-muted-foreground">
+            <span
+              className={`shrink-0 text-xs text-muted-foreground transition-opacity duration-300 ${
+                visible ? "opacity-100" : "opacity-0"
+              }`}
+            >
               — {praise.customerName}
             </span>
           </a>

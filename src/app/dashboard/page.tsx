@@ -6,9 +6,10 @@ import {
   Inbox,
   Eye,
   Plus,
-  Share2,
   Sparkles,
   ArrowRight,
+  Heart,
+  Search,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
@@ -24,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { MilestoneNudge } from "@/components/milestone-nudge";
 import { VideoFreeBanner } from "@/components/video-free-banner";
 import { FormUrlCard } from "@/components/form-url-card";
+import { DashboardEmptyState } from "@/components/dashboard-empty-state";
 import { TrackedLink } from "@/components/tracked-link";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
@@ -277,7 +279,14 @@ export default async function DashboardPage() {
           so two purple cards stacked would compete for attention.
           Milestone dismissal is per-session so if the user closes
           it, they'll see "Do next" again on the next page load. */}
-      {!MILESTONE_COUNTS.includes(approvedTestimonials) && (
+      {/* Suppress the "Do next" nudge entirely when the user has
+          ZERO testimonials — the new DashboardEmptyState hero below
+          already asks them to paste their first tweet with a bigger,
+          more visual CTA. Two purple cards stacked with the same
+          call-to-action just competes. Milestone dismissal is per-
+          session so if the user closes it, they'll see "Do next"
+          again on the next page load. */}
+      {totalTestimonials > 0 && !MILESTONE_COUNTS.includes(approvedTestimonials) && (
         <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
@@ -365,12 +374,18 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Quick actions */}
+      {/* Quick actions — the 4 things a founder does most from the
+          dashboard: add another testimonial, look at their wall,
+          find more praise on X, and manage their embed widgets.
+          Share Form was removed (redundant with the empty-state
+          inline share flow + the FormUrlCard above); replaced
+          with more actionable "See my Wall" + "Find praise tweets"
+          discovery entrypoints. */}
       <div className="flex flex-wrap items-center gap-3">
         <Button asChild>
           <Link href="/dashboard/import">
             <Plus className="mr-2 h-4 w-4" />
-            Add Testimonial
+            Add testimonial
           </Link>
         </Button>
         <PlanLimitProgress
@@ -379,16 +394,28 @@ export default async function DashboardPage() {
           resource="testimonials"
           upgradeSurface="dashboard_quick_actions"
         />
+        {wallUrl && (
+          <Button variant="outline" asChild>
+            <a href={wallUrl} target="_blank" rel="noopener noreferrer">
+              <Heart className="mr-2 h-4 w-4" />
+              See my Wall
+            </a>
+          </Button>
+        )}
+        <Button variant="outline" asChild>
+          <a
+            href="/tools/praise-tweet-finder"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Search className="mr-2 h-4 w-4" />
+            Find praise tweets
+          </a>
+        </Button>
         <Button variant="outline" asChild>
           <Link href="/dashboard/widgets">
             <Code2 className="mr-2 h-4 w-4" />
-            Manage Widgets
-          </Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/dashboard/collect">
-            <Share2 className="mr-2 h-4 w-4" />
-            Share Form
+            Manage widgets
           </Link>
         </Button>
       </div>
@@ -403,15 +430,14 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent>
           {recentTestimonials.length === 0 ? (
-            <div className="py-8 text-center">
-              <MessageSquareQuote className="mx-auto h-10 w-10 text-muted-foreground/50" />
-              <p className="mt-2 text-sm text-muted-foreground">
-                No testimonials yet. Paste a customer tweet or share
-                your form — either way, live in 30 seconds.
-              </p>
-              <Button className="mt-4" asChild>
-                <Link href="/dashboard/import">Paste your first tweet</Link>
-              </Button>
+            <div className="py-2">
+              <DashboardEmptyState
+                formUrl={
+                  formShareHref
+                    ? `${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}${formShareHref}`
+                    : null
+                }
+              />
             </div>
           ) : (
             <div className="space-y-4">
