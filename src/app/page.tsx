@@ -29,6 +29,7 @@ import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { HeroScrollLink } from "@/components/hero-scroll-link";
 import { PageEngagement } from "@/components/page-engagement";
+import { PageLoadPerf } from "@/components/page-load-perf";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { LiveSignupTicker } from "@/components/live-signup-ticker";
 
@@ -37,6 +38,7 @@ export default function LandingPage() {
     <div className="flex min-h-screen flex-col">
       <StructuredData />
       <PageEngagement surface="home" />
+      <PageLoadPerf surface="home" anonymous />
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">

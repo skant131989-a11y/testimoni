@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { ImportSourcesRow } from "@/components/import-sources-row";
 import { WelcomeSplash } from "@/components/welcome-splash";
+import { PageLoadPerf } from "@/components/page-load-perf";
 import { celebrateFirstTestimonial } from "@/lib/confetti";
 import { track, identify } from "@/lib/analytics";
 
@@ -539,6 +540,7 @@ export function WelcomeClient({
     return (
       <>
         <WelcomeSplash active={isNewSignup} />
+        <PageLoadPerf surface="welcome" />
         <div className="mx-auto max-w-4xl space-y-6 py-6">
           <div className="text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
@@ -831,6 +833,7 @@ export function WelcomeClient({
   return (
     <>
       <WelcomeSplash active={isNewSignup} />
+      <PageLoadPerf surface="welcome" />
       <div className="mx-auto max-w-4xl space-y-6 py-6">
         <div className="text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">

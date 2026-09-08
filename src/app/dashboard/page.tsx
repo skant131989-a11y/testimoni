@@ -25,6 +25,7 @@ import { MilestoneNudge } from "@/components/milestone-nudge";
 import { VideoFreeBanner } from "@/components/video-free-banner";
 import { FormUrlCard } from "@/components/form-url-card";
 import { TrackedLink } from "@/components/tracked-link";
+import { PageLoadPerf } from "@/components/page-load-perf";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
 import { getEffectiveLimits } from "@/lib/plan";
@@ -256,6 +257,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      <PageLoadPerf surface="dashboard" />
       {/* Page heading */}
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
