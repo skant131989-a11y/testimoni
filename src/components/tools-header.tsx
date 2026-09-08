@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TrackedLink } from "@/components/tracked-link";
+import { createClient } from "@/lib/supabase/client";
 
 /**
  * Shared header for /tools pages.
@@ -17,10 +19,29 @@ import { TrackedLink } from "@/components/tracked-link";
  * Tools · Pricing) so users learn navigation once. Free Tools is
  * always active on /tools/* — highlights subtly.
  *
+ * Auth swap: on mount, checks Supabase auth. Logged-in visitors
+ * get a "Dashboard" button instead of "Log in + Get Started Free"
+ * so a signed-in founder using a tool doesn't see marketing chrome
+ * for their own product. Same client-side pattern PublicNavAuth
+ * uses on marketing pages.
+ *
  * Optional `backToTools` prop adds a "← All tools" breadcrumb row
  * on individual tool pages (not on the /tools index itself).
  */
 export function ToolsHeader({ backToTools = false }: { backToTools?: boolean }) {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    createClient()
+      .auth.getUser()
+      .then(({ data }) => {
+        if (!cancelled) setIsLoggedIn(!!data.user);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <header className="border-b bg-background">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
@@ -61,12 +82,24 @@ export function ToolsHeader({ backToTools = false }: { backToTools?: boolean }) 
           >
             Pricing
           </TrackedLink>
-          <TrackedLink cta="tools_nav_login" surface="tools_nav" href="/login">
-            <Button variant="ghost" size="sm">Log in</Button>
-          </TrackedLink>
-          <TrackedLink cta="tools_nav_signup" surface="tools_nav" href="/signup">
-            <Button size="sm">Get Started Free</Button>
-          </TrackedLink>
+          {isLoggedIn ? (
+            <TrackedLink
+              cta="tools_nav_dashboard"
+              surface="tools_nav"
+              href="/dashboard"
+            >
+              <Button size="sm">Dashboard</Button>
+            </TrackedLink>
+          ) : (
+            <>
+              <TrackedLink cta="tools_nav_login" surface="tools_nav" href="/login">
+                <Button variant="ghost" size="sm">Log in</Button>
+              </TrackedLink>
+              <TrackedLink cta="tools_nav_signup" surface="tools_nav" href="/signup">
+                <Button size="sm">Get Started Free</Button>
+              </TrackedLink>
+            </>
+          )}
         </nav>
 
         {/* Mobile — one link + primary CTA. Kept tight. */}
@@ -74,18 +107,20 @@ export function ToolsHeader({ backToTools = false }: { backToTools?: boolean }) 
           <TrackedLink
             cta="tools_nav_mobile_home"
             surface="tools_nav"
-            href="/"
+            href={isLoggedIn ? "/dashboard" : "/"}
             className="text-sm font-medium text-muted-foreground hover:text-foreground"
           >
-            Home
+            {isLoggedIn ? "Dashboard" : "Home"}
           </TrackedLink>
-          <TrackedLink
-            cta="tools_nav_mobile_signup"
-            surface="tools_nav"
-            href="/signup"
-          >
-            <Button size="sm">Start free</Button>
-          </TrackedLink>
+          {!isLoggedIn && (
+            <TrackedLink
+              cta="tools_nav_mobile_signup"
+              surface="tools_nav"
+              href="/signup"
+            >
+              <Button size="sm">Start free</Button>
+            </TrackedLink>
+          )}
         </div>
       </div>
 

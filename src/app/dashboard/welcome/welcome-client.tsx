@@ -473,7 +473,7 @@ export function WelcomeClient({
   // Success state — imported testimonial + wall preview
   if (imported) {
     return (
-      <div className="mx-auto max-w-2xl space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6 py-6">
         <div className="text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
             <Sparkles className="h-7 w-7 text-primary" />
@@ -754,8 +754,15 @@ export function WelcomeClient({
 
   // Empty state — one primary action, one small fallback link, one
   // collapsed secondary. No parallel choices, no "skip" escape hatch.
+  // Container widened to max-w-4xl so the paste-URL + your-form
+  // cards fill more of the viewport horizontally on desktop
+  // (previously max-w-2xl left ~500px of blank margin on either
+  // side, which read as "nothing here"). Mobile is untouched — the
+  // grid stacks. Below the cards, we also drop in a 3-card
+  // engagement grid so first-run users have concrete next steps
+  // visible without scrolling into a wall of white.
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6 py-6">
       <div className="text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
           <Sparkles className="h-7 w-7 text-primary" />
@@ -851,8 +858,15 @@ export function WelcomeClient({
                 <button
                   type="button"
                   onClick={() => {
+                    // A real, current tweet praising Testimoni (also
+                    // used on the home page's "Loved by founders"
+                    // strip). Verified alive via the tweet-preview
+                    // syndication path. Was previously a deleted
+                    // Vercel tweet from 2022 — first user to click
+                    // hit a 404 and thought the product was broken.
+                    // Refresh this URL when it starts feeling stale.
                     const exampleUrl =
-                      "https://twitter.com/vercel/status/1584080605893484544";
+                      "https://x.com/octaviamotion1/status/2096818332993458576";
                     setUrl(exampleUrl);
                     track("welcome_example_url_used");
                   }}
@@ -1083,6 +1097,69 @@ export function WelcomeClient({
             )}
           </Button>
         </div>
+      </div>
+
+      {/* First-run engagement grid — three concrete next-steps
+          visible without scrolling into the empty white space
+          below. Each card opens in a new tab (target="_blank") so
+          the welcome tab stays where they came from and doesn't
+          lose the paste-URL context. */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <a
+          href="/tools/ask-templates"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex flex-col rounded-xl border bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
+        >
+          <div className="text-2xl">✍️</div>
+          <p className="mt-2 text-sm font-semibold">
+            Get 3 templates to ask
+          </p>
+          <p className="mt-1 flex-1 text-xs text-muted-foreground">
+            Copy-paste WhatsApp, email, or LinkedIn DMs proven to
+            get a testimonial back in a day.
+          </p>
+          <span className="mt-3 text-xs font-medium text-primary group-hover:underline">
+            Open templates →
+          </span>
+        </a>
+        <a
+          href="/w/cmtedlomj0009w0btzyi3yweh"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex flex-col rounded-xl border bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
+        >
+          <div className="text-2xl">🩷</div>
+          <p className="mt-2 text-sm font-semibold">
+            See a real Wall of Love
+          </p>
+          <p className="mt-1 flex-1 text-xs text-muted-foreground">
+            Neha&rsquo;s wall — actual testimonials, live. Yours can
+            look like this in 30 seconds.
+          </p>
+          <span className="mt-3 text-xs font-medium text-primary group-hover:underline">
+            View wall →
+          </span>
+        </a>
+        <a
+          href="/tools/praise-tweet-finder"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex flex-col rounded-xl border bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
+        >
+          <div className="text-2xl">🔎</div>
+          <p className="mt-2 text-sm font-semibold">
+            Find your praise tweets
+          </p>
+          <p className="mt-1 flex-1 text-xs text-muted-foreground">
+            Search X for existing praise about your work. Each result
+            has a <span className="font-medium text-primary">Save to my Wall</span> button
+            that lands the tweet here in one click.
+          </p>
+          <span className="mt-3 text-xs font-medium text-primary group-hover:underline">
+            Find my praise →
+          </span>
+        </a>
       </div>
     </div>
   );

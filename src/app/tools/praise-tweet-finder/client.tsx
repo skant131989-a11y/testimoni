@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { track } from "@/lib/analytics";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
+import { createClient } from "@/lib/supabase/client";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
 
@@ -54,6 +55,27 @@ const DEFAULT_KEYWORDS: Keyword[] = ["love", "amazing", "recommend"];
 export function PraiseTweetFinderClient() {
   const [handle, setHandle] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set(DEFAULT_KEYWORDS));
+  // Detect signed-in visitors so <TweetPreviewDemo /> renders a
+  // "Save to my Wall" button (posts to /api/testimonials/import-url
+  // and lands the tweet in the caller's workspace instantly) instead
+  // of the "Sign up to save" CTA. Ties the praise tweet finder into
+  // the founder's welcome-page flow: find → click → saved → back.
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.auth.getUser();
+        if (!cancelled) setIsLoggedIn(!!data.user);
+      } catch {
+        // Silent — auth failure just falls back to anonymous flow.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /**
    * Normalize the handle the user typed. We strip common decorations
@@ -272,11 +294,14 @@ export function PraiseTweetFinderClient() {
               <Sparkles className="h-3 w-3" /> Found a good one?
             </div>
             <h2 className="text-2xl font-bold">
-              Paste it here to save.
+              {isLoggedIn
+                ? "Paste it here — 1 click and it's on your wall."
+                : "Paste it here to save."}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              We&apos;ll pull the author, text, and rating right now — no
-              signup needed. Sign up when you like what you see.
+              {isLoggedIn
+                ? "We'll pull the author, text, and rating. Click Save to my Wall and it lands as an approved testimonial in your workspace — no leaving this tab."
+                : "We'll pull the author, text, and rating right now — no signup needed. Sign up when you like what you see."}
             </p>
           </div>
 
@@ -286,20 +311,35 @@ export function PraiseTweetFinderClient() {
               preview in sessionStorage and routes to signup so the
               welcome page can auto-import. */}
           <div className="mx-auto max-w-md">
-            <TweetPreviewDemo />
+            <TweetPreviewDemo isLoggedIn={isLoggedIn} />
           </div>
 
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            Or{" "}
-            <Link
-              href="/signup?tool=praise-tweet-finder"
-              onClick={() => track("praise_finder_signup_direct")}
-              className="font-semibold text-primary hover:underline"
-            >
-              sign up first
-            </Link>{" "}
-            and paste from the dashboard.
-          </p>
+          {isLoggedIn ? (
+            <p className="mt-6 text-center text-xs text-muted-foreground">
+              Or paste it on your{" "}
+              <Link
+                href="/dashboard/import"
+                onClick={() =>
+                  track("praise_finder_dashboard_import", { auth: "logged_in" })
+                }
+                className="font-semibold text-primary hover:underline"
+              >
+                dashboard import page →
+              </Link>
+            </p>
+          ) : (
+            <p className="mt-6 text-center text-xs text-muted-foreground">
+              Or{" "}
+              <Link
+                href="/signup?tool=praise-tweet-finder"
+                onClick={() => track("praise_finder_signup_direct")}
+                className="font-semibold text-primary hover:underline"
+              >
+                sign up first
+              </Link>{" "}
+              and paste from the dashboard.
+            </p>
+          )}
         </div>
       </main>
 
@@ -312,7 +352,10 @@ export function PraiseTweetFinderClient() {
         </div>
       </footer>
 
-      <ExitIntent surface="tools_praise_tweet_finder" />
+      {/* Exit-intent signup nudge — only for anonymous visitors.
+          Logged-in users don't need a "sign up!" pop-up when they
+          try to leave a tool page. */}
+      {!isLoggedIn && <ExitIntent surface="tools_praise_tweet_finder" />}
     </div>
   );
 }
