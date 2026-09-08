@@ -31,6 +31,12 @@ export default function SignupPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isMagicLoading, setIsMagicLoading] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
+  // When email verification is enabled in Supabase Auth, signUp returns
+  // a user but NO session. The user must click a link in their inbox
+  // before they can log in. We flip verificationSent=true and render a
+  // "check your inbox" panel instead of trying to redirect (which
+  // would bounce off /dashboard auth-guard).
+  const [verificationSent, setVerificationSent] = useState(false);
   // Honeypot + mount timestamp — same anti-bot pattern as the login
   // form. Silent reject; bots credential-stuff both endpoints.
   const [botTrap, setBotTrap] = useState("");
@@ -79,8 +85,19 @@ export default function SignupPage() {
         return;
       }
 
-      // With email confirmation off in Supabase, signUp returns a
-      // session immediately — drop the user straight into welcome.
+      // Email verification path — Supabase returns a user but no
+      // session when confirmation is required. Show the check-inbox
+      // panel and STOP. The user clicks the emailed link, /callback
+      // exchanges the code for a session, then routes to
+      // /dashboard/welcome.
+      if (data.user && !data.session) {
+        track("signup_verification_sent", { method: "email" }, { instant: true });
+        setVerificationSent(true);
+        return;
+      }
+
+      // Verification off / user already confirmed — session is present.
+      // Drop them straight into welcome.
       if (data.user?.id) {
         resetAnalytics();
         identify(data.user.id, { email });
@@ -149,21 +166,101 @@ export default function SignupPage() {
 
   return (
     <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">
-          {isImportFlow
-            ? "One more step — save your testimonial"
-            : "Get your Wall of Love in 30 seconds"}
-        </CardTitle>
-        <CardDescription>
-          {isImportFlow
-            ? "The tweet you just imported is waiting in your workspace. Sign up and we'll drop it on your Wall of Love."
-            : "Free forever · No credit card"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+      {verificationSent ? (
+        // Post-signup "check your inbox" state. Replaces the form so
+        // the user can't accidentally re-submit while they wait for
+        // the verification email. Resend button re-triggers signup
+        // (Supabase treats a second signUp with the same email as
+        // "resend confirmation" when the user is still unconfirmed).
+        <>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl">Check your inbox</CardTitle>
+            <CardDescription>
+              We sent a confirmation link to{" "}
+              <span className="font-medium text-foreground">{email}</span>.
+              Click it and you&rsquo;re in.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+              <p className="font-semibold text-foreground">While you wait:</p>
+              <ul className="mt-2 space-y-1.5 text-muted-foreground">
+                <li>
+                  &bull; Link expires in 24 hours — click it soon
+                </li>
+                <li>
+                  &bull; Not in your inbox? Check spam / promotions
+                </li>
+                <li>
+                  &bull; Wrong email? Refresh and try again
+                </li>
+              </ul>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={async () => {
+                try {
+                  const supabase = createClient();
+                  const { error: resendError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                      emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent("/dashboard/welcome")}`,
+                    },
+                  });
+                  if (resendError) {
+                    setError(resendError.message);
+                    return;
+                  }
+                  track("signup_verification_resent", { method: "email" });
+                } catch {
+                  setError("Couldn't resend. Try again in a moment.");
+                }
+              }}
+            >
+              Resend confirmation email
+            </Button>
+            {error && (
+              <p className="text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            )}
+          </CardContent>
+          <CardFooter>
+            <p className="text-center text-sm text-muted-foreground w-full">
+              Wrong email?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setVerificationSent(false);
+                  setError(null);
+                }}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Start over
+              </button>
+            </p>
+          </CardFooter>
+        </>
+      ) : (
+        <>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl">
+              {isImportFlow
+                ? "One more step — save your testimonial"
+                : "Get your Wall of Love in 30 seconds"}
+            </CardTitle>
+            <CardDescription>
+              {isImportFlow
+                ? "The tweet you just imported is waiting in your workspace. Sign up and we'll drop it on your Wall of Love."
+                : "Free forever · No credit card"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
@@ -299,6 +396,8 @@ export default function SignupPage() {
           </Link>
         </p>
       </CardFooter>
+        </>
+      )}
     </Card>
   );
 }
