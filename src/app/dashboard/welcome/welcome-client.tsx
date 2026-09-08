@@ -242,10 +242,20 @@ export function WelcomeClient({
   // can call the latest version.
   const handleImportRef = useRef<((opts?: { silent?: boolean; urlOverride?: string }) => void) | null>(null);
 
-  const fullFormUrl =
-    typeof window !== "undefined" && defaultFormUrl
-      ? `${window.location.origin}${defaultFormUrl}`
-      : defaultFormUrl;
+  // Absolute form URL — computed in an effect so SSR and first-
+  // client render both output the same string (empty), then the
+  // effect runs and swaps in the full URL. Doing the join inline
+  // with `typeof window !== "undefined"` triggered React's
+  // hydration mismatch — server rendered the relative path,
+  // client rendered origin+path on the same node.
+  const [fullFormUrl, setFullFormUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (defaultFormUrl) {
+      setFullFormUrl(`${window.location.origin}${defaultFormUrl}`);
+    } else {
+      setFullFormUrl(null);
+    }
+  }, [defaultFormUrl]);
 
   // Provisioning-race safety net: if the server rendered without a
   // form URL (dashboard layout provisioning + this page's query
@@ -268,19 +278,32 @@ export function WelcomeClient({
   // Fall back to the id passed in from the server if the API response
   // doesn't carry one for any reason.
   const effectiveWidgetId = importedWidgetId ?? defaultWidgetId;
-  const wallUrl =
-    typeof window !== "undefined" && effectiveWidgetId
-      ? `${window.location.origin}/w/${effectiveWidgetId}`
-      : effectiveWidgetId
-        ? `/w/${effectiveWidgetId}`
-        : null;
+  // Wall URL — same effect pattern as fullFormUrl above. Server and
+  // first-client render both output null, then the effect swaps in
+  // the origin-prefixed URL. Doing this inline with `typeof window
+  // !== "undefined"` mismatches hydration.
+  const [wallUrl, setWallUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (effectiveWidgetId) {
+      setWallUrl(`${window.location.origin}/w/${effectiveWidgetId}`);
+    } else {
+      setWallUrl(null);
+    }
+  }, [effectiveWidgetId]);
 
   // One-line embed snippet for the default widget. Ships the same shape
   // as the dashboard's Embed page (div anchor + async script) — swapping
   // in later is a copy-paste. Kept as a single string so we can pass it
   // straight to clipboard.
-  const embedOrigin =
-    typeof window !== "undefined" ? window.location.origin : "https://testimoni.io";
+  // Embed origin — same hydration-safe pattern as wallUrl / fullFormUrl.
+  // SSR renders the production URL as a placeholder; the client effect
+  // swaps in the actual origin on mount. Without this, the <code> block
+  // rendering the snippet would flip between testimoni.io (SSR) and
+  // localhost:3000 (client hydration) and trip React's mismatch check.
+  const [embedOrigin, setEmbedOrigin] = useState("https://testimoni.io");
+  useEffect(() => {
+    setEmbedOrigin(window.location.origin);
+  }, []);
   const embedSnippet = effectiveWidgetId
     ? `<div id="fw-${effectiveWidgetId}"></div>\n<script src="${embedOrigin}/embed/widget.js" data-widget-id="${effectiveWidgetId}" async></script>`
     : null;
