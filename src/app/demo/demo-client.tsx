@@ -235,6 +235,11 @@ export default function DemoClient() {
   const [signupError, setSignupError] = useState<string | null>(null);
   const [signupLoading, setSignupLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  // Email-verification state — when Supabase's Confirm Email is on,
+  // signUp() returns a user but no session. Swap the demo signup
+  // form for a check-inbox message instead of redirecting (which
+  // would bounce off /dashboard's auth guard).
+  const [demoVerificationSent, setDemoVerificationSent] = useState(false);
 
   async function handleInlineSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -247,7 +252,7 @@ export default function DemoClient() {
     track("signup_started", { method: "email", source: "demo_keep" });
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
         options: {
@@ -259,10 +264,15 @@ export default function DemoClient() {
         setSignupError(authError.message);
         return;
       }
+      // Verification-required path — Supabase returns user + null
+      // session. Show inline confirmation state; do NOT redirect
+      // (auth guard would bounce them).
+      if (data.user && !data.session) {
+        track("signup_verification_sent", { method: "email", source: "demo_keep" }, { instant: true });
+        setDemoVerificationSent(true);
+        return;
+      }
       track("signup_completed", { method: "email", source: "demo_keep" });
-      // Whether Supabase issued a session or is emailing a verification
-      // link, land the user on /dashboard/welcome — middleware bounces
-      // to /login if verification is required and they aren't confirmed yet.
       window.location.assign("/dashboard/welcome?src=demo");
     } catch {
       track("signup_failed", { method: "email", source: "demo_keep", error: "unknown" });
@@ -884,6 +894,40 @@ export default function DemoClient() {
 
               {/* Right — inline signup form */}
               <div className="rounded-xl border bg-background p-5 shadow-sm">
+                {demoVerificationSent ? (
+                  <div className="space-y-3 text-center">
+                    <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                      <span className="text-lg">📬</span>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold">
+                        Check your inbox
+                      </h3>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        We sent a confirmation link to{" "}
+                        <span className="font-medium text-foreground">
+                          {signupEmail}
+                        </span>
+                        . Click it and you&rsquo;re in.
+                      </p>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Link expires in 24 hours · Not in your inbox?
+                      Check spam / promotions
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDemoVerificationSent(false);
+                        setSignupError(null);
+                      }}
+                      className="text-[11px] font-medium text-muted-foreground hover:text-foreground"
+                    >
+                      Wrong email? Start over
+                    </button>
+                  </div>
+                ) : (
+                <>
                 <form onSubmit={handleInlineSignup} className="space-y-3">
                   <div>
                     <Label htmlFor="demo-signup-email" className="text-xs">
@@ -990,6 +1034,8 @@ export default function DemoClient() {
                   and{" "}
                   <Link href="/privacy" className="underline">Privacy Policy</Link>.
                 </p>
+                </>
+                )}
               </div>
             </div>
           </div>

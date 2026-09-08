@@ -24,6 +24,11 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  // Email-verification state — when Supabase's Confirm Email is on,
+  // signUp() returns a user but no session. We swap the form for an
+  // inline "check your inbox" panel instead of trying to redirect
+  // (which would bounce off /dashboard's auth guard).
+  const [verificationSent, setVerificationSent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -46,6 +51,14 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
       if (authError) {
         setError(authError.message);
         track("signup_failed", { method: "email", source, error: authError.message });
+        return;
+      }
+      // Verification-required path — signUp returns user + null
+      // session. Show inline confirmation state and STOP. Do not
+      // identify() (no session to attribute to) and do not redirect.
+      if (data.user && !data.session) {
+        track("signup_verification_sent", { method: "email", source }, { instant: true });
+        setVerificationSent(true);
         return;
       }
       if (data.user?.id) identify(data.user.id, { email });
@@ -83,7 +96,75 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
 
   return (
     <div className="rounded-xl border bg-background p-5 shadow-sm">
-      <form onSubmit={handleSubmit} className="space-y-3">
+      {verificationSent ? (
+        // Compact check-inbox state — the InlineSignup lives on
+        // marketing pages (home, pricing, features, demo, wall,
+        // /for/[niche]) so it stays tight, not full-page.
+        <div className="space-y-3 text-center">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            <span className="text-lg">📬</span>
+          </div>
+          <div>
+            <h3 className="text-base font-semibold">Check your inbox</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              We sent a confirmation link to{" "}
+              <span className="font-medium text-foreground">{email}</span>.
+              Click it and you&rsquo;re in.
+            </p>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Link expires in 24 hours · Not in your inbox? Check
+            spam / promotions
+          </p>
+          <div className="flex flex-col gap-2 pt-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                setError(null);
+                try {
+                  const supabase = createClient();
+                  const { error: resendError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                      emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent(`/dashboard/welcome?src=${source}`)}`,
+                    },
+                  });
+                  if (resendError) {
+                    setError(resendError.message);
+                    return;
+                  }
+                  track("signup_verification_resent", { method: "email", source });
+                } catch {
+                  setError("Couldn't resend. Try again in a moment.");
+                }
+              }}
+              className="w-full"
+            >
+              Resend confirmation
+            </Button>
+            <button
+              type="button"
+              onClick={() => {
+                setVerificationSent(false);
+                setError(null);
+              }}
+              className="text-[11px] font-medium text-muted-foreground hover:text-foreground"
+            >
+              Wrong email? Start over
+            </button>
+          </div>
+          {error && (
+            <p className="text-xs text-destructive" role="alert">
+              {error}
+            </p>
+          )}
+        </div>
+      ) : (
+        <>
+          <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <Label htmlFor={`${idPrefix}-email`} className="text-xs">
             Email
@@ -171,6 +252,8 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
         and{" "}
         <Link href="/privacy" className="underline">Privacy Policy</Link>.
       </p>
+        </>
+      )}
     </div>
   );
 }
