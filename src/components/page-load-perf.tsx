@@ -1,38 +1,49 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { track } from "@/lib/analytics";
 
 /**
  * Fires ONE `page_load_perf` event per page mount with the browser's
- * own navigation-timing numbers. Drop this in server pages that want
- * real load-time telemetry (home, dashboard, welcome).
+ * navigation-timing numbers. Drop this in server pages that want real
+ * load-time telemetry (home, dashboard, welcome).
  *
- * What each field means:
- *   ttfb_ms    — server-response time. Time from nav start until the
- *                first byte of the document arrived. This is the
- *                clearest "is the backend slow?" signal.
- *   dcl_ms     — DOMContentLoaded. HTML parsed + sync scripts done.
- *   load_ms    — full window "load" event: images, fonts, scripts.
- *   fcp_ms    — First Contentful Paint. When the user first sees
- *                anything painted (text, image, etc.).
- *   lcp_ms    — Largest Contentful Paint. When the main above-the-
- *                fold content appears. Best "page feels ready"
- *                proxy. Nullable — captured via PerformanceObserver
- *                and may not resolve if the page unmounts fast.
- *   navigation_type — "navigate", "reload", "back_forward",
- *                or "prerender". Filter to "navigate" for clean
- *                cold-load percentiles.
- *   surface — passed by the caller so events from different pages
- *                can be sliced apart (home vs dashboard vs welcome).
+ * ─── The SPA-transition trap ───────────────────────────────────────
+ * Next.js App Router uses client-side navigation. `getEntriesByType
+ * ("navigation")` returns the ORIGINAL browser navigation entry — it
+ * does NOT create a new entry when you router.push() or click a Link.
+ * So without a guard, every page on the site reports the very first
+ * page's ttfb/fcp/lcp under a different `surface` label. That's why
+ * the first version of this tracker was reporting identical numbers
+ * for /home and /dashboard.
  *
- * All numbers are milliseconds since navigation start (Performance
- * API standard). Skips events with negative or absurd numbers
- * (>60_000ms) which usually mean the tab was backgrounded — those
- * pollute p95 metrics.
+ * Fix: compare `nav.name` (the URL that produced the nav entry) to
+ * the current `location.href`. When they match, this IS the real cold
+ * load and we fire the full `page_load_perf` event. When they differ,
+ * we arrived via SPA transition — we fire a separate, lighter
+ * `page_transition_perf` event with just client-render time.
  *
- * Fires exactly once per mount via the fired ref. If the same page
- * is re-rendered by parent state, we don't emit a duplicate.
+ * ─── Fields on `page_load_perf` (cold load only) ───────────────────
+ *   ttfb_ms         — server response
+ *   dcl_ms          — DOMContentLoaded
+ *   load_ms         — full window load (images, fonts, scripts)
+ *   fcp_ms          — First Contentful Paint (first pixel)
+ *   lcp_ms          — Largest Contentful Paint (main content) — via
+ *                     PerformanceObserver, nullable if unsupported
+ *   navigation_type — "navigate" / "reload" / "back_forward"
+ *   surface         — page label ("home", "dashboard", "welcome")
+ *
+ * ─── Fields on `page_transition_perf` (SPA route change) ───────────
+ *   client_ms       — time from route change to component mount
+ *   surface         — new page label
+ *   from_pathname   — previous pathname (client-only, no PII)
+ *
+ * ─── Sanity guards ─────────────────────────────────────────────────
+ * Drops values <0 or >60_000ms — backgrounded tabs report absurd
+ * numbers that skew p95 dashboards. Guards on `loadEventEnd > 0`
+ * before firing so we don't report `load_ms: 0` when the effect
+ * ran during the load-event window.
  */
 export function PageLoadPerf({
   surface,
@@ -45,15 +56,52 @@ export function PageLoadPerf({
   anonymous?: boolean;
 }) {
   const firedRef = useRef(false);
+  const pathname = usePathname();
+  const previousPathnameRef = useRef<string | null>(null);
+  const mountTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (firedRef.current) return;
     if (typeof window === "undefined" || !("performance" in window)) return;
 
-    // Capture LCP via PerformanceObserver. LCP updates whenever a
-    // larger element gets painted, so we track the latest and use it
-    // when we fire. Some browsers (older Firefox / Safari) don't
-    // support this entryType — we silently skip and lcp_ms stays null.
+    mountTimeRef.current = performance.now();
+
+    // ── SPA transition detection ─────────────────────────────────
+    // If the nav entry's URL doesn't match ours, this is a client-
+    // side route change. Fire the lighter `page_transition_perf`
+    // instead of `page_load_perf` — the full-page nav numbers
+    // don't apply here.
+    const [navEntry] = performance.getEntriesByType(
+      "navigation",
+    ) as PerformanceNavigationTiming[];
+
+    const isColdLoad =
+      !!navEntry &&
+      typeof navEntry.name === "string" &&
+      normalizeUrl(navEntry.name) === normalizeUrl(window.location.href);
+
+    if (!isColdLoad) {
+      firedRef.current = true;
+      track(
+        "page_transition_perf",
+        {
+          surface,
+          from_pathname: previousPathnameRef.current,
+          // performance.now() is 0-based from the tab's origin.
+          // Not signup-to-mount latency — just "how long from
+          // React render start to the effect firing". Small
+          // useful signal for slow client transitions.
+          client_ms: Math.round(performance.now()),
+        },
+        { anonymous },
+      );
+      previousPathnameRef.current = pathname;
+      return;
+    }
+
+    // ── Cold load path: real navigation-timing metrics ──────────
+    // Capture LCP via PerformanceObserver. Updates whenever a
+    // larger element paints; we grab the last value at fire time.
     let lcpMs: number | null = null;
     let lcpObserver: PerformanceObserver | null = null;
     try {
@@ -63,19 +111,22 @@ export function PageLoadPerf({
       });
       lcpObserver.observe({ type: "largest-contentful-paint", buffered: true });
     } catch {
-      // browser doesn't support LCP — no-op
+      // Firefox < 122 doesn't support LCP — silently skip.
     }
 
-    function fire() {
+    function tryFire() {
       if (firedRef.current) return;
-      firedRef.current = true;
-
       const [nav] = performance.getEntriesByType(
         "navigation",
       ) as PerformanceNavigationTiming[];
       if (!nav) return;
 
-      // FCP lives in the "paint" entry type, not navigation timing.
+      // The load event may have not populated loadEventEnd yet even
+      // if document.readyState === "complete". Wait for a real
+      // number before firing so we don't report load_ms: 0.
+      if (nav.loadEventEnd <= 0) return;
+
+      firedRef.current = true;
       const fcp = performance
         .getEntriesByType("paint")
         .find((e) => e.name === "first-contentful-paint");
@@ -85,9 +136,6 @@ export function PageLoadPerf({
       const loadMs = Math.round(nav.loadEventEnd);
       const fcpMs = fcp ? Math.round(fcp.startTime) : null;
 
-      // Sanity filter — backgrounded tabs report values in the tens
-      // of thousands and skew p95 dashboards. Also drops the -1 /
-      // 0 that browsers return when timing wasn't captured.
       const sane = (n: number | null) =>
         n !== null && n >= 0 && n < 60_000 ? n : null;
 
@@ -100,7 +148,7 @@ export function PageLoadPerf({
           load_ms: sane(loadMs),
           fcp_ms: sane(fcpMs),
           lcp_ms: sane(lcpMs),
-          navigation_type: nav.type, // "navigate" | "reload" | "back_forward" | "prerender"
+          navigation_type: nav.type, // "navigate" | "reload" | "back_forward"
         },
         { anonymous },
       );
@@ -108,17 +156,59 @@ export function PageLoadPerf({
       lcpObserver?.disconnect();
     }
 
-    // Fire after the window "load" event so loadEventEnd is
-    // populated. If load already fired before this effect ran
-    // (fast page + late React mount), fire immediately.
+    // Fire strategy:
+    //  1. If load already fired AND loadEventEnd is populated,
+    //     wait one rAF for LCP to settle then fire.
+    //  2. Otherwise, register load listener and re-attempt.
+    //  3. In case load fired but loadEventEnd is still 0 (browser
+    //     race), also poll every 100ms up to 3s.
+    let pollId: ReturnType<typeof setInterval> | null = null;
+    const loadHandler = () => {
+      requestAnimationFrame(tryFire);
+    };
     if (document.readyState === "complete") {
-      // rAF gives LCP one more tick to settle. Cheap, invisible.
-      requestAnimationFrame(fire);
+      requestAnimationFrame(tryFire);
+      pollId = setInterval(() => {
+        tryFire();
+        if (firedRef.current) {
+          if (pollId) clearInterval(pollId);
+        }
+      }, 100);
+      setTimeout(() => {
+        if (pollId) clearInterval(pollId);
+      }, 3_000);
     } else {
-      window.addEventListener("load", fire, { once: true });
-      return () => window.removeEventListener("load", fire);
+      window.addEventListener("load", loadHandler, { once: true });
     }
-  }, [surface, anonymous]);
+
+    previousPathnameRef.current = pathname;
+    return () => {
+      window.removeEventListener("load", loadHandler);
+      if (pollId) clearInterval(pollId);
+      lcpObserver?.disconnect();
+    };
+  }, [surface, anonymous, pathname]);
 
   return null;
+}
+
+/**
+ * Normalize URLs for the cold-load comparison. Some browsers store
+ * `nav.name` without a trailing slash on `/`, while `location.href`
+ * has it — that mismatch would incorrectly classify a real cold load
+ * as an SPA transition. Also strip the hash (nav entry doesn't
+ * include it, location does).
+ */
+function normalizeUrl(u: string): string {
+  try {
+    const url = new URL(u);
+    url.hash = "";
+    // Trim trailing slash from pathname unless it's the root.
+    if (url.pathname.length > 1 && url.pathname.endsWith("/")) {
+      url.pathname = url.pathname.slice(0, -1);
+    }
+    return url.toString();
+  } catch {
+    return u;
+  }
 }
