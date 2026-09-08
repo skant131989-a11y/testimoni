@@ -27,6 +27,7 @@ import { ImportSourcesRow } from "@/components/import-sources-row";
 import { WelcomeSplash } from "@/components/welcome-splash";
 import { PageLoadPerf } from "@/components/page-load-perf";
 import { celebrateFirstTestimonial } from "@/lib/confetti";
+import { readSessionCache } from "@/lib/session-cache";
 import { track, identify } from "@/lib/analytics";
 
 interface ImportedTestimonial {
@@ -263,14 +264,30 @@ export function WelcomeClient({
   // with `typeof window !== "undefined"` triggered React's
   // hydration mismatch — server rendered the relative path,
   // client rendered origin+path on the same node.
+  //
+  // On mount: try localStorage first (from session-cache). If the
+  // user has been on the dashboard before, we have their form URL
+  // instantly — no "Setting up your form…" flicker while the SSR
+  // race resolves. Falls through to the server-provided URL when
+  // the cache is empty or expired.
   const [fullFormUrl, setFullFormUrl] = useState<string | null>(null);
   useEffect(() => {
     if (defaultFormUrl) {
       setFullFormUrl(`${window.location.origin}${defaultFormUrl}`);
-    } else {
-      setFullFormUrl(null);
+      return;
     }
-  }, [defaultFormUrl]);
+    // SSR sent null (provisioning race). Check localStorage for a
+    // fresh cached URL — belongs-to-this-user check inside the
+    // reader prevents cross-account leaks.
+    if (userId) {
+      const cached = readSessionCache(userId);
+      if (cached?.formUrl) {
+        setFullFormUrl(cached.formUrl);
+        return;
+      }
+    }
+    setFullFormUrl(null);
+  }, [defaultFormUrl, userId]);
 
   // Provisioning-race safety net: if the server rendered without a
   // form URL (dashboard layout provisioning + this page's query
@@ -340,14 +357,25 @@ export function WelcomeClient({
   // first-client render both output null, then the effect swaps in
   // the origin-prefixed URL. Doing this inline with `typeof window
   // !== "undefined"` mismatches hydration.
+  //
+  // localStorage fallback (see fullFormUrl comment above) applies
+  // here too — if this user has been to the dashboard before we
+  // show the cached wall URL immediately.
   const [wallUrl, setWallUrl] = useState<string | null>(null);
   useEffect(() => {
     if (effectiveWidgetId) {
       setWallUrl(`${window.location.origin}/w/${effectiveWidgetId}`);
-    } else {
-      setWallUrl(null);
+      return;
     }
-  }, [effectiveWidgetId]);
+    if (userId) {
+      const cached = readSessionCache(userId);
+      if (cached?.wallUrl) {
+        setWallUrl(cached.wallUrl);
+        return;
+      }
+    }
+    setWallUrl(null);
+  }, [effectiveWidgetId, userId]);
 
   // One-line embed snippet for the default widget. Ships the same shape
   // as the dashboard's Embed page (div anchor + async script) — swapping

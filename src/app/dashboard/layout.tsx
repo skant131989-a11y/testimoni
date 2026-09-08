@@ -13,6 +13,7 @@ import { generateSlug } from "@/lib/utils";
 import { getEffectivePlan } from "@/lib/plan";
 import { safeDisplayName } from "@/lib/name-utils";
 import { DashboardPageTracker } from "@/components/dashboard-page-tracker";
+import { SessionCacheWriter } from "@/components/session-cache-writer";
 import { sendEmail } from "@/lib/emails/send";
 import { welcomeEmailHtml, welcomeEmailSubject } from "@/lib/emails/welcome";
 
@@ -209,8 +210,31 @@ export default async function DashboardLayout({
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
   const wallUrl = defaultWidget ? `${siteUrl}/w/${defaultWidget.id}` : null;
 
+  // Persist non-sensitive session data (workspace + URLs) to
+  // localStorage so subsequent client-side navigations can render
+  // optimistically before the server response streams. See
+  // src/lib/session-cache.ts for the full rationale.
+  const defaultForm = workspace.forms?.[0] ?? null;
+  const formUrl = defaultForm
+    ? `${siteUrl}/collect/${workspace.slug}/${defaultForm.slug}`
+    : null;
+
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* Session-cache sync — writes workspace + URLs to localStorage
+          on mount so the welcome page and FormUrlCard can hydrate
+          instantly on repeat visits instead of showing "Setting up…"
+          placeholders. Reads happen client-side elsewhere. */}
+      <SessionCacheWriter
+        workspaceId={workspace.id}
+        workspaceSlug={workspace.slug}
+        workspaceName={workspace.name}
+        plan={plan}
+        formUrl={formUrl}
+        wallUrl={wallUrl}
+        embedOrigin={siteUrl}
+        supabaseUserId={authUser.id}
+      />
       {/* Ensure PostHog is identified as the CURRENT user, not
           whoever was logged in last. Resets if it detects an
           identity switch. Handles Google OAuth (which can't identify
