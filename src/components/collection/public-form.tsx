@@ -238,6 +238,25 @@ export default function PublicCollectionForm({
                 * Provide at least one — stars, {contentLabel.toLowerCase()}, or
                 both. Minimum 20 characters if you write a message.
               </p>
+              {/* Writer's-block bridge — anonymous form fillers
+                  often stare at the blank box. Suggest our
+                  testimonial writer tool as a warm on-ramp; opens
+                  in a new tab so they don't lose this form's state.
+                  UTM-tagged so we can see if the bridge converts
+                  (both to a completed form + a signup on the tool
+                  page). */}
+              <p className="mt-2 text-xs text-muted-foreground">
+                Stuck on what to write?{" "}
+                <a
+                  href="/tools/testimonial-writer?utm_source=collect_form&utm_medium=writers_block_link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Get 3 draft options →
+                </a>{" "}
+                (free, no signup)
+              </p>
             </div>
 
             {/* Honeypot — labelled "Website" but hidden from human

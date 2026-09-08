@@ -255,6 +255,25 @@ export function DashboardEmptyState({ formUrl }: Props) {
                   ← Back
                 </button>
               </div>
+              {/* Cross-tool nudge — proven ask templates lift
+                  reply-rate on collection form URLs 3-5x. */}
+              <p className="mt-3 text-xs text-muted-foreground">
+                💡{" "}
+                <a
+                  href="/tools/ask-templates"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    track("cross_tool_ask_templates_clicked", {
+                      surface: "dashboard_empty_state",
+                    })
+                  }
+                  className="font-semibold text-primary hover:underline"
+                >
+                  Grab a proven ask template →
+                </a>{" "}
+                (WhatsApp, email, DM)
+              </p>
             </>
           )}
         </div>

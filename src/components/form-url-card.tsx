@@ -61,6 +61,24 @@ export function FormUrlCard({ formUrl, surface }: FormUrlCardProps) {
           <p className="mt-0.5 text-xs text-muted-foreground">
             Send this to customers — email, DM, follow-up. Every reply lands in your inbox for approval.
           </p>
+          {/* Cross-tool nudge — customers reply to well-worded
+              asks 3-5x more often. Persistent link (not toast)
+              because the habit we want is "copy URL → use a
+              template," not a one-time hint. */}
+          <p className="mt-2 text-xs text-muted-foreground">
+            💡 Send it with a proven ask template →{" "}
+            <a
+              href="/tools/ask-templates"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() =>
+                track("cross_tool_ask_templates_clicked", { surface })
+              }
+              className="font-semibold text-primary hover:underline"
+            >
+              WhatsApp, email, DM templates
+            </a>
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2 md:shrink-0">
