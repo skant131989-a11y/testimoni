@@ -406,11 +406,11 @@ export default async function DashboardPage() {
             <div className="py-8 text-center">
               <MessageSquareQuote className="mx-auto h-10 w-10 text-muted-foreground/50" />
               <p className="mt-2 text-sm text-muted-foreground">
-                No testimonials yet. Start collecting feedback from your
-                customers!
+                No testimonials yet. Paste a customer tweet or share
+                your form — either way, live in 30 seconds.
               </p>
               <Button className="mt-4" asChild>
-                <Link href="/dashboard/collect">Get Started</Link>
+                <Link href="/dashboard/import">Paste your first tweet</Link>
               </Button>
             </div>
           ) : (

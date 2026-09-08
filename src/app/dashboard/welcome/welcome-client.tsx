@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { ImportSourcesRow } from "@/components/import-sources-row";
+import { WelcomeSplash } from "@/components/welcome-splash";
 import { track, identify } from "@/lib/analytics";
 
 interface ImportedTestimonial {
@@ -473,9 +474,11 @@ export function WelcomeClient({
   // Success state — imported testimonial + wall preview
   if (imported) {
     return (
-      <div className="mx-auto max-w-4xl space-y-6 py-6">
-        <div className="text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+      <>
+        <WelcomeSplash active={isNewSignup} />
+        <div className="mx-auto max-w-4xl space-y-6 py-6">
+          <div className="text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
             <Sparkles className="h-7 w-7 text-primary" />
           </div>
           <h1 className="mt-6 text-3xl font-bold tracking-tight md:text-4xl">
@@ -749,6 +752,7 @@ export function WelcomeClient({
           </Link>
         </p>
       </div>
+      </>
     );
   }
 
@@ -762,9 +766,11 @@ export function WelcomeClient({
   // engagement grid so first-run users have concrete next steps
   // visible without scrolling into a wall of white.
   return (
-    <div className="mx-auto max-w-4xl space-y-6 py-6">
-      <div className="text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+    <>
+      <WelcomeSplash active={isNewSignup} />
+      <div className="mx-auto max-w-4xl space-y-6 py-6">
+        <div className="text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
           <Sparkles className="h-7 w-7 text-primary" />
         </div>
         <h1 className="mt-6 text-3xl font-bold tracking-tight md:text-4xl">
@@ -1162,5 +1168,6 @@ export function WelcomeClient({
         </a>
       </div>
     </div>
+    </>
   );
 }

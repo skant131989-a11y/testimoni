@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { track } from "@/lib/analytics";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
+import { BatchImportPanel } from "@/components/batch-import-panel";
 import { createClient } from "@/lib/supabase/client";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
@@ -115,11 +116,44 @@ export function PraiseTweetFinderClient() {
     ? `https://x.com/search?q=${encodeURIComponent(xQuery)}&f=live`
     : "#";
 
-  function toggleKeyword(k: Keyword) {
+  function toggleKeyword(k: string) {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(k)) next.delete(k);
       else next.add(k);
+      return next;
+    });
+  }
+
+  const [customKeywords, setCustomKeywords] = useState<string[]>([]);
+  const [customInput, setCustomInput] = useState("");
+
+  function addCustomKeyword() {
+    const raw = customInput.trim().toLowerCase();
+    if (!raw) return;
+    // Ignore duplicates of built-ins or already-added customs.
+    if ((KEYWORDS as readonly string[]).includes(raw)) {
+      // Already exists — just make sure it's selected.
+      setSelected((prev) => new Set(prev).add(raw));
+      setCustomInput("");
+      return;
+    }
+    if (customKeywords.includes(raw)) {
+      setSelected((prev) => new Set(prev).add(raw));
+      setCustomInput("");
+      return;
+    }
+    setCustomKeywords((prev) => [...prev, raw]);
+    setSelected((prev) => new Set(prev).add(raw));
+    setCustomInput("");
+    track("praise_finder_custom_keyword_added");
+  }
+
+  function removeCustomKeyword(k: string) {
+    setCustomKeywords((prev) => prev.filter((x) => x !== k));
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.delete(k);
       return next;
     });
   }
@@ -136,7 +170,7 @@ export function PraiseTweetFinderClient() {
     <div className="min-h-screen bg-background">
       <ToolsHeader backToTools />
 
-      <main className="mx-auto max-w-3xl px-4 py-14">
+      <main className="mx-auto max-w-4xl px-4 py-10 sm:py-14">
         {/* Hero */}
         <div className="text-center">
           <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
@@ -213,6 +247,75 @@ export function PraiseTweetFinderClient() {
                   </button>
                 );
               })}
+              {/* User-added custom keywords render inline with the
+                  built-ins so the search visually reads as "one set
+                  of keywords." Small × on each to remove — the
+                  built-ins only toggle on/off; customs can be
+                  removed entirely. */}
+              {customKeywords.map((k) => {
+                const active = selected.has(k);
+                return (
+                  <span
+                    key={k}
+                    className={`inline-flex items-center gap-1 rounded-full border-2 px-2.5 py-1 text-xs font-medium transition ${
+                      active
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleKeyword(k)}
+                      className="inline-flex items-center gap-1"
+                    >
+                      <Heart
+                        className={
+                          active ? "h-3 w-3 fill-current" : "h-3 w-3 opacity-40"
+                        }
+                      />
+                      {k}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeCustomKeyword(k)}
+                      aria-label={`Remove ${k}`}
+                      className="text-muted-foreground/60 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+
+            {/* Custom keyword input — add your own praise words
+                (product-specific superlatives, niche jargon, brand
+                nicknames). Enter or "+" adds it inline to the chip
+                row above. */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Input
+                value={customInput}
+                onChange={(e) => setCustomInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addCustomKeyword();
+                  }
+                }}
+                placeholder="Add your own — e.g. lifesaver, magical, mvp"
+                maxLength={30}
+                className="h-8 max-w-xs text-xs"
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={addCustomKeyword}
+                disabled={!customInput.trim()}
+                className="h-8"
+              >
+                Add keyword
+              </Button>
             </div>
           </div>
 
@@ -310,8 +413,17 @@ export function PraiseTweetFinderClient() {
               rendered as a testimonial card. On "Save", stashes the
               preview in sessionStorage and routes to signup so the
               welcome page can auto-import. */}
-          <div className="mx-auto max-w-md">
+          <div className="mx-auto max-w-2xl">
             <TweetPreviewDemo isLoggedIn={isLoggedIn} />
+          </div>
+
+          {/* Batch import — for founders who found more than one
+              good tweet on X. Paste many URLs at once; each row
+              gets an Add-to-Wall button (or Save-all bulk). Ships
+              logged-in flow first; anonymous path shown as a
+              sign-up teaser. */}
+          <div className="mx-auto mt-6 max-w-2xl">
+            <BatchImportPanel isLoggedIn={isLoggedIn} />
           </div>
 
           {isLoggedIn ? (
