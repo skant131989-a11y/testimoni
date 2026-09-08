@@ -247,6 +247,24 @@ export function WelcomeClient({
       ? `${window.location.origin}${defaultFormUrl}`
       : defaultFormUrl;
 
+  // Provisioning-race safety net: if the server rendered without a
+  // form URL (dashboard layout provisioning + this page's query
+  // race-conditioned, or a Prisma read-replica returned stale rows),
+  // the client is otherwise stuck showing "Setting up your form and
+  // widget…" forever. Poll with router.refresh() every 2s, up to 5x,
+  // to give provisioning a chance to complete + re-render server
+  // components with the new form URL.
+  const refreshAttempts = useRef(0);
+  useEffect(() => {
+    if (defaultFormUrl) return;
+    if (refreshAttempts.current >= 5) return;
+    const t = setTimeout(() => {
+      refreshAttempts.current += 1;
+      router.refresh();
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [defaultFormUrl, router]);
+
   // Fall back to the id passed in from the server if the API response
   // doesn't carry one for any reason.
   const effectiveWidgetId = importedWidgetId ?? defaultWidgetId;
@@ -1004,7 +1022,10 @@ export function WelcomeClient({
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <div className="min-w-0 flex-1 truncate rounded-md border bg-muted/60 px-3 py-2 font-mono text-xs">
-            {fullFormUrl ?? "Setting up your form and widget…"}
+            {fullFormUrl ??
+              (refreshAttempts.current >= 5
+                ? "Setup incomplete — refresh the page or contact hello@testimoni.io"
+                : "Setting up your form and widget…")}
           </div>
           <Button
             onClick={copyForm}
