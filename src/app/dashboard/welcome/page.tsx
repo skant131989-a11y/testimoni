@@ -33,6 +33,11 @@ export default async function WelcomePage() {
     (authUser?.app_metadata?.provider as string | undefined) === "google"
       ? "google"
       : "email";
+  // Pass the raw signup timestamp so the client can compute exact
+  // "signup → welcome ready" latency for the welcome_form_ready
+  // event. Null when the user isn't a fresh signup so we don't
+  // pollute the metric with returning-visitor timings.
+  const signupTimestamp = isNewSignup ? createdAt : null;
 
   if (authUser) {
     const dbUser = await prisma.user.findUnique({
@@ -76,6 +81,7 @@ export default async function WelcomePage() {
       workspaceName={workspaceName}
       isNewSignup={isNewSignup}
       signupMethod={signupMethod}
+      signupTimestamp={signupTimestamp}
       userId={authUser?.id ?? null}
       userEmail={authUser?.email ?? null}
     />

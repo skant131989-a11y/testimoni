@@ -44,6 +44,11 @@ interface WelcomeClientProps {
   workspaceName: string;
   isNewSignup: boolean;
   signupMethod: "google" | "email";
+  /** Epoch ms of Supabase auth user's created_at. Only set when
+   *  isNewSignup === true so we can measure exact signup → form-
+   *  URL-ready latency without polluting the metric with returning
+   *  visitors. Null for anyone who isn't a fresh signup. */
+  signupTimestamp: number | null;
   userId: string | null;
   userEmail: string | null;
 }
@@ -54,6 +59,7 @@ export function WelcomeClient({
   workspaceName,
   isNewSignup,
   signupMethod,
+  signupTimestamp,
   userId,
   userEmail,
 }: WelcomeClientProps) {
@@ -286,6 +292,45 @@ export function WelcomeClient({
     }, delay);
     return () => clearTimeout(t);
   }, [defaultFormUrl, router]);
+
+  // Signup-to-welcome-ready latency telemetry. Fires exactly ONCE
+  // per fresh-signup session, the moment the form URL is available
+  // for the user to copy (which is the meaningful "welcome page is
+  // usable" moment — anything before this and the primary CTA
+  // reads "Setting up your form…"). Skipped for returning visitors
+  // so the metric stays clean.
+  //
+  // Properties on the event:
+  //   ms_since_signup      — real time from Supabase created_at to
+  //                          form URL ready in client state.
+  //                          This is the number you want.
+  //   ms_since_mount       — how much of that was client-side
+  //                          (mount → form URL). Rest is network +
+  //                          SSR + auth-redirect chain.
+  //   refresh_attempts     — how many router.refresh() calls we had
+  //                          to make before the form URL appeared.
+  //                          0 = provisioning committed cleanly
+  //                          before first render. >0 = race hit.
+  //   had_form_url_on_mount — true when the initial SSR already
+  //                          included the form URL (best case).
+  //   signup_method        — email vs google.
+  const welcomeReadyFiredRef = useRef(false);
+  const mountTimeRef = useRef(Date.now());
+  const hadFormUrlOnMountRef = useRef(!!defaultFormUrl);
+  useEffect(() => {
+    if (welcomeReadyFiredRef.current) return;
+    if (!isNewSignup || !signupTimestamp) return;
+    if (!fullFormUrl) return; // wait until copy-able URL exists
+    welcomeReadyFiredRef.current = true;
+    const now = Date.now();
+    track("welcome_form_ready", {
+      ms_since_signup: now - signupTimestamp,
+      ms_since_mount: now - mountTimeRef.current,
+      refresh_attempts: refreshAttempts.current,
+      had_form_url_on_mount: hadFormUrlOnMountRef.current,
+      signup_method: signupMethod,
+    });
+  }, [fullFormUrl, isNewSignup, signupTimestamp, signupMethod]);
 
   // Fall back to the id passed in from the server if the API response
   // doesn't carry one for any reason.
