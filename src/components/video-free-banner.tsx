@@ -26,36 +26,28 @@ export function VideoFreeBanner({ videoCount }: VideoFreeBannerProps) {
   };
 
   return (
-    <div className="relative rounded-2xl border-2 border-purple-300/60 bg-gradient-to-br from-purple-50 to-fuchsia-50 p-5 shadow-sm">
+    <div className="relative rounded-xl border border-purple-300/60 bg-gradient-to-r from-purple-50 to-fuchsia-50/60 px-4 py-2.5">
       <button
         type="button"
         onClick={dismiss}
         aria-label="Dismiss"
-        className="absolute right-3 top-3 rounded-full p-1 text-purple-500 hover:bg-purple-100"
+        className="absolute right-2 top-2 rounded-full p-1 text-purple-500 hover:bg-purple-100"
       >
-        <X className="h-4 w-4" />
+        <X className="h-3.5 w-3.5" />
       </button>
-      <div className="flex flex-col gap-4 pr-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-600 text-white">
-            <Video className="h-5 w-5" />
+      <div className="flex flex-col gap-2 pr-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-600 text-white">
+            <Video className="h-3.5 w-3.5" />
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-purple-700">
-              1 free video on every plan
-            </p>
-            <p className="mt-1 text-base font-semibold text-foreground">
-              Add your first video testimonial
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Video converts ~2× better than text. Upload an MP4/MOV, or ask a
-              customer to record from their phone.
-            </p>
-          </div>
+          <p className="text-sm">
+            <span className="font-semibold">Add your first video testimonial</span>{" "}
+            <span className="text-muted-foreground">— free on every plan, converts ~2× better.</span>
+          </p>
         </div>
-        <Button asChild size="lg" className="shrink-0">
+        <Button asChild size="sm" variant="outline" className="shrink-0">
           <Link href="/dashboard/import?tab=video">
-            Upload video <ArrowRight className="ml-2 h-4 w-4" />
+            Upload <ArrowRight className="ml-1 h-3 w-3" />
           </Link>
         </Button>
       </div>

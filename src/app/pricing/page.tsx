@@ -6,11 +6,12 @@ import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
+import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 
 export const metadata: Metadata = {
   title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",
   description:
-    "Free plan includes paste-a-tweet import, a hosted Wall of Love URL, 10 testimonials, 1 video testimonial, and one-line embed — no credit card. Pro at $9/month (₹499) for unlimited testimonials, forms, widgets, and video.",
+    "Free plan includes paste-a-tweet import, Screenshot → testimonial (AI), a hosted Wall of Love URL, 10 testimonials (any format), 1 video testimonial, and one-line embed — no credit card. Pro at $9/month (₹499) for unlimited testimonials, forms, widgets, video, and batch screenshot upload.",
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "Testimoni Pricing — Free forever with paste-a-tweet + Wall of Love",
@@ -55,16 +56,7 @@ export default function PricingPage() {
                 Perfect for getting started
               </p>
               <ul className="mt-8 space-y-4">
-                {[
-                  "Paste-a-tweet import (X + LinkedIn)",
-                  "Public Wall of Love URL",
-                  "Up to 10 testimonials",
-                  "1 video testimonial (upload MP4/MOV)",
-                  "1 collection form + 1 widget",
-                  "Grid layout",
-                  "Email support",
-                  "Script tag embed",
-                ].map((feature) => (
+                {FREE_FEATURES.map((feature) => (
                   <li key={feature} className="flex items-center gap-3 text-sm">
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                     {feature}
@@ -91,19 +83,7 @@ export default function PricingPage() {
                 For growing businesses
               </p>
               <ul className="mt-8 space-y-4">
-                {[
-                  "Unlimited testimonials",
-                  "Unlimited collection forms",
-                  "Unlimited widgets",
-                  "Curate different testimonials per widget",
-                  "All layouts (Grid, Masonry, Carousel, List, Marquee)",
-                  "Unlimited video testimonials",
-                  "Custom branding & colors",
-                  "Remove 'Powered by' watermark",
-                  "Import from Twitter/LinkedIn",
-                  "Analytics dashboard",
-                  "Priority support",
-                ].map((feature) => (
+                {PRO_FEATURES.map((feature) => (
                   <li key={feature} className="flex items-center gap-3 text-sm">
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                     {feature}

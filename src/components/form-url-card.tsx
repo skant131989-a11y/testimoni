@@ -38,14 +38,14 @@ export function FormUrlCard({ formUrl, surface }: FormUrlCardProps) {
   }
 
   return (
-    <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 shadow-sm">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent px-4 py-3 shadow-sm">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
-              <Inbox className="h-3.5 w-3.5 text-primary" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
+              <Inbox className="h-3 w-3 text-primary" />
             </div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
               Your collection form
             </p>
           </div>
@@ -53,32 +53,25 @@ export function FormUrlCard({ formUrl, surface }: FormUrlCardProps) {
             href={formUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-1.5 block truncate font-mono text-xs text-foreground hover:text-primary hover:underline sm:text-sm"
+            className="mt-1 block truncate font-mono text-xs text-foreground hover:text-primary hover:underline"
             onClick={() => track("form_view_clicked", { surface, via: "url_text" })}
           >
             {formUrl}
           </a>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Send this to customers — email, DM, follow-up. Every reply lands in your inbox for approval.
-          </p>
-          {/* Cross-tool nudge — customers reply to well-worded
-              asks 3-5x more often. Persistent link (not toast)
-              because the habit we want is "copy URL → use a
-              template," not a one-time hint. */}
-          <p className="mt-2 text-xs text-muted-foreground">
-            💡 Send it with a proven ask template →{" "}
-            <a
-              href="/tools/ask-templates"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() =>
-                track("cross_tool_ask_templates_clicked", { surface })
-              }
-              className="font-semibold text-primary hover:underline"
-            >
-              WhatsApp, email, DM templates
-            </a>
-          </p>
+          {/* Ask-templates hint — kept but collapsed to one line, no
+              "descriptive" prefix, so the whole row fits on screen
+              without pushing the other dashboard panels down. */}
+          <a
+            href="/tools/ask-templates"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              track("cross_tool_ask_templates_clicked", { surface })
+            }
+            className="mt-1 inline-block text-[11px] text-muted-foreground hover:text-primary hover:underline"
+          >
+            💡 Grab a proven ask template
+          </a>
         </div>
 
         <div className="flex flex-wrap gap-2 md:shrink-0">

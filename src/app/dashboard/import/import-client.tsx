@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,8 +25,10 @@ import {
 } from "lucide-react";
 import { track } from "@/lib/analytics";
 import { ImportSourcesRow } from "@/components/import-sources-row";
+import { compressImageToDataUrl } from "@/lib/image-compress";
+import { SCREENSHOT_TAG } from "@/lib/screenshot-constants";
 
-type Mode = "url" | "manual" | "video";
+type Mode = "url" | "manual" | "video" | "screenshot";
 
 interface ImportClientProps {
   /** Whether the current workspace is on the Pro plan. Passed in from
@@ -35,7 +38,18 @@ interface ImportClientProps {
 }
 
 export default function ImportClient({ isPro }: ImportClientProps) {
-  const [mode, setMode] = useState<Mode>("url");
+  const searchParams = useSearchParams();
+  // Read ?tab= on mount so /dashboard/import?tab=screenshot opens
+  // straight to the screenshot flow. Falls back to "url" (default)
+  // when the param is missing or invalid.
+  const initialMode: Mode = (() => {
+    const t = searchParams?.get("tab");
+    if (t === "manual" || t === "video" || t === "screenshot" || t === "url") {
+      return t;
+    }
+    return "url";
+  })();
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [url, setUrl] = useState("");
   const [manualData, setManualData] = useState({
     customerName: "",
@@ -70,6 +84,26 @@ export default function ImportClient({ isPro }: ImportClientProps) {
   const [manualAuthor, setManualAuthor] = useState("");
   const [embedOpen, setEmbedOpen] = useState(false);
   const [embedCopied, setEmbedCopied] = useState(false);
+
+  // Screenshot mode — single file for Free plan, multi-file
+  // (queued sequentially) for Pro. Pro users see a queue with
+  // per-file progress; Free users see the same single-file UX
+  // that shipped in v1.
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [screenshotExtracting, setScreenshotExtracting] = useState(false);
+  const screenshotInputRef = useRef<HTMLInputElement>(null);
+  // Pro-only queue. Each entry tracks a file's state through the
+  // pipeline: queued → compressing → extracting → saved / failed.
+  type QueueItem = {
+    id: string;
+    file: File;
+    preview: string | null;
+    status: "queued" | "compressing" | "extracting" | "saved" | "failed";
+    error?: string;
+    author?: string;
+  };
+  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [queueRunning, setQueueRunning] = useState(false);
 
   // Same one-line embed used on /dashboard/welcome — script tag with a
   // div anchor. Populated with the successfully-imported testimonial's
@@ -194,6 +228,260 @@ export default function ImportClient({ isPro }: ImportClientProps) {
    * or delete it. The alternative (upload first, then create) means a
    * failed create orphans a file in storage.
    */
+  /**
+   * Pro-only multi-file screenshot import. Users can drop several
+   * screenshots at once; we process them sequentially so we don't
+   * blow past Anthropic per-minute rate limits. Each file goes
+   * through: compress → extract → save. Status is tracked per row
+   * so the UI can show ✓ / ✗ / spinner independently.
+   */
+  async function handleQueueFiles(files: FileList | File[]) {
+    if (!isPro) return; // safety — UI already gates
+    const list = Array.from(files);
+    if (!list.length) return;
+    const items: QueueItem[] = list.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      file,
+      preview: null,
+      status: "queued",
+    }));
+    setQueue((q) => [...q, ...items]);
+    track("testimonial_import_started", {
+      source: "screenshot_multi",
+      count: items.length,
+    });
+    if (queueRunning) return; // an existing pass will pick up new items
+    runQueue([...queue, ...items]);
+  }
+
+  async function runQueue(initial: QueueItem[]) {
+    setQueueRunning(true);
+    let pending = initial;
+    // Loop until every queued/compressing/extracting item is resolved.
+    while (pending.some((it) => it.status === "queued")) {
+      const nextIdx = pending.findIndex((it) => it.status === "queued");
+      if (nextIdx === -1) break;
+      const item = pending[nextIdx];
+      const setStatus = (
+        id: string,
+        status: QueueItem["status"],
+        extras: Partial<QueueItem> = {},
+      ) => {
+        setQueue((q) =>
+          q.map((it) => (it.id === id ? { ...it, status, ...extras } : it)),
+        );
+        pending = pending.map((it) =>
+          it.id === id ? { ...it, status, ...extras } : it,
+        );
+      };
+
+      try {
+        setStatus(item.id, "compressing");
+        const dataUrl = await compressImageToDataUrl(
+          item.file,
+          4.5 * 1024 * 1024,
+        );
+        setStatus(item.id, "extracting", { preview: dataUrl });
+
+        const extractRes = await fetch(
+          "/api/tools/screenshot-to-testimonial",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: dataUrl }),
+          },
+        );
+        const extractData = await extractRes.json();
+        if (!extractRes.ok || !extractData.is_praise) {
+          setStatus(item.id, "failed", {
+            error:
+              extractData.message ??
+              extractData.error ??
+              "Extraction failed.",
+          });
+          continue;
+        }
+        const saveRes = await fetch("/api/testimonials", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerName: extractData.author,
+            customerTitle: extractData.author_handle
+              ? `@${String(extractData.author_handle).replace(/^@/, "")}`
+              : undefined,
+            content: extractData.quote,
+            rating: 5,
+            source: "MANUAL",
+            status: "APPROVED",
+            tags: [SCREENSHOT_TAG],
+          }),
+        });
+        const saveData = await saveRes.json();
+        if (!saveRes.ok) {
+          setStatus(item.id, "failed", {
+            error: saveData.error ?? "Save failed.",
+          });
+          continue;
+        }
+        setStatus(item.id, "saved", { author: extractData.author });
+        if (saveData.widget?.id) setSuccessWidgetId(saveData.widget.id);
+      } catch {
+        setStatus(item.id, "failed", { error: "Network error." });
+      }
+    }
+    setQueueRunning(false);
+    // If everything landed clean, surface the standard success + embed
+    // reveal so the user gets the same reward as a single-file save.
+    const anySaved = pending.some((it) => it.status === "saved");
+    if (anySaved) {
+      setSuccess(
+        `${pending.filter((it) => it.status === "saved").length} testimonial${
+          pending.filter((it) => it.status === "saved").length === 1 ? "" : "s"
+        } saved!`,
+      );
+      track("testimonial_import_succeeded", {
+        source: "screenshot_multi",
+        count: pending.filter((it) => it.status === "saved").length,
+      });
+    }
+  }
+
+  /**
+   * Screenshot import — file picked, compressed via Canvas, then
+   * sent to /api/tools/screenshot-to-testimonial for Claude Vision
+   * extraction. On success we forward the extracted
+   * quote+author+source to /api/testimonials to save. Same shape
+   * the URL / manual paths use, so the "successWidgetId" flow
+   * (embed snippet reveal) works identically after screenshot
+   * imports.
+   */
+  async function handleScreenshotFile(file: File) {
+    setError("");
+    setSuccess(null);
+    if (!file.type.startsWith("image/")) {
+      setError("Please pick an image file — PNG, JPEG, WEBP, or GIF.");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      setError("Image is too large. Please pick one under 15MB.");
+      return;
+    }
+    try {
+      const dataUrl = await compressImageToDataUrl(file, 4.5 * 1024 * 1024);
+      setScreenshotPreview(dataUrl);
+    } catch {
+      setError("Couldn't read this image. Try another one.");
+    }
+  }
+
+  async function handleScreenshotExtract() {
+    if (!screenshotPreview) return;
+    setScreenshotExtracting(true);
+    setImporting(true);
+    setError("");
+    track("testimonial_import_started", { source: "screenshot" });
+    try {
+      // Step 1: Claude Vision extraction.
+      const extractRes = await fetch(
+        "/api/tools/screenshot-to-testimonial",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: screenshotPreview }),
+        },
+      );
+      const extractData = await extractRes.json();
+      if (extractRes.status === 402 && extractData.reason === "quota_exceeded") {
+        // Free plan monthly cap reached — nudge to Pro. Not
+        // rendering a full paywall here so the same tab still
+        // shows the URL / manual paths as free alternatives.
+        setError(
+          `${extractData.message} (Used ${extractData.used}/${extractData.limit} this month.)`,
+        );
+        setUpgradeRequired(true);
+        track("testimonial_import_failed", {
+          source: "screenshot",
+          status: 402,
+          reason: "quota_exceeded",
+        });
+        return;
+      }
+      if (extractRes.status === 503) {
+        setError(
+          extractData.message ??
+            "Screenshot extraction is temporarily unavailable.",
+        );
+        track("testimonial_import_failed", {
+          source: "screenshot",
+          status: 503,
+        });
+        return;
+      }
+      if (!extractRes.ok) {
+        setError(extractData.error ?? "Extraction failed.");
+        track("testimonial_import_failed", {
+          source: "screenshot",
+          status: extractRes.status,
+        });
+        return;
+      }
+      if (!extractData.is_praise) {
+        setError(
+          extractData.message ??
+            "That doesn't look like praise. Try another screenshot.",
+        );
+        track("testimonial_import_failed", {
+          source: "screenshot",
+          status: 0,
+          reason: "not_praise",
+        });
+        return;
+      }
+
+      // Step 2: persist the extracted testimonial.
+      const saveRes = await fetch("/api/testimonials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: extractData.author,
+          customerTitle: extractData.author_handle
+            ? `@${String(extractData.author_handle).replace(/^@/, "")}`
+            : undefined,
+          content: extractData.quote,
+          rating: 5,
+          source: "MANUAL",
+          status: "APPROVED",
+          // Tag so the server-side quota check can count this
+          // row against the workspace's monthly limit.
+          tags: [SCREENSHOT_TAG],
+        }),
+      });
+      const saveData = await saveRes.json();
+      if (!saveRes.ok) {
+        setError(saveData.error ?? "Couldn't save the testimonial.");
+        return;
+      }
+      setSuccess("Testimonial extracted and saved!");
+      if (saveData.widget?.id) setSuccessWidgetId(saveData.widget.id);
+      track("testimonial_import_succeeded", {
+        source: "screenshot",
+        confidence: extractData.confidence,
+        detected_source: extractData.source,
+      });
+      // Reset the picker so the user can drop another screenshot.
+      setScreenshotPreview(null);
+      if (screenshotInputRef.current) {
+        screenshotInputRef.current.value = "";
+      }
+    } catch {
+      setError("Network error extracting the screenshot. Try again.");
+      track("testimonial_import_failed", { source: "screenshot", status: 0 });
+    } finally {
+      setScreenshotExtracting(false);
+      setImporting(false);
+    }
+  }
+
   async function handleVideoImport() {
     if (!videoData.customerName.trim() || !videoFile) return;
     setImporting(true);
@@ -312,6 +600,22 @@ export default function ImportClient({ isPro }: ImportClientProps) {
         >
           <FileText className="mr-2 h-4 w-4" />
           Manual entry
+        </Button>
+        <Button
+          variant={mode === "screenshot" ? "default" : "outline"}
+          onClick={() => {
+            setMode("screenshot");
+            setError("");
+            setSuccess(null);
+            track("import_tab_selected", { tab: "screenshot" });
+          }}
+          className="relative"
+        >
+          <Sparkles className="mr-2 h-4 w-4" />
+          Screenshot
+          <span className="ml-2 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+            AI
+          </span>
         </Button>
         <Button
           variant={mode === "video" ? "default" : "outline"}
@@ -888,6 +1192,221 @@ export default function ImportClient({ isPro }: ImportClientProps) {
                 </>
               )}
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {mode === "screenshot" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Extract from a screenshot
+              {isPro ? (
+                <span className="ml-2 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                  Pro · Unlimited · Multi-file
+                </span>
+              ) : (
+                <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Free · 3 total
+                </span>
+              )}
+            </CardTitle>
+            <CardDescription>
+              Drop {isPro ? "one or many" : "a"} screenshot{isPro ? "s" : ""} of
+              praise — DM, tweet, Slack, WhatsApp, email, App Store review.
+              We&apos;ll extract the quote, author, and source in 3-6 seconds
+              per file and save it as a testimonial.
+              {!isPro && (
+                <>
+                  {" "}
+                  Free plan includes 3 total screenshot extractions.{" "}
+                  <Link
+                    href="/pricing"
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Upgrade for unlimited + multi-file upload →
+                  </Link>
+                </>
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Pro path: multi-file queue */}
+            {isPro ? (
+              <div className="space-y-4">
+                <label
+                  htmlFor="dashboard-screenshot-multi"
+                  className="block cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-8 text-center transition-colors hover:border-primary/50 hover:bg-primary/10"
+                >
+                  <input
+                    id="dashboard-screenshot-multi"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="sr-only"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files && files.length) handleQueueFiles(files);
+                      // Reset so re-picking the same files re-fires.
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+                    <Upload className="h-5 w-5 text-primary" />
+                  </div>
+                  <p className="mt-3 text-base font-semibold">
+                    Drop multiple screenshots or click to pick
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Files process sequentially — you can add more while
+                    others are extracting.
+                  </p>
+                </label>
+
+                {queue.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Queue ({queue.filter((it) => it.status === "saved").length}
+                      /{queue.length} saved)
+                    </p>
+                    {queue.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-3 rounded-lg border p-3"
+                      >
+                        <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-muted">
+                          {item.preview && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.preview}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">
+                            {item.file.name}
+                          </p>
+                          {item.status === "saved" && item.author && (
+                            <p className="text-xs text-emerald-700">
+                              Extracted from {item.author}
+                            </p>
+                          )}
+                          {item.status === "failed" && item.error && (
+                            <p className="text-xs text-destructive">
+                              {item.error}
+                            </p>
+                          )}
+                          {(item.status === "queued" ||
+                            item.status === "compressing" ||
+                            item.status === "extracting") && (
+                            <p className="text-xs text-muted-foreground">
+                              {item.status === "queued"
+                                ? "Queued…"
+                                : item.status === "compressing"
+                                  ? "Compressing…"
+                                  : "Extracting…"}
+                            </p>
+                          )}
+                        </div>
+                        <div className="shrink-0">
+                          {item.status === "saved" && (
+                            <Check className="h-5 w-5 text-emerald-600" />
+                          )}
+                          {item.status === "failed" && (
+                            <span className="text-lg text-destructive">✕</span>
+                          )}
+                          {(item.status === "queued" ||
+                            item.status === "compressing" ||
+                            item.status === "extracting") && (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : !screenshotPreview ? (
+              /* Free path: single-file picker */
+              <label
+                htmlFor="dashboard-screenshot-file"
+                className="block cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-8 text-center transition-colors hover:border-primary/50 hover:bg-primary/10"
+              >
+                <input
+                  ref={screenshotInputRef}
+                  id="dashboard-screenshot-file"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleScreenshotFile(file);
+                  }}
+                />
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+                  <Upload className="h-5 w-5 text-primary" />
+                </div>
+                <p className="mt-3 text-base font-semibold">
+                  Drop your screenshot or click to pick
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  PNG, JPEG, WEBP, or GIF · up to 15MB · one at a time on Free
+                </p>
+              </label>
+            ) : (
+              /* Free path: preview + extract */
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="min-w-0 flex-1 overflow-hidden rounded-xl border bg-background shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={screenshotPreview}
+                      alt="Your screenshot"
+                      className="max-h-64 w-full object-contain"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={handleScreenshotExtract}
+                    disabled={screenshotExtracting}
+                    size="lg"
+                    className="gap-2"
+                  >
+                    {screenshotExtracting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Extracting…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Extract & save to wall
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setScreenshotPreview(null);
+                      if (screenshotInputRef.current) {
+                        screenshotInputRef.current.value = "";
+                      }
+                    }}
+                    disabled={screenshotExtracting}
+                  >
+                    Pick a different one
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  We compress your image locally before extraction — it
+                  never leaves your device until you click Extract.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

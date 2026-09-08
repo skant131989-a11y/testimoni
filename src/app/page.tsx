@@ -23,8 +23,8 @@ import { ProPriceDual, FreePrice, FoundingBadge, FoundingExplainer } from "@/com
 import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
-import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
-import { TiltCard } from "@/components/tilt-card";
+import { HeroDualDemo } from "@/components/hero-dual-demo";
+import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { HeroScrollLink } from "@/components/hero-scroll-link";
@@ -95,7 +95,7 @@ export default function LandingPage() {
               From tweet to embed in 30 seconds
             </div>
             <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-              Paste a tweet.{" "}
+              Paste a tweet or upload a screenshot.{" "}
               <span className="text-primary">It&rsquo;s on your site today.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground md:text-xl">
@@ -164,23 +164,13 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Right column — LIVE paste-a-URL demo. The whole point of
-              the hero visual: give visitors an interactive artefact
-              they can try in the first screen, not an illustrative
-              mock they have to scroll past. Paste a real tweet → see
-              their actual card render → keep the flow with a Save
-              button. Replaced the static Sarah/Marcus/Aditi mock
-              cards because the demo IS the "what you'll get"
-              preview, done better. */}
+          {/* Right column — interactive dual demo. Tab 1 is paste-a-
+              tweet (proven, kept default). Tab 2 is the new
+              screenshot-to-testimonial autoplay demo (zero API cost —
+              pre-computed examples). Both feed the same signup CTA
+              so the funnel doesn't fork. See <HeroDualDemo>. */}
           <div className="relative mx-auto w-full max-w-md">
-            {/* Pill removed — the sub-headline already promises "no
-                account to preview" and the card itself makes the try-
-                it-now nature obvious. Keeping the pill was redundant
-                repetition. Subtle 3D tilt on cursor for a premium
-                feel — see TiltCard. */}
-            <TiltCard>
-              <TweetPreviewDemo />
-            </TiltCard>
+            <HeroDualDemo />
           </div>
         </div>
       </section>
@@ -656,6 +646,12 @@ export default function LandingPage() {
                   "Turn a public X or LinkedIn post into an approved testimonial by pasting the URL. Author and text pulled automatically; you edit the rating if you want.",
               },
               {
+                icon: Zap,
+                title: "Screenshot → testimonial (AI)",
+                description:
+                  "Drop a screenshot of any praise — DM, tweet, Slack, WhatsApp, email, App Store review — and Claude Vision extracts the quote, author, and source. Free plan: any of your 10 testimonials can be a screenshot. Pro: batch upload multiple at once.",
+              },
+              {
                 icon: Play,
                 title: "Video testimonials",
                 description:
@@ -839,7 +835,7 @@ export default function LandingPage() {
               <p className="mt-2 text-3xl font-bold"><FreePrice suffix="" /></p>
               <p className="text-sm text-muted-foreground">Forever free</p>
               <ul className="mt-6 space-y-3">
-                {["10 testimonials", "1 widget", "Grid layout", "Collection forms"].map((f) => (
+                {FREE_FEATURES.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="h-4 w-4 text-primary" />
                     {f}
@@ -863,14 +859,7 @@ export default function LandingPage() {
               <FoundingExplainer className="mt-2" />
               <p className="mt-3 text-sm text-muted-foreground">Everything unlimited</p>
               <ul className="mt-6 space-y-3">
-                {[
-                  "Unlimited testimonials",
-                  "Unlimited widgets",
-                  "All layouts",
-                  "Video testimonials",
-                  "Custom branding",
-                  "No watermark",
-                ].map((f) => (
+                {PRO_FEATURES.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="h-4 w-4 text-primary" />
                     {f}

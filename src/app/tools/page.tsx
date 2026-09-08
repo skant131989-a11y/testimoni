@@ -8,18 +8,27 @@ import { TrackedLink } from "@/components/tracked-link";
 export const metadata: Metadata = {
   title: "Free testimonial tools — Testimoni",
   description:
-    "Free tools for testimonials: card image generator, praise tweet finder, and testimonial writer. No signup needed.",
+    "Free tools for testimonials: card image generator, praise tweet finder, testimonial writer, and AI screenshot extractor. Most tools no signup needed.",
   alternates: { canonical: "/tools" },
   openGraph: {
     title: "Free testimonial tools — Testimoni",
     description:
-      "Card generator, praise-tweet finder, and testimonial writer. All free, no signup.",
+      "Card generator, praise-tweet finder, testimonial writer, and AI screenshot extraction. All free.",
     url: "/tools",
   },
   robots: { index: true, follow: true },
 };
 
 const TOOLS = [
+  {
+    href: "/tools/screenshot-to-testimonial",
+    icon: Sparkles,
+    title: "Screenshot → Testimonial",
+    description:
+      "Drop any screenshot of praise — DM, tweet, Slack, email, review. AI extracts the quote, author, and source into a testimonial card. 3 free extractions with signup.",
+    cta: "Extract now →",
+    badge: "NEW · AI",
+  },
   {
     href: "/tools/testimonial-card",
     icon: ImageIcon,
@@ -79,7 +88,7 @@ export default function ToolsPage() {
         {/* Hero */}
         <div className="text-center">
           <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
-            <Sparkles className="h-3.5 w-3.5" /> All free · No signup
+            <Sparkles className="h-3.5 w-3.5" /> Free tools
           </div>
           <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
             Free testimonial tools
@@ -100,8 +109,15 @@ export default function ToolsPage() {
               href={t.href}
               className="group rounded-2xl border-2 border-primary/10 bg-card p-6 shadow-sm transition hover:border-primary/40 hover:shadow-md"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
-                <t.icon className="h-5 w-5 text-primary" />
+              <div className="flex items-center justify-between">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10">
+                  <t.icon className="h-5 w-5 text-primary" />
+                </div>
+                {"badge" in t && t.badge && (
+                  <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                    {t.badge}
+                  </span>
+                )}
               </div>
               <h2 className="mt-4 text-lg font-bold">{t.title}</h2>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -141,7 +157,7 @@ export default function ToolsPage() {
           <Link href="/" className="hover:text-foreground">
             ← Back to Testimoni
           </Link>
-          <p>All tools free. No signup needed.</p>
+          <p>All tools free.</p>
         </div>
       </footer>
     </div>

@@ -28,6 +28,8 @@ import { WelcomeSplash } from "@/components/welcome-splash";
 import { PageLoadPerf } from "@/components/page-load-perf";
 import { celebrateFirstTestimonial } from "@/lib/confetti";
 import { readSessionCache } from "@/lib/session-cache";
+import { SCREENSHOT_TAG } from "@/lib/screenshot-constants";
+import { compressImageToDataUrl } from "@/lib/image-compress";
 import { track, identify } from "@/lib/analytics";
 
 interface ImportedTestimonial {
@@ -89,12 +91,17 @@ export function WelcomeClient({
   const [embedCopied, setEmbedCopied] = useState(false);
   // Intake mode — "url" is the primary path, "manual" reveals when the
   // user clicks the "no tweet handy" toggle. Same card, different input.
-  const [mode, setMode] = useState<"url" | "manual">("url");
+  const [mode, setMode] = useState<"url" | "manual" | "screenshot">("url");
   const [manualName, setManualName] = useState("");
   const [manualContent, setManualContent] = useState("");
   const [manualTitle, setManualTitle] = useState("");
   const [manualRating, setManualRating] = useState<number>(5);
   const [savingManual, setSavingManual] = useState(false);
+  // Screenshot mode — v1 single file. Preview holds the compressed
+  // data URL until the user clicks Extract. Then we hit the API.
+  const [ssPreview, setSsPreview] = useState<string | null>(null);
+  const [ssExtracting, setSsExtracting] = useState(false);
+  const ssInputRef = useRef<HTMLInputElement>(null);
 
   // Fire signup_completed exactly once for fresh signups (< 90s old).
   // Google OAuth users can't be tracked from the button click alone
@@ -242,6 +249,100 @@ export function WelcomeClient({
       } catch {
         // Silent — user still sees the optimistic render and can
         // retry via the "Add another" button.
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-extract from a screenshot the user picked on the public
+  // /tools/screenshot-to-testimonial page BEFORE signing up. The
+  // tool page stashed a data URL in sessionStorage; here we call
+  // the extraction API (signed-in now), then save to the wall —
+  // the user's first login IS their first testimonial live moment.
+  const autoScreenshotRef = useRef(false);
+  const [screenshotExtracting, setScreenshotExtracting] = useState(false);
+  useEffect(() => {
+    if (autoScreenshotRef.current) return;
+    let dataUrl: string | null = null;
+    try {
+      dataUrl = sessionStorage.getItem("pending_screenshot");
+    } catch {}
+    if (!dataUrl) return;
+    autoScreenshotRef.current = true;
+    try {
+      sessionStorage.removeItem("pending_screenshot");
+    } catch {}
+
+    track("auto_extract_from_screenshot");
+    setScreenshotExtracting(true);
+
+    (async () => {
+      try {
+        // Step 1: run extraction via Claude Vision.
+        const extractRes = await fetch(
+          "/api/tools/screenshot-to-testimonial",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: dataUrl }),
+          },
+        );
+        const extractData = await extractRes.json();
+        if (extractRes.status === 402 && extractData.reason === "quota_exceeded") {
+          // Rare on the welcome page — a brand-new signup with
+          // 0 prior extractions won't hit the cap on their first
+          // one. Guard anyway (e.g. reused account) so the error
+          // is clear and points at pricing instead of stalling.
+          setError(extractData.message ?? "Screenshot quota reached.");
+          return;
+        }
+        if (!extractRes.ok || !extractData.is_praise) {
+          setError(
+            extractData.message ||
+              extractData.error ||
+              "We couldn't extract praise from that screenshot. Try another one.",
+          );
+          return;
+        }
+
+        // Step 2: persist the extracted testimonial to the wall.
+        const saveRes = await fetch("/api/testimonials", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerName: extractData.author,
+            customerTitle: extractData.author_handle
+              ? `@${String(extractData.author_handle).replace(/^@/, "")}`
+              : undefined,
+            content: extractData.quote,
+            rating: 5,
+            source: "MANUAL",
+            status: "APPROVED",
+            // Tag so the monthly quota query counts this row.
+            tags: [SCREENSHOT_TAG],
+          }),
+        });
+        const saveData = await saveRes.json();
+        if (saveRes.ok && saveData.testimonial) {
+          setImported({
+            id: saveData.testimonial.id,
+            content: saveData.testimonial.content,
+            customerName: saveData.testimonial.customerName,
+            customerTitle: saveData.testimonial.customerTitle,
+            rating: saveData.testimonial.rating,
+            source: saveData.testimonial.source ?? "MANUAL",
+            sourceUrl: null,
+          });
+          if (saveData.widget?.id) setImportedWidgetId(saveData.widget.id);
+          if (!celebratedRef.current) {
+            celebratedRef.current = true;
+            celebrateFirstTestimonial();
+          }
+        }
+      } catch {
+        setError("Something went wrong extracting your screenshot.");
+      } finally {
+        setScreenshotExtracting(false);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -498,6 +599,98 @@ export function WelcomeClient({
     }
   }
 
+  /**
+   * Screenshot mode: pick file → compress → preview → extract via
+   * Claude Vision → save with SCREENSHOT_TAG. Reuses the same
+   * extraction + save endpoints the sessionStorage auto-import
+   * hits, so results feed into the same `imported` success state.
+   */
+  async function handleWelcomeScreenshotPick(file: File) {
+    setError(null);
+    if (!file.type.startsWith("image/")) {
+      setError("Please pick an image file — PNG, JPEG, WEBP, or GIF.");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      setError("Image is too large. Please pick one under 15MB.");
+      return;
+    }
+    try {
+      const dataUrl = await compressImageToDataUrl(file, 4.5 * 1024 * 1024);
+      setSsPreview(dataUrl);
+    } catch {
+      setError("Couldn't read this image. Try another one.");
+    }
+  }
+
+  async function handleWelcomeScreenshotExtract() {
+    if (!ssPreview) return;
+    setSsExtracting(true);
+    setError(null);
+    try {
+      const extractRes = await fetch(
+        "/api/tools/screenshot-to-testimonial",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: ssPreview }),
+        },
+      );
+      const extractData = await extractRes.json();
+      if (extractRes.status === 402) {
+        setError(extractData.message ?? "Screenshot quota reached.");
+        return;
+      }
+      if (!extractRes.ok || !extractData.is_praise) {
+        setError(
+          extractData.message ??
+            extractData.error ??
+            "Couldn't extract praise from that screenshot.",
+        );
+        return;
+      }
+      const saveRes = await fetch("/api/testimonials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: extractData.author,
+          customerTitle: extractData.author_handle
+            ? `@${String(extractData.author_handle).replace(/^@/, "")}`
+            : undefined,
+          content: extractData.quote,
+          rating: 5,
+          source: "MANUAL",
+          status: "APPROVED",
+          tags: [SCREENSHOT_TAG],
+        }),
+      });
+      const saveData = await saveRes.json();
+      if (!saveRes.ok) {
+        setError(saveData.error ?? "Couldn't save the testimonial.");
+        return;
+      }
+      setImported({
+        id: saveData.testimonial.id,
+        content: saveData.testimonial.content,
+        customerName: saveData.testimonial.customerName,
+        customerTitle: saveData.testimonial.customerTitle,
+        rating: saveData.testimonial.rating,
+        source: saveData.testimonial.source ?? "MANUAL",
+        sourceUrl: null,
+      });
+      if (saveData.widget?.id) setImportedWidgetId(saveData.widget.id);
+      if (!celebratedRef.current) {
+        celebratedRef.current = true;
+        celebrateFirstTestimonial();
+      }
+      track("welcome_screenshot_extracted", { source: "welcome_landing" });
+    } catch {
+      setError("Something went wrong. Try again.");
+    } finally {
+      setSsExtracting(false);
+    }
+  }
+
   function copyWall() {
     if (!wallUrl) return;
     navigator.clipboard.writeText(wallUrl);
@@ -561,6 +754,41 @@ export function WelcomeClient({
     } finally {
       setSaving(false);
     }
+  }
+
+  // Screenshot extraction in flight — takes ~3-6s. Show a
+  // dedicated "we're reading your screenshot" panel instead of
+  // the paste-URL empty state so the user knows something is
+  // happening on their behalf.
+  if (screenshotExtracting && !imported) {
+    return (
+      <>
+        <WelcomeSplash active={isNewSignup} />
+        <PageLoadPerf surface="welcome" />
+        <div className="mx-auto max-w-2xl space-y-6 py-12 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Extracting your screenshot…
+            </h1>
+            <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+              We&apos;re reading the quote, author, and source from the
+              screenshot you uploaded. Usually takes 3-6 seconds.
+            </p>
+          </div>
+          <div className="mx-auto max-w-md rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="space-y-3">
+              <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-full animate-pulse rounded bg-muted" />
+              <div className="h-3 w-4/5 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
+            </div>
+          </div>
+        </div>
+      </>
+    );
   }
 
   // Success state — imported testimonial + wall preview
@@ -894,7 +1122,8 @@ export function WelcomeClient({
         )}
       </div>
 
-      {/* Primary card — URL input or manual form depending on mode */}
+      {/* Primary card — URL input, manual form, or screenshot
+          extractor depending on mode. */}
       <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-6">
         {mode === "url" ? (
           <>
@@ -977,7 +1206,42 @@ export function WelcomeClient({
               </p>
             )}
 
-            {/* Mode toggle — one tap to switch to manual entry */}
+            {/* Mode toggle — one tap to switch to manual entry OR
+                to the AI screenshot extractor. Screenshot gets the
+                heavier visual treatment (button-shaped, gradient
+                background, Sparkles icon) because it's the newest
+                AI feature and the biggest conversion driver — a
+                plain text link was disappearing next to the URL
+                paste hero. Manual stays a subtle text link. */}
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setMode("screenshot");
+                track("welcome_switched_to_screenshot", {
+                  source: "welcome_landing",
+                });
+              }}
+              className="mt-5 flex w-full items-center justify-between gap-3 rounded-xl border-2 border-primary/30 bg-gradient-to-r from-primary/10 via-pink-500/[0.06] to-transparent p-3 text-left transition-all hover:border-primary/50 hover:from-primary/15 hover:via-pink-500/10"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">
+                    Or drop a screenshot of praise{" "}
+                    <span className="ml-1 rounded bg-primary/15 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-primary">
+                      AI
+                    </span>
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    DM, tweet, Slack, WhatsApp — we extract the quote automatically.
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-primary" />
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -985,12 +1249,12 @@ export function WelcomeClient({
                 setMode("manual");
                 track("welcome_switched_to_manual", { source: "welcome_landing" });
               }}
-              className="mt-4 text-sm font-medium text-primary hover:underline"
+              className="mt-3 block text-xs font-medium text-muted-foreground hover:text-primary hover:underline"
             >
               Have a customer&apos;s words from an email or DM? Type them in here →
             </button>
           </>
-        ) : (
+        ) : mode === "manual" ? (
           <>
             <div className="flex items-start justify-between gap-2">
               <label htmlFor="m-content" className="text-sm font-semibold">
@@ -1080,6 +1344,99 @@ export function WelcomeClient({
                 )}
               </Button>
             </div>
+          </>
+        ) : (
+          <>
+            {/* Screenshot mode — pick a file, preview it, extract
+                via Claude Vision. Same shape as /dashboard/import's
+                screenshot tab so users learn one pattern. */}
+            <div className="flex items-start justify-between gap-2">
+              <label htmlFor="w-ss" className="text-sm font-semibold">
+                Drop a screenshot of praise
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setError(null);
+                  setMode("url");
+                }}
+                className="shrink-0 text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                ← Back to URL paste
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              DM, tweet, Slack, WhatsApp, email, App Store review — we
+              extract the quote, author, and source.
+            </p>
+            {!ssPreview ? (
+              <label
+                htmlFor="w-ss"
+                className="mt-3 block cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-background p-8 text-center transition-colors hover:border-primary/50 hover:bg-primary/5"
+              >
+                <input
+                  ref={ssInputRef}
+                  id="w-ss"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleWelcomeScreenshotPick(file);
+                  }}
+                />
+                <Sparkles className="mx-auto h-8 w-8 text-primary" />
+                <p className="mt-3 text-sm font-semibold">
+                  Click or drag to upload
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  PNG, JPEG, WEBP, or GIF · up to 15MB
+                </p>
+              </label>
+            ) : (
+              <div className="mt-3 space-y-3">
+                <div className="overflow-hidden rounded-xl border bg-background">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={ssPreview}
+                    alt="Your screenshot"
+                    className="max-h-64 w-full object-contain"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={handleWelcomeScreenshotExtract}
+                    disabled={ssExtracting}
+                    size="lg"
+                    className="gap-2"
+                  >
+                    {ssExtracting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Extracting…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Extract & save
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSsPreview(null);
+                      if (ssInputRef.current) {
+                        ssInputRef.current.value = "";
+                      }
+                    }}
+                    disabled={ssExtracting}
+                  >
+                    Pick a different one
+                  </Button>
+                </div>
+              </div>
+            )}
           </>
         )}
 

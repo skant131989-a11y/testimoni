@@ -9,7 +9,6 @@ import {
   Plus,
   Sparkles,
   ArrowRight,
-  Heart,
   Search,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -271,30 +270,29 @@ export default async function DashboardPage() {
           session so if the user closes it, they'll see "Do next"
           again on the next page load. */}
       {totalTestimonials > 0 && !MILESTONE_COUNTS.includes(approvedTestimonials) && (
-        <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <Sparkles className="h-4 w-4 text-primary" />
+        <div className="rounded-xl border border-primary/25 bg-primary/[0.04] px-4 py-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2.5">
+            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
                 Do next
               </p>
-              <p className="mt-1 text-base font-semibold text-foreground">
+              <p className="mt-0.5 text-sm font-semibold text-foreground">
                 {nba.title}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">{nba.desc}</p>
             </div>
           </div>
-          <Button asChild size="lg" className="shrink-0">
+          <Button asChild size="sm" className="shrink-0">
             {nba.external ? (
               <a href={nba.href} target="_blank" rel="noopener noreferrer">
-                {nba.label} <ArrowRight className="ml-2 h-4 w-4" />
+                {nba.label} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </a>
             ) : (
               <Link href={nba.href}>
-                {nba.label} <ArrowRight className="ml-2 h-4 w-4" />
+                {nba.label} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             )}
           </Button>
@@ -313,11 +311,12 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* Video-upgrade nudge — only show once the user has real
-          proof to build on. Pushing "get your free video" while they
-          still have zero text testimonials is a distraction from the
-          primary "collect first" job. */}
-      {totalTestimonials > 0 && (
+      {/* Video-upgrade nudge — only surface once the user has some
+          real proof already (3+ testimonials). Before that the pitch
+          for "add a video" competes with the primary "collect your
+          first few" job. Component itself is now compact (one line)
+          so it slots into the dashboard without dominating it. */}
+      {totalTestimonials >= 3 && (
         <VideoFreeBanner videoCount={videoCount} />
       )}
 
@@ -358,18 +357,22 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Quick actions — the 4 things a founder does most from the
-          dashboard: add another testimonial, look at their wall,
-          find more praise on X, and manage their embed widgets.
-          Share Form was removed (redundant with the empty-state
-          inline share flow + the FormUrlCard above); replaced
-          with more actionable "See my Wall" + "Find praise tweets"
-          discovery entrypoints. */}
+      {/* Quick actions — three focused CTAs a founder actually
+          clicks: add a testimonial, extract one from a screenshot
+          via AI, or find fresh praise tweets to import. "See my
+          Wall" and "Manage widgets" moved to the sidebar where
+          they belong; keeping them here diluted the row. */}
       <div className="flex flex-wrap items-center gap-3">
         <Button asChild>
           <Link href="/dashboard/import">
             <Plus className="mr-2 h-4 w-4" />
             Add testimonial
+          </Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href="/dashboard/import?tab=screenshot">
+            <Sparkles className="mr-2 h-4 w-4" />
+            Extract from screenshot
           </Link>
         </Button>
         <PlanLimitProgress
@@ -378,14 +381,6 @@ export default async function DashboardPage() {
           resource="testimonials"
           upgradeSurface="dashboard_quick_actions"
         />
-        {wallUrl && (
-          <Button variant="outline" asChild>
-            <a href={wallUrl} target="_blank" rel="noopener noreferrer">
-              <Heart className="mr-2 h-4 w-4" />
-              See my Wall
-            </a>
-          </Button>
-        )}
         <Button variant="outline" asChild>
           <a
             href="/tools/praise-tweet-finder"
@@ -395,12 +390,6 @@ export default async function DashboardPage() {
             <Search className="mr-2 h-4 w-4" />
             Find praise tweets
           </a>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/dashboard/widgets">
-            <Code2 className="mr-2 h-4 w-4" />
-            Manage widgets
-          </Link>
         </Button>
       </div>
 

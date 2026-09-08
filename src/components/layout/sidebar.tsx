@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
+  Heart,
   ExternalLink,
   Copy,
   Check,
@@ -114,10 +115,10 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
         )}
 
         {/* Your Wall of Love — always-visible link to the primary
-            shareable asset. Cheap to show, big value if users click
-            through and share. Hidden when there's no widget yet
-            (fresh account still provisioning) so we don't ship a
-            broken link. */}
+            shareable asset. Prominently styled (gradient, bigger
+            heading + heart emoji) because sharing the wall is the
+            #1 outcome we want users to remember. Cheap to show,
+            outsized value when users click through and share. */}
         {wallUrl && (
           <div className={cn("border-b p-3", collapsed && "px-2")}>
             {collapsed ? (
@@ -126,39 +127,41 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Your Wall of Love"
-                className="flex items-center justify-center rounded-md p-2 text-primary hover:bg-primary/10"
+                className="flex items-center justify-center rounded-md bg-gradient-to-br from-primary/20 to-pink-500/15 p-2 text-primary hover:from-primary/30 hover:to-pink-500/25"
                 onClick={() =>
                   track("wall_view_clicked", { surface: "sidebar", via: "icon" })
                 }
               >
-                <Sparkles className="h-5 w-5" />
+                <Heart className="h-5 w-5 fill-current" />
               </a>
             ) : (
-              <div className="rounded-md bg-primary/5 p-2.5">
+              <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/10 via-pink-500/[0.06] to-transparent p-3 shadow-sm">
                 <div className="flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" />
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  <Heart className="h-4 w-4 shrink-0 fill-primary text-primary" />
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
                     Your Wall of Love
                   </p>
                 </div>
+                <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                  Share this anywhere — bio, email, DM.
+                </p>
                 <a
                   href={wallUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   title={wallUrl}
-                  className="mt-1 block truncate text-xs text-foreground hover:text-primary hover:underline"
+                  className="mt-2 block truncate rounded border border-primary/15 bg-background/70 px-2 py-1 font-mono text-[11px] text-foreground hover:border-primary/40 hover:text-primary"
                   onClick={() =>
                     track("wall_view_clicked", { surface: "sidebar", via: "url_text" })
                   }
                 >
                   {wallUrl.replace(/^https?:\/\//, "")}
                 </a>
-                <div className="mt-1.5 flex gap-1">
+                <div className="mt-2 flex gap-1.5">
                   <Button
                     asChild
                     size="sm"
-                    variant="ghost"
-                    className="h-6 flex-1 px-1.5 text-[10px]"
+                    className="h-7 flex-1 px-2 text-[11px]"
                   >
                     <a
                       href={wallUrl}
@@ -168,22 +171,22 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
                         track("wall_view_clicked", { surface: "sidebar", via: "button" })
                       }
                     >
-                      <ExternalLink className="mr-0.5 h-3 w-3" /> View
+                      <ExternalLink className="mr-1 h-3 w-3" /> View
                     </a>
                   </Button>
                   <Button
                     size="sm"
-                    variant="ghost"
-                    className="h-6 flex-1 px-1.5 text-[10px]"
+                    variant="outline"
+                    className="h-7 flex-1 px-2 text-[11px]"
                     onClick={copyWallUrl}
                   >
                     {wallCopied ? (
                       <>
-                        <Check className="mr-0.5 h-3 w-3" /> Copied
+                        <Check className="mr-1 h-3 w-3" /> Copied
                       </>
                     ) : (
                       <>
-                        <Copy className="mr-0.5 h-3 w-3" /> Copy
+                        <Copy className="mr-1 h-3 w-3" /> Copy
                       </>
                     )}
                   </Button>

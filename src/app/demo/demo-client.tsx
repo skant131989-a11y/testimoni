@@ -12,7 +12,7 @@ import { LetterAvatar } from "@/components/letter-avatar";
 import { TrackedLink } from "@/components/tracked-link";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { InlineSignup } from "@/components/inline-signup";
-import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
+import { HeroDualDemo } from "@/components/hero-dual-demo";
 import { DemoVideo } from "@/components/demo-video";
 import { track } from "@/lib/analytics";
 import { createClient } from "@/lib/supabase/client";
@@ -470,6 +470,39 @@ export default function DemoClient() {
       <LovedByFoundersStrip />
 
       <main className="mx-auto max-w-7xl px-4 py-12">
+        {/* Banner — surfaces the Screenshot → Testimonial tool as a
+            skip-the-flow alternative for visitors who already have
+            praise to import. Compact, one line, links directly to
+            the free tool page. */}
+        <div className="mb-8 rounded-2xl border-2 border-primary/30 bg-gradient-to-r from-primary/5 via-primary/[0.03] to-transparent p-4">
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15">
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">
+                  Already have praise in your DMs, tweets, or Slack?
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Skip the flow — drop a screenshot and we&apos;ll extract it
+                  into a testimonial in 3 seconds.
+                </p>
+              </div>
+            </div>
+            <TrackedLink
+              cta="demo_screenshot_banner"
+              surface="demo"
+              href="/tools/screenshot-to-testimonial"
+              className="shrink-0"
+            >
+              <Button size="sm" variant="outline" className="gap-1.5">
+                Try Screenshot → Testimonial <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </TrackedLink>
+          </div>
+        </div>
+
         {/* Hero */}
         <div className="text-center">
           <Badge variant="outline" className="mb-4">
@@ -477,13 +510,13 @@ export default function DemoClient() {
             Try the flow. Save it to an account when you want it on your site.
           </Badge>
           <h1 className="text-4xl font-bold md:text-5xl">
-            Paste a tweet, or fill a form.{" "}
+            Paste a tweet, drop a screenshot, or fill a form.{" "}
             <span className="text-primary">See it live in 30 seconds.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            The two intake paths, both interactive. Try the form flow below,
-            or scroll down to paste any X or LinkedIn URL and see the same
-            testimonial land in your library.
+            All three intake paths, interactive. Paste a URL, drop a screenshot
+            of praise (DM, Slack, WhatsApp), or fill the collection form — all
+            three end at the same testimonial library.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
             Prefer a shareable link over embed code?{" "}
@@ -504,18 +537,21 @@ export default function DemoClient() {
             <h2 className="text-lg font-semibold">Choose an intake path</h2>
           </div>
           <p className="mb-6 text-sm text-muted-foreground">
-            Two ways in. Paste an existing tweet — instant. Or share a form
-            for fresh submissions. Both flows below are live.
+            Two ways in. Paste a URL (tweet) or drop a screenshot — both are
+            instant. Or share a form for fresh submissions. All three end at
+            the same testimonial library.
           </p>
 
           <div className="grid gap-6 md:grid-cols-[1fr_auto_1fr] md:items-stretch md:gap-8">
-            {/* LEFT: Paste-a-tweet flow */}
+            {/* LEFT: Instant-intake tabs — paste-a-tweet OR screenshot.
+                Both skip Step 2 (auto-approved on the demo). See
+                <HeroDualDemo> for the tab wrapper. */}
             <div className="flex flex-col">
               <div className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full border-2 border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
                 Auto-approved · Skips step 2 →
               </div>
               <div className="flex-1">
-                <TweetPreviewDemo isLoggedIn={isLoggedIn} />
+                <HeroDualDemo />
               </div>
             </div>
 
