@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
 import { randomUUID } from "node:crypto";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import {
+  getAuthUser,
+  getDbUserWithWorkspace,
+  loadDbUserWithWorkspaceFresh,
+} from "@/lib/session";
 import { Sidebar } from "@/components/layout/sidebar";
 import { AuthIdentifier } from "@/components/auth-identifier";
 import { Header } from "@/components/layout/header";
@@ -17,40 +21,13 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
+  const authUser = await getAuthUser();
 
   if (!authUser) {
     redirect("/login");
   }
 
-  let dbUser = await prisma.user.findUnique({
-    where: { supabaseId: authUser.id },
-    include: {
-      workspaceMembers: {
-        include: {
-          workspace: {
-            include: {
-              subscription: true,
-              // Fetch the default (oldest active) widget in the SAME
-              // query so we don't run a second round-trip for the
-              // sidebar wall URL. Cut layout render time on Supabase
-              // Free by ~200-500ms per navigation.
-              widgets: {
-                where: { isActive: true },
-                orderBy: { createdAt: "asc" },
-                take: 1,
-                select: { id: true },
-              },
-            },
-          },
-        },
-        take: 1,
-      },
-    },
-  });
+  let dbUser = await getDbUserWithWorkspace();
 
   if (!dbUser || !dbUser.workspaceMembers[0]) {
     // First-time provisioning. The old implementation ran 6+
@@ -195,27 +172,7 @@ export default async function DashboardLayout({
       })();
     }
 
-    dbUser = await prisma.user.findUnique({
-      where: { supabaseId: authUser.id },
-      include: {
-        workspaceMembers: {
-          include: {
-            workspace: {
-              include: {
-                subscription: true,
-                widgets: {
-                  where: { isActive: true },
-                  orderBy: { createdAt: "asc" },
-                  take: 1,
-                  select: { id: true },
-                },
-              },
-            },
-          },
-          take: 1,
-        },
-      },
-    });
+    dbUser = await loadDbUserWithWorkspaceFresh();
 
     if (!dbUser || !dbUser.workspaceMembers[0]) {
       redirect("/login");
