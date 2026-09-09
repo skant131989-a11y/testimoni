@@ -842,6 +842,94 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Review-platforms band — announces the newly-Free auto-import
+          from App Store / Play Store / Chrome Web Store / Product
+          Hunt. Sits above the AI features so the story reads
+          intake-first ("look at all the places we can pull praise
+          from") before value-add ("and here's what Pro adds on
+          top"). */}
+      <section className="border-t bg-gradient-to-b from-background via-primary/[0.02] to-background py-14">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+              <Sparkles className="h-3 w-3" />
+              Now free
+            </div>
+            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+              Auto-import from every review platform.
+            </h2>
+            <p className="mt-3 max-w-2xl text-muted-foreground">
+              Paste an App Store, Play Store, Chrome Web Store, or Product
+              Hunt URL. We pull the reviews, you approve, they land on your
+              Wall of Love — all on the Free plan.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-3 md:grid-cols-4">
+            {[
+              {
+                name: "App Store",
+                logoBg: "bg-blue-500",
+                logoLetter: "A",
+                tagline: "iOS + macOS reviews",
+              },
+              {
+                name: "Play Store",
+                logoBg: "bg-emerald-500",
+                logoLetter: "P",
+                tagline: "Android apps",
+              },
+              {
+                name: "Chrome Web Store",
+                logoBg: "bg-yellow-500",
+                logoLetter: "C",
+                tagline: "Extension reviews",
+              },
+              {
+                name: "Product Hunt",
+                logoBg: "bg-orange-500",
+                logoLetter: "P",
+                tagline: "Launch reviews",
+              },
+            ].map((p) => (
+              <div
+                key={p.name}
+                className="flex items-center gap-3 rounded-xl border bg-card p-4 transition hover:border-primary hover:shadow"
+              >
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${p.logoBg} text-lg font-black text-white`}
+                >
+                  {p.logoLetter}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">{p.name}</p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {p.tagline}
+                  </p>
+                </div>
+                <CheckCircle2 className="ml-auto h-4 w-4 shrink-0 text-emerald-500" />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-col items-center gap-2 text-center">
+            <TrackedLink
+              cta="review_sources_band_cta"
+              surface="home"
+              href="/signup?src=review_sources_band"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+            >
+              Start free — no credit card
+              <ArrowRight className="h-4 w-4" />
+            </TrackedLink>
+            <p className="text-xs text-muted-foreground">
+              Free: manual import + 10-testimonial cap. Pro: auto-sync every
+              24h + auto-approve + unlimited.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* New Pro AI features band — sits right before pricing so
           visitors see the upsell hook in the moment they're deciding
           "free or Pro?". Compact by design — three tiles, one CTA.
