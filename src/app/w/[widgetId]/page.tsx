@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import type { Metadata } from "next";
 import { Star, ArrowRight, Twitter, Linkedin, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -16,54 +18,79 @@ interface WallPageProps {
   searchParams: Promise<{ showcase?: string }>;
 }
 
-async function getWidget(widgetId: string) {
-  return prisma.widget.findUnique({
-    where: { id: widgetId },
-    include: {
-      workspace: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          logoUrl: true,
-          subscription: { select: { plan: true } },
-          // First active collection form — used as the target of the
-          // "Testify for X" flow. Every workspace has at least one
-          // form after provisioning; guard for the rare zero-forms
-          // case downstream anyway.
-          forms: {
-            where: { isActive: true },
-            orderBy: { createdAt: "asc" },
-            take: 1,
-            select: { slug: true },
-          },
-        },
-      },
-      testimonials: {
-        orderBy: { position: "asc" },
-        include: {
-          testimonial: {
-            select: {
-              id: true,
-              content: true,
-              rating: true,
-              customerName: true,
-              customerAvatar: true,
-              customerTitle: true,
-              customerUrl: true,
-              videoUrl: true,
-              source: true,
-              sourceUrl: true,
+// Background revalidation — after 5 minutes the next visitor
+// triggers a fresh DB fetch while everyone else keeps getting the
+// cached copy. New approved testimonials show up within 5min on
+// the wall without a manual invalidation. If we need faster,
+// invalidate the cache tag from the testimonial approve/edit
+// endpoints (see revalidateTag docs).
+export const revalidate = 300;
+
+// Two-layer cache:
+// 1. `unstable_cache` — persists across requests + across regions,
+//    keyed on widgetId + tagged for on-demand invalidation.
+// 2. `cache()` — de-dupes calls WITHIN a single request. Without
+//    this, generateMetadata + the page render run the same query
+//    twice (~30-80ms wasted per page load).
+const fetchWidgetFromDb = unstable_cache(
+  async (widgetId: string) =>
+    prisma.widget.findUnique({
+      where: { id: widgetId },
+      include: {
+        workspace: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
+            subscription: { select: { plan: true } },
+            // First active collection form — used as the target of the
+            // "Testify for X" flow. Every workspace has at least one
+            // form after provisioning; guard for the rare zero-forms
+            // case downstream anyway.
+            forms: {
+              where: { isActive: true },
+              orderBy: { createdAt: "asc" },
+              take: 1,
+              select: { slug: true },
             },
           },
         },
-        where: {
-          testimonial: { status: "APPROVED" },
+        testimonials: {
+          orderBy: { position: "asc" },
+          include: {
+            testimonial: {
+              select: {
+                id: true,
+                content: true,
+                rating: true,
+                customerName: true,
+                customerAvatar: true,
+                customerTitle: true,
+                customerUrl: true,
+                videoUrl: true,
+                source: true,
+                sourceUrl: true,
+              },
+            },
+          },
+          where: {
+            testimonial: { status: "APPROVED" },
+          },
         },
       },
-    },
-  });
-}
+    }),
+  ["widget-page"],
+  {
+    revalidate: 300,
+    // Tag the cache entry so approve / edit / archive endpoints can
+    // call `revalidateTag(\`widget:\${id}\`)` for instant refresh
+    // without waiting 5 minutes.
+    tags: ["widget-page"],
+  }
+);
+
+const getWidget = cache(async (widgetId: string) => fetchWidgetFromDb(widgetId));
 
 export async function generateMetadata(
   { params }: WallPageProps
