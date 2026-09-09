@@ -6,6 +6,7 @@ import { Loader2, Mail, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
 import { webmailForEmail } from "@/lib/email-provider";
+import { OtpCodeInput } from "@/components/otp-code-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -126,6 +127,16 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
               </Button>
             </a>
           )}
+          {/* OTP fallback — bypasses the mail-scanner-prefetch
+              magic-link failure. Users type the 6-digit code from
+              the email if the link doesn't work. */}
+          <OtpCodeInput
+            email={email}
+            redirectTo={`/dashboard/welcome?src=${encodeURIComponent(source)}`}
+            successEvent="signup_completed"
+            method="magic_link"
+            surface={`inline:${source}`}
+          />
           <p className="text-[11px] text-muted-foreground">
             Link expires in 1 hour · Not in your inbox? Check spam / promotions
           </p>

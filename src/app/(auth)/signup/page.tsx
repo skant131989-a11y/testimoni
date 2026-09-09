@@ -7,6 +7,7 @@ import { Loader2, Mail, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { track, identify, resetAnalytics } from "@/lib/analytics";
 import { webmailForEmail } from "@/lib/email-provider";
+import { OtpCodeInput } from "@/components/otp-code-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -221,6 +222,17 @@ export default function SignupPage() {
                 </Button>
               </a>
             )}
+            {/* OTP code input — for both magic-link signup and
+                email-verification signup, users can type the 6-digit
+                code from the email instead of clicking the link.
+                Bypasses email-scanner prefetch failures. */}
+            <OtpCodeInput
+              email={email}
+              redirectTo="/dashboard/welcome"
+              successEvent="signup_completed"
+              method={verificationSent ? "email_verify" : "magic_link"}
+              surface="signup"
+            />
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
               <p className="font-semibold text-foreground">While you wait:</p>
               <ul className="mt-2 space-y-1.5 text-muted-foreground">

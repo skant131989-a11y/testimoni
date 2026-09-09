@@ -70,19 +70,40 @@
                   Sign in to Testimoni
                 </div>
                 <div style="margin-top:10px;font-size:15px;color:#334155;line-height:1.5;">
-                  Tap the button below to sign in. This link works once and
-                  expires in <strong>1 hour</strong>.
+                  Two ways to sign in — pick whichever works for you.
+                  Both expire in <strong>1 hour</strong>.
                 </div>
               </td>
             </tr>
 
-            <!-- Primary CTA — the magic link button. bulletproof (works
-                 across Outlook via VML fallback would be ideal, but a
-                 rounded-corner table works for 95% of clients and
-                 degrades to a plain rectangle in old Outlook). -->
+            <!-- Primary path — the 6-digit code. Type this on the
+                 sign-in page. Email link scanners (Gmail, Outlook,
+                 corporate firewalls) prefetch link URLs but can't
+                 fill a form, so the code always works even when the
+                 magic-link click doesn't. Big + centered for iOS
+                 "From Messages" autofill copy-paste. -->
             <tr>
-              <td style="padding:24px 32px 8px 32px;">
-                <table role="presentation" cellpadding="0" cellspacing="0">
+              <td style="padding:20px 32px 4px 32px;">
+                <div style="font-size:13px;font-weight:600;color:#5b21b6;text-transform:uppercase;letter-spacing:0.05em;">
+                  Option 1 · Type this code
+                </div>
+                <div style="margin-top:10px;background:#f5f3ff;border:2px solid #ddd6fe;border-radius:12px;padding:18px;text-align:center;">
+                  <div style="font-size:34px;font-weight:800;font-family:'SFMono-Regular',ui-monospace,Menlo,monospace;letter-spacing:0.35em;color:#0f172a;">
+                    {{ .Token }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Secondary path — the magic-link button. Works when
+                 the tab that opens it has the original PKCE cookie
+                 (same browser as sign-in start). -->
+            <tr>
+              <td style="padding:20px 32px 8px 32px;">
+                <div style="font-size:13px;font-weight:600;color:#5b21b6;text-transform:uppercase;letter-spacing:0.05em;">
+                  Option 2 · Or click this link
+                </div>
+                <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:10px;">
                   <tr>
                     <td style="border-radius:10px;background:#5b21b6;">
                       <a href="{{ .ConfirmationURL }}"
