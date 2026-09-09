@@ -208,6 +208,38 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
     }
   }
 
+  /**
+   * Change the rating threshold on a source. Reviews below the new
+   * threshold on the NEXT sync will be skipped; already-imported
+   * testimonials are unaffected (users can archive those manually).
+   * Optimistic update with rollback on server failure.
+   */
+  async function handleChangeMinRating(id: string, next: number) {
+    const prev = sources.find((s) => s.id === id)?.minRating;
+    setSources((current) =>
+      current.map((s) => (s.id === id ? { ...s, minRating: next } : s)),
+    );
+    track("review_source_min_rating_changed", {
+      source_id: id,
+      from: prev,
+      to: next,
+    });
+    try {
+      const res = await fetch(`/api/review-sources/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ minRating: next }),
+      });
+      if (!res.ok) throw new Error("PATCH failed");
+    } catch {
+      if (prev !== undefined) {
+        setSources((current) =>
+          current.map((s) => (s.id === id ? { ...s, minRating: prev } : s)),
+        );
+      }
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -408,7 +440,7 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
                     {s.sourceUrl}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {s.totalImported} imported · Min {s.minRating}★ ·{" "}
+                    {s.totalImported} imported ·{" "}
                     {s.lastSyncedAt
                       ? `Last synced ${new Date(s.lastSyncedAt).toLocaleString()}`
                       : "Never synced"}
@@ -418,12 +450,41 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
                       {s.syncError}
                     </p>
                   )}
-                  {/* Auto-approve toggle — the copy is explicit about
-                      WHERE pending imports actually live (Testimonials →
-                      Pending), not "inbox" (which is form-only). Users
-                      were bouncing between /dashboard/inbox and
-                      /dashboard/sources looking for their synced
-                      reviews. */}
+
+                  {/* Rating threshold dropdown — editable anytime.
+                      Changes take effect on the NEXT sync; testimonials
+                      already imported at the old threshold stay put.
+                      Reasonable defaults: 4★+ hides ranty reviews
+                      without being too restrictive. 5★ is the "only
+                      the raves" option. 1★+ is "everything." */}
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                    <label
+                      htmlFor={`min-rating-${s.id}`}
+                      className="font-medium"
+                    >
+                      Minimum rating to import:
+                    </label>
+                    <select
+                      id={`min-rating-${s.id}`}
+                      value={s.minRating}
+                      onChange={(e) =>
+                        handleChangeMinRating(s.id, Number(e.target.value))
+                      }
+                      disabled={!isPro}
+                      className="rounded-md border bg-background px-2 py-1 text-xs font-semibold focus:border-primary focus:outline-none disabled:opacity-60"
+                    >
+                      <option value={1}>1★+ (everything)</option>
+                      <option value={2}>2★+</option>
+                      <option value={3}>3★+</option>
+                      <option value={4}>4★+ (recommended)</option>
+                      <option value={5}>5★ only (raves)</option>
+                    </select>
+                    <span className="text-muted-foreground">
+                      Change anytime — applies to future syncs.
+                    </span>
+                  </div>
+
+                  {/* Auto-approve toggle */}
                   <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs">
                     <input
                       type="checkbox"
@@ -438,8 +499,8 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
                       Auto-approve future reviews
                     </span>
                     <span className="text-muted-foreground">
-                      — land straight on your Wall of Love (still filtered by
-                      Min {s.minRating}★). Off = review in Testimonials → Pending.
+                      — land straight on your Wall of Love. Off = review
+                      in Testimonials → Pending.
                     </span>
                   </label>
                 </div>
