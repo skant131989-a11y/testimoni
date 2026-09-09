@@ -1556,12 +1556,33 @@ export function WelcomeClient({
         </div>
       </div>
 
-      {/* First-run engagement grid — three concrete next-steps
+      {/* First-run engagement grid — four concrete next-steps
           visible without scrolling into the empty white space
           below. Each card opens in a new tab (target="_blank") so
           the welcome tab stays where they came from and doesn't
           lose the paste-URL context. */}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <a
+          href="/dashboard/sources"
+          className="group flex flex-col rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-pink-500/[0.06] to-transparent p-4 shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
+        >
+          <div className="flex items-center gap-2">
+            <div className="text-2xl">🔄</div>
+            <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-primary">
+              Pro · New
+            </span>
+          </div>
+          <p className="mt-2 text-sm font-semibold">
+            Import from review sources
+          </p>
+          <p className="mt-1 flex-1 text-xs text-muted-foreground">
+            Auto-sync App Store + Chrome Web Store reviews to your
+            wall. Paste your app URL, we handle the rest.
+          </p>
+          <span className="mt-3 text-xs font-medium text-primary group-hover:underline">
+            Connect a source →
+          </span>
+        </a>
         <a
           href="/tools/ask-templates"
           target="_blank"

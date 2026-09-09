@@ -10,6 +10,7 @@ import {
   Sparkles,
   ArrowRight,
   Search,
+  RefreshCw,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import {
@@ -373,6 +374,12 @@ export default async function DashboardPage() {
           <Link href="/dashboard/import?tab=screenshot">
             <Sparkles className="mr-2 h-4 w-4" />
             Extract from screenshot
+          </Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href="/dashboard/sources">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Import from sources
           </Link>
         </Button>
         <PlanLimitProgress
