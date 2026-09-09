@@ -11,18 +11,34 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => ({}));
   const currency = body?.currency === "USD" ? "USD" : "INR";
+  const tier = body?.tier === "pro_ai" ? "pro_ai" : "pro";
 
-  const planId =
-    currency === "USD"
-      ? process.env.RAZORPAY_PRO_PLAN_ID_USD
-      : process.env.RAZORPAY_PRO_PLAN_ID_INR || process.env.RAZORPAY_PRO_PLAN_ID;
+  // Route to the right plan-ID env var based on tier + currency.
+  // Pro AI plans must be created separately in Razorpay (₹1499
+  // and $29) with their own plan IDs before this branch works.
+  let planId: string | undefined;
+  if (tier === "pro_ai") {
+    planId =
+      currency === "USD"
+        ? process.env.RAZORPAY_PRO_AI_PLAN_ID_USD
+        : process.env.RAZORPAY_PRO_AI_PLAN_ID_INR ||
+          process.env.RAZORPAY_PRO_AI_PLAN_ID;
+  } else {
+    planId =
+      currency === "USD"
+        ? process.env.RAZORPAY_PRO_PLAN_ID_USD
+        : process.env.RAZORPAY_PRO_PLAN_ID_INR ||
+          process.env.RAZORPAY_PRO_PLAN_ID;
+  }
 
   if (!planId) {
+    const envVar =
+      tier === "pro_ai"
+        ? `RAZORPAY_PRO_AI_PLAN_ID_${currency}`
+        : `RAZORPAY_PRO_PLAN_ID_${currency}`;
     return NextResponse.json(
-      {
-        error: `RAZORPAY_PRO_PLAN_ID_${currency} is not configured`,
-      },
-      { status: 500 }
+      { error: `${envVar} is not configured` },
+      { status: 500 },
     );
   }
 
@@ -40,6 +56,7 @@ export async function POST(request: Request) {
         workspaceId: auth.workspace.id,
         workspaceSlug: auth.workspace.slug,
         userEmail: auth.user.email,
+        tier,
       },
     });
 

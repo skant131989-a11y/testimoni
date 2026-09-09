@@ -17,4 +17,4 @@
  *      RAZORPAY_PRO_AI_PLAN_ID_INR, STRIPE_PRO_AI_PRICE_ID
  *   4. Verify checkout works end-to-end
  */
-export const PRO_AI_PUBLIC = false;
+export const PRO_AI_PUBLIC = true;
