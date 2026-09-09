@@ -1,0 +1,149 @@
+<!--
+  Testimoni magic-link email — Supabase Auth template.
+
+  ── HOW TO INSTALL ────────────────────────────────────────────────
+  1. Supabase Dashboard → Auth → Email Templates → Magic Link
+  2. Paste this entire file into the "Message body" textarea
+  3. Set Subject to:  Your sign-in link for Testimoni
+  4. Save
+  5. Same template works for /login, /signup, and the InlineSignup
+     magic link — Supabase uses "Magic Link" for signInWithOtp
+     regardless of which surface triggered it.
+
+  ── Supabase template variables used ────────────────────────────
+  {{ .ConfirmationURL }} — the one-time sign-in link (must survive
+                           verbatim — no encoding, no rewriting)
+  {{ .Email }}           — the recipient email (optional, unused here)
+
+  Do NOT rename or reformat the {{ .ConfirmationURL }} placeholder.
+  Anything else can be edited freely.
+
+  ── Email-safe rules baked in ──────────────────────────────────
+  - Table layout — Outlook & Gmail iOS drop flex/grid
+  - Inline styles only — <style> blocks stripped by Gmail webapp
+  - 560px max width — industry default; wider clips in Outlook
+  - System font stack — no @font-face support in most clients
+  - No JS, no <script> — silently dropped everywhere
+  - Absolute URLs for images — no origin context in an email
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Your sign-in link for Testimoni</title>
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+  </head>
+  <body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+    <!-- Preheader — the little grey text next to the subject line in
+         Gmail/Outlook lists. Not visually rendered in the email body. -->
+    <div style="display:none;font-size:1px;color:#f4f4f5;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
+      Tap the button to sign in — link expires in 1 hour, single use.
+    </div>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f4f4f5;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0" width="560" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,0.06);">
+
+            <!-- Header — brand wordmark -->
+            <tr>
+              <td style="padding:28px 32px 20px 32px;text-align:left;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="vertical-align:middle;padding-right:10px;">
+                      <div style="display:inline-block;width:34px;height:34px;line-height:34px;border-radius:17px;background:#5b21b6;color:#ffffff;font-size:22px;font-weight:900;text-align:center;font-family:Georgia,serif;">&ldquo;</div>
+                    </td>
+                    <td style="vertical-align:middle;">
+                      <div style="font-size:20px;font-weight:800;color:#0f172a;">Testimoni</div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding:0 32px 8px 32px;">
+                <div style="font-size:22px;font-weight:700;color:#0f172a;line-height:1.25;letter-spacing:-0.01em;">
+                  Sign in to Testimoni
+                </div>
+                <div style="margin-top:10px;font-size:15px;color:#334155;line-height:1.5;">
+                  Tap the button below to sign in. This link works once and
+                  expires in <strong>1 hour</strong>.
+                </div>
+              </td>
+            </tr>
+
+            <!-- Primary CTA — the magic link button. bulletproof (works
+                 across Outlook via VML fallback would be ideal, but a
+                 rounded-corner table works for 95% of clients and
+                 degrades to a plain rectangle in old Outlook). -->
+            <tr>
+              <td style="padding:24px 32px 8px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="border-radius:10px;background:#5b21b6;">
+                      <a href="{{ .ConfirmationURL }}"
+                         style="display:inline-block;padding:14px 26px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:10px;">
+                        Sign in to Testimoni →
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Fallback URL — some clients rewrite href to a preview
+                 URL. Showing the raw link lets users copy-paste if
+                 the button click fails. Long-word-break-anywhere so
+                 the URL wraps cleanly in narrow mobile clients. -->
+            <tr>
+              <td style="padding:8px 32px 20px 32px;">
+                <div style="font-size:12px;color:#64748b;line-height:1.5;">
+                  Or copy this link:
+                </div>
+                <div style="margin-top:6px;font-size:12px;color:#5b21b6;word-break:break-all;line-height:1.4;">
+                  <a href="{{ .ConfirmationURL }}" style="color:#5b21b6;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Reassurance / troubleshooting card -->
+            <tr>
+              <td style="padding:0 32px 24px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#faf5ff;border-radius:10px;">
+                  <tr>
+                    <td style="padding:14px 16px;">
+                      <div style="font-size:13px;font-weight:700;color:#4c1d95;">Didn&rsquo;t request this?</div>
+                      <div style="margin-top:4px;font-size:13px;color:#4c1d95;line-height:1.5;">
+                        Someone typed your email into Testimoni. If it wasn&rsquo;t you,
+                        just ignore this email — the link won&rsquo;t work without your
+                        inbox, and no account gets created.
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding:20px 32px 28px 32px;border-top:1px solid #e2e8f0;">
+                <div style="font-size:12px;color:#64748b;line-height:1.5;">
+                  Testimoni · The Wall of Love for founders
+                </div>
+                <div style="margin-top:4px;font-size:12px;color:#94a3b8;line-height:1.5;">
+                  You received this because a sign-in was requested at
+                  <a href="https://testimoni.io" style="color:#94a3b8;text-decoration:underline;">testimoni.io</a>.
+                </div>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

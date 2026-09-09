@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { track, identify, resetAnalytics } from "@/lib/analytics";
+import { webmailForEmail } from "@/lib/email-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,7 +48,6 @@ function classifyAuthError(msg: string): string {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +55,10 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isMagicLoading, setIsMagicLoading] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
+  // Password mode is off by default — magic link is the primary
+  // path. A "Prefer a password?" link reveals the password field
+  // inline; the email field stays visible so users don't lose it.
+  const [showPassword, setShowPassword] = useState(false);
   // Honeypot — bots fill every visible field, including hidden ones
   // named like "phone" or "website". Real humans never see or touch
   // it. If populated on submit, we silently reject without hitting
@@ -65,25 +68,20 @@ export default function LoginPage() {
   // milliseconds; humans take at least a couple of seconds to type.
   const [mountedAt] = useState(() => Date.now());
 
+  const webmail = magicSent ? webmailForEmail(email) : null;
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 
     // Bot check 1 — honeypot. Track the reject so we see in PostHog
     // when real users get caught by an autofilling password manager.
-    // Field is renamed to a random string (see markup below) so
-    // 1Password / LastPass / Bitwarden / Chrome autofill don't
-    // pattern-match on the previous name="website" and drop real
-    // logins silently.
     if (botTrap) {
       track("login_rejected", { reason: "honeypot", method: "email" });
       setError("Login blocked. If your password manager filled a hidden field, refresh and try again.");
       return;
     }
-    // Bot check 2 — submission < 800ms after mount (was 1500ms).
-    // Real users paste saved passwords and hit Enter fast; 800ms
-    // still blocks scripted spam that fires within one animation
-    // frame.
+    // Bot check 2 — submission < 800ms after mount.
     if (Date.now() - mountedAt < 800) {
       track("login_rejected", { reason: "too_fast", method: "email" });
       setError("Slow down a bit and try again.");
@@ -100,15 +98,8 @@ export default function LoginPage() {
         password,
       });
 
-      // Supabase can return authError alongside a valid data.user in
-      // some session-refresh / already-signed-in edge cases. Only
-      // treat as a real failure when we truly have no user. Otherwise
-      // proceed to the success path even if authError is non-null.
       if (authError && !data.user) {
         setError(authError.message);
-        // Include as much diagnostic detail as we can pull from the
-        // Supabase error so PostHog properties tell us WHY logins are
-        // failing without needing to correlate console logs.
         const err = authError as unknown as {
           message?: string;
           status?: number;
@@ -121,26 +112,16 @@ export default function LoginPage() {
           error_status: err.status ?? null,
           error_code: err.code ?? null,
           error_name: err.name ?? null,
-          // A crude but useful categorisation so we can group failures
-          // in PostHog without parsing free-form message text.
           reason: classifyAuthError(err.message ?? ""),
         });
         return;
       }
 
       if (data.user?.id) {
-        // Reset first — if a different user was previously identified
-        // in this browser (email/password then Google OAuth, or just
-        // account switching), PostHog would otherwise keep aliasing
-        // events to the older identity. Reset + fresh identify gives
-        // us the right distinct_id for the current user.
         resetAnalytics();
         identify(data.user.id, { email });
       }
       track("login_completed", { method: "email" }, { instant: true });
-      // Hard navigation so the fresh auth cookies are attached to the
-      // request the server sees (router.push races the cookie handshake
-      // and can occasionally land on /login or / instead of /dashboard).
       window.location.assign("/dashboard");
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -149,7 +130,8 @@ export default function LoginPage() {
     }
   }
 
-  async function handleMagicLink() {
+  async function handleMagicLink(e?: React.FormEvent<HTMLFormElement>) {
+    if (e) e.preventDefault();
     if (!email) return;
     setError(null);
     setIsMagicLoading(true);
@@ -205,168 +187,239 @@ export default function LoginPage() {
 
   return (
     <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Sign in</CardTitle>
-        <CardDescription>
-          Enter your email and password to access your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-              autoComplete="email"
-            />
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+      {magicSent ? (
+        <>
+          <CardHeader className="space-y-1">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Mail className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-center text-2xl">Check your inbox</CardTitle>
+            <CardDescription className="text-center">
+              We sent a sign-in link to{" "}
+              <span className="font-medium text-foreground">{email}</span>.
+              Click it and you&rsquo;re in.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {webmail && (
+              <a
+                href={webmail.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() =>
+                  track("auth_open_webmail_clicked", {
+                    provider: webmail.name,
+                    surface: "login_magic",
+                  })
+                }
+              >
+                <Button className="w-full" type="button">
+                  Open {webmail.name}
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
+              </a>
+            )}
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+              <p className="font-semibold text-foreground">While you wait:</p>
+              <ul className="mt-2 space-y-1.5 text-muted-foreground">
+                <li>&bull; Link expires in 1 hour — click it soon</li>
+                <li>&bull; Not in your inbox? Check spam / promotions</li>
+                <li>&bull; Wrong email? Refresh and try again</li>
+              </ul>
+            </div>
+            {error && (
+              <p className="text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            )}
+          </CardContent>
+          <CardFooter>
+            <p className="text-center text-sm text-muted-foreground w-full">
+              Wrong email?{" "}
               <button
                 type="button"
                 onClick={() => {
-                  if (!email) {
-                    document.getElementById("email")?.focus();
-                    return;
-                  }
-                  handleMagicLink();
+                  setMagicSent(false);
+                  setError(null);
                 }}
-                className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+                className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                Forgot your password?
+                Start over
               </button>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-              autoComplete="current-password"
-            />
-          </div>
-
-          {/* Honeypot field — hidden from users via inline styles
-              (bots ignore CSS from stylesheets but usually parse
-              inline). Renamed from name="website" to a random slug
-              because password managers (1Password, LastPass,
-              Bitwarden, Chrome autofill) commonly fill any field
-              named "website" — including off-screen ones — which
-              was silently rejecting real users. Random names don't
-              pattern-match. */}
-          <input
-            type="text"
-            name="fx-check-2b7c"
-            tabIndex={-1}
-            autoComplete="off"
-            value={botTrap}
-            onChange={(e) => setBotTrap(e.target.value)}
-            style={{
-              position: "absolute",
-              left: "-9999px",
-              width: "1px",
-              height: "1px",
-              opacity: 0,
-              pointerEvents: "none",
-            }}
-            aria-hidden="true"
-          />
-
-          {error && (
-            <p className="text-sm text-destructive" role="alert">
-              {error}
             </p>
-          )}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Sign in
-          </Button>
-        </form>
+          </CardFooter>
+        </>
+      ) : (
+        <>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl">Sign in</CardTitle>
+            <CardDescription>
+              We&rsquo;ll email you a link — no password needed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Magic-link form is the primary path on login too.
+                Consistent shape with signup so muscle memory carries
+                between the two pages. */}
+            <form onSubmit={handleMagicLink} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isMagicLoading || isLoading}
+                  autoComplete="email"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isMagicLoading || !email}
+              >
+                {isMagicLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send me a sign-in link
+                  </>
+                )}
+              </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                Also works if you forgot your password.
+              </p>
+              {error && !showPassword && (
+                <p className="text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              )}
+            </form>
 
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">
-              Or continue with
-            </span>
-          </div>
-        </div>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
 
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleGoogleLogin}
-          disabled={isGoogleLoading}
-        >
-          {isGoogleLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <svg className="h-4 w-4" viewBox="0 0 24 24">
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                fill="#EA4335"
-              />
-            </svg>
-          )}
-          Google
-        </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleGoogleLogin}
+              disabled={isGoogleLoading}
+            >
+              {isGoogleLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <svg className="h-4 w-4" viewBox="0 0 24 24">
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853"
+                  />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335"
+                  />
+                </svg>
+              )}
+              Google
+            </Button>
 
-        {/* Magic link — passwordless. One less thing for users to
-            remember, one fewer step for real humans. Handy for the
-            "I forgot my password" moment too. */}
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-2 w-full"
-          onClick={handleMagicLink}
-          disabled={isMagicLoading || !email}
-        >
-          {isMagicLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : magicSent ? (
-            <>✓ Link sent to {email} — check your inbox</>
-          ) : (
-            <>Email me a magic link {email ? "" : "(enter email above)"}</>
-          )}
-        </Button>
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          We&apos;ll email you a one-click sign-in link — no password needed. Also
-          works if you forgot yours.
-        </p>
-      </CardContent>
-      <CardFooter>
-        <p className="text-center text-sm text-muted-foreground w-full">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-primary underline-offset-4 hover:underline"
-          >
-            Sign up
-          </Link>
-        </p>
-      </CardFooter>
+            {/* Password fallback — off by default. Reveals inline
+                below so the email field stays visible; we don't
+                make anyone re-enter it. */}
+            {!showPassword ? (
+              <button
+                type="button"
+                className="mt-6 w-full text-center text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+                onClick={() => {
+                  setShowPassword(true);
+                  track("login_password_mode_opened");
+                }}
+              >
+                Prefer a password? →
+              </button>
+            ) : (
+              <div className="mt-6 border-t pt-6">
+                <p className="mb-3 text-sm font-medium text-foreground">
+                  Sign in with password
+                </p>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      autoComplete="current-password"
+                    />
+                  </div>
+
+                  {/* Honeypot — random name so password managers
+                      don't fill it. */}
+                  <input
+                    type="text"
+                    name="fx-check-2b7c"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={botTrap}
+                    onChange={(e) => setBotTrap(e.target.value)}
+                    style={{
+                      position: "absolute",
+                      left: "-9999px",
+                      width: "1px",
+                      height: "1px",
+                      opacity: 0,
+                      pointerEvents: "none",
+                    }}
+                    aria-hidden="true"
+                  />
+
+                  {error && (
+                    <p className="text-sm text-destructive" role="alert">
+                      {error}
+                    </p>
+                  )}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                    Sign in with password
+                  </Button>
+                </form>
+              </div>
+            )}
+          </CardContent>
+          <CardFooter>
+            <p className="text-center text-sm text-muted-foreground w-full">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/signup"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Sign up
+              </Link>
+            </p>
+          </CardFooter>
+        </>
+      )}
     </Card>
   );
 }
