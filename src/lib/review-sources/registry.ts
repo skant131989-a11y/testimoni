@@ -4,6 +4,7 @@ import { chromeStoreAdapter } from "./chrome-store";
 import { productHuntAdapter } from "./product-hunt";
 import { appStoreAdapter } from "./app-store";
 import { googlePlayAdapter } from "./google-play";
+import { shopifyAdapter } from "./shopify";
 
 /**
  * Registry of all platform adapters — keyed by the enum value the
@@ -27,16 +28,9 @@ export const ADAPTERS: Record<ReviewSourcePlatform, ReviewSourceAdapter> = {
   PRODUCT_HUNT: productHuntAdapter,
   APP_STORE: appStoreAdapter,
   GOOGLE_PLAY: googlePlayAdapter,
-  // Placeholders for future Phase 2 adapters — throw at runtime so
-  // the compiler can't skip them accidentally.
-  SHOPIFY: {
-    platform: "SHOPIFY",
-    parseUrl: () => null,
-    fetchReviews: () => {
-      throw new Error("Shopify adapter not yet shipped");
-    },
-    available: () => false,
-  },
+  SHOPIFY: shopifyAdapter,
+  // Placeholder for future adapters — throws at runtime so the
+  // compiler can't skip it accidentally.
   TRUSTPILOT: {
     platform: "TRUSTPILOT",
     parseUrl: () => null,

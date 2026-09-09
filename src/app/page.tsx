@@ -865,7 +865,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="mt-10 grid gap-3 md:grid-cols-4">
+          <div className="mt-10 grid gap-3 md:grid-cols-3 lg:grid-cols-5">
             {[
               {
                 name: "App Store",
@@ -890,6 +890,12 @@ export default function LandingPage() {
                 logoBg: "bg-orange-500",
                 logoLetter: "P",
                 tagline: "Launch reviews",
+              },
+              {
+                name: "Shopify",
+                logoBg: "bg-lime-600",
+                logoLetter: "S",
+                tagline: "Shopify App Store",
               },
             ].map((p) => (
               <div
