@@ -42,6 +42,7 @@ import { PageLoadPerf } from "@/components/page-load-perf";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { LiveSignupTicker } from "@/components/live-signup-ticker";
 import { LaunchBar } from "@/components/launch-bar";
+import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
 
 export default function LandingPage() {
   return (
@@ -49,6 +50,7 @@ export default function LandingPage() {
       <StructuredData />
       <PageEngagement surface="home" />
       <PageLoadPerf surface="home" anonymous />
+      <HashScrollCleanup />
       {/* Launch-week bar. Sits above the sticky nav so it moves out
           of view on scroll (nav stays); dismissable + persists via
           localStorage. Bump the `id` when this message changes. */}

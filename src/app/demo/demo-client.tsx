@@ -14,6 +14,7 @@ import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { InlineSignup } from "@/components/inline-signup";
 import { HeroDualDemo } from "@/components/hero-dual-demo";
 import { DemoVideo } from "@/components/demo-video";
+import { LaunchBar } from "@/components/launch-bar";
 import { track } from "@/lib/analytics";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -407,6 +408,12 @@ export default function DemoClient() {
 
   return (
     <div className="min-h-screen bg-background">
+      <LaunchBar
+        id="ask-my-wall-2026-09"
+        href="/#new-ai-features"
+        message="Ask My Wall is live — an AI chatbot that only quotes real customers."
+        cta="See it"
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
