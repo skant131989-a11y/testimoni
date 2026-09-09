@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
-import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -11,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { TestimonialStatus } from "@prisma/client";
+import { FilterTabs } from "./filter-tabs";
+import { BulkApproveBar } from "./bulk-approve-bar";
 import { TestimonialRow, type TestimonialRowData } from "./testimonial-row";
 
 type FilterTab = "ALL" | TestimonialStatus;
@@ -67,14 +68,35 @@ export default async function TestimonialsPage({
     orderBy: { createdAt: "desc" },
   };
 
-  const [testimonials, counts] = await Promise.all([
+  const [testimonials, counts, ratingBuckets] = await Promise.all([
     prisma.testimonial.findMany(whereClause),
     prisma.testimonial.groupBy({
       by: ["status"],
       where: { workspaceId },
       _count: true,
     }),
+    // Rating buckets for the pending tab's bulk-approve filter.
+    // Cheap groupBy scoped to PENDING so the dropdown labels are
+    // accurate ("Approve 87 5-star" etc.).
+    prisma.testimonial.groupBy({
+      by: ["rating"],
+      where: { workspaceId, status: "PENDING" },
+      _count: true,
+    }),
   ]);
+
+  // Fold rating buckets into cumulative counts the bulk bar can show.
+  const bulkCounts = {
+    fiveStar: 0,
+    fourStarPlus: 0,
+    threeStarPlus: 0,
+  };
+  for (const b of ratingBuckets) {
+    const r = b.rating ?? 0;
+    if (r >= 5) bulkCounts.fiveStar += b._count;
+    if (r >= 4) bulkCounts.fourStarPlus += b._count;
+    if (r >= 3) bulkCounts.threeStarPlus += b._count;
+  }
 
   const countMap: Record<string, number> = {};
   let totalCount = 0;
@@ -126,34 +148,21 @@ export default async function TestimonialsPage({
           </form>
         </div>
 
-        {/* Filter tabs */}
-        <div className="flex gap-1 border-b">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.value}
-              href={`/dashboard/testimonials${tab.value !== "ALL" ? `?filter=${tab.value.toLowerCase()}` : ""}${searchQuery ? `${tab.value !== "ALL" ? "&" : "?"}q=${searchQuery}` : ""}`}
-              className={cn(
-                "flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors",
-                activeFilter === tab.value
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {tab.label}
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-xs",
-                  activeFilter === tab.value
-                    ? "bg-primary/10 text-primary"
-                    : "bg-muted text-muted-foreground"
-                )}
-              >
-                {tab.count}
-              </span>
-            </Link>
-          ))}
-        </div>
+        {/* Filter tabs — client-side transitions + top progress bar
+            so users get instant feedback on click and see a loader
+            while the server re-fetches counts + rows. */}
+        <FilterTabs tabs={tabs} activeFilter={activeFilter} searchQuery={searchQuery} />
       </div>
+
+      {/* Bulk-approve bar — only shown on the Pending tab. Cleanest
+          way to blast through a large synced review backlog with
+          one click (optionally rating-filtered). */}
+      {activeFilter === "PENDING" && (countMap["PENDING"] ?? 0) >= 2 && (
+        <BulkApproveBar
+          totalPending={countMap["PENDING"] ?? 0}
+          counts={bulkCounts}
+        />
+      )}
 
       {/* Testimonials list */}
       {testimonials.length === 0 ? (

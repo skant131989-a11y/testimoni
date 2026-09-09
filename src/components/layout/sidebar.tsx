@@ -20,6 +20,7 @@ import {
   ExternalLink,
   Copy,
   Check,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ const navItems: {
   { href: "/dashboard/widgets", label: "Widgets", icon: Code2 },
   { href: "/dashboard/collect", label: "Collect", icon: Send },
   { href: "/dashboard/import", label: "Import", icon: Import },
+  { href: "/dashboard/sources", label: "Review sources", icon: RefreshCw },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];

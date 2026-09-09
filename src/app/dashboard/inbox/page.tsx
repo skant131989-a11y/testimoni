@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
-import { cn } from "@/lib/utils";
 import { getEffectivePlan, getEffectiveLimits } from "@/lib/plan";
 import { InboxList, type InboxSubmission } from "./inbox-list";
+import { TabsWithProgress } from "@/components/tabs-with-progress";
 
 type FilterTab = "NEW" | "APPROVED" | "REJECTED";
 
@@ -91,32 +90,11 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
         </p>
       </div>
 
-      <div className="flex gap-1 border-b">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.value}
-            href={`/dashboard/inbox?filter=${tab.value.toLowerCase()}`}
-            className={cn(
-              "flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors",
-              activeFilter === tab.value
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {tab.label}
-            <span
-              className={cn(
-                "rounded-full px-2 py-0.5 text-xs",
-                activeFilter === tab.value
-                  ? "bg-primary/10 text-primary"
-                  : "bg-muted text-muted-foreground"
-              )}
-            >
-              {tab.count}
-            </span>
-          </Link>
-        ))}
-      </div>
+      <TabsWithProgress
+        tabs={tabs}
+        activeValue={activeFilter}
+        buildHref={(value) => `/dashboard/inbox?filter=${value.toLowerCase()}`}
+      />
 
       <InboxList
         initial={inboxSubmissions}

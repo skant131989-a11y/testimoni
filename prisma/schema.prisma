@@ -23,29 +23,30 @@ model User {
 }
 
 model Workspace {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  logoUrl   String?  @map("logo_url")
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  logoUrl       String?  @map("logo_url")
   // Public founder directory opt-in. When true, this workspace shows
   // up on /founders and gets a public /founders/[slug] profile page.
   // Default false — nothing goes public until the owner explicitly
   // toggles it in Settings → Public listing.
-  publicListing Boolean @default(false) @map("public_listing")
+  publicListing Boolean  @default(false) @map("public_listing")
   // Short one-liner shown on the founder directory card + profile.
   // Free text, max 200 chars, sanitized before display.
-  pitch     String? @db.VarChar(240)
+  pitch         String?  @db.VarChar(240)
   // Optional links surfaced on the profile page.
-  websiteUrl String? @map("website_url") @db.VarChar(400)
-  xHandle   String? @map("x_handle") @db.VarChar(60)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  websiteUrl    String?  @map("website_url") @db.VarChar(400)
+  xHandle       String?  @map("x_handle") @db.VarChar(60)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  members      WorkspaceMember[]
-  testimonials Testimonial[]
-  widgets      Widget[]
-  forms        CollectionForm[]
-  subscription Subscription?
+  members       WorkspaceMember[]
+  testimonials  Testimonial[]
+  widgets       Widget[]
+  forms         CollectionForm[]
+  subscription  Subscription?
+  reviewSources ReviewSource[]
 
   @@index([publicListing])
   @@map("workspaces")
@@ -75,12 +76,12 @@ model Testimonial {
   id          String @id @default(cuid())
   workspaceId String @map("workspace_id")
 
-  content       String?
-  rating        Int?
-  videoUrl      String?  @map("video_url")
-  videoStorageKey String? @map("video_storage_key")
-  videoDurationSeconds Int? @map("video_duration_seconds")
-  imageUrls     String[] @map("image_urls")
+  content              String?
+  rating               Int?
+  videoUrl             String?  @map("video_url")
+  videoStorageKey      String?  @map("video_storage_key")
+  videoDurationSeconds Int?     @map("video_duration_seconds")
+  imageUrls            String[] @map("image_urls")
 
   customerName   String  @map("customer_name")
   customerEmail  String? @map("customer_email")
@@ -93,6 +94,18 @@ model Testimonial {
   status    TestimonialStatus @default(PENDING)
   tags      String[]          @default([])
 
+  // For platform-review-sync ingest — the platform's stable ID for
+  // the imported review so we can dedupe on next sync. e.g. Play
+  // Store returns `gp:AOqpTOH…`, App Store returns a numeric ID.
+  // Not indexed globally because uniqueness is only meaningful
+  // within a workspace + source combo; a compound partial index
+  // is expensive without buying us much at Testimoni's scale.
+  externalReviewId String?       @map("external_review_id")
+  // If this testimonial came from a synced review source, link back
+  // so the UI can show "imported from App Store on 2026-09-09".
+  reviewSourceId   String?       @map("review_source_id")
+  reviewSource     ReviewSource? @relation(fields: [reviewSourceId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -101,6 +114,7 @@ model Testimonial {
 
   @@index([workspaceId, status])
   @@index([workspaceId, createdAt])
+  @@index([workspaceId, externalReviewId])
   @@map("testimonials")
 }
 
@@ -114,6 +128,11 @@ enum TestimonialSource {
   HACKER_NEWS
   PRODUCT_HUNT
   IMPORT
+  APP_STORE
+  GOOGLE_PLAY
+  CHROME_STORE
+  SHOPIFY
+  TRUSTPILOT
 }
 
 enum TestimonialStatus {
@@ -275,4 +294,65 @@ enum SubscriptionStatus {
   PAST_DUE
   CANCELED
   INCOMPLETE
+}
+
+/**
+ * Connected review source — a Pro-only feature that pulls reviews
+ * from external platforms (App Store, Play Store, Product Hunt,
+ * Chrome Web Store) and imports them as Testimonials on the user's
+ * Wall of Love.
+ * A source is uniquely defined by (workspaceId, platform, externalAppId)
+ * so a workspace can't connect the same app twice on the same
+ * platform. Each successful sync writes new Testimonial rows with
+ * externalReviewId set for dedup on the next run.
+ */
+model ReviewSource {
+  id            String               @id @default(cuid())
+  workspaceId   String               @map("workspace_id")
+  platform      ReviewSourcePlatform
+  // Original URL the user pasted, kept verbatim for display + audit.
+  sourceUrl     String               @map("source_url")
+  // Extracted stable ID for the platform's API/scraper — package
+  // name for Play, numeric app ID for App Store, product slug for
+  // Product Hunt, extension ID for Chrome Store.
+  externalAppId String               @map("external_app_id")
+  // User-visible name for the source ("MyApp on Play Store" etc.).
+  displayName   String               @map("display_name")
+
+  // Import rules
+  minRating   Int     @default(4) @map("min_rating") // 1-5, reviews below skip
+  autoApprove Boolean @default(false) @map("auto_approve") // true = straight to wall
+
+  // Sync state
+  lastSyncedAt  DateTime?              @map("last_synced_at")
+  syncStatus    ReviewSourceSyncStatus @default(ACTIVE) @map("sync_status")
+  syncError     String?                @map("sync_error")
+  totalImported Int                    @default(0) @map("total_imported")
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  testimonials Testimonial[]
+
+  @@unique([workspaceId, platform, externalAppId])
+  @@index([workspaceId])
+  @@index([syncStatus, lastSyncedAt])
+  @@map("review_sources")
+}
+
+enum ReviewSourcePlatform {
+  APP_STORE
+  GOOGLE_PLAY
+  PRODUCT_HUNT
+  CHROME_STORE
+  SHOPIFY
+  TRUSTPILOT
+}
+
+enum ReviewSourceSyncStatus {
+  ACTIVE // healthy, syncing on schedule
+  ERROR // last sync failed — see syncError
+  DISABLED // user paused
 }

@@ -35,6 +35,11 @@ const sourceColors: Record<TestimonialSource, string> = {
   HACKER_NEWS: "bg-amber-100 text-amber-700",
   PRODUCT_HUNT: "bg-rose-100 text-rose-700",
   IMPORT: "bg-purple-100 text-purple-700",
+  APP_STORE: "bg-slate-100 text-slate-700",
+  GOOGLE_PLAY: "bg-green-100 text-green-700",
+  CHROME_STORE: "bg-yellow-100 text-yellow-700",
+  SHOPIFY: "bg-emerald-100 text-emerald-700",
+  TRUSTPILOT: "bg-teal-100 text-teal-700",
 };
 
 export interface TestimonialRowData {
@@ -475,22 +480,51 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
               >
                 <Pencil className="h-4 w-4 text-muted-foreground" />
               </Button>
-              {t.status !== "APPROVED" && (
+              {t.status === "PENDING" ? (
+                // Pending rows get the FULL text Approve button so users
+                // (especially first-timers looking at a synced review
+                // inbox) immediately see the primary action. Approving
+                // status-flips to APPROVED AND wires the testimonial
+                // onto the workspace's default widget — that's what
+                // makes it appear on the Wall of Love.
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  title="Approve"
+                  size="sm"
+                  className="gap-1.5 bg-green-600 text-white hover:bg-green-700"
                   disabled={busy !== null}
                   onClick={() => runAction("approve")}
+                  title="Approve → adds to your Wall of Love"
                 >
                   {busy === "approve" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Approving
+                    </>
                   ) : (
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Approve → Wall
+                    </>
                   )}
                 </Button>
+              ) : (
+                t.status !== "APPROVED" && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    title="Approve → adds to your Wall of Love"
+                    disabled={busy !== null}
+                    onClick={() => runAction("approve")}
+                  >
+                    {busy === "approve" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    )}
+                  </Button>
+                )
               )}
               {t.status !== "ARCHIVED" && (
                 <Button
@@ -498,7 +532,7 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8"
-                  title="Archive"
+                  title="Archive — hide without deleting"
                   disabled={busy !== null}
                   onClick={() => runAction("archive")}
                 >
@@ -514,7 +548,7 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                title="Delete"
+                title="Delete forever"
                 disabled={busy !== null}
                 onClick={() => runAction("delete")}
               >

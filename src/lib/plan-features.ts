@@ -26,6 +26,7 @@ export const FREE_FEATURES = [
 export const PRO_FEATURES = [
   "Unlimited testimonials",
   "Unlimited screenshot AI + batch upload",
+  "Auto-sync from App Store, Play Store, Product Hunt, Chrome Web Store",
   "URL import — X, LinkedIn, Reddit, HN, Product Hunt",
   "Unlimited collection forms + widgets",
   "Unlimited video testimonials",
