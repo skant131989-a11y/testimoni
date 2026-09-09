@@ -7,6 +7,7 @@ import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { FREE_FEATURES, PRO_FEATURES, PRO_AI_FEATURES } from "@/lib/plan-features";
+import { PRO_AI_PUBLIC } from "@/lib/feature-flags";
 
 export const metadata: Metadata = {
   title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",
@@ -45,7 +46,7 @@ export default function PricingPage() {
             </p>
           </div>
 
-          <div className="mt-16 grid gap-6 md:max-w-6xl md:mx-auto md:grid-cols-3">
+          <div className={PRO_AI_PUBLIC ? "mt-16 grid gap-6 md:max-w-6xl md:mx-auto md:grid-cols-3" : "mt-16 grid gap-8 md:grid-cols-2 md:max-w-4xl md:mx-auto"}>
             {/* Free Plan */}
             <div className="rounded-2xl border bg-card p-6">
               <h3 className="text-xl font-semibold">Free</h3>
@@ -94,7 +95,10 @@ export default function PricingPage() {
               <PricingCta plan="pro" />
             </div>
 
-            {/* Pro AI Plan — intelligence tier */}
+            {/* Pro AI Plan — intelligence tier. Hidden until
+                PRO_AI_PUBLIC is flipped on (after Razorpay + Stripe
+                Pro AI products exist and env vars are set). */}
+            {PRO_AI_PUBLIC && (
             <div className="relative rounded-2xl border-2 border-fuchsia-500 bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-6">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-fuchsia-600 to-purple-600 px-3 py-1 text-xs font-medium text-white">
                 🧠 AI Intelligence
@@ -117,6 +121,7 @@ export default function PricingPage() {
               </ul>
               <PricingCta plan="pro_ai" />
             </div>
+            )}
           </div>
 
           {/* FAQ */}

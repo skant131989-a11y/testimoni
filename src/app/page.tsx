@@ -25,6 +25,7 @@ import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
 import { HeroDualDemo } from "@/components/hero-dual-demo";
 import { FREE_FEATURES, PRO_FEATURES, PRO_AI_FEATURES } from "@/lib/plan-features";
+import { PRO_AI_PUBLIC } from "@/lib/feature-flags";
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { HeroScrollLink } from "@/components/hero-scroll-link";
@@ -828,7 +829,7 @@ export default function LandingPage() {
           <p className="mt-4 text-muted-foreground">
             Start free, upgrade when you need more.
           </p>
-          <div className="mt-12 mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+          <div className={PRO_AI_PUBLIC ? "mt-12 mx-auto grid max-w-6xl gap-6 md:grid-cols-3" : "mt-12 mx-auto grid max-w-3xl gap-8 md:grid-cols-2"}>
             {/* Free */}
             <div className="rounded-lg border bg-card p-6 text-left">
               <h3 className="text-lg font-semibold">Free</h3>
@@ -872,7 +873,11 @@ export default function LandingPage() {
               </TrackedLink>
             </div>
 
-            {/* Pro AI — intelligence tier */}
+            {/* Pro AI — intelligence tier. Feature-flagged off until
+                the Razorpay + Stripe products are created; the pricing
+                scaffold (schema, constants, hook) is live so nothing
+                else changes when we flip PRO_AI_PUBLIC. */}
+            {PRO_AI_PUBLIC && (
             <div className="relative rounded-lg border-2 border-fuchsia-500 bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-6 text-left">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-fuchsia-600 to-purple-600 px-3 py-1 text-xs font-medium text-white">
                 🧠 AI Intelligence
@@ -894,6 +899,7 @@ export default function LandingPage() {
                 </Button>
               </TrackedLink>
             </div>
+            )}
           </div>
         </div>
       </section>
