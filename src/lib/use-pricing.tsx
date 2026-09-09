@@ -10,6 +10,10 @@ interface PricingContextValue {
   proMonthlyFormatted: string;
   proMonthlyUsd: string;
   proMonthlyInr: string;
+  proAiMonthly: number;
+  proAiMonthlyFormatted: string;
+  proAiMonthlyUsd: string;
+  proAiMonthlyInr: string;
 }
 
 const PricingContext = createContext<PricingContextValue | null>(null);
@@ -41,6 +45,10 @@ export function PricingProvider({ children }: { children: ReactNode }) {
   const proMonthlyFormatted = formatPrice(proMonthly, currency);
   const proMonthlyUsd = formatPrice(PRICING.USD.proMonthly, "USD");
   const proMonthlyInr = formatPrice(PRICING.INR.proMonthly, "INR");
+  const proAiMonthly = PRICING[currency].proAiMonthly;
+  const proAiMonthlyFormatted = formatPrice(proAiMonthly, currency);
+  const proAiMonthlyUsd = formatPrice(PRICING.USD.proAiMonthly, "USD");
+  const proAiMonthlyInr = formatPrice(PRICING.INR.proAiMonthly, "INR");
 
   return (
     <PricingContext.Provider
@@ -51,6 +59,10 @@ export function PricingProvider({ children }: { children: ReactNode }) {
         proMonthlyFormatted,
         proMonthlyUsd,
         proMonthlyInr,
+        proAiMonthly,
+        proAiMonthlyFormatted,
+        proAiMonthlyUsd,
+        proAiMonthlyInr,
       }}
     >
       {children}
@@ -68,6 +80,10 @@ export function usePricing(): PricingContextValue {
       proMonthlyFormatted: formatPrice(PRICING.USD.proMonthly, "USD"),
       proMonthlyUsd: formatPrice(PRICING.USD.proMonthly, "USD"),
       proMonthlyInr: formatPrice(PRICING.INR.proMonthly, "INR"),
+      proAiMonthly: PRICING.USD.proAiMonthly,
+      proAiMonthlyFormatted: formatPrice(PRICING.USD.proAiMonthly, "USD"),
+      proAiMonthlyUsd: formatPrice(PRICING.USD.proAiMonthly, "USD"),
+      proAiMonthlyInr: formatPrice(PRICING.INR.proAiMonthly, "INR"),
     };
   }
   return ctx;

@@ -19,12 +19,12 @@ import {
   Play,
 } from "lucide-react";
 import { PublicNavAuth, PublicNavAuthMobile } from "@/components/layout/public-nav-auth";
-import { ProPriceDual, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
+import { ProPriceDual, ProAiPrice, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
 import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
 import { HeroDualDemo } from "@/components/hero-dual-demo";
-import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
+import { FREE_FEATURES, PRO_FEATURES, PRO_AI_FEATURES } from "@/lib/plan-features";
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { HeroScrollLink } from "@/components/hero-scroll-link";
@@ -828,26 +828,27 @@ export default function LandingPage() {
           <p className="mt-4 text-muted-foreground">
             Start free, upgrade when you need more.
           </p>
-          <div className="mt-12 mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
+          <div className="mt-12 mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
             {/* Free */}
-            <div className="rounded-lg border bg-card p-8 text-left">
+            <div className="rounded-lg border bg-card p-6 text-left">
               <h3 className="text-lg font-semibold">Free</h3>
               <p className="mt-2 text-3xl font-bold"><FreePrice suffix="" /></p>
-              <p className="text-sm text-muted-foreground">Forever free</p>
-              <ul className="mt-6 space-y-3">
+              <p className="text-sm text-muted-foreground">Forever free — try the viral loops</p>
+              <ul className="mt-6 space-y-2.5">
                 {FREE_FEATURES.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    {f}
+                  <li key={f} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>{f}</span>
                   </li>
                 ))}
               </ul>
-              <TrackedLink cta="pricing_preview_free" surface="home" href="/signup" className="mt-8 block">
+              <TrackedLink cta="pricing_preview_free" surface="home" href="/signup" className="mt-6 block">
                 <Button variant="outline" className="w-full">Get Started</Button>
               </TrackedLink>
             </div>
-            {/* Pro */}
-            <div className="relative rounded-lg border-2 border-primary bg-card p-8 text-left">
+
+            {/* Pro — utility tier */}
+            <div className="relative rounded-lg border-2 border-primary bg-card p-6 text-left">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
                 Most Popular
               </div>
@@ -857,17 +858,40 @@ export default function LandingPage() {
               <h3 className="text-lg font-semibold">Pro</h3>
               <p className="mt-2 text-3xl font-bold"><ProPriceDual /></p>
               <FoundingExplainer className="mt-2" />
-              <p className="mt-3 text-sm text-muted-foreground">Everything unlimited</p>
-              <ul className="mt-6 space-y-3">
+              <p className="mt-3 text-sm text-muted-foreground">Unlimited utility + one AI perk</p>
+              <ul className="mt-6 space-y-2.5">
                 {PRO_FEATURES.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    {f}
+                  <li key={f} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>{f}</span>
                   </li>
                 ))}
               </ul>
-              <TrackedLink cta="pricing_preview_pro" surface="home" href="/signup" className="mt-8 block">
+              <TrackedLink cta="pricing_preview_pro" surface="home" href="/signup" className="mt-6 block">
                 <Button className="w-full">Start Free, Upgrade Anytime</Button>
+              </TrackedLink>
+            </div>
+
+            {/* Pro AI — intelligence tier */}
+            <div className="relative rounded-lg border-2 border-fuchsia-500 bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-6 text-left">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-fuchsia-600 to-purple-600 px-3 py-1 text-xs font-medium text-white">
+                🧠 AI Intelligence
+              </div>
+              <h3 className="text-lg font-semibold">Pro AI</h3>
+              <p className="mt-2 text-3xl font-bold"><ProAiPrice suffix="" /></p>
+              <p className="mt-3 text-sm text-muted-foreground">Everything + the intelligence layer</p>
+              <ul className="mt-6 space-y-2.5">
+                {PRO_AI_FEATURES.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-fuchsia-600" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <TrackedLink cta="pricing_preview_pro_ai" surface="home" href="/signup" className="mt-6 block">
+                <Button className="w-full bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white hover:from-fuchsia-700 hover:to-purple-700">
+                  Try Free — Upgrade to Pro AI
+                </Button>
               </TrackedLink>
             </div>
           </div>

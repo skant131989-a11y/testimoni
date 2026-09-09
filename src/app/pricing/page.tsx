@@ -1,12 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
-import { ProPriceDual, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
+import { ProPriceDual, ProAiPrice, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
-import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
+import { FREE_FEATURES, PRO_FEATURES, PRO_AI_FEATURES } from "@/lib/plan-features";
 
 export const metadata: Metadata = {
   title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",
@@ -45,52 +45,77 @@ export default function PricingPage() {
             </p>
           </div>
 
-          <div className="mt-16 grid gap-8 md:grid-cols-2 md:max-w-4xl md:mx-auto">
+          <div className="mt-16 grid gap-6 md:max-w-6xl md:mx-auto md:grid-cols-3">
             {/* Free Plan */}
-            <div className="rounded-2xl border bg-card p-8">
+            <div className="rounded-2xl border bg-card p-6">
               <h3 className="text-xl font-semibold">Free</h3>
-              <p className="mt-2 text-4xl font-bold">
+              <p className="mt-2 text-3xl font-bold">
                 <FreePrice suffix="/month" />
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Perfect for getting started
+                Try the viral loops — Wall Score, tweet drafts, and paste-a-tweet
+                on us.
               </p>
-              <ul className="mt-8 space-y-4">
+              <ul className="mt-6 space-y-3">
                 {FREE_FEATURES.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-sm">
-                    <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
-                    {feature}
+                  <li key={feature} className="flex items-start gap-2.5 text-sm">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
               <PricingCta plan="free" />
             </div>
 
-            {/* Pro Plan */}
-            <div className="relative rounded-2xl border-2 border-primary bg-card p-8">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground">
+            {/* Pro Plan — utility tier */}
+            <div className="relative rounded-2xl border-2 border-primary bg-card p-6">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
                 Most Popular
               </div>
               <div className="mb-2">
                 <FoundingBadge />
               </div>
               <h3 className="text-xl font-semibold">Pro</h3>
-              <p className="mt-2 text-4xl font-bold">
+              <p className="mt-2 text-3xl font-bold">
                 <ProPriceDual suffix="/month" />
               </p>
               <FoundingExplainer className="mt-2" />
               <p className="mt-3 text-sm text-muted-foreground">
-                For growing businesses
+                Unlimited utility + one AI perk (unlimited tweet drafts).
               </p>
-              <ul className="mt-8 space-y-4">
+              <ul className="mt-6 space-y-3">
                 {PRO_FEATURES.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-sm">
-                    <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
-                    {feature}
+                  <li key={feature} className="flex items-start gap-2.5 text-sm">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
               <PricingCta plan="pro" />
+            </div>
+
+            {/* Pro AI Plan — intelligence tier */}
+            <div className="relative rounded-2xl border-2 border-fuchsia-500 bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-6">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-fuchsia-600 to-purple-600 px-3 py-1 text-xs font-medium text-white">
+                🧠 AI Intelligence
+              </div>
+              <h3 className="text-xl font-semibold">Pro AI</h3>
+              <p className="mt-2 text-3xl font-bold">
+                <ProAiPrice suffix="/month" />
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Everything in Pro, plus the intelligence layer: Ask My Wall,
+                Wall Score tracking, weekly reports.
+              </p>
+              <ul className="mt-6 space-y-3">
+                {PRO_AI_FEATURES.map((feature) => (
+                  <li key={feature} className="flex items-start gap-2.5 text-sm">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-fuchsia-600" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <PricingCta plan="pro_ai" />
             </div>
           </div>
 

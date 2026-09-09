@@ -11,9 +11,9 @@ import { createClient } from "@/lib/supabase/client";
  * whole /pricing route can be statically pre-rendered. Swaps to
  * Dashboard-flavored copy once we've confirmed a logged-in session.
  *
- * plan="free" or plan="pro" — different href + label per plan card.
+ * plan="free" | "pro" | "pro_ai" — different href + label per plan card.
  */
-export function PricingCta({ plan }: { plan: "free" | "pro" }) {
+export function PricingCta({ plan }: { plan: "free" | "pro" | "pro_ai" }) {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
@@ -28,7 +28,14 @@ export function PricingCta({ plan }: { plan: "free" | "pro" }) {
   }, []);
 
   const cfg =
-    plan === "pro"
+    plan === "pro_ai"
+      ? {
+          href: isLoggedIn ? "/dashboard/settings/billing?tier=pro_ai" : "/signup",
+          label: isLoggedIn ? "Upgrade to Pro AI" : "Try Free — Upgrade to Pro AI Anytime",
+          cta: "pricing_pro_ai_plan",
+          variant: undefined as "outline" | undefined,
+        }
+      : plan === "pro"
       ? {
           href: isLoggedIn ? "/dashboard/settings/billing" : "/signup",
           label: isLoggedIn ? "Upgrade to Pro" : "Start Free, Upgrade Anytime",

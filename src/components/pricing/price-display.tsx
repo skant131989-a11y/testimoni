@@ -80,6 +80,25 @@ export function ProPriceDual({ suffix = "/mo", primary }: ProPriceDualProps) {
 }
 
 /**
+ * Pro AI tier price — the $29/mo (₹1499) intelligence tier. No
+ * founding-member discount here (this is a new tier launched
+ * 2026-09; the price IS the price). Same auto-currency detection.
+ */
+export function ProAiPrice({ suffix = "/mo", className }: ProPriceProps) {
+  const { proAiMonthlyFormatted } = usePricing();
+  return (
+    <span className={className}>
+      {proAiMonthlyFormatted}
+      {suffix && (
+        <span className="text-base font-normal text-muted-foreground">
+          {suffix}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/**
  * Small badge that anchors the "founding member" story next to the
  * struck-through Pro price. Use next to a ProPriceDual on marketing
  * cards to explain WHY the price is discounted.

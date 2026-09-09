@@ -287,6 +287,7 @@ model Subscription {
 enum PlanType {
   FREE
   PRO
+  PRO_AI
 }
 
 enum SubscriptionStatus {
