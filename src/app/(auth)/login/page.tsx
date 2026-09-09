@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Mail, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -47,7 +48,34 @@ function classifyAuthError(msg: string): string {
   return "other";
 }
 
+/**
+ * Translate the ?error=… code the /callback route redirects with into
+ * copy the user can act on. The old flow just left them on the login
+ * page with no explanation — they'd try Google, then give up. See
+ * PostHog session 01a08733-… for the pattern we're fixing.
+ */
+function callbackErrorMessage(code: string | null): string | null {
+  if (!code) return null;
+  switch (code) {
+    case "expired":
+    case "otp_expired":
+      return "That sign-in link expired. Enter your email below and we'll send a fresh one.";
+    case "already_used":
+      return "That sign-in link was already used. Enter your email below to get a new one.";
+    case "pkce_mismatch":
+      return "Sign-in link opened in a different browser than you started in. Try again in this browser.";
+    case "no_code":
+      return "That URL is missing sign-in info. Enter your email below to start over.";
+    case "auth_callback_error":
+    case "unknown":
+      return "We couldn't complete sign-in. Try requesting a new link below.";
+    default:
+      return null;
+  }
+}
+
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +95,17 @@ export default function LoginPage() {
   // Timestamp of when the login form mounted. Bots submit within
   // milliseconds; humans take at least a couple of seconds to type.
   const [mountedAt] = useState(() => Date.now());
+
+  // Surface callback errors from the URL so users understand why they
+  // got bounced back to /login. We track the error too so PostHog
+  // shows how often each reason fires.
+  const callbackErrorCode = searchParams.get("error");
+  const callbackError = callbackErrorMessage(callbackErrorCode);
+  useEffect(() => {
+    if (callbackErrorCode) {
+      track("login_callback_error_shown", { reason: callbackErrorCode });
+    }
+  }, [callbackErrorCode]);
 
   const webmail = magicSent ? webmailForEmail(email) : null;
 
@@ -258,6 +297,19 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Callback-error banner. Fires when Supabase bounces the
+                user back to /login with ?error=… (expired link, wrong
+                browser, etc.). Without this the user just saw the
+                default form and gave up. */}
+            {callbackError && (
+              <div
+                role="alert"
+                className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm"
+              >
+                <p className="font-medium text-amber-900">Sign-in didn&rsquo;t complete</p>
+                <p className="mt-1 text-amber-800">{callbackError}</p>
+              </div>
+            )}
             {/* Magic-link form is the primary path on login too.
                 Consistent shape with signup so muscle memory carries
                 between the two pages. */}
