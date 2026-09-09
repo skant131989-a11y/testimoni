@@ -223,11 +223,12 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
                 {!collapsed && (
                   <span className="flex-1">{item.label}</span>
                 )}
-                {/* Small "NEW" pill on the Import link — surfaces the
-                    Reddit / HN / Product Hunt import sources shipped
-                    2026-09. Rendered in the collapsed sidebar too as
-                    a bare purple dot so the signal survives. */}
-                {item.href === "/dashboard/import" && (
+                {/* Small "NEW" pill — moved from Import to
+                    Review Sources since that's the newest thing
+                    users should discover. Rendered in the collapsed
+                    sidebar too as a bare purple dot so the signal
+                    survives at 40px width. */}
+                {item.href === "/dashboard/sources" && (
                   <>
                     {!collapsed && (
                       <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
