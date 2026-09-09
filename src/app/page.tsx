@@ -209,45 +209,6 @@ export default function LandingPage() {
           without duplicating the layout. */}
       <LovedByFoundersStrip />
 
-      {/* Compact "See what's inside Testimoni" band — replaces
-          the four longer sections that used to live below the
-          hero (Ask/Collect/Publish strip, Path B form callout,
-          AnimatedDemo, video-testimonials pitch). All of that
-          content moved to /features so home stays focused; this
-          band is the doorway for high-intent visitors who want
-          the deep dive. */}
-      <section className="border-y bg-primary/[0.03] py-8">
-        <div className="mx-auto max-w-5xl px-4">
-          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                Everything inside Testimoni
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                The full flow, every intake path, every layout, every AI feature.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
-              <Link href="/features#how-it-works" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
-                How it works
-              </Link>
-              <Link href="/features#collect" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
-                Intake paths
-              </Link>
-              <Link href="/features#video" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
-                Video
-              </Link>
-              <Link href="/features#features" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
-                All features
-              </Link>
-              <TrackedLink cta="features_band_see_all" surface="home" href="/features" className="ml-1 inline-flex items-center gap-1 text-primary font-semibold hover:underline">
-                See all <ArrowRight className="h-3 w-3" />
-              </TrackedLink>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Wall of Love preview — shows what a live wall actually looks like
           after all the collection + approval. Static grid, not interactive,
           links out to /w/demo for the full experience. Same testimonials as
@@ -782,6 +743,46 @@ export default function LandingPage() {
         </div>
       </section>
 
+
+      {/* "See what's inside Testimoni" band — the last-chance
+          deep-dive doorway right before pricing. High-intent
+          visitors who scrolled this far but aren't ready to buy
+          get one final path: chip-links into the /features deep
+          dive to answer the "but does it do X?" objections that
+          fire in the moment before a price commitment. When they
+          return from /features, /features' own CTAs (signup,
+          pricing) close the loop. */}
+      <section className="border-y bg-primary/[0.03] py-8">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                Everything inside Testimoni
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                The full flow, every intake path, every layout, every AI feature.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
+              <Link href="/features#how-it-works" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
+                How it works
+              </Link>
+              <Link href="/features#collect" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
+                Intake paths
+              </Link>
+              <Link href="/features#video" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
+                Video
+              </Link>
+              <Link href="/features#features" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
+                All features
+              </Link>
+              <TrackedLink cta="features_band_see_all" surface="home" href="/features" className="ml-1 inline-flex items-center gap-1 text-primary font-semibold hover:underline">
+                See all <ArrowRight className="h-3 w-3" />
+              </TrackedLink>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Pricing Preview */}
       <section className="border-t bg-muted/30 py-20">
