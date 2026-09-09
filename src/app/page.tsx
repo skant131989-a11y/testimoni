@@ -17,6 +17,9 @@ import {
   Link2,
   Share2,
   Play,
+  Gauge,
+  Send,
+  Sparkles,
 } from "lucide-react";
 import { PublicNavAuth, PublicNavAuthMobile } from "@/components/layout/public-nav-auth";
 import { ProPriceDual, ProAiPrice, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
@@ -38,6 +41,7 @@ import { PageEngagement } from "@/components/page-engagement";
 import { PageLoadPerf } from "@/components/page-load-perf";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { LiveSignupTicker } from "@/components/live-signup-ticker";
+import { LaunchBar } from "@/components/launch-bar";
 
 export default function LandingPage() {
   return (
@@ -45,6 +49,15 @@ export default function LandingPage() {
       <StructuredData />
       <PageEngagement surface="home" />
       <PageLoadPerf surface="home" anonymous />
+      {/* Launch-week bar. Sits above the sticky nav so it moves out
+          of view on scroll (nav stays); dismissable + persists via
+          localStorage. Bump the `id` when this message changes. */}
+      <LaunchBar
+        id="ask-my-wall-2026-09"
+        href="#new-ai-features"
+        message="Ask My Wall is live — an AI chatbot that only quotes real customers."
+        cta="See it"
+      />
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
@@ -823,6 +836,129 @@ export default function LandingPage() {
             >
               vs Testimonial.to
             </TrackedLink>
+          </div>
+        </div>
+      </section>
+
+      {/* New Pro AI features band — sits right before pricing so
+          visitors see the upsell hook in the moment they're deciding
+          "free or Pro?". Compact by design — three tiles, one CTA.
+          The visual story: Score / Amplify / Answer — the three
+          verbs that describe what Pro does with the wall you've
+          already collected. */}
+      <section id="new-ai-features" className="border-t bg-gradient-to-br from-primary/[0.04] via-background to-primary/[0.02] py-16 scroll-mt-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
+              <Sparkles className="h-3 w-3" />
+              New · Included in Pro
+            </div>
+            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+              Your wall of love, but smarter.
+            </h2>
+            <p className="mt-3 max-w-2xl text-muted-foreground">
+              Three AI features that turn testimonials into insight, tweets,
+              and answers — grounded on the real customers you already have.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {/* Wall Score */}
+            <Link
+              href="/signup?tool=wall-score"
+              className="group flex flex-col rounded-2xl border bg-card p-6 transition hover:border-primary hover:shadow-lg"
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                  <Gauge className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-blue-700">
+                  Wall Score
+                </span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">
+                Audit your wall 0–100
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                6 dimensions — volume, diversity, video, recency, verification,
+                ratings. Trend graph + specific next actions per weakness.
+              </p>
+              <div className="mt-4 flex items-center gap-1 text-sm font-medium text-blue-700 group-hover:gap-2 transition-all">
+                See how it works <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+
+            {/* Tweet drafts */}
+            <Link
+              href="/signup?tool=tweet-drafts"
+              className="group flex flex-col rounded-2xl border bg-card p-6 transition hover:border-primary hover:shadow-lg"
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                  <Send className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                  Tweet drafts
+                </span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">
+                Every quote → 3 tweets
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Quote, reaction, callout — three tweet-length drafts per
+                testimonial. One click opens X or LinkedIn compose, pre-filled.
+              </p>
+              <div className="mt-4 flex items-center gap-1 text-sm font-medium text-emerald-700 group-hover:gap-2 transition-all">
+                See how it works <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+
+            {/* Ask My Wall */}
+            <Link
+              href="/signup?tool=ask-my-wall"
+              className="group flex flex-col rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-background p-6 transition hover:border-primary hover:shadow-lg"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <MessageSquare className="h-5 w-5" />
+                  </div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+                    Ask My Wall
+                  </span>
+                </div>
+                <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">
+                  Wow
+                </span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">
+                AI chatbot, real quotes only
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Visitors ask questions on your site. Answers cite real
+                customers by name — Rachel at HubSpot said 4 hours. Never
+                invents.
+              </p>
+              <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
+                See how it works <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+          </div>
+
+          <div className="mt-8 flex flex-col items-center gap-2">
+            <TrackedLink
+              cta="new_features_band_cta"
+              surface="home"
+              href="/pricing"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+            >
+              All three included in Pro · $9/mo
+              <ArrowRight className="h-4 w-4" />
+            </TrackedLink>
+            <p className="text-xs text-muted-foreground">
+              Free plan gets 1 Wall Score audit + 5 tweet drafts/mo. Ask My
+              Wall is Pro-only.
+            </p>
           </div>
         </div>
       </section>
