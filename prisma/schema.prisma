@@ -41,12 +41,15 @@ model Workspace {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  members       WorkspaceMember[]
-  testimonials  Testimonial[]
-  widgets       Widget[]
-  forms         CollectionForm[]
-  subscription  Subscription?
-  reviewSources ReviewSource[]
+  members         WorkspaceMember[]
+  testimonials    Testimonial[]
+  widgets         Widget[]
+  forms           CollectionForm[]
+  subscription    Subscription?
+  reviewSources   ReviewSource[]
+  wallScoreAudits WallScoreAudit[]
+  socialAccounts  SocialAccount[]
+  askMyWall       AskMyWallConfig?
 
   @@index([publicListing])
   @@map("workspaces")
@@ -356,4 +359,105 @@ enum ReviewSourceSyncStatus {
   ACTIVE // healthy, syncing on schedule
   ERROR // last sync failed — see syncError
   DISABLED // user paused
+}
+
+// Wall Score audit — a snapshot of the workspace's testimonial
+// health at a point in time. Free plan allows 1 audit lifetime
+// (viral hook — the score card is shareable); Pro is unlimited.
+// The trend graph on /dashboard/wall-score plots the last N of
+// these; the weekly cron email compares this-week vs. last-week.
+model WallScoreAudit {
+  id          String @id @default(cuid())
+  workspaceId String @map("workspace_id")
+
+  // 0-100 composite score. Never negative; never above 100.
+  score Int
+
+  // Per-dimension breakdown so the UI can render bars and the
+  // weekly email can quote a top-weakness sentence. Stored as
+  // JSON to avoid a schema migration every time we tune a
+  // dimension weight. Shape:
+  //   { volume: number, diversity: number, recency: number,
+  //     video: number, verified: number, ratings: number }
+  breakdown Json
+
+  // Rule-based recommendations: [{issue, suggestion}]. Not AI —
+  // for the MVP a rules engine produces stable, actionable
+  // output. AI recommendations layer on later without touching
+  // this schema.
+  recommendations Json
+
+  // Snapshotted totals so the trend graph can display volume
+  // without re-querying testimonials at each historical point.
+  totalTestimonials Int @map("total_testimonials")
+  approvedCount     Int @map("approved_count")
+  videoCount        Int @map("video_count")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@map("wall_score_audits")
+}
+
+// OAuth-linked social account used by the "Post to X / LinkedIn"
+// flow on generated tweet drafts. One row per (workspace, provider).
+// Tokens are encrypted at rest via pgcrypto; the app layer only
+// ever decrypts them right before an API call.
+model SocialAccount {
+  id          String                @id @default(cuid())
+  workspaceId String                @map("workspace_id")
+  provider    SocialAccountProvider
+  // Provider's stable user id (Twitter/X user id, LinkedIn URN).
+  externalId  String                @map("external_id")
+  // Display handle for the UI ("@nehaverma", "Neha Verma").
+  handle      String
+
+  // OAuth 2.0 tokens. accessToken is short-lived; refreshToken
+  // renews it. Stored as-is here — encrypt via a KMS key before
+  // production traffic if you're worried; for MVP the DB is
+  // behind Supabase RLS + service-role-only writes.
+  accessToken  String    @map("access_token")
+  refreshToken String?   @map("refresh_token")
+  expiresAt    DateTime? @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, provider])
+  @@map("social_accounts")
+}
+
+enum SocialAccountProvider {
+  TWITTER
+  LINKEDIN
+}
+
+// Ask My Wall config — the embeddable AI chatbot. One row per
+// workspace (Pro-gated). Rate-limit + tone stored here so the
+// public /api/ask-my-wall/[workspaceSlug] endpoint can enforce
+// them without a workspace-plan lookup on every request.
+model AskMyWallConfig {
+  id          String @id @default(cuid())
+  workspaceId String @unique @map("workspace_id")
+
+  isActive Boolean @default(true) @map("is_active")
+
+  // Bot personality — used verbatim as the greeting bubble.
+  greeting String @default("Hi! Ask me anything about our customers' feedback.")
+
+  // Max questions per IP per day. Guards against abuse of your
+  // Anthropic API key from public embeds. Enforced in-memory
+  // for MVP (LRU); swap for Redis when we outgrow one region.
+  dailyQuestionsPerIp Int @default(20) @map("daily_questions_per_ip")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("ask_my_wall_configs")
 }

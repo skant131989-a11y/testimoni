@@ -21,6 +21,8 @@ import {
   Copy,
   Check,
   RefreshCw,
+  Gauge,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,9 @@ const navItems: {
   { href: "/dashboard/collect", label: "Collect", icon: Send },
   { href: "/dashboard/import", label: "Import", icon: Import },
   { href: "/dashboard/sources", label: "Review sources", icon: RefreshCw },
+  { href: "/dashboard/wall-score", label: "Wall Score", icon: Gauge },
+  { href: "/dashboard/tweet-drafts", label: "Tweet drafts", icon: Send },
+  { href: "/dashboard/ask-my-wall", label: "Ask My Wall", icon: MessageSquare },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];

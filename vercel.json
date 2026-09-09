@@ -6,6 +6,12 @@
       "maxDuration": 30
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/wall-score-weekly",
+      "schedule": "37 2 * * 1"
+    }
+  ],
   "headers": [
     {
       "source": "/embed/collect.js",

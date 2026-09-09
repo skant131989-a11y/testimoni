@@ -40,7 +40,7 @@ export const FREE_FEATURES = [
 export const PRO_FEATURES = [
   "Unlimited testimonials",
   "Unlimited screenshot AI + batch upload",
-  "Unlimited Testimonial → Tweet drafts + auto-post to X/LinkedIn",
+  "Unlimited Testimonial → Tweet drafts (one-click to X + LinkedIn compose)",
   "Ask My Wall — embeddable AI chatbot that answers visitors from your testimonials",
   "Wall Score — unlimited audits + weekly emailed report + trend graph",
   "Deep AI recommendations — specific customer prompts per weakness",

@@ -18,3 +18,24 @@
  *   4. Verify checkout works end-to-end
  */
 export const PRO_AI_PUBLIC = false;
+
+/**
+ * Feature flag for OAuth-based auto-post to X and LinkedIn.
+ *
+ * TRUE  → Tweet-drafts page shows "Connect X" / "Connect LinkedIn"
+ *         chips and "Post to X" / "Post to LinkedIn" one-click
+ *         auto-post buttons. Requires TWITTER_CLIENT_ID/SECRET,
+ *         LINKEDIN_CLIENT_ID/SECRET, and OAUTH_STATE_SECRET env
+ *         vars. Also requires an X app with write scope and a
+ *         LinkedIn app with w_member_social scope — both take
+ *         real setup work.
+ * FALSE → Only the "Open in X" / "Open in LinkedIn" web-intent
+ *         buttons render. These open a pre-filled compose window
+ *         in a new tab; user clicks Post themselves. Zero env
+ *         vars, zero OAuth setup, works today. 2 seconds of
+ *         friction vs. true auto-post — acceptable at MVP scale.
+ *
+ * The OAuth API routes + models sit dormant when this is false —
+ * flip to true once the OAuth apps exist and env vars are set.
+ */
+export const SOCIAL_AUTO_POST_ENABLED = false;
