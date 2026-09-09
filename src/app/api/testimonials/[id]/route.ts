@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { updateTestimonialSchema } from "@/lib/validations/testimonial";
 import { createAdminClient, VIDEO_BUCKET } from "@/lib/supabase/admin";
+import { invalidateWallCache } from "@/lib/wall-cache";
 
 export async function PATCH(
   request: Request,
@@ -58,6 +59,8 @@ export async function PATCH(
       .catch(() => {});
   }
 
+  invalidateWallCache();
+
   return NextResponse.json({ testimonial });
 }
 
@@ -94,6 +97,8 @@ export async function DELETE(
       .remove([existing.videoStorageKey])
       .catch(() => {});
   }
+
+  invalidateWallCache();
 
   return NextResponse.json({ success: true });
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
+import { invalidateWallCache } from "@/lib/wall-cache";
 
 export async function POST(
   request: Request,
@@ -21,6 +22,8 @@ export async function POST(
   }
 
   await prisma.testimonial.delete({ where: { id } });
+
+  invalidateWallCache();
 
   return NextResponse.redirect(new URL("/dashboard/testimonials", request.url), 303);
 }

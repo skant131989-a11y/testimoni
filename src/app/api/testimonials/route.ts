@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { createTestimonialSchema } from "@/lib/validations/testimonial";
 import { getEffectiveLimits } from "@/lib/plan";
+import { invalidateWallCache } from "@/lib/wall-cache";
 
 export async function GET(request: Request) {
   const auth = await getAuthContext(request);
@@ -126,6 +127,8 @@ export async function POST(request: Request) {
       });
     }
   }
+
+  invalidateWallCache();
 
   return NextResponse.json({ testimonial, widget: defaultWidget }, { status: 201 });
 }

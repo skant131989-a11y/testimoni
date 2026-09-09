@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { getEffectiveLimits } from "@/lib/plan";
+import { invalidateWallCache } from "@/lib/wall-cache";
 
 export async function POST(
   request: Request,
@@ -107,6 +108,8 @@ export async function POST(
       update: {},
     });
   }
+
+  invalidateWallCache();
 
   return NextResponse.json({
     ok: true,

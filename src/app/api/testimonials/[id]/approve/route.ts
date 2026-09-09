@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
+import { invalidateWallCache } from "@/lib/wall-cache";
 
 /**
  * Approve a testimonial.
@@ -70,6 +71,8 @@ export async function POST(
       });
     }
   });
+
+  invalidateWallCache();
 
   return NextResponse.redirect(
     new URL("/dashboard/testimonials", request.url),

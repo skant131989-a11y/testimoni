@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { getEffectiveLimits } from "@/lib/plan";
 import { createAdminClient, VIDEO_BUCKET } from "@/lib/supabase/admin";
+import { invalidateWallCache } from "@/lib/wall-cache";
 
 /**
  * POST /api/testimonials/upload-video
@@ -173,6 +174,7 @@ export async function POST(request: Request) {
       // Best-effort — a failure here just leaves a small orphan.
       await supabase.storage.from(VIDEO_BUCKET).remove([existingKey]).catch(() => {});
     }
+    invalidateWallCache();
   }
 
   return NextResponse.json({

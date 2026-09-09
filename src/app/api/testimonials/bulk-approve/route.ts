@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
+import { invalidateWallCache } from "@/lib/wall-cache";
 
 /**
  * Bulk approve — flips a batch of testimonials to APPROVED and
@@ -91,6 +92,8 @@ export async function POST(request: Request) {
       });
     }
   });
+
+  invalidateWallCache();
 
   return NextResponse.json({ approved: ids.length });
 }

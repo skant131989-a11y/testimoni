@@ -4,6 +4,7 @@ import { getAuthContext } from "@/lib/auth";
 import { getEffectiveLimits } from "@/lib/plan";
 import { sanitizeImportedText } from "@/lib/sanitize-imported-text";
 import { fetchTweetViaSyndication } from "@/lib/twitter-syndication";
+import { invalidateWallCache } from "@/lib/wall-cache";
 
 interface ImportResult {
   content: string;
@@ -518,6 +519,8 @@ export async function POST(request: Request) {
       update: {},
     });
   }
+
+  invalidateWallCache();
 
   return NextResponse.json({
     testimonial,

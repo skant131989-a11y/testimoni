@@ -5,6 +5,7 @@ import { createSubmissionSchema } from "@/lib/validations/submission";
 import { generateSlug } from "@/lib/utils";
 import { getEffectiveLimits } from "@/lib/plan";
 import { sendEmail } from "@/lib/emails/send";
+import { invalidateWallCache } from "@/lib/wall-cache";
 import {
   submissionNotifyEmailHtml,
   submissionNotifyEmailSubject,
@@ -286,6 +287,7 @@ export async function POST(request: Request) {
     // Auto-approve path — still notify the owner. Owner may want to
     // know a submission arrived even if it's already live on the wall.
     fireOwnerNotification();
+    invalidateWallCache();
     return response;
   }
 
