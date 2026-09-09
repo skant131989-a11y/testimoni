@@ -113,18 +113,20 @@ export default function LandingPage() {
             <div className="mb-3">
               <LiveSignupTicker />
             </div>
-            <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm">
-              <Zap className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-              From tweet to embed in 30 seconds
+            <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              Now free — App Store, Play Store, Shopify + 5 more
             </div>
             <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-              Paste a tweet or upload a screenshot.{" "}
-              <span className="text-primary">It&rsquo;s on your site today.</span>
+              Any praise becomes a Wall of Love.{" "}
+              <span className="text-primary">Now the wall talks back.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground md:text-xl">
-              No account to preview. Keep what you like, embed the
-              wall on your site with one line — or share the free
-              hosted URL.
+              Paste a tweet, drop a screenshot, or import from App
+              Store, Play, Chrome, Product Hunt, Shopify. Testimoni
+              turns every kind of praise into a Wall of Love — with
+              an AI chatbot that answers visitors using real customer
+              quotes, cited by name.
             </p>
 
             {/* Trust caption sits close to the sub — reads as
