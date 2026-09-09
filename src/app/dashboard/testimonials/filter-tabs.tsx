@@ -4,10 +4,11 @@ import { TabsWithProgress } from "@/components/tabs-with-progress";
 import type { TestimonialStatus } from "@prisma/client";
 
 /**
- * Thin wrapper around the shared TabsWithProgress that knows the
- * URL shape for /dashboard/testimonials?filter=…&q=…. The generic
- * component doesn't hardcode any URL logic so the same primitive
- * powers Inbox + Testimonials without divergent behavior.
+ * Thin wrapper for /dashboard/testimonials. This IS a client
+ * component, so it can safely build hrefs internally using the
+ * server-passed searchQuery string (all serializable primitives).
+ * The generic TabsWithProgress expects pre-built hrefs on each
+ * tab item; we compute them here.
  */
 export type FilterTab = "ALL" | TestimonialStatus;
 
@@ -32,11 +33,6 @@ function buildHref(value: FilterTab, q: string): string {
 }
 
 export function FilterTabs({ tabs, activeFilter, searchQuery }: Props) {
-  return (
-    <TabsWithProgress
-      tabs={tabs}
-      activeValue={activeFilter}
-      buildHref={(value) => buildHref(value, searchQuery)}
-    />
-  );
+  const enriched = tabs.map((t) => ({ ...t, href: buildHref(t.value, searchQuery) }));
+  return <TabsWithProgress tabs={enriched} activeValue={activeFilter} />;
 }

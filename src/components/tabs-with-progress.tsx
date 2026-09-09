@@ -8,37 +8,36 @@ import { cn } from "@/lib/utils";
 /**
  * Generic filter-tab strip with useTransition + a top progress bar.
  *
- * Any dashboard page with a Link-based "?filter=…" tab strip can
- * drop this in and get:
+ * Any dashboard page with a "?filter=…" style tab strip can drop
+ * this in and get:
  *   - Instant click feedback (target tab tints purple while loading)
  *   - Thin gradient progress bar fixed to top-of-viewport
  *   - "Loading…" label on the far right of the tabs
  *   - Fallback: browser back/forward still uses hard nav → loading.tsx
  *
- * Usage:
- *   <TabsWithProgress
- *     tabs={[{ label: "New", value: "NEW", count: 12 }, ...]}
- *     activeValue="NEW"
- *     basePath="/dashboard/inbox"
- *     buildHref={(value) => `/dashboard/inbox?filter=${value.toLowerCase()}`}
- *   />
+ * The server-side callsite pre-builds each tab's `href` and passes
+ * it via the `tabs` array — no function props cross the server/
+ * client boundary, so this component is safe to import directly
+ * from server pages without needing a client wrapper.
  */
 interface TabItem<V extends string> {
   label: string;
   value: V;
   count: number;
+  /** Pre-computed href — built server-side so the client never
+   *  needs a builder function. Should include any preserved query
+   *  params (e.g. `q=…`) the destination expects. */
+  href: string;
 }
 
 interface Props<V extends string> {
   tabs: TabItem<V>[];
   activeValue: V;
-  buildHref: (value: V) => string;
 }
 
 export function TabsWithProgress<V extends string>({
   tabs,
   activeValue,
-  buildHref,
 }: Props<V>) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -48,11 +47,11 @@ export function TabsWithProgress<V extends string>({
     if (!isPending) setPendingValue(null);
   }, [isPending, activeValue]);
 
-  function selectTab(value: V) {
+  function selectTab(value: V, href: string) {
     if (value === activeValue) return;
     setPendingValue(value);
     startTransition(() => {
-      router.push(buildHref(value));
+      router.push(href);
     });
   }
 
@@ -67,10 +66,10 @@ export function TabsWithProgress<V extends string>({
           return (
             <Link
               key={tab.value}
-              href={buildHref(tab.value)}
+              href={tab.href}
               onClick={(e) => {
                 e.preventDefault();
-                selectTab(tab.value);
+                selectTab(tab.value, tab.href);
               }}
               className={cn(
                 "flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors",

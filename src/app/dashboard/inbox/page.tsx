@@ -65,10 +65,14 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   const countMap: Record<string, number> = {};
   for (const g of counts) countMap[g.status] = g._count;
 
-  const tabs: { label: string; value: FilterTab; count: number }[] = [
-    { label: "New", value: "NEW", count: countMap["NEW"] ?? 0 },
-    { label: "Approved", value: "APPROVED", count: countMap["APPROVED"] ?? 0 },
-    { label: "Rejected", value: "REJECTED", count: countMap["REJECTED"] ?? 0 },
+  // Build tabs with pre-computed hrefs — client component can't
+  // receive a function prop across the server boundary, so we
+  // build each destination URL here and pass it in the shape the
+  // shared TabsWithProgress expects.
+  const tabs: { label: string; value: FilterTab; count: number; href: string }[] = [
+    { label: "New", value: "NEW", count: countMap["NEW"] ?? 0, href: "/dashboard/inbox?filter=new" },
+    { label: "Approved", value: "APPROVED", count: countMap["APPROVED"] ?? 0, href: "/dashboard/inbox?filter=approved" },
+    { label: "Rejected", value: "REJECTED", count: countMap["REJECTED"] ?? 0, href: "/dashboard/inbox?filter=rejected" },
   ];
 
   const inboxSubmissions: InboxSubmission[] = submissions.map((s) => ({
@@ -90,11 +94,7 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
         </p>
       </div>
 
-      <TabsWithProgress
-        tabs={tabs}
-        activeValue={activeFilter}
-        buildHref={(value) => `/dashboard/inbox?filter=${value.toLowerCase()}`}
-      />
+      <TabsWithProgress tabs={tabs} activeValue={activeFilter} />
 
       <InboxList
         initial={inboxSubmissions}
