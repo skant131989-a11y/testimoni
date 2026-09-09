@@ -317,18 +317,21 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
         </div>
       )}
 
-      {/* Pro paywall */}
+      {/* Free-plan explainer — sits at the top so Free users know
+          what they get and what upgrading unlocks. Pro users see
+          the "Connect a new source" section immediately. */}
       {!isPro && (
         <Card className="border-2 border-primary/30 bg-primary/5">
           <CardContent className="flex flex-col items-start gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-base font-semibold">
-                Every review, every platform, one wall.
+                Import reviews from App Store, Play Store & more — free.
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Connect the platforms where your customers already leave
-                reviews. Testimoni pulls new ones automatically — you approve,
-                they land on your wall. Pro plan only.
+                Free plan: paste any review URL, click Import, reviews
+                land in your pending queue. Cap: 10 testimonials total.
+                Pro plan unlocks auto-sync every 24h + auto-approve +
+                unlimited testimonials.
               </p>
             </div>
             <Link href="/pricing">
@@ -340,8 +343,9 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
         </Card>
       )}
 
-      {/* Connect a source */}
-      {isPro && (
+      {/* Connect a source — available on every plan now. Free
+          users can import once and it counts against the 10-cap. */}
+      {(
         <Card>
           <CardHeader>
             <CardTitle>Connect a new source</CardTitle>
@@ -405,13 +409,11 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
 
       {/* Connected sources list */}
       {sources.length === 0 ? (
-        isPro && (
-          <Card className="border-dashed">
-            <CardContent className="py-10 text-center text-sm text-muted-foreground">
-              No sources connected yet. Paste a review URL above to get started.
-            </CardContent>
-          </Card>
-        )
+        <Card className="border-dashed">
+          <CardContent className="py-10 text-center text-sm text-muted-foreground">
+            No sources connected yet. Paste a review URL above to get started.
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-3">
           {sources.map((s) => (
@@ -470,7 +472,6 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
                       onChange={(e) =>
                         handleChangeMinRating(s.id, Number(e.target.value))
                       }
-                      disabled={!isPro}
                       className="rounded-md border bg-background px-2 py-1 text-xs font-semibold focus:border-primary focus:outline-none disabled:opacity-60"
                     >
                       <option value={1}>1★+ (everything)</option>
@@ -484,7 +485,8 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
                     </span>
                   </div>
 
-                  {/* Auto-approve toggle */}
+                  {/* Auto-approve toggle — Pro-only. On Free it renders
+                      disabled with a small upgrade nudge inline. */}
                   <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs">
                     <input
                       type="checkbox"
@@ -499,8 +501,11 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
                       Auto-approve future reviews
                     </span>
                     <span className="text-muted-foreground">
-                      — land straight on your Wall of Love. Off = review
-                      in Testimonials → Pending.
+                      {isPro ? (
+                        <>— land straight on your Wall of Love. Off = review in Testimonials → Pending.</>
+                      ) : (
+                        <>— Pro only. Free imports land in Pending. <Link href="/pricing" className="underline text-primary">Upgrade →</Link></>
+                      )}
                     </span>
                   </label>
                 </div>
@@ -509,7 +514,7 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
                     variant="outline"
                     size="sm"
                     onClick={() => handleSync(s.id)}
-                    disabled={syncingId === s.id || !isPro}
+                    disabled={syncingId === s.id}
                   >
                     {syncingId === s.id ? (
                       <>

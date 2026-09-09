@@ -12,11 +12,15 @@ import { parseAnySourceUrl, availablePlatforms } from "@/lib/review-sources/regi
 /**
  * Review sources API.
  *   GET  /api/review-sources        — list this workspace's sources
- *   POST /api/review-sources        — connect a new source (Pro only)
+ *   POST /api/review-sources        — connect a new source
  *
- * All routes require a signed-in user. Only Pro workspaces can
- * create new sources — GET is available to Free too so we can
- * show an empty state + upsell.
+ * Connecting is FREE on every plan — a Free user can paste an
+ * App Store / Play Store / Product Hunt / Chrome Web Store URL
+ * and pull the reviews once. The plan cap (Free = 10 testimonials
+ * total) is what gates volume, not the feature itself. autoApprove
+ * stays Pro-only: on Free, imported reviews land in the pending
+ * queue for manual review. Auto-sync (scheduled background pulls)
+ * is also Pro-only — see the sync cron.
  */
 
 const CREATE_SCHEMA = z.object({
@@ -25,7 +29,7 @@ const CREATE_SCHEMA = z.object({
   autoApprove: z.boolean().optional(),
 });
 
-async function requirePro() {
+async function resolveWorkspace() {
   const authUser = await getAuthUser();
   if (!authUser) return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   const dbUser =
@@ -47,7 +51,7 @@ async function requirePro() {
 }
 
 export async function GET() {
-  const ctx = await requirePro();
+  const ctx = await resolveWorkspace();
   if ("error" in ctx) return ctx.error;
 
   const sources = await prisma.reviewSource.findMany({
@@ -63,18 +67,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const ctx = await requirePro();
+  const ctx = await resolveWorkspace();
   if ("error" in ctx) return ctx.error;
-
-  if (ctx.plan !== "PRO") {
-    return NextResponse.json(
-      {
-        error: "Review source syncing is a Pro feature.",
-        upgradeRequired: true,
-      },
-      { status: 402 },
-    );
-  }
 
   let body: unknown;
   try {
@@ -119,6 +113,12 @@ export async function POST(req: Request) {
     );
   }
 
+  // autoApprove is a Pro perk. On Free plans, force it off so
+  // imported reviews land in the pending queue where the user has
+  // to approve each one — same curation flow as any other testimonial.
+  const requestedAutoApprove = parsed.data.autoApprove ?? false;
+  const autoApprove = ctx.plan === "PRO" ? requestedAutoApprove : false;
+
   const source = await prisma.reviewSource.create({
     data: {
       workspaceId: ctx.workspaceId,
@@ -127,7 +127,7 @@ export async function POST(req: Request) {
       displayName: detected.displayName,
       sourceUrl: parsed.data.url,
       minRating: parsed.data.minRating ?? 4,
-      autoApprove: parsed.data.autoApprove ?? false,
+      autoApprove,
     },
   });
 

@@ -19,6 +19,10 @@ export interface SyncResult {
   imported: number;
   skipped: number;
   error?: string;
+  /** True when the workspace's testimonial cap prevented some
+   *  eligible reviews from being imported. The client can surface a
+   *  "hit your free cap — upgrade to import the rest" message. */
+  capReached?: boolean;
 }
 
 const PLATFORM_TO_TESTIMONIAL_SOURCE = {
@@ -32,6 +36,17 @@ const PLATFORM_TO_TESTIMONIAL_SOURCE = {
 
 export async function syncReviewSource(
   source: ReviewSource,
+  options: {
+    /** Cap on how many new rows to insert this run. Free workspaces
+     *  pass `maxTestimonials - currentTestimonialCount` so imports
+     *  never blow past the plan's ceiling. Undefined = unlimited
+     *  (Pro workspaces). */
+    maxToImport?: number;
+    /** Overrides source.autoApprove for this sync only. Free plans
+     *  force PENDING regardless of the source setting so users curate
+     *  before anything lands on their wall. */
+    forcePending?: boolean;
+  } = {},
 ): Promise<SyncResult> {
   const adapter = ADAPTERS[source.platform];
   if (!adapter || !adapter.available()) {
@@ -90,9 +105,21 @@ export async function syncReviewSource(
   const seen = new Set(existing.map((e) => e.externalReviewId));
 
   // Filter by min-rating threshold set on the source.
-  const eligible = reviews.filter(
+  const eligibleAll = reviews.filter(
     (r) => !seen.has(r.externalId) && r.rating >= source.minRating,
   );
+
+  // Cap on how many rows we're allowed to insert this run (Free
+  // plans pass remaining-slots-until-max-testimonials). If the cap
+  // is zero or negative, we bail early with a capReached flag so
+  // the API can surface an upgrade nudge.
+  const cap = options.maxToImport;
+  const eligible =
+    typeof cap === "number" && cap >= 0
+      ? eligibleAll.slice(0, cap)
+      : eligibleAll;
+  const capReached =
+    typeof cap === "number" && eligibleAll.length > eligible.length;
 
   if (eligible.length === 0) {
     await prisma.reviewSource.update({
@@ -103,11 +130,16 @@ export async function syncReviewSource(
         lastSyncedAt: new Date(),
       },
     });
-    return { imported: 0, skipped: reviews.length };
+    return {
+      imported: 0,
+      skipped: reviews.length,
+      ...(capReached ? { capReached } : {}),
+    };
   }
 
   // Bulk insert — createMany doesn't return rows, which is fine here.
   const testimonialSource = PLATFORM_TO_TESTIMONIAL_SOURCE[source.platform];
+  const shouldAutoApprove = source.autoApprove && !options.forcePending;
   await prisma.testimonial.createMany({
     data: eligible.map((r) => ({
       workspaceId: source.workspaceId,
@@ -117,7 +149,7 @@ export async function syncReviewSource(
       rating: r.rating,
       source: testimonialSource,
       sourceUrl: r.sourceUrl,
-      status: source.autoApprove ? "APPROVED" : "PENDING",
+      status: shouldAutoApprove ? "APPROVED" : "PENDING",
       externalReviewId: r.externalId,
       reviewSourceId: source.id,
       createdAt: r.postedAt,
@@ -135,5 +167,9 @@ export async function syncReviewSource(
     },
   });
 
-  return { imported: eligible.length, skipped: reviews.length - eligible.length };
+  return {
+    imported: eligible.length,
+    skipped: reviews.length - eligible.length,
+    ...(capReached ? { capReached } : {}),
+  };
 }
