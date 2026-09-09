@@ -48,6 +48,10 @@ interface OtpCodeInputProps {
   surface?: string;
   /** Optional hook to run before the redirect happens. */
   onBeforeRedirect?: (userId: string) => void;
+  /** Expected code length. Matches Supabase's "Email OTP Length"
+   *  setting — default is 6, some projects run 8. Accepts 6 or 8
+   *  and the input auto-submits when the buffer hits this length. */
+  codeLength?: 6 | 8;
 }
 
 export function OtpCodeInput({
@@ -57,6 +61,7 @@ export function OtpCodeInput({
   method,
   surface,
   onBeforeRedirect,
+  codeLength = 8,
 }: OtpCodeInputProps) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +76,7 @@ export function OtpCodeInput({
   }, []);
 
   async function verify(token: string) {
-    if (token.length !== 6 || verifying) return;
+    if (token.length !== codeLength || verifying) return;
     setVerifying(true);
     setError(null);
     try {
@@ -110,7 +115,7 @@ export function OtpCodeInput({
     <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
       <div className="mb-3 flex items-center gap-2">
         <KeyRound className="h-4 w-4 text-primary" />
-        <p className="text-sm font-semibold">Or type the 6-digit code</p>
+        <p className="text-sm font-semibold">Or type the {codeLength}-digit code</p>
       </div>
       <p className="mb-3 text-xs text-muted-foreground">
         The email contains a code you can type here instead of clicking the link
@@ -129,22 +134,22 @@ export function OtpCodeInput({
           type="text"
           inputMode="numeric"
           autoComplete="one-time-code"
-          pattern="[0-9]{6}"
-          maxLength={6}
-          minLength={6}
-          placeholder="123456"
+          pattern={`[0-9]{${codeLength}}`}
+          maxLength={codeLength}
+          minLength={codeLength}
+          placeholder={"1".repeat(codeLength)}
           value={code}
           onChange={(e) => {
-            const next = e.target.value.replace(/\D/g, "").slice(0, 6);
+            const next = e.target.value.replace(/\D/g, "").slice(0, codeLength);
             setCode(next);
             setError(null);
-            if (next.length === 6) verify(next);
+            if (next.length === codeLength) verify(next);
           }}
           disabled={verifying}
-          className="flex-1 font-mono text-center text-lg tracking-[0.4em]"
-          aria-label="6-digit sign-in code"
+          className="flex-1 font-mono text-center text-lg tracking-[0.3em]"
+          aria-label={`${codeLength}-digit sign-in code`}
         />
-        <Button type="submit" disabled={code.length !== 6 || verifying}>
+        <Button type="submit" disabled={code.length !== codeLength || verifying}>
           {verifying ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying
