@@ -22,6 +22,8 @@ import {
   Check,
   Video,
   Sparkles,
+  RefreshCw,
+  ExternalLink,
 } from "lucide-react";
 import { track } from "@/lib/analytics";
 import { ImportSourcesRow } from "@/components/import-sources-row";
@@ -635,6 +637,27 @@ export default function ImportClient({ isPro }: ImportClientProps) {
               1 free
             </span>
           )}
+        </Button>
+        {/* Review sources tab — this one's a plain Link that
+            navigates AWAY to /dashboard/sources. Sources is a
+            list-management view (connected platforms, sync status,
+            per-source settings) that doesn't fit inline as a mode.
+            The tab exists here purely for discoverability — users
+            think "add testimonials → Import", so this signposts
+            the path from that mental model. Small arrow icon
+            signals "opens somewhere else." */}
+        <Button variant="outline" asChild className="relative">
+          <Link
+            href="/dashboard/sources"
+            onClick={() => track("import_tab_selected", { tab: "sources" })}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Import from sources
+            <ExternalLink className="ml-2 h-3 w-3 text-muted-foreground" />
+            <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+              Pro · New
+            </span>
+          </Link>
         </Button>
       </div>
 
