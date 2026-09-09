@@ -5,22 +5,27 @@ export const contentType = "image/png";
 
 /**
  * OpenGraph card for testimoni.io.
- * Satori requires every div with multiple children to declare
- * display: flex explicitly. No CSS grid, no @font-face.
  *
- * Fresh direction (v7 rewrite):
- * - Positioning-first, not paste-a-tweet-first. The three-step loop
- *   Ask → Collect → Publish is the story we now lead with on the
- *   home page; the OG mirrors it.
- * - Big centered headline. Feeds compress this card to ~500px wide,
- *   so anything smaller than ~48px type turns to mud.
- * - Wall-preview strip at the bottom shows the outcome — three
- *   testimonial cards in a row, tight, with real-sized author photos.
- * - No URL bar → arrow → pill diagram. That solved a different
- *   confusion (paste-a-tweet). We're past it.
+ * v10 — Both intake paths visible.
+ *
+ * The launch story is "any praise becomes a testimonial." The
+ * previous card led with the screenshot flow only, hiding the
+ * URL-paste path that most visitors already know. This version
+ * shows both flows side-by-side as coequal choices:
+ *   Left  — paste a tweet URL → testimonial card
+ *   Right — drop a screenshot → testimonial card
+ *
+ * Same visual weight, same output shape. Users scanning a social
+ * feed see immediately: "oh, this works with either kind of praise
+ * I have lying around."
+ *
+ * Satori quirks that trip you up:
+ *   - Every div with multiple children needs display: flex.
+ *   - No CSS grid, no @font-face.
+ *   - Keep type >= 14px for social preview compression.
  */
 
-function StarRow({ size: sz = 14 }: { size?: number }) {
+function StarRow({ size: sz = 11 }: { size?: number }) {
   return (
     <div style={{ display: "flex", gap: 2 }}>
       {[0, 1, 2, 3, 4].map((i) => (
@@ -41,31 +46,307 @@ function StarRow({ size: sz = 14 }: { size?: number }) {
   );
 }
 
-const WALL_STRIP = [
-  {
-    initial: "P",
-    accent: "#16a34a",
-    name: "Priya",
-    role: "Founder, LinenLab",
-    quote: "Live wall up in the time it took me to make coffee.",
-  },
-  {
-    initial: "S",
-    accent: "#ea580c",
-    name: "Sarah",
-    role: "CEO, LaunchPad",
-    quote: "Turned a mess of tweets into a wall of love in 30 seconds.",
-  },
-  {
-    initial: "M",
-    accent: "#7c3aed",
-    name: "Marcus",
-    role: "Founder, ShipFast",
-    quote: "Embed took me one line. Wall was live before lunch.",
-  },
-];
+/** Sparkle glyph — for the "AI" chips. */
+function Sparkle({ size: sz = 12, color = "#5b21b6" }: { size?: number; color?: string }) {
+  return (
+    <svg width={sz} height={sz} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2z"
+        fill={color}
+      />
+    </svg>
+  );
+}
+
+/**
+ * A single intake-path column: label chip, input mock, arrow, and
+ * the extracted testimonial card. Kept as a reusable subcomponent
+ * so the two paths share exact visual weight.
+ */
+function FlowColumn({
+  chip,
+  chipColor,
+  input,
+  quote,
+  author,
+  handle,
+  sourceLabel,
+  authorInitial,
+  authorColor,
+}: {
+  chip: string;
+  chipColor: string;
+  input: React.ReactNode;
+  quote: string;
+  author: string;
+  handle: string;
+  sourceLabel: string;
+  authorInitial: string;
+  authorColor: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        flex: 1,
+        gap: 10,
+      }}
+    >
+      {/* Path label */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "5px 12px",
+          borderRadius: 999,
+          background: chipColor,
+          color: "white",
+          fontSize: 13,
+          fontWeight: 800,
+          letterSpacing: "0.02em",
+        }}
+      >
+        {chip}
+      </div>
+
+      {/* Input mock */}
+      {input}
+
+      {/* AI arrow */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "3px 10px",
+          borderRadius: 999,
+          background: "white",
+          border: "1.5px solid #5b21b6",
+          fontSize: 12,
+          fontWeight: 900,
+          color: "#5b21b6",
+        }}
+      >
+        <Sparkle size={11} color="#5b21b6" /> AI ↓
+      </div>
+
+      {/* Extracted testimonial card */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          padding: 14,
+          borderRadius: 12,
+          background: "white",
+          border: "2px solid rgba(91, 33, 182, 0.3)",
+          boxShadow: "0 8px 24px rgba(76, 29, 149, 0.16)",
+        }}
+      >
+        <StarRow size={11} />
+        <div
+          style={{
+            display: "flex",
+            fontSize: 13,
+            lineHeight: 1.4,
+            color: "#1f2937",
+            marginTop: 8,
+          }}
+        >
+          &ldquo;{quote}&rdquo;
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 10,
+            paddingTop: 8,
+            borderTop: "1px solid #e5e7eb",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 24,
+              height: 24,
+              borderRadius: 12,
+              background: authorColor,
+              color: "white",
+              fontSize: 11,
+              fontWeight: 800,
+            }}
+          >
+            {authorInitial}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            <div
+              style={{
+                display: "flex",
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#1a1a1a",
+              }}
+            >
+              {author}
+            </div>
+            <div style={{ display: "flex", fontSize: 9, color: "#6b7280" }}>
+              {handle}
+            </div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              padding: "2px 6px",
+              borderRadius: 999,
+              background: "#f3f4f6",
+              fontSize: 9,
+              fontWeight: 700,
+              color: "#4b5563",
+            }}
+          >
+            {sourceLabel}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function OpenGraphImage() {
+  // Input mock #1 — a browser-style URL bar with an X post URL.
+  const urlInputMock = (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        gap: 8,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "10px 12px",
+          borderRadius: 10,
+          background: "white",
+          border: "1.5px solid rgba(76, 29, 149, 0.25)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 18,
+            height: 18,
+            borderRadius: 9,
+            background: "#0f172a",
+            color: "white",
+            fontSize: 12,
+            fontWeight: 900,
+            fontFamily: "Georgia, serif",
+          }}
+        >
+          𝕏
+        </div>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 12,
+            color: "#1f2937",
+            fontFamily: "monospace",
+          }}
+        >
+          x.com/sarahchen/status/1798...
+        </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignSelf: "center",
+          padding: "3px 10px",
+          borderRadius: 999,
+          background: "#5b21b6",
+          color: "white",
+          fontSize: 11,
+          fontWeight: 800,
+        }}
+      >
+        Import →
+      </div>
+    </div>
+  );
+
+  // Input mock #2 — a dark DM screenshot.
+  const screenshotMock = (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        padding: 12,
+        borderRadius: 10,
+        background: "#0f172a",
+        boxShadow: "0 6px 16px rgba(15, 23, 42, 0.25)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          paddingBottom: 6,
+          borderBottom: "1px solid #1e293b",
+          fontSize: 10,
+          fontWeight: 700,
+          color: "#e2e8f0",
+        }}
+      >
+        WhatsApp · Priya M.
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 8 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 22,
+            height: 22,
+            borderRadius: 11,
+            background: "#ea580c",
+            color: "white",
+            fontSize: 11,
+            fontWeight: 800,
+          }}
+        >
+          P
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            padding: "7px 10px",
+            borderRadius: 12,
+            background: "#059669",
+            color: "white",
+            fontSize: 12,
+            lineHeight: 1.35,
+          }}
+        >
+          Set up my testimonials wall in about 5 minutes yesterday. Wild.
+        </div>
+      </div>
+    </div>
+  );
+
   return new ImageResponse(
     (
       <div
@@ -74,9 +355,9 @@ export default function OpenGraphImage() {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "44px 56px 36px 56px",
+          padding: "34px 56px 28px 56px",
           background:
-            "linear-gradient(135deg, #f5f3ff 0%, #ddd6fe 50%, #a78bfa 100%)",
+            "linear-gradient(135deg, #f5f3ff 0%, #ddd6fe 55%, #a78bfa 100%)",
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
@@ -94,20 +375,20 @@ export default function OpenGraphImage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: 44,
-                height: 44,
-                borderRadius: 22,
+                width: 40,
+                height: 40,
+                borderRadius: 20,
                 background: "#5b21b6",
                 color: "white",
-                fontSize: 30,
+                fontSize: 26,
                 fontWeight: 900,
-                paddingBottom: 8,
+                paddingBottom: 6,
                 fontFamily: "Georgia, serif",
               }}
             >
               &ldquo;
             </div>
-            <div style={{ fontSize: 30, fontWeight: 800, color: "#1a1a1a" }}>
+            <div style={{ fontSize: 26, fontWeight: 800, color: "#1a1a1a" }}>
               Testimoni
             </div>
           </div>
@@ -115,171 +396,118 @@ export default function OpenGraphImage() {
             style={{
               display: "flex",
               alignItems: "center",
-              padding: "8px 16px",
+              padding: "7px 14px",
               borderRadius: 999,
               background: "white",
               border: "1.5px solid #4c1d95",
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 700,
               color: "#4c1d95",
             }}
           >
-            Free plan · No card required
+            Free · No card required
           </div>
         </div>
 
-        {/* Center: massive 3-word positioning headline */}
+        {/* Headline */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
-            marginTop: 20,
+            marginTop: 18,
+            gap: 8,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              fontSize: 52,
+              fontWeight: 900,
+              color: "#1a1a1a",
+              lineHeight: 1.02,
+              letterSpacing: "-0.03em",
+              textAlign: "center",
+            }}
+          >
+            Tweet or screenshot. Testimonial in 30 seconds.
+          </div>
+        </div>
+
+        {/* Two intake paths, side by side */}
+        <div
+          style={{
+            display: "flex",
+            gap: 32,
+            marginTop: 22,
+            flex: 1,
+            paddingLeft: 20,
+            paddingRight: 20,
+          }}
+        >
+          <FlowColumn
+            chip="PATH A · Paste a URL"
+            chipColor="#1d4ed8"
+            input={urlInputMock}
+            quote="Turned a mess of praise tweets into a wall of love in 30 seconds."
+            author="Sarah Chen"
+            handle="@sarahchen"
+            sourceLabel="Twitter"
+            authorInitial="S"
+            authorColor="#059669"
+          />
+          <FlowColumn
+            chip="PATH B · Drop a screenshot"
+            chipColor="#5b21b6"
+            input={screenshotMock}
+            quote="Set up my testimonials wall in about 5 minutes yesterday. Wild."
+            author="Priya M."
+            handle="WhatsApp DM"
+            sourceLabel="WhatsApp"
+            authorInitial="P"
+            authorColor="#ea580c"
+          />
+        </div>
+
+        {/* Sources strip + wordmark footer */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 14,
           }}
         >
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              padding: "12px 26px",
-              borderRadius: 999,
-              background: "#5b21b6",
-              color: "white",
-              fontSize: 28,
+              gap: 10,
+              fontSize: 12,
+              fontWeight: 600,
+              color: "#4c1d95",
+            }}
+          >
+            <span>Works with:</span>
+            <span>Twitter</span>
+            <span>·</span>
+            <span>LinkedIn</span>
+            <span>·</span>
+            <span>Slack</span>
+            <span>·</span>
+            <span>WhatsApp</span>
+            <span>·</span>
+            <span>Reddit</span>
+            <span>·</span>
+            <span>HN</span>
+            <span>·</span>
+            <span>Product Hunt</span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 18,
               fontWeight: 800,
-              marginBottom: 22,
-            }}
-          >
-            Paste a tweet → live in 30 seconds
-          </div>
-          <div
-            style={{
-              display: "flex",
-              fontSize: 96,
-              fontWeight: 900,
-              color: "#1a1a1a",
-              lineHeight: 1,
-              letterSpacing: "-0.03em",
-              gap: 24,
-            }}
-          >
-            <span>Ask.</span>
-            <span style={{ color: "#7c3aed" }}>Collect.</span>
-            <span>Publish.</span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              marginTop: 18,
-              fontSize: 24,
-              color: "#4b5563",
-              fontWeight: 500,
-              textAlign: "center",
-            }}
-          >
-            One tool for your Wall of Love — on your site or ours.
-          </div>
-        </div>
-
-        {/* Wall preview strip — three testimonial cards */}
-        <div
-          style={{
-            display: "flex",
-            gap: 14,
-            marginTop: 36,
-          }}
-        >
-          {WALL_STRIP.map((t) => (
-            <div
-              key={t.name}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                flex: 1,
-                padding: 16,
-                borderRadius: 14,
-                background: "white",
-                border: "1px solid rgba(76, 29, 149, 0.15)",
-                boxShadow: "0 8px 24px rgba(76, 29, 149, 0.10)",
-              }}
-            >
-              <StarRow size={14} />
-              <div
-                style={{
-                  display: "flex",
-                  fontSize: 15,
-                  color: "#1f2937",
-                  lineHeight: 1.4,
-                  marginTop: 10,
-                }}
-              >
-                &ldquo;{t.quote}&rdquo;
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  marginTop: 12,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    background: t.accent,
-                    color: "white",
-                    fontSize: 13,
-                    fontWeight: 800,
-                  }}
-                >
-                  {t.initial}
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: "#1a1a1a",
-                    }}
-                  >
-                    {t.name}
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      fontSize: 11,
-                      color: "#6b7280",
-                    }}
-                  >
-                    {t.role}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Footer */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 22,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              fontSize: 22,
-              fontWeight: 700,
               color: "#4c1d95",
             }}
           >
@@ -288,6 +516,6 @@ export default function OpenGraphImage() {
         </div>
       </div>
     ),
-    { ...size }
+    { ...size },
   );
 }
