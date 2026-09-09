@@ -23,7 +23,8 @@ import {
 } from "lucide-react";
 import { PublicNavAuth, PublicNavAuthMobile } from "@/components/layout/public-nav-auth";
 import { ProPriceDual, ProAiPrice, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
-import { AnimatedDemo } from "@/components/animated-demo";
+// AnimatedDemo used to render on this page; moved to /features.
+// PathStep used to render on this page; moved to /features.
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
 import { HeroDualDemo } from "@/components/hero-dual-demo";
@@ -173,16 +174,21 @@ export default function LandingPage() {
                 the hash gets cleaned up after scrolling — a plain
                 <a href="#form-path"> would leave #form-path stuck in
                 the URL, making the SECOND click a no-op. */}
+            {/* Escape hatch for visitors without public praise —
+                sends them to the /features "Two intake paths"
+                section (which now hosts the form-path detail;
+                it used to live on this page but moved during the
+                home-simplification pass). */}
             <p className="mt-3 text-xs text-muted-foreground">
               No public praise yet?{" "}
-              <HeroScrollLink
-                targetId="form-path"
+              <TrackedLink
                 cta="hero_form_path"
                 surface="home_hero"
+                href="/features#collect"
                 className="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
               >
                 Share a form instead →
-              </HeroScrollLink>
+              </TrackedLink>
             </p>
           </div>
 
@@ -203,201 +209,40 @@ export default function LandingPage() {
           without duplicating the layout. */}
       <LovedByFoundersStrip />
 
-      {/* Ask → Collect → Publish strip. Answers the #1 unspoken question
-          from cold traffic — "do the testimonials live on your site or
-          mine?" — before it becomes a bounce. Sits above "How it works"
-          which goes deeper on the two intake paths. */}
-      <section className="border-y bg-primary/[0.03] py-10">
+      {/* Compact "See what's inside Testimoni" band — replaces
+          the four longer sections that used to live below the
+          hero (Ask/Collect/Publish strip, Path B form callout,
+          AnimatedDemo, video-testimonials pitch). All of that
+          content moved to /features so home stays focused; this
+          band is the doorway for high-intent visitors who want
+          the deep dive. */}
+      <section className="border-y bg-primary/[0.03] py-8">
         <div className="mx-auto max-w-5xl px-4">
-          <div className="grid gap-6 md:grid-cols-3">
-            {[
-              {
-                num: "1",
-                title: "Ask",
-                body: "Send one link — via email, WhatsApp, DM, QR code, or an embed on your site. Or paste a customer's tweet directly.",
-              },
-              {
-                num: "2",
-                title: "Collect",
-                body: "Text, ratings, and video (1 free on every plan) all land in one inbox. Approve with one click.",
-              },
-              {
-                num: "3",
-                title: "Publish",
-                body: "One line of JavaScript embeds the wall on your site — or share our free hosted Wall of Love URL anywhere.",
-              },
-            ].map((step) => (
-              <div key={step.num} className="flex gap-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                  {step.num}
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-foreground">
-                    {step.title}
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    {step.body}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Path B (form) callout — sits AFTER the paste-a-tweet demo
-          above, so we frame it as "here's the second path" rather
-          than "two ways to pick from" (redundant when the visitor has
-          already seen paste-a-tweet live). Path A gets a compact
-          recap; Path B gets the fuller treatment. The hero's
-          "No public praise yet? Share a form →" escape-hatch link
-          targets this section's #form-path anchor so visitors
-          without tweetable praise can jump straight to the alternative. */}
-      <section id="form-path" className="scroll-mt-16 border-y bg-background py-12">
-        <div className="mx-auto max-w-5xl px-4">
-          <div className="mb-8 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-              The other path
-            </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight md:text-3xl">
-              No praise tweets yet? Send a form.
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
-              You just tried paste-a-tweet. If you don&apos;t have public praise
-              yet, this is the second way — share a form with your customers,
-              approve their responses, embed the wall.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Path A — recap. Compact card so paste-a-tweet gets
-                credit as a real path without pretending the visitor
-                hasn't seen it. */}
-            <div className="rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-6">
-              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                ✓ Path A — you just saw this
-              </div>
-              <h3 className="text-lg font-semibold">Paste-a-tweet</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Any public X or LinkedIn post URL → live testimonial in 30 seconds. No screenshots, no signup to preview.
-              </p>
-            </div>
-
-            {/* Path B — collect via form (the new information here) */}
-            <div className="rounded-2xl border bg-card p-6">
-              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Path B · For fresh ones
-              </div>
-              <h3 className="text-lg font-semibold">Want to collect new testimonials?</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Share a form link with your customers — text, star ratings, and video (1 free, unlimited on Pro).
-              </p>
-              <ol className="mt-5 space-y-3">
-                <PathStep number={1}>Share your collection form URL, QR code, or embed</PathStep>
-                <PathStep number={2}>Customers submit — lands in your inbox for review</PathStep>
-                <PathStep number={3}>Approve — it&apos;s live on your wall</PathStep>
-              </ol>
-            </div>
-          </div>
-
-          {/* Convergence line — both paths end at the same wall */}
-          <div className="mt-6 flex items-center justify-center">
-            <div className="rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-xs font-medium text-primary">
-              ↓ Both end at your Wall of Love — one URL, one embed, one library ↓
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Animated demo — shows the form → approve → widget path so both
-          intake flows get one visual each (tweet-import above, form here). */}
-      <section className="py-16">
-        <div className="mx-auto max-w-7xl px-4">
-          <p className="mx-auto mb-6 max-w-2xl text-center text-sm text-muted-foreground">
-            That was paste-a-tweet. Here&apos;s the form path — click through,
-            it&apos;s live.
-          </p>
-          <AnimatedDemo />
-        </div>
-      </section>
-
-      {/* Video testimonials pitch — sits between the two demos and
-          the wall preview so the reader's mental model expands:
-          text works, forms work, and if you want richer proof
-          there's video. Kept compact so it doesn't dominate. */}
-      <section className="border-y bg-gradient-to-br from-primary/5 via-background to-background py-14">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="grid items-center gap-10 md:grid-cols-2">
+          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
             <div>
-              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                1 free · Video
-              </div>
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                Prefer video over text?
-              </h2>
-              <p className="mt-3 text-base text-muted-foreground">
-                Upload short customer videos or record them from your
-                phone. Video testimonials convert around 2× better than
-                text alone — nothing beats seeing a real customer say
-                real words.
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                Everything inside Testimoni
               </p>
-              <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>MP4 or MOV up to 50MB, played in a modal on your wall</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>Works the same on the hosted wall and the embed widget</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>1 free video on every plan — Pro unlocks unlimited</span>
-                </li>
-              </ul>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <TrackedLink cta="video_section_pricing" surface="home" href="/pricing">
-                  <Button variant="outline">
-                    See pricing <ArrowRight className="ml-1.5 h-4 w-4" />
-                  </Button>
-                </TrackedLink>
-              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                The full flow, every intake path, every layout, every AI feature.
+              </p>
             </div>
-
-            {/* Mockup video testimonial card — thumbnail placeholder
-                with a play overlay + customer meta below. No real
-                video (we don't want a 5MB payload on the landing
-                page); the visual conveys the concept. */}
-            <div className="mx-auto w-full max-w-md">
-              <div className="rounded-2xl border bg-background p-4 shadow-sm">
-                <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-slate-800 to-slate-900">
-                  <div className="absolute right-3 top-3 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-                    Video
-                  </div>
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg">
-                    <Play className="ml-0.5 h-6 w-6 fill-black text-black" />
-                  </div>
-                </div>
-                <div className="mt-4 flex gap-0.5">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <div className="mt-3 flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">
-                    M
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">Marcus Johnson</p>
-                    <p className="text-xs text-muted-foreground">
-                      Course creator · 45s video
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                Sample video testimonial card
-              </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
+              <Link href="/features#how-it-works" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
+                How it works
+              </Link>
+              <Link href="/features#collect" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
+                Intake paths
+              </Link>
+              <Link href="/features#video" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
+                Video
+              </Link>
+              <Link href="/features#features" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
+                All features
+              </Link>
+              <TrackedLink cta="features_band_see_all" surface="home" href="/features" className="ml-1 inline-flex items-center gap-1 text-primary font-semibold hover:underline">
+                See all <ArrowRight className="h-3 w-3" />
+              </TrackedLink>
             </div>
           </div>
         </div>
@@ -550,393 +395,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Free tools strip — moved down from just after paste-a-tweet
-          to here (after all four product demos: paste-a-tweet, form
-          path, video pitch, example wall). Reason: the tools compete
-          with the main product story if surfaced too early; placing
-          them after the visitor has SEEN what the product does frames
-          them as a nice-to-have bonus rather than a distraction.
-          Still above Features/Pricing so scanners find them. */}
-      <section className="border-b bg-background py-6">
-        <div className="mx-auto max-w-5xl px-4">
-          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
-            <p className="text-sm text-muted-foreground">
-              <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-primary">
-                Also free
-              </span>
-              — 6 tools no signup required:
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <TrackedLink
-                cta="tools_strip_card"
-                surface="home"
-                href="/tools/testimonial-card"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                🖼️ Card generator
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_finder"
-                surface="home"
-                href="/tools/praise-tweet-finder"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                🔎 Praise tweet finder
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_writer"
-                surface="home"
-                href="/tools/testimonial-writer"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                ✍️ Testimonial writer
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_ask"
-                surface="home"
-                href="/tools/ask-templates"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                💬 Ask templates
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_linkedin"
-                surface="home"
-                href="/tools/linkedin-recommendation"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                💼 LinkedIn recommendation
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_badge"
-                surface="home"
-                href="/tools/star-badge"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                ⭐ Star badge
-              </TrackedLink>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="border-t bg-muted/30 py-20">
-        <div className="mx-auto max-w-7xl px-4">
-          <h2 className="text-center text-3xl font-bold">
-            Everything you need for social proof
-          </h2>
-          <p className="mt-4 text-center text-muted-foreground">
-            From collection to display, we handle the entire testimonial workflow.
-          </p>
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                icon: MessageSquare,
-                title: "Collect Testimonials",
-                description:
-                  "Share a beautiful form with customers. Collect text, video, and star ratings effortlessly.",
-              },
-              {
-                icon: Layout,
-                title: "Wall of Love Layouts",
-                description:
-                  "Grid, masonry, carousel, marquee — choose the perfect layout for your brand.",
-              },
-              {
-                icon: Code,
-                title: "Easy Embed",
-                description:
-                  "Drop a single script tag on your site. Works with any website or framework.",
-              },
-              {
-                icon: Zap,
-                title: "Lightning Fast",
-                description:
-                  "Under 10KB widget with CDN caching. Zero impact on your page load speed.",
-              },
-              {
-                icon: Shield,
-                title: "Approve & Curate",
-                description:
-                  "Review submissions before they go live. Full control over what gets displayed.",
-              },
-              {
-                icon: Star,
-                title: "Paste-a-tweet import",
-                description:
-                  "Turn a public X or LinkedIn post into an approved testimonial by pasting the URL. Author and text pulled automatically; you edit the rating if you want.",
-              },
-              {
-                icon: Zap,
-                title: "Screenshot → testimonial (AI)",
-                description:
-                  "Drop a screenshot of any praise — DM, tweet, Slack, WhatsApp, email, App Store review — and Claude Vision extracts the quote, author, and source. Free plan: any of your 10 testimonials can be a screenshot. Pro: batch upload multiple at once.",
-              },
-              {
-                icon: Play,
-                title: "Video testimonials",
-                description:
-                  "1 free video on every plan — upload MP4 or MOV up to 50MB. Plays inline on your hosted wall + embedded widget. Pro unlocks unlimited. Video testimonials convert ~2× better than text.",
-              },
-              {
-                icon: MonitorSmartphone,
-                title: "Public Wall of Love URL",
-                description:
-                  "Every workspace gets a shareable wall URL — testimoni.io/w/… — public, no signup needed. Drop it in bios, DMs, or a QR code on your packaging.",
-              },
-              {
-                icon: Share2,
-                title: "Ready-to-share templates",
-                description:
-                  "Copy-paste WhatsApp, DM, and email asks for customers, plus a downloadable QR code for packaging or receipts. Filling your wall stops being a &ldquo;what do I even say?&rdquo; problem.",
-              },
-            ].map((feature) => (
-              <div key={feature.title} className="rounded-lg border bg-card p-6">
-                <feature.icon className="h-8 w-8 text-primary" />
-                <h3 className="mt-4 text-lg font-semibold">{feature.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-10 text-center text-sm">
-            <TrackedLink
-              cta="features_grid_see_all"
-              surface="home"
-              href="/features"
-              className="font-medium text-primary hover:underline"
-            >
-              See all features and details →
-            </TrackedLink>
-          </p>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4">
-          <h2 className="text-center text-3xl font-bold">
-            Get started in 3 steps
-          </h2>
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
-            {[
-              {
-                step: "1",
-                title: "Share a collection form",
-                description: "We create your first form on signup. Share the link, embed a floating button, or drop a QR code on your packaging.",
-              },
-              {
-                step: "2",
-                title: "Approve in one click",
-                description: "Review each submission in your inbox. Approve — and it&apos;s instantly on your wall. No extra steps.",
-              },
-              {
-                step: "3",
-                title: "Share or embed the wall",
-                description: "Every workspace gets a hosted Wall of Love URL. Paste it in your bio, or copy one line of code to embed anywhere.",
-              },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-                  {item.step}
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: item.description }} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why us — differentiators vs Senja / Testimonial.to */}
-      <section className="border-t py-20">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="text-center">
-            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs font-medium">
-              <Shield className="h-3 w-3" />
-              Honest comparison
-            </div>
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Why Testimoni over other tools?
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              We&apos;re new. Senja and Testimonial.to are mature. Here&apos;s
-              the honest set of trade-offs that made building this worth it.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {/* Wedge — the ONE feature nobody else leads with. Kept
-                first so the reader locks in the differentiator
-                before the pricing/pos tiles below. */}
-            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
-              <div className="text-3xl">📋</div>
-              <h3 className="mt-3 text-lg font-bold">
-                Paste a tweet, done in 30s
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                URL in, live testimonial out — no screenshots, no copy-paste.
-                Senja and Testimonial.to make you build a form and email 20
-                customers before you have anything to show.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
-              <div className="text-3xl">🎥</div>
-              <h3 className="mt-3 text-lg font-bold">
-                Video on the free plan
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                1 free video testimonial per workspace, unlimited on Pro.
-                Competitors gate video behind their $50+ plans — we
-                include it in $0.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
-              <div className="text-3xl">🌐</div>
-              <h3 className="mt-3 text-lg font-bold">
-                Free wall URL + share tools
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Every workspace gets a public Wall of Love URL you can drop
-                in your bio day one. Plus ready-to-send WhatsApp / DM / email
-                templates and a QR code for packaging. All on Free.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
-              <div className="text-3xl">💸</div>
-              <h3 className="mt-3 text-lg font-bold">
-                $9 Pro · You email, I ship
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Half of Senja, one-fifth of Testimonial.to. Native ₹499 in
-                India — no forex middleman. Every support email lands with
-                me directly and ships as code within days, not quarters.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm">
-            <span className="text-muted-foreground">Full comparisons →</span>
-            <TrackedLink
-              cta="vs_senja"
-              surface="home"
-              href="/vs/senja"
-              className="rounded-full border px-3 py-1 font-medium text-primary hover:bg-primary/5"
-            >
-              vs Senja
-            </TrackedLink>
-            <TrackedLink
-              cta="vs_testimonial_to"
-              surface="home"
-              href="/vs/testimonial-to"
-              className="rounded-full border px-3 py-1 font-medium text-primary hover:bg-primary/5"
-            >
-              vs Testimonial.to
-            </TrackedLink>
-          </div>
-        </div>
-      </section>
-
-      {/* Review-platforms band — announces the newly-Free auto-import
-          from App Store / Play Store / Chrome Web Store / Product
-          Hunt. Sits above the AI features so the story reads
-          intake-first ("look at all the places we can pull praise
-          from") before value-add ("and here's what Pro adds on
-          top"). */}
-      <section className="border-t bg-gradient-to-b from-background via-primary/[0.02] to-background py-14">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="flex flex-col items-center gap-2 text-center">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-              <Sparkles className="h-3 w-3" />
-              Now free
-            </div>
-            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-              Auto-import from every review platform.
-            </h2>
-            <p className="mt-3 max-w-2xl text-muted-foreground">
-              Paste an App Store, Play Store, Chrome Web Store, or Product
-              Hunt URL. We pull the reviews, you approve, they land on your
-              Wall of Love — all on the Free plan.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-3 md:grid-cols-3 lg:grid-cols-5">
-            {[
-              {
-                name: "App Store",
-                logoBg: "bg-blue-500",
-                logoLetter: "A",
-                tagline: "iOS + macOS reviews",
-              },
-              {
-                name: "Play Store",
-                logoBg: "bg-emerald-500",
-                logoLetter: "P",
-                tagline: "Android apps",
-              },
-              {
-                name: "Chrome Web Store",
-                logoBg: "bg-yellow-500",
-                logoLetter: "C",
-                tagline: "Extension reviews",
-              },
-              {
-                name: "Product Hunt",
-                logoBg: "bg-orange-500",
-                logoLetter: "P",
-                tagline: "Launch reviews",
-              },
-              {
-                name: "Shopify",
-                logoBg: "bg-lime-600",
-                logoLetter: "S",
-                tagline: "Shopify App Store",
-              },
-            ].map((p) => (
-              <div
-                key={p.name}
-                className="flex items-center gap-3 rounded-xl border bg-card p-4 transition hover:border-primary hover:shadow"
-              >
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${p.logoBg} text-lg font-black text-white`}
-                >
-                  {p.logoLetter}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{p.name}</p>
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                    {p.tagline}
-                  </p>
-                </div>
-                <CheckCircle2 className="ml-auto h-4 w-4 shrink-0 text-emerald-500" />
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 flex flex-col items-center gap-2 text-center">
-            <TrackedLink
-              cta="review_sources_band_cta"
-              surface="home"
-              href="/signup?src=review_sources_band"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-            >
-              Start free — no credit card
-              <ArrowRight className="h-4 w-4" />
-            </TrackedLink>
-            <p className="text-xs text-muted-foreground">
-              Free: manual import + 10-testimonial cap. Pro: auto-sync every
-              24h + auto-approve + unlimited.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* New Pro AI features band — sits right before pricing so
           visitors see the upsell hook in the moment they're deciding
           "free or Pro?". Compact by design — three tiles, one CTA.
@@ -1059,6 +517,271 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Review-platforms band — announces the newly-Free auto-import
+          from App Store / Play Store / Chrome Web Store / Product
+          Hunt. Sits above the AI features so the story reads
+          intake-first ("look at all the places we can pull praise
+          from") before value-add ("and here's what Pro adds on
+          top"). */}
+      <section className="border-t bg-gradient-to-b from-background via-primary/[0.02] to-background py-14">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+              <Sparkles className="h-3 w-3" />
+              Now free
+            </div>
+            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+              Auto-import from every review platform.
+            </h2>
+            <p className="mt-3 max-w-2xl text-muted-foreground">
+              Paste an App Store, Play Store, Chrome Web Store, or Product
+              Hunt URL. We pull the reviews, you approve, they land on your
+              Wall of Love — all on the Free plan.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-3 md:grid-cols-3 lg:grid-cols-5">
+            {[
+              {
+                name: "App Store",
+                logoBg: "bg-blue-500",
+                logoLetter: "A",
+                tagline: "iOS + macOS reviews",
+              },
+              {
+                name: "Play Store",
+                logoBg: "bg-emerald-500",
+                logoLetter: "P",
+                tagline: "Android apps",
+              },
+              {
+                name: "Chrome Web Store",
+                logoBg: "bg-yellow-500",
+                logoLetter: "C",
+                tagline: "Extension reviews",
+              },
+              {
+                name: "Product Hunt",
+                logoBg: "bg-orange-500",
+                logoLetter: "P",
+                tagline: "Launch reviews",
+              },
+              {
+                name: "Shopify",
+                logoBg: "bg-lime-600",
+                logoLetter: "S",
+                tagline: "Shopify App Store",
+              },
+            ].map((p) => (
+              <div
+                key={p.name}
+                className="flex items-center gap-3 rounded-xl border bg-card p-4 transition hover:border-primary hover:shadow"
+              >
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${p.logoBg} text-lg font-black text-white`}
+                >
+                  {p.logoLetter}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">{p.name}</p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {p.tagline}
+                  </p>
+                </div>
+                <CheckCircle2 className="ml-auto h-4 w-4 shrink-0 text-emerald-500" />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-col items-center gap-2 text-center">
+            <TrackedLink
+              cta="review_sources_band_cta"
+              surface="home"
+              href="/signup?src=review_sources_band"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+            >
+              Start free — no credit card
+              <ArrowRight className="h-4 w-4" />
+            </TrackedLink>
+            <p className="text-xs text-muted-foreground">
+              Free: manual import + 10-testimonial cap. Pro: auto-sync every
+              24h + auto-approve + unlimited.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Free tools strip — moved down from just after paste-a-tweet
+          to here (after all four product demos: paste-a-tweet, form
+          path, video pitch, example wall). Reason: the tools compete
+          with the main product story if surfaced too early; placing
+          them after the visitor has SEEN what the product does frames
+          them as a nice-to-have bonus rather than a distraction.
+          Still above Features/Pricing so scanners find them. */}
+      <section className="border-b bg-background py-6">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
+            <p className="text-sm text-muted-foreground">
+              <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-primary">
+                Also free
+              </span>
+              — 6 tools no signup required:
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <TrackedLink
+                cta="tools_strip_card"
+                surface="home"
+                href="/tools/testimonial-card"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                🖼️ Card generator
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_finder"
+                surface="home"
+                href="/tools/praise-tweet-finder"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                🔎 Praise tweet finder
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_writer"
+                surface="home"
+                href="/tools/testimonial-writer"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                ✍️ Testimonial writer
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_ask"
+                surface="home"
+                href="/tools/ask-templates"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                💬 Ask templates
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_linkedin"
+                surface="home"
+                href="/tools/linkedin-recommendation"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                💼 LinkedIn recommendation
+              </TrackedLink>
+              <TrackedLink
+                cta="tools_strip_badge"
+                surface="home"
+                href="/tools/star-badge"
+                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
+              >
+                ⭐ Star badge
+              </TrackedLink>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features grid and "Get started in 3 steps" both moved to
+          /features so home stays focused. Feature grid was 100 lines
+          of card-tile duplication of what /features already carries;
+          the 3-step "how it works" section duplicated the earlier
+          Ask/Collect/Publish strip. The compact "Everything inside
+          Testimoni" band above the Wall of Love preview links visitors
+          who want the depth. */}
+
+      {/* Why us — differentiators vs Senja / Testimonial.to */}
+      <section className="border-t py-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="text-center">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs font-medium">
+              <Shield className="h-3 w-3" />
+              Honest comparison
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Why Testimoni over other tools?
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+              We&apos;re new. Senja and Testimonial.to are mature. Here&apos;s
+              the honest set of trade-offs that made building this worth it.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {/* Wedge — the ONE feature nobody else leads with. Kept
+                first so the reader locks in the differentiator
+                before the pricing/pos tiles below. */}
+            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
+              <div className="text-3xl">📋</div>
+              <h3 className="mt-3 text-lg font-bold">
+                Paste a tweet, done in 30s
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                URL in, live testimonial out — no screenshots, no copy-paste.
+                Senja and Testimonial.to make you build a form and email 20
+                customers before you have anything to show.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
+              <div className="text-3xl">🎥</div>
+              <h3 className="mt-3 text-lg font-bold">
+                Video on the free plan
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                1 free video testimonial per workspace, unlimited on Pro.
+                Competitors gate video behind their $50+ plans — we
+                include it in $0.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
+              <div className="text-3xl">🌐</div>
+              <h3 className="mt-3 text-lg font-bold">
+                Free wall URL + share tools
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Every workspace gets a public Wall of Love URL you can drop
+                in your bio day one. Plus ready-to-send WhatsApp / DM / email
+                templates and a QR code for packaging. All on Free.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
+              <div className="text-3xl">💸</div>
+              <h3 className="mt-3 text-lg font-bold">
+                $9 Pro · You email, I ship
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Half of Senja, one-fifth of Testimonial.to. Native ₹499 in
+                India — no forex middleman. Every support email lands with
+                me directly and ships as code within days, not quarters.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm">
+            <span className="text-muted-foreground">Full comparisons →</span>
+            <TrackedLink
+              cta="vs_senja"
+              surface="home"
+              href="/vs/senja"
+              className="rounded-full border px-3 py-1 font-medium text-primary hover:bg-primary/5"
+            >
+              vs Senja
+            </TrackedLink>
+            <TrackedLink
+              cta="vs_testimonial_to"
+              surface="home"
+              href="/vs/testimonial-to"
+              className="rounded-full border px-3 py-1 font-medium text-primary hover:bg-primary/5"
+            >
+              vs Testimonial.to
+            </TrackedLink>
+          </div>
+        </div>
+      </section>
+
 
       {/* Pricing Preview */}
       <section className="border-t bg-muted/30 py-20">
@@ -1266,22 +989,6 @@ export default function LandingPage() {
       </footer>
       <StickyMobileCta source="home" />
     </div>
-  );
-}
-
-/**
- * Single step within a "How it works" path column. Numbered circle
- * + body copy in a tight row. Used by both Path A (paste-a-tweet)
- * and Path B (form collection) so both paths render the same shape.
- */
-function PathStep({ number, children }: { number: number; children: React.ReactNode }) {
-  return (
-    <li className="flex items-start gap-3">
-      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
-        {number}
-      </div>
-      <p className="text-sm leading-relaxed text-foreground">{children}</p>
-    </li>
   );
 }
 
