@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getEffectivePlan } from "@/lib/plan";
 import { TrackedLink } from "@/components/tracked-link";
 import { ChangePasswordCard } from "@/components/change-password-card";
+import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import {
   Card,
   CardContent,
@@ -288,9 +289,7 @@ export default async function SettingsPage() {
               </p>
             </div>
             {plan === "FREE" ? (
-              <Button asChild>
-                <TrackedLink cta="settings_upgrade_to_pro" surface="settings" href="/dashboard/settings/billing">Upgrade to Pro</TrackedLink>
-              </Button>
+              <UpgradeProButton surface="settings" />
             ) : (
               <Button variant="outline" asChild>
                 <TrackedLink cta="settings_manage_subscription" surface="settings" href="/dashboard/settings/billing">Manage Subscription</TrackedLink>

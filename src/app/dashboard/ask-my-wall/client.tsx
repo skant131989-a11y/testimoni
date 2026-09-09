@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Copy, Check, Loader2, AlertCircle, Sparkles } from "lucide-react";
 import { track } from "@/lib/analytics";
+import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import type { PlanType } from "@/lib/constants";
 
 type Props = {
@@ -139,8 +140,11 @@ function UpgradeGate() {
         Ask My Wall answers visitor questions using your real customer testimonials — grounded, cited, never made-up. Included in Pro at $9/mo.
       </p>
       <Link href="/pricing" className="mt-4 inline-block">
-        <Button>Upgrade to Pro</Button>
+        <Button variant="link" className="h-auto p-0 text-sm">See what&rsquo;s in Pro →</Button>
       </Link>
+      <div className="mt-4">
+        <UpgradeProButton surface="ask_my_wall_upgrade_card" />
+      </div>
     </div>
   );
 }

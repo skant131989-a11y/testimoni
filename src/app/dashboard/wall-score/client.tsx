@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Gauge, TrendingUp, TrendingDown, Sparkles, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { track } from "@/lib/analytics";
+import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import type { PlanType } from "@/lib/constants";
 
 type Audit = {
@@ -164,8 +165,11 @@ export function WallScoreClient({ initialAudits, totalAudits, plan, workspaceNam
             Pro plan unlocks unlimited audits, a trend graph, and a weekly emailed report so you know if your wall is improving.
           </p>
           <Link href="/pricing" className="mt-4 inline-block">
-            <Button>Upgrade to Pro — $9/mo</Button>
+            <Button variant="link" className="h-auto p-0 text-sm">See what&rsquo;s in Pro →</Button>
           </Link>
+          <div className="mt-4">
+            <UpgradeProButton surface="wall_score_upgrade_card" label="Upgrade to Pro — $9/mo" />
+          </div>
         </div>
       )}
     </div>

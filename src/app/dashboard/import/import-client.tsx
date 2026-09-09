@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1062,19 +1063,13 @@ export default function ImportClient({ isPro }: ImportClientProps) {
                   Delete the existing one to upload a different clip, or
                   upgrade to Pro for unlimited video testimonials.
                 </p>
-                <Button asChild size="sm" className="mt-3">
-                  <Link
-                    href="/dashboard/settings/billing"
-                    onClick={() =>
-                      track("video_upgrade_nudge_click", {
-                        source: "video_tab",
-                        seen: "after_submit",
-                      })
-                    }
-                  >
-                    Upgrade to Pro <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                  </Link>
-                </Button>
+                <div className="mt-3">
+                  <UpgradeProButton
+                    surface="import_video_upgrade_nudge"
+                    size="sm"
+                    label={<>Upgrade to Pro <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></>}
+                  />
+                </div>
               </div>
             )}
 

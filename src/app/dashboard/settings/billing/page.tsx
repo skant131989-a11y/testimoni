@@ -29,23 +29,16 @@ interface Usage {
   widgets: number;
 }
 
-/** Minimal window.Razorpay shape — the SDK is loaded via <Script>. */
+/** Minimal window.Razorpay shape — the SDK is loaded via <Script>.
+ *  Shared declaration in src/lib/razorpay-window.ts so this page
+ *  and <UpgradeProButton> agree on the type. */
 declare global {
   interface Window {
-    Razorpay?: new (opts: RazorpayOptions) => { open: () => void };
+    Razorpay?: new (opts: import("@/lib/razorpay-window").RazorpayCheckoutOptions) => { open: () => void };
   }
 }
 
-interface RazorpayOptions {
-  key: string;
-  subscription_id: string;
-  name: string;
-  description?: string;
-  prefill?: { email?: string; name?: string };
-  theme?: { color?: string };
-  handler?: (response: { razorpay_payment_id: string }) => void;
-  modal?: { ondismiss?: () => void };
-}
+type RazorpayOptions = import("@/lib/razorpay-window").RazorpayCheckoutOptions;
 
 export default function BillingPage() {
   const { currency, proMonthlyFormatted } = usePricing();

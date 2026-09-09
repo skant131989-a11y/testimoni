@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import type { PlanType } from "@/lib/constants";
 import { QuoteOpen } from "@/components/icons/quote-open";
 import { track } from "@/lib/analytics";
@@ -250,7 +251,8 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
           })}
         </nav>
 
-        {/* Upgrade banner for free plan */}
+        {/* Upgrade banner for free plan — opens Razorpay directly
+            in one click. No intermediate billing page. */}
         {plan === "FREE" && !collapsed && (
           <div className="m-3 rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 p-4">
             <div className="flex items-center gap-2">
@@ -260,9 +262,12 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
             <p className="mt-1 text-xs text-muted-foreground">
               Unlock unlimited testimonials, widgets, and more.
             </p>
-            <Button size="sm" className="mt-3 w-full" asChild>
-              <Link href="/dashboard/settings#billing">Upgrade</Link>
-            </Button>
+            <UpgradeProButton
+              surface="sidebar_upgrade_banner"
+              size="sm"
+              className="mt-3 w-full"
+              label="Upgrade"
+            />
           </div>
         )}
 

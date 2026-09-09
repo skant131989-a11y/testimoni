@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -182,12 +183,13 @@ export default function WidgetsPage() {
               <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3">
                 <p className="text-sm text-destructive">{createError}</p>
                 {createError.toLowerCase().includes("limit") && (
-                  <a
-                    href="/dashboard/settings/billing"
-                    className="mt-1 inline-block text-xs font-semibold text-destructive underline"
-                  >
-                    Upgrade to Pro →
-                  </a>
+                  <div className="mt-2">
+                    <UpgradeProButton
+                      surface="widgets_limit_error"
+                      size="sm"
+                      label="Upgrade to Pro →"
+                    />
+                  </div>
                 )}
               </div>
             )}

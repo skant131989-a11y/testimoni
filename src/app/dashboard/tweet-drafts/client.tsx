@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { track } from "@/lib/analytics";
+import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import type { PlanType } from "@/lib/constants";
 
 type Testimonial = {
@@ -261,8 +262,11 @@ export function TweetDraftsClient({ testimonials, plan, socialAccounts, autoPost
             Free plan: 5 tweet drafts / month. Pro plan: unlimited drafts, one click to X or LinkedIn compose.
           </p>
           <Link href="/pricing" className="mt-4 inline-block">
-            <Button>Upgrade to Pro — $9/mo</Button>
+            <Button variant="link" className="h-auto p-0 text-sm">See what&rsquo;s in Pro →</Button>
           </Link>
+          <div className="mt-4">
+            <UpgradeProButton surface="tweet_drafts_upgrade_card" label="Upgrade to Pro — $9/mo" />
+          </div>
         </div>
       )}
     </div>

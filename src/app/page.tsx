@@ -42,6 +42,7 @@ import { PageLoadPerf } from "@/components/page-load-perf";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { LiveSignupTicker } from "@/components/live-signup-ticker";
 import { LaunchBar } from "@/components/launch-bar";
+import { PricingCta } from "@/components/pricing/pricing-cta";
 import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
 
 export default function LandingPage() {
@@ -1080,9 +1081,9 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <TrackedLink cta="pricing_preview_free" surface="home" href="/signup" className="mt-6 block">
-                <Button variant="outline" className="w-full">Get Started</Button>
-              </TrackedLink>
+              {/* Account-aware CTA — Free card sends anon to /signup,
+                  logged-in users to /dashboard. Shared with /pricing. */}
+              <PricingCta plan="free" />
             </div>
 
             {/* Pro — utility tier */}
@@ -1105,9 +1106,10 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <TrackedLink cta="pricing_preview_pro" surface="home" href="/signup" className="mt-6 block">
-                <Button className="w-full">Start Free, Upgrade Anytime</Button>
-              </TrackedLink>
+              {/* Account-aware CTA: anon → signup; Free → 1-click
+                  Razorpay; Pro → manage subscription. Shared with the
+                  /pricing page so the two surfaces stay in sync. */}
+              <PricingCta plan="pro" />
             </div>
 
             {/* Pro AI — intelligence tier. Feature-flagged off until
