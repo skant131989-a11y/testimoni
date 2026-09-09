@@ -6,27 +6,21 @@ export const contentType = "image/png";
 /**
  * OpenGraph card for testimoni.io.
  *
- * v12 — Three flows on one card.
+ * v13 — Hero-mirror card.
  *
- * Prior versions (v10, v11) leaned on the two intake paths — URL
- * paste and screenshot — as the whole story. That framing misses
- * the new hook: after you've filled the wall, the wall now TALKS
- * BACK. Ask My Wall is Testimoni's clearest differentiator against
- * generic testimonial widgets, and the OG card is the surface
- * that carries the pitch across every share, DM preview, and
- * SERP snippet — so the differentiator belongs here.
+ * v12 leaned on three columns of intake demos. It worked but
+ * competed with itself — three flows meant no single message
+ * anchored the image. The site's new hero ("Any praise becomes
+ * a Wall of Love. Now the wall talks back.") is the brand-defining
+ * line and belongs on the card. This version puts that line at
+ * the center of the composition, with a single supporting product
+ * mock on the right so the "here's the product" signal survives.
  *
- * Story: any kind of praise → one wall → the wall answers your
- * visitors' questions using real customers, cited by name.
- *
- * Layout:
- *   Top strip     — wordmark + "JUST SHIPPED · PRO $9/mo" chip
- *   Center        — 2-line headline
- *   Body          — three equal columns:
- *     [Paste URL]  → tiny "AI ↓" arrow → testimonial card
- *     [Screenshot] → tiny "AI ↓" arrow → testimonial card
- *     [Chat panel] → tiny "AI ↓" arrow → citation chip
- *   Footer strip  — supported sources + testimoni.io wordmark
+ * Layout — 1200×630:
+ *   Top strip     — wordmark + "NEW · Ask My Wall" chip
+ *   Left column   — eyebrow chip, headline, subhead, trust chips
+ *   Right column  — one supporting product mock (mini testimonial
+ *                   card + Ask My Wall citation chip)
  *
  * Satori quirks that trip you up:
  *   - Every div with multiple children needs display: flex.
@@ -42,7 +36,7 @@ function Sparkle({ size: sz = 12, color = "#5b21b6" }: { size?: number; color?: 
   );
 }
 
-function StarRow({ size: sz = 10 }: { size?: number }) {
+function StarRow({ size: sz = 12 }: { size?: number }) {
   return (
     <div style={{ display: "flex", gap: 2 }}>
       {[0, 1, 2, 3, 4].map((i) => (
@@ -57,347 +51,29 @@ function StarRow({ size: sz = 10 }: { size?: number }) {
   );
 }
 
-function AiArrow() {
+function TrustChip({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
         gap: 5,
-        padding: "3px 10px",
-        borderRadius: 999,
-        background: "white",
-        border: "1.5px solid #5b21b6",
-        fontSize: 11,
-        fontWeight: 900,
-        color: "#5b21b6",
-        alignSelf: "center",
+        fontSize: 12,
+        color: "#4c1d95",
+        fontWeight: 600,
       }}
     >
-      <Sparkle size={10} color="#5b21b6" /> AI ↓
-    </div>
-  );
-}
-
-function TestimonialCard({
-  quote,
-  author,
-  handle,
-  authorInitial,
-  authorColor,
-  sourceLabel,
-}: {
-  quote: string;
-  author: string;
-  handle: string;
-  authorInitial: string;
-  authorColor: string;
-  sourceLabel: string;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        padding: 12,
-        borderRadius: 12,
-        background: "white",
-        border: "2px solid rgba(91, 33, 182, 0.28)",
-        boxShadow: "0 8px 22px rgba(76, 29, 149, 0.16)",
-        gap: 6,
-      }}
-    >
-      <StarRow size={10} />
-      <div style={{ display: "flex", fontSize: 12, lineHeight: 1.35, color: "#0f172a" }}>
-        &ldquo;{quote}&rdquo;
-      </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 7,
-          paddingTop: 6,
-          borderTop: "1px solid #e5e7eb",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 22,
-            height: 22,
-            borderRadius: 11,
-            background: authorColor,
-            color: "white",
-            fontSize: 11,
-            fontWeight: 800,
-          }}
-        >
-          {authorInitial}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-          <div style={{ display: "flex", fontSize: 10, fontWeight: 700, color: "#1a1a1a" }}>
-            {author}
-          </div>
-          <div style={{ display: "flex", fontSize: 9, color: "#6b7280" }}>{handle}</div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            padding: "2px 6px",
-            borderRadius: 999,
-            background: "#f3f4f6",
-            fontSize: 9,
-            fontWeight: 700,
-            color: "#4b5563",
-          }}
-        >
-          {sourceLabel}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FlowColumn({
-  chip,
-  chipColor,
-  input,
-  output,
-}: {
-  chip: string;
-  chipColor: string;
-  input: React.ReactNode;
-  output: React.ReactNode;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        flex: 1,
-        gap: 8,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 5,
-          padding: "5px 11px",
-          borderRadius: 999,
-          background: chipColor,
-          color: "white",
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: "0.04em",
-        }}
-      >
-        {chip}
-      </div>
-      {input}
-      <AiArrow />
-      {output}
-    </div>
-  );
-}
-
-// Input mock #1 — browser URL bar with an X post URL.
-function UrlInputMock() {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: 6 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "10px 12px",
-          borderRadius: 10,
-          background: "white",
-          border: "1.5px solid rgba(76, 29, 149, 0.25)",
-          boxShadow: "0 4px 14px rgba(29, 78, 216, 0.1)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 20,
-            height: 20,
-            borderRadius: 10,
-            background: "#0f172a",
-            color: "white",
-            fontSize: 13,
-            fontWeight: 900,
-            fontFamily: "Georgia, serif",
-          }}
-        >
-          𝕏
-        </div>
-        <div style={{ display: "flex", fontSize: 11, color: "#1f2937", fontFamily: "monospace" }}>
-          x.com/sarahchen/status/1798…
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Input mock #2 — dark DM screenshot.
-function ScreenshotMock() {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        padding: 12,
-        borderRadius: 10,
-        background: "#0f172a",
-        boxShadow: "0 6px 18px rgba(15, 23, 42, 0.25)",
-        gap: 6,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 5,
-          paddingBottom: 5,
-          borderBottom: "1px solid #1e293b",
-          fontSize: 9,
-          fontWeight: 700,
-          color: "#e2e8f0",
-        }}
-      >
-        WhatsApp · Priya M.
-      </div>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 20,
-            height: 20,
-            borderRadius: 10,
-            background: "#ea580c",
-            color: "white",
-            fontSize: 10,
-            fontWeight: 800,
-          }}
-        >
-          P
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flex: 1,
-            padding: "6px 9px",
-            borderRadius: 10,
-            background: "#059669",
-            color: "white",
-            fontSize: 11,
-            lineHeight: 1.3,
-          }}
-        >
-          Set up my testimonials wall in 5 min yesterday. Wild.
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Input mock #3 — Ask My Wall chat panel.
-function ChatMock() {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        borderRadius: 12,
-        background: "white",
-        border: "1.5px solid rgba(76, 29, 149, 0.25)",
-        overflow: "hidden",
-        boxShadow: "0 6px 18px rgba(76, 29, 149, 0.18)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "6px 10px",
-          background: "#5b21b6",
-          color: "white",
-        }}
-      >
-        <div style={{ display: "flex", fontSize: 10, fontWeight: 700 }}>Ask about our customers</div>
-        <div style={{ display: "flex", fontSize: 9, opacity: 0.75 }}>Live</div>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", padding: 10, gap: 6, background: "#fafafa" }}>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <div
-            style={{
-              display: "flex",
-              padding: "5px 9px",
-              borderRadius: 10,
-              background: "#5b21b6",
-              color: "white",
-              fontSize: 10,
-              fontWeight: 600,
-              maxWidth: "85%",
-            }}
-          >
-            Onboarding time?
-          </div>
-        </div>
-        <div style={{ display: "flex", justifyContent: "flex-start" }}>
-          <div
-            style={{
-              display: "flex",
-              padding: "5px 9px",
-              borderRadius: 10,
-              background: "#f4f4f5",
-              color: "#18181b",
-              fontSize: 10,
-              fontWeight: 500,
-              lineHeight: 1.3,
-              maxWidth: "88%",
-            }}
-          >
-            Rachel at HubSpot said 4 hours — she&rsquo;d expected a full week.
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CitationChip() {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "8px 12px",
-        borderRadius: 10,
-        background: "white",
-        border: "2px solid #5b21b6",
-        boxShadow: "0 8px 22px rgba(76, 29, 149, 0.16)",
-        width: "100%",
-      }}
-    >
-      <div style={{ display: "flex", fontSize: 11, color: "#71717a", fontWeight: 600 }}>Cited:</div>
-      <div style={{ display: "flex", fontSize: 12, color: "#5b21b6", fontWeight: 800 }}>
-        — Rachel Kim, HubSpot
-      </div>
+      <svg width={12} height={12} viewBox="0 0 24 24">
+        <path
+          d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"
+          fill="none"
+          stroke="#4c1d95"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {children}
     </div>
   );
 }
@@ -411,13 +87,12 @@ export default function OpenGraphImage() {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "26px 48px 24px 48px",
-          background:
-            "linear-gradient(135deg, #f5f3ff 0%, #ddd6fe 55%, #a78bfa 100%)",
+          padding: "30px 48px 26px 48px",
+          background: "linear-gradient(135deg, #f5f3ff 0%, #ddd6fe 55%, #a78bfa 100%)",
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
-        {/* Top row */}
+        {/* Top row — wordmark + Ask My Wall chip */}
         <div
           style={{
             display: "flex",
@@ -460,135 +135,312 @@ export default function OpenGraphImage() {
               letterSpacing: "0.04em",
             }}
           >
-            <Sparkle size={11} color="#fbbf24" /> JUST SHIPPED · PRO $9/mo
+            <Sparkle size={11} color="#fbbf24" /> NEW · ASK MY WALL
           </div>
         </div>
 
-        {/* Headline */}
+        {/* Body — split composition */}
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            marginTop: 10,
-            gap: 2,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              fontSize: 40,
-              fontWeight: 900,
-              color: "#1a1a1a",
-              lineHeight: 1.02,
-              letterSpacing: "-0.03em",
-              textAlign: "center",
-            }}
-          >
-            Any praise becomes a Wall of Love —
-          </div>
-          <div
-            style={{
-              display: "flex",
-              fontSize: 40,
-              fontWeight: 900,
-              color: "#5b21b6",
-              lineHeight: 1.02,
-              letterSpacing: "-0.03em",
-              textAlign: "center",
-            }}
-          >
-            and now it talks back.
-          </div>
-        </div>
-
-        {/* Three-column flow */}
-        <div
-          style={{
-            display: "flex",
-            gap: 22,
-            marginTop: 16,
+            gap: 32,
+            marginTop: 22,
             flex: 1,
-            paddingLeft: 4,
-            paddingRight: 4,
           }}
         >
-          <FlowColumn
-            chip="PASTE-A-TWEET"
-            chipColor="#1d4ed8"
-            input={<UrlInputMock />}
-            output={
-              <TestimonialCard
-                quote="Turned a mess of praise tweets into a Wall of Love in 30 seconds."
-                author="Sarah Chen"
-                handle="@sarahchen"
-                authorInitial="S"
-                authorColor="#059669"
-                sourceLabel="Twitter"
-              />
-            }
-          />
-
-          <FlowColumn
-            chip="SCREENSHOT AI"
-            chipColor="#059669"
-            input={<ScreenshotMock />}
-            output={
-              <TestimonialCard
-                quote="Set up my testimonials wall in about 5 minutes yesterday. Wild."
-                author="Priya M."
-                handle="WhatsApp DM"
-                authorInitial="P"
-                authorColor="#ea580c"
-                sourceLabel="WhatsApp"
-              />
-            }
-          />
-
-          <FlowColumn
-            chip="ASK MY WALL · NEW"
-            chipColor="#5b21b6"
-            input={<ChatMock />}
-            output={<CitationChip />}
-          />
-        </div>
-
-        {/* Footer */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginTop: 10,
-          }}
-        >
+          {/* Left column — pitch */}
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: 10,
-              fontSize: 12,
-              fontWeight: 600,
-              color: "#4c1d95",
+              flexDirection: "column",
+              width: 700,
+              justifyContent: "space-between",
             }}
           >
-            <span>Import from</span>
-            <span>Twitter</span>
-            <span>·</span>
-            <span>LinkedIn</span>
-            <span>·</span>
-            <span>Reddit</span>
-            <span>·</span>
-            <span>HN</span>
-            <span>·</span>
-            <span>Product Hunt</span>
-            <span>·</span>
-            <span>DMs</span>
-            <span>·</span>
-            <span>Slack</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* Eyebrow chip */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "5px 11px",
+                  borderRadius: 999,
+                  background: "white",
+                  border: "1.5px solid rgba(76, 29, 149, 0.4)",
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: "#4c1d95",
+                  letterSpacing: "0.05em",
+                  alignSelf: "flex-start",
+                }}
+              >
+                <Sparkle size={10} color="#5b21b6" /> NOW FREE — APP STORE, PLAY, SHOPIFY + 5 MORE
+              </div>
+
+              {/* Headline — two-line, second line in primary purple */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 52,
+                    fontWeight: 900,
+                    color: "#1a1a1a",
+                    lineHeight: 1.02,
+                    letterSpacing: "-0.03em",
+                  }}
+                >
+                  Any praise becomes a
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 52,
+                    fontWeight: 900,
+                    color: "#1a1a1a",
+                    lineHeight: 1.02,
+                    letterSpacing: "-0.03em",
+                  }}
+                >
+                  Wall of Love.
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 52,
+                    fontWeight: 900,
+                    color: "#5b21b6",
+                    lineHeight: 1.02,
+                    letterSpacing: "-0.03em",
+                    marginTop: 6,
+                  }}
+                >
+                  Now the wall talks back.
+                </div>
+              </div>
+
+              {/* Subhead */}
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: 16,
+                  color: "#3f3f46",
+                  lineHeight: 1.4,
+                  maxWidth: 620,
+                  marginTop: 6,
+                }}
+              >
+                Paste a tweet, drop a screenshot, or import from App Store,
+                Play, Chrome, Product Hunt, Shopify. An AI chatbot answers
+                visitors using real customer quotes — cited by name.
+              </div>
+            </div>
+
+            {/* Trust chips + domain */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <TrustChip>Free forever</TrustChip>
+                <div style={{ display: "flex", color: "#a78bfa" }}>·</div>
+                <TrustChip>No credit card</TrustChip>
+                <div style={{ display: "flex", color: "#a78bfa" }}>·</div>
+                <TrustChip>Live in ~30s</TrustChip>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: "#4c1d95",
+                }}
+              >
+                testimoni.io
+              </div>
+            </div>
           </div>
-          <div style={{ display: "flex", fontSize: 18, fontWeight: 800, color: "#4c1d95" }}>
-            testimoni.io
+
+          {/* Right column — mini product mock (testimonial + cited chip) */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              gap: 12,
+              justifyContent: "center",
+            }}
+          >
+            {/* Testimonial card */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                padding: 16,
+                borderRadius: 14,
+                background: "white",
+                border: "2px solid rgba(91, 33, 182, 0.28)",
+                boxShadow: "0 10px 26px rgba(76, 29, 149, 0.18)",
+                gap: 10,
+              }}
+            >
+              <StarRow size={11} />
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: 14,
+                  lineHeight: 1.35,
+                  color: "#0f172a",
+                }}
+              >
+                &ldquo;Cut my onboarding docs from 3 days to 4 hours. Team actually reads them now.&rdquo;
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  paddingTop: 8,
+                  borderTop: "1px solid #e5e7eb",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 26,
+                    height: 26,
+                    borderRadius: 13,
+                    background: "#059669",
+                    color: "white",
+                    fontSize: 12,
+                    fontWeight: 800,
+                  }}
+                >
+                  R
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                  <div style={{ display: "flex", fontSize: 11, fontWeight: 700, color: "#1a1a1a" }}>
+                    Rachel Kim
+                  </div>
+                  <div style={{ display: "flex", fontSize: 10, color: "#6b7280" }}>
+                    VP Ops · via Twitter
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    padding: "3px 7px",
+                    borderRadius: 999,
+                    background: "#f3f4f6",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: "#4b5563",
+                  }}
+                >
+                  Twitter
+                </div>
+              </div>
+            </div>
+
+            {/* Ask My Wall chat exchange — the wall "talking back" */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                borderRadius: 14,
+                background: "white",
+                border: "1.5px solid rgba(76, 29, 149, 0.25)",
+                overflow: "hidden",
+                boxShadow: "0 6px 18px rgba(76, 29, 149, 0.14)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "6px 12px",
+                  background: "#5b21b6",
+                  color: "white",
+                }}
+              >
+                <div style={{ display: "flex", fontSize: 11, fontWeight: 700 }}>Ask My Wall</div>
+                <div style={{ display: "flex", fontSize: 9, opacity: 0.85 }}>Live</div>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  padding: 10,
+                  gap: 6,
+                  background: "#fafafa",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      padding: "5px 9px",
+                      borderRadius: 10,
+                      background: "#5b21b6",
+                      color: "white",
+                      fontSize: 10,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Onboarding time?
+                  </div>
+                </div>
+                <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      padding: "5px 9px",
+                      borderRadius: 10,
+                      background: "#f4f4f5",
+                      color: "#18181b",
+                      fontSize: 10,
+                      fontWeight: 500,
+                      lineHeight: 1.3,
+                      maxWidth: "85%",
+                    }}
+                  >
+                    Rachel at HubSpot said 4 hours.
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignSelf: "flex-start" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                      padding: "3px 8px",
+                      borderRadius: 6,
+                      background: "white",
+                      border: "1px solid #e4e4e7",
+                      fontSize: 9,
+                      color: "#71717a",
+                    }}
+                  >
+                    Cited:&nbsp;
+                    <span style={{ color: "#5b21b6", fontWeight: 800 }}>
+                      — Rachel Kim
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
