@@ -6,36 +6,47 @@ export const contentType = "image/png";
 /**
  * OpenGraph card for testimoni.io.
  *
- * v10 — Both intake paths visible.
+ * v12 — Three flows on one card.
  *
- * The launch story is "any praise becomes a testimonial." The
- * previous card led with the screenshot flow only, hiding the
- * URL-paste path that most visitors already know. This version
- * shows both flows side-by-side as coequal choices:
- *   Left  — paste a tweet URL → testimonial card
- *   Right — drop a screenshot → testimonial card
+ * Prior versions (v10, v11) leaned on the two intake paths — URL
+ * paste and screenshot — as the whole story. That framing misses
+ * the new hook: after you've filled the wall, the wall now TALKS
+ * BACK. Ask My Wall is Testimoni's clearest differentiator against
+ * generic testimonial widgets, and the OG card is the surface
+ * that carries the pitch across every share, DM preview, and
+ * SERP snippet — so the differentiator belongs here.
  *
- * Same visual weight, same output shape. Users scanning a social
- * feed see immediately: "oh, this works with either kind of praise
- * I have lying around."
+ * Story: any kind of praise → one wall → the wall answers your
+ * visitors' questions using real customers, cited by name.
+ *
+ * Layout:
+ *   Top strip     — wordmark + "JUST SHIPPED · PRO $9/mo" chip
+ *   Center        — 2-line headline
+ *   Body          — three equal columns:
+ *     [Paste URL]  → tiny "AI ↓" arrow → testimonial card
+ *     [Screenshot] → tiny "AI ↓" arrow → testimonial card
+ *     [Chat panel] → tiny "AI ↓" arrow → citation chip
+ *   Footer strip  — supported sources + testimoni.io wordmark
  *
  * Satori quirks that trip you up:
  *   - Every div with multiple children needs display: flex.
  *   - No CSS grid, no @font-face.
- *   - Keep type >= 14px for social preview compression.
+ *   - Keep type ≥ 10px so social preview compression stays legible.
  */
 
-function StarRow({ size: sz = 11 }: { size?: number }) {
+function Sparkle({ size: sz = 12, color = "#5b21b6" }: { size?: number; color?: string }) {
+  return (
+    <svg width={sz} height={sz} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2z" fill={color} />
+    </svg>
+  );
+}
+
+function StarRow({ size: sz = 10 }: { size?: number }) {
   return (
     <div style={{ display: "flex", gap: 2 }}>
       {[0, 1, 2, 3, 4].map((i) => (
-        <svg
-          key={i}
-          width={sz}
-          height={sz}
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg key={i} width={sz} height={sz} viewBox="0 0 24 24">
           <path
             d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
             fill="#facc15"
@@ -46,43 +57,121 @@ function StarRow({ size: sz = 11 }: { size?: number }) {
   );
 }
 
-/** Sparkle glyph — for the "AI" chips. */
-function Sparkle({ size: sz = 12, color = "#5b21b6" }: { size?: number; color?: string }) {
+function AiArrow() {
   return (
-    <svg width={sz} height={sz} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2z"
-        fill={color}
-      />
-    </svg>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 5,
+        padding: "3px 10px",
+        borderRadius: 999,
+        background: "white",
+        border: "1.5px solid #5b21b6",
+        fontSize: 11,
+        fontWeight: 900,
+        color: "#5b21b6",
+        alignSelf: "center",
+      }}
+    >
+      <Sparkle size={10} color="#5b21b6" /> AI ↓
+    </div>
   );
 }
 
-/**
- * A single intake-path column: label chip, input mock, arrow, and
- * the extracted testimonial card. Kept as a reusable subcomponent
- * so the two paths share exact visual weight.
- */
+function TestimonialCard({
+  quote,
+  author,
+  handle,
+  authorInitial,
+  authorColor,
+  sourceLabel,
+}: {
+  quote: string;
+  author: string;
+  handle: string;
+  authorInitial: string;
+  authorColor: string;
+  sourceLabel: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        padding: 12,
+        borderRadius: 12,
+        background: "white",
+        border: "2px solid rgba(91, 33, 182, 0.28)",
+        boxShadow: "0 8px 22px rgba(76, 29, 149, 0.16)",
+        gap: 6,
+      }}
+    >
+      <StarRow size={10} />
+      <div style={{ display: "flex", fontSize: 12, lineHeight: 1.35, color: "#0f172a" }}>
+        &ldquo;{quote}&rdquo;
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+          paddingTop: 6,
+          borderTop: "1px solid #e5e7eb",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 22,
+            height: 22,
+            borderRadius: 11,
+            background: authorColor,
+            color: "white",
+            fontSize: 11,
+            fontWeight: 800,
+          }}
+        >
+          {authorInitial}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+          <div style={{ display: "flex", fontSize: 10, fontWeight: 700, color: "#1a1a1a" }}>
+            {author}
+          </div>
+          <div style={{ display: "flex", fontSize: 9, color: "#6b7280" }}>{handle}</div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            padding: "2px 6px",
+            borderRadius: 999,
+            background: "#f3f4f6",
+            fontSize: 9,
+            fontWeight: 700,
+            color: "#4b5563",
+          }}
+        >
+          {sourceLabel}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FlowColumn({
   chip,
   chipColor,
   input,
-  quote,
-  author,
-  handle,
-  sourceLabel,
-  authorInitial,
-  authorColor,
+  output,
 }: {
   chip: string;
   chipColor: string;
   input: React.ReactNode;
-  quote: string;
-  author: string;
-  handle: string;
-  sourceLabel: string;
-  authorInitial: string;
-  authorColor: string;
+  output: React.ReactNode;
 }) {
   return (
     <div
@@ -91,144 +180,36 @@ function FlowColumn({
         flexDirection: "column",
         alignItems: "center",
         flex: 1,
-        gap: 10,
+        gap: 8,
       }}
     >
-      {/* Path label */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
-          padding: "5px 12px",
+          gap: 5,
+          padding: "5px 11px",
           borderRadius: 999,
           background: chipColor,
           color: "white",
-          fontSize: 13,
+          fontSize: 11,
           fontWeight: 800,
-          letterSpacing: "0.02em",
+          letterSpacing: "0.04em",
         }}
       >
         {chip}
       </div>
-
-      {/* Input mock */}
       {input}
-
-      {/* AI arrow */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "3px 10px",
-          borderRadius: 999,
-          background: "white",
-          border: "1.5px solid #5b21b6",
-          fontSize: 12,
-          fontWeight: 900,
-          color: "#5b21b6",
-        }}
-      >
-        <Sparkle size={11} color="#5b21b6" /> AI ↓
-      </div>
-
-      {/* Extracted testimonial card */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          padding: 14,
-          borderRadius: 12,
-          background: "white",
-          border: "2px solid rgba(91, 33, 182, 0.3)",
-          boxShadow: "0 8px 24px rgba(76, 29, 149, 0.16)",
-        }}
-      >
-        <StarRow size={11} />
-        <div
-          style={{
-            display: "flex",
-            fontSize: 13,
-            lineHeight: 1.4,
-            color: "#1f2937",
-            marginTop: 8,
-          }}
-        >
-          &ldquo;{quote}&rdquo;
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginTop: 10,
-            paddingTop: 8,
-            borderTop: "1px solid #e5e7eb",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 24,
-              height: 24,
-              borderRadius: 12,
-              background: authorColor,
-              color: "white",
-              fontSize: 11,
-              fontWeight: 800,
-            }}
-          >
-            {authorInitial}
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-            <div
-              style={{
-                display: "flex",
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#1a1a1a",
-              }}
-            >
-              {author}
-            </div>
-            <div style={{ display: "flex", fontSize: 9, color: "#6b7280" }}>
-              {handle}
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              padding: "2px 6px",
-              borderRadius: 999,
-              background: "#f3f4f6",
-              fontSize: 9,
-              fontWeight: 700,
-              color: "#4b5563",
-            }}
-          >
-            {sourceLabel}
-          </div>
-        </div>
-      </div>
+      <AiArrow />
+      {output}
     </div>
   );
 }
 
-export default function OpenGraphImage() {
-  // Input mock #1 — a browser-style URL bar with an X post URL.
-  const urlInputMock = (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        gap: 8,
-      }}
-    >
+// Input mock #1 — browser URL bar with an X post URL.
+function UrlInputMock() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: 6 }}>
       <div
         style={{
           display: "flex",
@@ -238,6 +219,7 @@ export default function OpenGraphImage() {
           borderRadius: 10,
           background: "white",
           border: "1.5px solid rgba(76, 29, 149, 0.25)",
+          boxShadow: "0 4px 14px rgba(29, 78, 216, 0.1)",
         }}
       >
         <div
@@ -245,48 +227,29 @@ export default function OpenGraphImage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 18,
-            height: 18,
-            borderRadius: 9,
+            width: 20,
+            height: 20,
+            borderRadius: 10,
             background: "#0f172a",
             color: "white",
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: 900,
             fontFamily: "Georgia, serif",
           }}
         >
           𝕏
         </div>
-        <div
-          style={{
-            display: "flex",
-            fontSize: 12,
-            color: "#1f2937",
-            fontFamily: "monospace",
-          }}
-        >
-          x.com/sarahchen/status/1798...
+        <div style={{ display: "flex", fontSize: 11, color: "#1f2937", fontFamily: "monospace" }}>
+          x.com/sarahchen/status/1798…
         </div>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          alignSelf: "center",
-          padding: "3px 10px",
-          borderRadius: 999,
-          background: "#5b21b6",
-          color: "white",
-          fontSize: 11,
-          fontWeight: 800,
-        }}
-      >
-        Import →
       </div>
     </div>
   );
+}
 
-  // Input mock #2 — a dark DM screenshot.
-  const screenshotMock = (
+// Input mock #2 — dark DM screenshot.
+function ScreenshotMock() {
+  return (
     <div
       style={{
         display: "flex",
@@ -295,35 +258,36 @@ export default function OpenGraphImage() {
         padding: 12,
         borderRadius: 10,
         background: "#0f172a",
-        boxShadow: "0 6px 16px rgba(15, 23, 42, 0.25)",
+        boxShadow: "0 6px 18px rgba(15, 23, 42, 0.25)",
+        gap: 6,
       }}
     >
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
-          paddingBottom: 6,
+          gap: 5,
+          paddingBottom: 5,
           borderBottom: "1px solid #1e293b",
-          fontSize: 10,
+          fontSize: 9,
           fontWeight: 700,
           color: "#e2e8f0",
         }}
       >
         WhatsApp · Priya M.
       </div>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 8 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 22,
-            height: 22,
-            borderRadius: 11,
+            width: 20,
+            height: 20,
+            borderRadius: 10,
             background: "#ea580c",
             color: "white",
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 800,
           }}
         >
@@ -333,20 +297,112 @@ export default function OpenGraphImage() {
           style={{
             display: "flex",
             flex: 1,
-            padding: "7px 10px",
-            borderRadius: 12,
+            padding: "6px 9px",
+            borderRadius: 10,
             background: "#059669",
             color: "white",
-            fontSize: 12,
-            lineHeight: 1.35,
+            fontSize: 11,
+            lineHeight: 1.3,
           }}
         >
-          Set up my testimonials wall in about 5 minutes yesterday. Wild.
+          Set up my testimonials wall in 5 min yesterday. Wild.
         </div>
       </div>
     </div>
   );
+}
 
+// Input mock #3 — Ask My Wall chat panel.
+function ChatMock() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        borderRadius: 12,
+        background: "white",
+        border: "1.5px solid rgba(76, 29, 149, 0.25)",
+        overflow: "hidden",
+        boxShadow: "0 6px 18px rgba(76, 29, 149, 0.18)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "6px 10px",
+          background: "#5b21b6",
+          color: "white",
+        }}
+      >
+        <div style={{ display: "flex", fontSize: 10, fontWeight: 700 }}>Ask about our customers</div>
+        <div style={{ display: "flex", fontSize: 9, opacity: 0.75 }}>Live</div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", padding: 10, gap: 6, background: "#fafafa" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <div
+            style={{
+              display: "flex",
+              padding: "5px 9px",
+              borderRadius: 10,
+              background: "#5b21b6",
+              color: "white",
+              fontSize: 10,
+              fontWeight: 600,
+              maxWidth: "85%",
+            }}
+          >
+            Onboarding time?
+          </div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-start" }}>
+          <div
+            style={{
+              display: "flex",
+              padding: "5px 9px",
+              borderRadius: 10,
+              background: "#f4f4f5",
+              color: "#18181b",
+              fontSize: 10,
+              fontWeight: 500,
+              lineHeight: 1.3,
+              maxWidth: "88%",
+            }}
+          >
+            Rachel at HubSpot said 4 hours — she&rsquo;d expected a full week.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CitationChip() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "8px 12px",
+        borderRadius: 10,
+        background: "white",
+        border: "2px solid #5b21b6",
+        boxShadow: "0 8px 22px rgba(76, 29, 149, 0.16)",
+        width: "100%",
+      }}
+    >
+      <div style={{ display: "flex", fontSize: 11, color: "#71717a", fontWeight: 600 }}>Cited:</div>
+      <div style={{ display: "flex", fontSize: 12, color: "#5b21b6", fontWeight: 800 }}>
+        — Rachel Kim, HubSpot
+      </div>
+    </div>
+  );
+}
+
+export default function OpenGraphImage() {
   return new ImageResponse(
     (
       <div
@@ -355,13 +411,13 @@ export default function OpenGraphImage() {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          padding: "34px 56px 28px 56px",
+          padding: "26px 48px 24px 48px",
           background:
             "linear-gradient(135deg, #f5f3ff 0%, #ddd6fe 55%, #a78bfa 100%)",
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
-        {/* Wordmark row */}
+        {/* Top row */}
         <div
           style={{
             display: "flex",
@@ -388,24 +444,23 @@ export default function OpenGraphImage() {
             >
               &ldquo;
             </div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: "#1a1a1a" }}>
-              Testimoni
-            </div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: "#1a1a1a" }}>Testimoni</div>
           </div>
           <div
             style={{
               display: "flex",
               alignItems: "center",
+              gap: 6,
               padding: "7px 14px",
               borderRadius: 999,
-              background: "white",
-              border: "1.5px solid #4c1d95",
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#4c1d95",
+              background: "#4c1d95",
+              color: "white",
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: "0.04em",
             }}
           >
-            Free · No card required
+            <Sparkle size={11} color="#fbbf24" /> JUST SHIPPED · PRO $9/mo
           </div>
         </div>
 
@@ -415,14 +470,14 @@ export default function OpenGraphImage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            marginTop: 18,
-            gap: 8,
+            marginTop: 10,
+            gap: 2,
           }}
         >
           <div
             style={{
               display: "flex",
-              fontSize: 52,
+              fontSize: 40,
               fontWeight: 900,
               color: "#1a1a1a",
               lineHeight: 1.02,
@@ -430,52 +485,81 @@ export default function OpenGraphImage() {
               textAlign: "center",
             }}
           >
-            Tweet or screenshot. Testimonial in 30 seconds.
+            Any praise becomes a Wall of Love —
+          </div>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 40,
+              fontWeight: 900,
+              color: "#5b21b6",
+              lineHeight: 1.02,
+              letterSpacing: "-0.03em",
+              textAlign: "center",
+            }}
+          >
+            and now it talks back.
           </div>
         </div>
 
-        {/* Two intake paths, side by side */}
+        {/* Three-column flow */}
         <div
           style={{
             display: "flex",
-            gap: 32,
-            marginTop: 22,
+            gap: 22,
+            marginTop: 16,
             flex: 1,
-            paddingLeft: 20,
-            paddingRight: 20,
+            paddingLeft: 4,
+            paddingRight: 4,
           }}
         >
           <FlowColumn
-            chip="PATH A · Paste a URL"
+            chip="PASTE-A-TWEET"
             chipColor="#1d4ed8"
-            input={urlInputMock}
-            quote="Turned a mess of praise tweets into a wall of love in 30 seconds."
-            author="Sarah Chen"
-            handle="@sarahchen"
-            sourceLabel="Twitter"
-            authorInitial="S"
-            authorColor="#059669"
+            input={<UrlInputMock />}
+            output={
+              <TestimonialCard
+                quote="Turned a mess of praise tweets into a Wall of Love in 30 seconds."
+                author="Sarah Chen"
+                handle="@sarahchen"
+                authorInitial="S"
+                authorColor="#059669"
+                sourceLabel="Twitter"
+              />
+            }
           />
+
           <FlowColumn
-            chip="PATH B · Drop a screenshot"
+            chip="SCREENSHOT AI"
+            chipColor="#059669"
+            input={<ScreenshotMock />}
+            output={
+              <TestimonialCard
+                quote="Set up my testimonials wall in about 5 minutes yesterday. Wild."
+                author="Priya M."
+                handle="WhatsApp DM"
+                authorInitial="P"
+                authorColor="#ea580c"
+                sourceLabel="WhatsApp"
+              />
+            }
+          />
+
+          <FlowColumn
+            chip="ASK MY WALL · NEW"
             chipColor="#5b21b6"
-            input={screenshotMock}
-            quote="Set up my testimonials wall in about 5 minutes yesterday. Wild."
-            author="Priya M."
-            handle="WhatsApp DM"
-            sourceLabel="WhatsApp"
-            authorInitial="P"
-            authorColor="#ea580c"
+            input={<ChatMock />}
+            output={<CitationChip />}
           />
         </div>
 
-        {/* Sources strip + wordmark footer */}
+        {/* Footer */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginTop: 14,
+            marginTop: 10,
           }}
         >
           <div
@@ -488,29 +572,22 @@ export default function OpenGraphImage() {
               color: "#4c1d95",
             }}
           >
-            <span>Works with:</span>
+            <span>Import from</span>
             <span>Twitter</span>
             <span>·</span>
             <span>LinkedIn</span>
-            <span>·</span>
-            <span>Slack</span>
-            <span>·</span>
-            <span>WhatsApp</span>
             <span>·</span>
             <span>Reddit</span>
             <span>·</span>
             <span>HN</span>
             <span>·</span>
             <span>Product Hunt</span>
+            <span>·</span>
+            <span>DMs</span>
+            <span>·</span>
+            <span>Slack</span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              fontSize: 18,
-              fontWeight: 800,
-              color: "#4c1d95",
-            }}
-          >
+          <div style={{ display: "flex", fontSize: 18, fontWeight: 800, color: "#4c1d95" }}>
             testimoni.io
           </div>
         </div>
