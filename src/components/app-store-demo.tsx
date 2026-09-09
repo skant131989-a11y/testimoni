@@ -307,12 +307,9 @@ export function AppStoreDemo() {
             <ul className="space-y-2">
               {ex.reviews.map((r, i) => (
                 <li
-                  key={i}
-                  className="rounded-lg border bg-background p-2.5 opacity-0 animate-in fade-in slide-in-from-bottom-2 duration-500"
-                  style={{
-                    animationDelay: `${i * 200}ms`,
-                    animationFillMode: "forwards",
-                  }}
+                  key={`${ex.platform.key}-${i}`}
+                  className="fade-up-in rounded-lg border bg-background p-2.5"
+                  style={{ animationDelay: `${i * 180}ms` }}
                 >
                   <div className="flex items-start gap-2">
                     <LetterAvatar
