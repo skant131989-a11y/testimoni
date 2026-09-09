@@ -34,17 +34,20 @@ export const PLAN_LIMITS = {
     video: true,
     watermark: false,
     customBranding: true,
-    // Pro gets 1 audit (same as Free — no additional Wall Score.
-    // Real tracking value lives in Pro AI).
-    maxWallScoreAudits: 1,
-    // Pro is where the "AI-flavored" perk lives so $9 doesn't
-    // feel AI-empty. Unlimited Testimonial → Tweet drafts.
+    // Every AI feature is unlocked at the Pro tier — we consolidated
+    // back to a single paid tier after the "Pro AI" split experiment
+    // didn't earn its complexity pre-scale. Revisit when we see a
+    // usage cohort that would justify carving it back out.
+    maxWallScoreAudits: Infinity,
     maxTweetDraftsPerMonth: Infinity,
-    askMyWall: false,
-    wallScoreTracking: false,
+    askMyWall: true,
+    wallScoreTracking: true,
   },
+  // Retained in PLAN_LIMITS + Prisma PlanType because deleting an
+  // enum member is a migration hassle and this tier may come back.
+  // Kept identical to PRO so any lingering code path that checks
+  // `plan === "PRO_AI"` still behaves correctly.
   PRO_AI: {
-    // Inherits every Pro utility limit at Infinity.
     maxTestimonials: Infinity,
     maxWidgets: Infinity,
     maxForms: Infinity,
@@ -53,8 +56,6 @@ export const PLAN_LIMITS = {
     video: true,
     watermark: false,
     customBranding: true,
-    // Wall Score: unlimited on-demand + weekly emailed report +
-    // trend graph. The intelligence layer users pay $29 for.
     maxWallScoreAudits: Infinity,
     maxTweetDraftsPerMonth: Infinity,
     askMyWall: true,

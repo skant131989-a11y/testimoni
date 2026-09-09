@@ -6,8 +6,11 @@ import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
-import { FREE_FEATURES, PRO_FEATURES, PRO_AI_FEATURES } from "@/lib/plan-features";
+import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { PRO_AI_PUBLIC } from "@/lib/feature-flags";
+// PRO_AI_FEATURES was removed when the tier collapsed back into Pro.
+// Empty stub so the (feature-flag-gated) card compiles if re-enabled.
+const PRO_AI_FEATURES: readonly string[] = [];
 
 export const metadata: Metadata = {
   title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",

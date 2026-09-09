@@ -24,8 +24,13 @@ import { AnimatedDemo } from "@/components/animated-demo";
 import { StructuredData } from "@/components/seo/structured-data";
 import { InlineSignup } from "@/components/inline-signup";
 import { HeroDualDemo } from "@/components/hero-dual-demo";
-import { FREE_FEATURES, PRO_FEATURES, PRO_AI_FEATURES } from "@/lib/plan-features";
+import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { PRO_AI_PUBLIC } from "@/lib/feature-flags";
+// PRO_AI_FEATURES no longer exists — the tier was collapsed back
+// into Pro. Keep an empty tuple so the (currently disabled)
+// PRO_AI_PUBLIC card renders without a compile error if the flag
+// is ever re-enabled without also restoring the array.
+const PRO_AI_FEATURES: readonly string[] = [];
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { HeroScrollLink } from "@/components/hero-scroll-link";

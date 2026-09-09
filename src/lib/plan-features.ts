@@ -5,18 +5,21 @@
  *
  * ─── Pricing model (2026-09) ─────────────────────────────────────
  *   Free              — try before you buy; viral loops live here
- *   Pro   ($9/mo)     — utility unlocks + one AI perk (unlimited
- *                        Testimonial → Tweet drafts) so users get
- *                        something AI-flavored for their $9
- *   Pro AI ($29/mo)   — the intelligence layer (Ask My Wall,
- *                        Wall Score tracking, weekly insights).
- *                        Where the real "does AI convert?" signal
- *                        lives.
+ *   Pro   ($9/mo)     — everything unlimited, including all AI
+ *                        features (Wall Score tracking, Ask My Wall,
+ *                        auto-tweet drafts, case studies).
+ *
+ * We ran an internal experiment with a third "Pro AI" tier at $29
+ * but pulled it back — the added complexity wasn't paying for
+ * itself pre-scale. Every Pro AI feature is now included in Pro
+ * at $9. We can split the tier back out when we have >100 Pro
+ * users and observable heavy-vs-light AI usage. Until then, one
+ * clear upgrade path.
  *
  * ─── Rules ───────────────────────────────────────────────────────
  *   - Same lists on home and /pricing (parity across surfaces).
- *   - Each tier list is intentionally longer than the previous so
- *     the value ladder reads at a glance.
+ *   - Pro list is intentionally longer than Free so the value gap
+ *     reads at a glance.
  *   - Keep phrasing consistent — don't hand-edit one page's copy
  *     without updating this file.
  */
@@ -37,29 +40,20 @@ export const FREE_FEATURES = [
 export const PRO_FEATURES = [
   "Unlimited testimonials",
   "Unlimited screenshot AI + batch upload",
-  "Unlimited Testimonial → Tweet drafts",
+  "Unlimited Testimonial → Tweet drafts + auto-post to X/LinkedIn",
+  "Ask My Wall — embeddable AI chatbot that answers visitors from your testimonials",
+  "Wall Score — unlimited audits + weekly emailed report + trend graph",
+  "Deep AI recommendations — specific customer prompts per weakness",
+  "AI Case Study Generator (drafts from any customer's testimonials)",
   "Auto-sync from App Store, Chrome Web Store, Play Store, Product Hunt",
   "URL import — X, LinkedIn, Reddit, HN, Product Hunt",
   "Unlimited collection forms + widgets",
   "Unlimited video testimonials",
-  "Public Wall of Love URL",
+  "Public Wall of Love URL + embeddable Trust Score badge",
   "All layouts (Grid, Masonry, Carousel, List, Marquee)",
   "Custom branding + colors",
   "Remove 'Powered by' watermark",
   "Curate different testimonials per widget",
   "Analytics dashboard",
   "Priority support",
-] as const;
-
-export const PRO_AI_FEATURES = [
-  "Everything in Pro",
-  "Ask My Wall — embeddable AI chatbot that answers visitors from your testimonials",
-  "Wall Score — unlimited audits + weekly emailed report",
-  "Wall Score trend graph — track proof strength over time",
-  "Wall Score benchmark — compare against category median",
-  "Deep AI recommendations — specific customer prompts per weakness",
-  "Auto-post Testimonial → Tweet to X + LinkedIn",
-  "AI Case Study Generator (drafts from any customer's testimonials)",
-  "Embeddable Trust Score badge for your site",
-  "Concierge onboarding — 30-min setup call",
 ] as const;
