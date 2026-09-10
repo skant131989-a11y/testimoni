@@ -60,13 +60,15 @@ function callbackErrorMessage(code: string | null): string | null {
   switch (code) {
     case "expired":
     case "otp_expired":
-      return "That sign-in link expired. Enter your email below and we'll send a fresh one.";
+      return "That sign-in link expired. Enter your email below and we'll send a fresh one — should land in seconds.";
     case "already_used":
       return "That sign-in link was already used. Enter your email below to get a new one.";
     case "pkce_mismatch":
       return "Sign-in link opened in a different browser than you started in. Try again in this browser.";
     case "no_code":
       return "That URL is missing sign-in info. Enter your email below to start over.";
+    case "access_denied":
+      return "Sign-in was cancelled or blocked. Enter your email below to try again.";
     case "auth_callback_error":
     case "unknown":
       return "We couldn't complete sign-in. Try requesting a new link below.";
@@ -98,15 +100,51 @@ export default function LoginPage() {
   const [mountedAt] = useState(() => Date.now());
 
   // Surface callback errors from the URL so users understand why they
-  // got bounced back to /login. We track the error too so PostHog
-  // shows how often each reason fires.
-  const callbackErrorCode = searchParams.get("error");
+  // got bounced back to /login.
+  //
+  // TWO places to check:
+  //   ?error=…    — set by our /callback route when Supabase's REST
+  //                 exchange fails. Server-side redirect, so it lives
+  //                 in the query string and useSearchParams sees it.
+  //   #error_code=… — Supabase's client-side auth-helpers redirect
+  //                   pattern. Errors land in the URL hash fragment
+  //                   (never sent to the server). Common shape:
+  //                     #error=access_denied
+  //                     &error_code=otp_expired
+  //                     &error_description=Email+link+is+invalid+or+has+expired
+  //
+  // The hash path was invisible to our old handler — PostHog session
+  // 01a089ab-… showed users hitting otp_expired via the hash and
+  // getting no banner. This effect reads both, prefers whichever
+  // is present, and cleans the hash from the URL so a refresh
+  // doesn't repeat the error.
+  const [hashErrorCode, setHashErrorCode] = useState<string | null>(null);
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash || !hash.includes("error")) return;
+    const params = new URLSearchParams(hash.replace(/^#/, ""));
+    const code = params.get("error_code") || params.get("error");
+    if (code) {
+      setHashErrorCode(code);
+      // Strip the hash so a refresh doesn't re-fire the error.
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search
+      );
+    }
+  }, []);
+
+  const callbackErrorCode = hashErrorCode ?? searchParams.get("error");
   const callbackError = callbackErrorMessage(callbackErrorCode);
   useEffect(() => {
     if (callbackErrorCode) {
-      track("login_callback_error_shown", { reason: callbackErrorCode });
+      track("login_callback_error_shown", {
+        reason: callbackErrorCode,
+        source: hashErrorCode ? "hash" : "query",
+      });
     }
-  }, [callbackErrorCode]);
+  }, [callbackErrorCode, hashErrorCode]);
 
   const webmail = magicSent ? webmailForEmail(email) : null;
 
