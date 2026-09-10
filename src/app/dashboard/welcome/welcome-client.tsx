@@ -348,6 +348,55 @@ export function WelcomeClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Bulk-import from the anonymous testimonials tray. Any quotes
+  // the user collected on find-my-proof search results, its import
+  // panel, or the screenshot tool while logged out get flushed to
+  // their new workspace on first login. Fires once per mount.
+  const bulkTrayRef = useRef(false);
+  const [bulkSaved, setBulkSaved] = useState(0);
+  useEffect(() => {
+    if (bulkTrayRef.current) return;
+    bulkTrayRef.current = true;
+    (async () => {
+      try {
+        const {
+          getPendingTestimonials,
+          clearPendingTestimonials,
+        } = await import("@/lib/pending-testimonials");
+        const items = getPendingTestimonials();
+        if (items.length === 0) return;
+        const res = await fetch("/api/testimonials/bulk-from-anon", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map((i) => ({
+              content: i.content,
+              author: i.author,
+              role: i.role,
+              source: i.source,
+              sourceUrl: i.sourceUrl,
+              origin: i.origin,
+            })),
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.saved === "number" && data.saved > 0) {
+            setBulkSaved(data.saved);
+            track("welcome_bulk_import_from_anon", {
+              saved: data.saved,
+              skipped: data.skippedDuplicates ?? 0,
+            });
+          }
+          clearPendingTestimonials();
+        }
+      } catch {
+        // Non-critical — the user can still add via the paste box.
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // handleImport is defined below with closures over state; keep a
   // ref so the auto-import effect (which must run once on mount)
   // can call the latest version.
@@ -798,6 +847,16 @@ export function WelcomeClient({
         <WelcomeSplash active={isNewSignup} />
         <PageLoadPerf surface="welcome" />
         <div className="mx-auto max-w-4xl space-y-6 py-6">
+          {bulkSaved > 0 && (
+            <div className="mx-auto flex max-w-2xl items-center justify-center gap-2 rounded-2xl border-2 border-emerald-400/50 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
+              <Sparkles className="h-4 w-4 text-emerald-600" />
+              <span>
+                Added <strong>{bulkSaved}</strong>{" "}
+                {bulkSaved === 1 ? "testimonial" : "testimonials"} you collected
+                as a guest to your wall.
+              </span>
+            </div>
+          )}
           <div className="text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
             <Sparkles className="h-7 w-7 text-primary" />

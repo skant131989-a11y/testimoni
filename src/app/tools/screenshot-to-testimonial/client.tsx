@@ -47,14 +47,23 @@ import { track } from "@/lib/analytics";
 const SESSION_KEY_SCREENSHOT = "pending_screenshot";
 const MAX_STASH_BYTES = 4.5 * 1024 * 1024; // ~4.5MB base64 (sessionStorage safe)
 
+interface ExtractedQuote {
+  content: string;
+  author: string;
+  source: string;
+}
+
 export function ScreenshotToTestimonialClient() {
   const router = useRouter();
   const [preview, setPreview] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [extracted, setExtracted] = useState<ExtractedQuote | null>(null);
+  const [extracting, setExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
     setErrorMsg(null);
+    setExtracted(null);
     if (!file.type.startsWith("image/")) {
       setErrorMsg("Please pick an image file — PNG, JPEG, WEBP, or GIF.");
       return;
@@ -65,8 +74,6 @@ export function ScreenshotToTestimonialClient() {
     }
     track("screenshot_tool_file_picked", {}, { anonymous: true });
 
-    // Read → compress to under ~4.5MB base64 → stash for the
-    // welcome page to pick up post-signup.
     let dataUrl: string;
     try {
       dataUrl = await compressImageToDataUrl(file, MAX_STASH_BYTES);
@@ -83,11 +90,61 @@ export function ScreenshotToTestimonialClient() {
       );
       return;
     }
-    track("screenshot_tool_signup_wall_shown", {}, { anonymous: true });
+
+    // Anonymous first-try extraction — 1 free per IP per day via
+    // the shared find-proof/import endpoint. If it works, the user
+    // sees the magic BEFORE the signup wall. If they've already
+    // used their free extraction, we quietly fall back to the
+    // existing signup-first flow (the sessionStorage stash lets
+    // the welcome page finish the job post-signup).
+    setExtracting(true);
+    try {
+      const res = await fetch("/api/tools/find-proof/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: "image", image: dataUrl }),
+      });
+      const data = await res.json();
+      if (res.ok && data.quote) {
+        setExtracted({
+          content: data.quote.content,
+          author: data.quote.author,
+          source: data.quote.source,
+        });
+        // Persist to the anonymous testimonials tray so it survives
+        // signup — the welcome page will bulk-save it to their wall.
+        try {
+          const { addPendingTestimonial } = await import(
+            "@/lib/pending-testimonials"
+          );
+          addPendingTestimonial({
+            content: data.quote.content,
+            author: data.quote.author,
+            source: data.quote.source,
+            origin: "screenshot_tool",
+          });
+        } catch {
+          // Non-critical — screenshot still shows inline.
+        }
+        track(
+          "screenshot_tool_anon_extracted",
+          { source: data.quote.source },
+          { anonymous: true },
+        );
+      } else {
+        // 429 or other — show the signup wall as before.
+        track("screenshot_tool_signup_wall_shown", {}, { anonymous: true });
+      }
+    } catch {
+      track("screenshot_tool_signup_wall_shown", {}, { anonymous: true });
+    } finally {
+      setExtracting(false);
+    }
   }
 
   function reset() {
     setPreview(null);
+    setExtracted(null);
     setErrorMsg(null);
     try {
       sessionStorage.removeItem(SESSION_KEY_SCREENSHOT);
@@ -101,7 +158,7 @@ export function ScreenshotToTestimonialClient() {
       { has_preview: !!preview },
       { anonymous: true },
     );
-    router.push("/signup?from=screenshot");
+    router.push("/signup?from=screenshot&import=pending");
   }
 
   return (
@@ -140,7 +197,7 @@ export function ScreenshotToTestimonialClient() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        {/* Upload zone / signup wall */}
+        {/* Upload zone / extraction result / signup wall */}
         <div className="mt-8">
           {!preview && (
             <UploadDropzone
@@ -149,7 +206,23 @@ export function ScreenshotToTestimonialClient() {
               error={errorMsg}
             />
           )}
-          {preview && (
+          {preview && extracting && (
+            <div className="mx-auto flex max-w-md flex-col items-center rounded-2xl border-2 border-primary/25 bg-card p-8 text-center shadow-sm">
+              <Sparkles className="h-6 w-6 animate-pulse text-primary" />
+              <p className="mt-4 text-sm font-medium">
+                Reading your screenshot…
+              </p>
+            </div>
+          )}
+          {preview && !extracting && extracted && (
+            <ExtractedResult
+              preview={preview}
+              quote={extracted}
+              onReset={reset}
+              onSignup={goSignup}
+            />
+          )}
+          {preview && !extracting && !extracted && (
             <SignupWall
               preview={preview}
               onReset={reset}
@@ -291,6 +364,83 @@ function UploadDropzone({
  * signing up: the extraction runs on THEIR file, and the result
  * appears on their welcome screen automatically.
  */
+// The extracted-result panel — shown when a 1-per-IP-per-day
+// anonymous extraction succeeded. Displays the pulled quote in
+// a testimonial-card format so the user experiences the payoff
+// before we ask them to sign up.
+function ExtractedResult({
+  preview,
+  quote,
+  onReset,
+  onSignup,
+}: {
+  preview: string;
+  quote: ExtractedQuote;
+  onReset: () => void;
+  onSignup: () => void;
+}) {
+  return (
+    <div className="mx-auto max-w-xl">
+      <div className="rounded-3xl border-2 border-emerald-400/60 bg-gradient-to-br from-emerald-50 via-background to-primary/5 p-6 shadow-lg">
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
+          <Sparkles className="h-3 w-3" /> Extracted
+        </div>
+        <div className="mt-2 flex gap-4">
+          {/* Small thumbnail of the source screenshot */}
+          <img
+            src={preview}
+            alt="Screenshot"
+            className="hidden h-24 w-24 flex-shrink-0 rounded-lg border object-cover md:block"
+          />
+          <div className="flex-1">
+            <p className="text-base italic leading-relaxed md:text-lg">
+              &ldquo;{quote.content}&rdquo;
+            </p>
+            <div className="mt-3 flex items-center gap-2 border-t border-emerald-200 pt-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                {quote.author.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="text-sm font-semibold">{quote.author}</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  from {quote.source}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-fuchsia-50 p-6 text-center">
+        <h3 className="text-xl font-bold">Save this to your Wall of Love</h3>
+        <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+          Sign up free — we&rsquo;ll add this testimonial to your wall and give
+          you 3 more free screenshot extractions.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={onSignup}
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90"
+          >
+            Sign up free
+          </button>
+          <button
+            type="button"
+            onClick={onReset}
+            className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+          >
+            Try another screenshot
+          </button>
+        </div>
+        <p className="mt-3 text-[10px] text-muted-foreground">
+          You&rsquo;ve used your 1 free anonymous extraction today.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function SignupWall({
   preview,
   onReset,

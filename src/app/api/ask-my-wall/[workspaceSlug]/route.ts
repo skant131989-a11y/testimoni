@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getEffectivePlan } from "@/lib/plan";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
+import { groqChat, hasGroq, GROQ_CHAT_MODEL } from "@/lib/groq";
 import { buildSystemPrompt, retrieve } from "@/lib/ask-my-wall";
 import { checkAndIncrement } from "@/lib/ask-rate-limit";
 
@@ -79,16 +80,39 @@ export async function POST(
   const retrieved = retrieve(testimonials, body.question, 6);
   const systemPrompt = buildSystemPrompt(workspace.name, retrieved);
 
-  const anthropic = getAnthropic();
-  const response = await anthropic.messages.create({
-    model: CHAT_MODEL,
-    max_tokens: 400,
-    system: systemPrompt,
-    messages: [{ role: "user", content: body.question }],
-  });
-
-  const block = response.content[0];
-  const answer = block.type === "text" ? block.text : "Sorry, I couldn't come up with an answer for that.";
+  // Prefer Groq (free) when the key is available; fall back to
+  // Claude Haiku. Both models handle this workload well; the
+  // system prompt is provider-agnostic.
+  let answer: string;
+  try {
+    if (hasGroq()) {
+      const { text } = await groqChat({
+        model: GROQ_CHAT_MODEL,
+        max_tokens: 400,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: body.question },
+        ],
+      });
+      answer = text || "Sorry, I couldn't come up with an answer for that.";
+    } else {
+      const anthropic = getAnthropic();
+      const response = await anthropic.messages.create({
+        model: CHAT_MODEL,
+        max_tokens: 400,
+        system: systemPrompt,
+        messages: [{ role: "user", content: body.question }],
+      });
+      const block = response.content[0];
+      answer =
+        block.type === "text"
+          ? block.text
+          : "Sorry, I couldn't come up with an answer for that.";
+    }
+  } catch (err) {
+    console.error("[ask-my-wall] LLM call failed:", err);
+    answer = "Sorry — the wall's chatbot is briefly offline. Try again in a moment.";
+  }
 
   return json({
     answer,

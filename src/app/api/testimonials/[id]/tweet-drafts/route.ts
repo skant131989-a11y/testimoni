@@ -4,6 +4,7 @@ import { getDbUserWithWorkspace } from "@/lib/session";
 import { getEffectivePlan } from "@/lib/plan";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
+import { groqChat, hasGroq, GROQ_CHAT_MODEL } from "@/lib/groq";
 
 /**
  * POST /api/testimonials/[id]/tweet-drafts
@@ -74,11 +75,7 @@ export async function POST(
   const author = testimonial.customerName;
   const authorTitle = testimonial.customerTitle;
 
-  const anthropic = getAnthropic();
-  const response = await anthropic.messages.create({
-    model: CHAT_MODEL,
-    max_tokens: 800,
-    system: `You turn customer testimonials into three tweet-length drafts.
+  const systemPrompt = `You turn customer testimonials into three tweet-length drafts.
 
 RULES:
 - Each draft ≤ 260 characters (leave room for a link).
@@ -91,23 +88,51 @@ RULES:
 - No hashtags. No emojis unless the quote itself has them.
 - No @mentions unless a real handle is provided.
 
-Return ONLY valid JSON: {"drafts":[{"style":"quote","text":"..."},{"style":"reaction","text":"..."},{"style":"callout","text":"..."}]}. No markdown, no commentary.`,
-    messages: [
-      {
-        role: "user",
-        content: `Testimonial: "${content}"\nAuthor: ${author}${authorTitle ? `, ${authorTitle}` : ""}`,
-      },
-    ],
-  });
+Return ONLY valid JSON: {"drafts":[{"style":"quote","text":"..."},{"style":"reaction","text":"..."},{"style":"callout","text":"..."}]}. No markdown, no commentary.`;
+  const userPrompt = `Testimonial: "${content}"\nAuthor: ${author}${authorTitle ? `, ${authorTitle}` : ""}`;
 
-  const block = response.content[0];
-  if (block.type !== "text") {
-    return NextResponse.json({ error: "Unexpected model response" }, { status: 500 });
+  let rawText = "";
+  try {
+    if (hasGroq()) {
+      const { text } = await groqChat({
+        model: GROQ_CHAT_MODEL,
+        max_tokens: 800,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+      });
+      rawText = text;
+    } else {
+      const anthropic = getAnthropic();
+      const response = await anthropic.messages.create({
+        model: CHAT_MODEL,
+        max_tokens: 800,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }],
+      });
+      const block = response.content[0];
+      if (block.type !== "text") {
+        return NextResponse.json({ error: "Unexpected model response" }, { status: 500 });
+      }
+      rawText = block.text;
+    }
+  } catch (err) {
+    console.error("[tweet-drafts] LLM call failed:", err);
+    return NextResponse.json({ error: "Model call failed" }, { status: 502 });
   }
+
+  // Strip prose/markdown fences; extract the JSON object.
+  const firstBrace = rawText.indexOf("{");
+  const lastBrace = rawText.lastIndexOf("}");
+  const jsonText =
+    firstBrace !== -1 && lastBrace > firstBrace
+      ? rawText.slice(firstBrace, lastBrace + 1)
+      : rawText;
 
   let parsed;
   try {
-    parsed = JSON.parse(block.text);
+    parsed = JSON.parse(jsonText);
   } catch {
     return NextResponse.json({ error: "Model returned invalid JSON" }, { status: 500 });
   }
