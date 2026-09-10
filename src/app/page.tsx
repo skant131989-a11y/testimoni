@@ -44,6 +44,9 @@ import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { LiveSignupTicker } from "@/components/live-signup-ticker";
 import { LaunchBar } from "@/components/launch-bar";
 import { PricingCta } from "@/components/pricing/pricing-cta";
+import { FadeIn } from "@/components/fade-in";
+import { TestimonialMarquee } from "@/components/testimonial-marquee";
+import Script from "next/script";
 import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
 
 export default function LandingPage() {
@@ -224,7 +227,14 @@ export default function LandingPage() {
           without duplicating the layout. */}
       <LovedByFoundersStrip />
 
-      {/* Wall of Love preview — shows what a live wall actually looks like
+      {/* Testimonial marquee — infinite right-to-left strip of
+          founder quotes, pauses on hover. On-brand for a
+          testimonial widget (obviously) and gives the page some
+          kinetic energy between the hero and the rest of the
+          scroll. */}
+      <TestimonialMarquee />
+
+      <FadeIn>{/* Wall of Love preview — shows what a live wall actually looks like
           after all the collection + approval. Static grid, not interactive,
           links out to /w/demo for the full experience. Same testimonials as
           /w/demo so the click-through feels like "yes, exactly what I saw." */}
@@ -371,7 +381,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Ask → Collect → Publish 3-step strip. This section is
+      </FadeIn>
+
+      <FadeIn>{/* Ask → Collect → Publish 3-step strip. This section is
           specifically the FORM path — visitors have already seen
           paste-a-tweet, screenshot, and App Store intakes in the
           hero demo. Framed as "here's how you'd start from scratch
@@ -431,7 +443,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* New Pro AI features band — sits right before pricing so
+      </FadeIn>
+
+      <FadeIn>{/* New Pro AI features band — sits right before pricing so
           visitors see the upsell hook in the moment they're deciding
           "free or Pro?". Compact by design — three tiles, one CTA.
           The visual story: Score / Amplify / Answer — the three
@@ -554,7 +568,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Review-platforms band — announces the newly-Free auto-import
+      </FadeIn>
+
+      <FadeIn>{/* Review-platforms band — announces the newly-Free auto-import
           from App Store / Play Store / Chrome Web Store / Product
           Hunt. Sits above the AI features so the story reads
           intake-first ("look at all the places we can pull praise
@@ -647,6 +663,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      </FadeIn>
 
       {/* Free tools strip — moved down from just after paste-a-tweet
           to here (after all four product demos: paste-a-tweet, form
@@ -830,7 +848,7 @@ export default function LandingPage() {
           below, which delivers a richer preview + the same "See
           all" link. Keeping only the grid. */}
 
-      {/* "Everything Testimoni does" — compact 6-card preview of
+      <FadeIn>{/* "Everything Testimoni does" — compact 6-card preview of
           the full feature grid on /features. Sits right below the
           doorway band so the visitor sees a taste before pricing:
           "here are 6 things the product does, and 20+ more if you
@@ -901,6 +919,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      </FadeIn>
 
       {/* Pricing Preview */}
       <section className="border-t bg-muted/30 py-20">
@@ -1107,6 +1127,24 @@ export default function LandingPage() {
         </div>
       </footer>
       <StickyMobileCta source="home" />
+
+      {/* Ask My Wall — LIVE chatbot on the home page. The same
+          embed customers get on Pro, pointed at Neha's founder
+          workspace. Visitors can literally click the bubble and
+          chat with a bot that answers using Testimoni's own
+          approved testimonials, cited by name. That's the "wall
+          talks back" story in interactive form.
+          Set NEXT_PUBLIC_ASK_MY_WALL_HOME_SLUG in Vercel to
+          point at a different workspace; defaults to "founder".
+          The workspace MUST have Ask My Wall enabled at
+          /dashboard/ask-my-wall — otherwise the API returns 402
+          and the bubble greets visitors but can't answer.
+          Loaded with `lazyOnload` so it never blocks first paint. */}
+      <Script
+        src="/embed/ask.js"
+        data-workspace={process.env.NEXT_PUBLIC_ASK_MY_WALL_HOME_SLUG ?? "founder"}
+        strategy="lazyOnload"
+      />
     </div>
   );
 }
