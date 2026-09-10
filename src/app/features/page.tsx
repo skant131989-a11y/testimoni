@@ -88,74 +88,128 @@ const flowSteps = [
 /**
  * Full feature grid — the deep list. Moved from the home page's "Features"
  * section so home stays lean. Icons imported at top for every entry.
+ * `category` drives a color-coded left border so scanners can group
+ * intake vs display vs plan-perks at a glance.
  */
-const features = [
+const features: Array<{
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  desc: string;
+  category: "intake" | "curate" | "display" | "plan";
+}> = [
   {
     icon: Twitter,
     title: "Paste-a-tweet import",
     desc: "Turn a public X or LinkedIn post into an approved testimonial by pasting the URL. Author and text pulled automatically; you edit the rating if you want.",
+    category: "intake",
   },
   {
     icon: Sparkles,
     title: "Screenshot → testimonial (AI)",
     desc: "Drop a screenshot of any praise — DM, tweet, Slack, WhatsApp, email, App Store review — and Claude Vision extracts the quote, author, and source. Free plan: any of your 10 testimonials can be a screenshot. Pro: batch upload multiple at once.",
+    category: "intake",
   },
   {
     icon: Send,
     title: "5 collection channels",
     desc: "Share your form via link, embed script, iframe, email template, or QR code. Whichever way your customers arrive, submissions land in the same inbox.",
+    category: "intake",
   },
   {
     icon: Inbox,
     title: "One-click approval",
     desc: "Review submissions in a single inbox. Approve the good ones with a click, reject spam. Optimistic UI — no page refresh.",
+    category: "curate",
   },
   {
     icon: LayoutGrid,
     title: "5 layouts",
     desc: "Grid, Masonry, Carousel, List, and Marquee. Pick different layouts for different pages of your site — all from one testimonial library.",
+    category: "display",
   },
   {
     icon: Code2,
     title: "One-line embed",
     desc: "Copy a single <script> tag and drop it into any HTML. Works on Framer, Webflow, WordPress, Shopify, Next.js, React, Vue — anywhere.",
+    category: "display",
   },
   {
     icon: ShieldCheck,
     title: "Shadow DOM isolation",
     desc: "The embed script renders inside a Shadow DOM, so its styles can't leak into your site — and your site's CSS can't break the widget.",
+    category: "display",
   },
   {
     icon: Video,
     title: "Video testimonials",
     desc: "1 free video on every plan, unlimited on Pro. Upload MP4 or MOV up to 50MB — plays inline on your wall and embedded widget. Convert ~2× better than text.",
+    category: "intake",
   },
   {
     icon: MonitorSmartphone,
     title: "Public Wall of Love URL",
     desc: "Every workspace gets a shareable wall URL — testimoni.io/w/… — public, no signup needed. Drop it in bios, DMs, or a QR code on your packaging.",
+    category: "display",
   },
   {
     icon: Share2,
     title: "Ready-to-share templates",
     desc: "Copy-paste WhatsApp, DM, and email asks for customers, plus a downloadable QR code for packaging or receipts. Filling your wall stops being a “what do I even say?” problem.",
+    category: "intake",
   },
   {
     icon: Palette,
     title: "Custom branding (Pro)",
     desc: "Change colors, fonts, and border radius to match your site. Remove the Testimoni watermark on Pro.",
+    category: "plan",
   },
   {
     icon: Globe,
     title: "Multi-currency pricing",
     desc: "Native INR pricing for Indian customers, USD for everyone else. Razorpay checkout accepts international cards.",
+    category: "plan",
   },
   {
     icon: Zap,
     title: "Free forever plan",
     desc: "10 testimonials, 1 form, 1 widget. Grid layout. No credit card. Perfect for launching your site's social proof today.",
+    category: "plan",
   },
 ];
+
+const CATEGORY_META: Record<
+  "intake" | "curate" | "display" | "plan",
+  { label: string; bg: string; text: string; border: string; iconBg: string }
+> = {
+  intake: {
+    label: "Intake",
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    border: "border-blue-200",
+    iconBg: "bg-blue-100 text-blue-700",
+  },
+  curate: {
+    label: "Curate",
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    border: "border-emerald-200",
+    iconBg: "bg-emerald-100 text-emerald-700",
+  },
+  display: {
+    label: "Display",
+    bg: "bg-fuchsia-50",
+    text: "text-fuchsia-700",
+    border: "border-fuchsia-200",
+    iconBg: "bg-fuchsia-100 text-fuchsia-700",
+  },
+  plan: {
+    label: "Plan",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+    iconBg: "bg-amber-100 text-amber-700",
+  },
+};
 
 // PathStep — moved from src/app/page.tsx along with the two-intake-path
 // section it belongs to.
@@ -237,25 +291,34 @@ export default function FeaturesPage() {
               <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
                 Every wall on Testimoni follows the same three-step flow. From
                 zero to a live wall in about 30 seconds if you have public
-                praise, one afternoon if you're starting from scratch.
+                praise, one afternoon if you&rsquo;re starting from scratch.
               </p>
             </div>
             <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {flowSteps.map((step) => (
-                <div key={step.num} className="flex gap-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                    {step.num}
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold text-foreground">
+              {flowSteps.map((step, i) => {
+                const gradients = [
+                  "from-blue-500/10 via-transparent to-transparent border-blue-500/30",
+                  "from-emerald-500/10 via-transparent to-transparent border-emerald-500/30",
+                  "from-fuchsia-500/10 via-transparent to-transparent border-fuchsia-500/30",
+                ];
+                const numBg = ["bg-blue-500", "bg-emerald-500", "bg-fuchsia-500"];
+                return (
+                  <div
+                    key={step.num}
+                    className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br p-6 ${gradients[i]}`}
+                  >
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-full ${numBg[i]} text-lg font-bold text-white`}>
+                      {step.num}
+                    </div>
+                    <p className="mt-4 text-lg font-bold text-foreground">
                       {step.title}
                     </p>
-                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                       {step.body}
                     </p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -403,7 +466,9 @@ export default function FeaturesPage() {
             </div>
           </section>
 
-          {/* Full feature grid — expanded from home's version */}
+          {/* Full feature grid — color-coded by category (Intake /
+              Curate / Display / Plan) so scanners can pattern-match
+              the shape of the product before reading. */}
           <section id="features" className="mt-20 scroll-mt-20">
             <p className="text-center text-xs font-semibold uppercase tracking-widest text-primary">
               Every feature, in one place
@@ -411,16 +476,41 @@ export default function FeaturesPage() {
             <h2 className="mt-2 text-center text-3xl font-bold tracking-tight md:text-4xl">
               Everything Testimoni does
             </h2>
-            <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {features.map((f) => (
-                <div key={f.title} className="rounded-2xl border bg-card p-6">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                    <f.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{f.desc}</p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs">
+              {(["intake", "curate", "display", "plan"] as const).map((c) => (
+                <div
+                  key={c}
+                  className={`inline-flex items-center gap-1.5 rounded-full ${CATEGORY_META[c].bg} ${CATEGORY_META[c].text} ${CATEGORY_META[c].border} border px-2.5 py-1 font-semibold uppercase tracking-wider`}
+                >
+                  {CATEGORY_META[c].label}
                 </div>
               ))}
+            </div>
+            <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {features.map((f) => {
+                const meta = CATEGORY_META[f.category];
+                return (
+                  <div
+                    key={f.title}
+                    className={`rounded-2xl border bg-card p-6 transition hover:shadow-md ${meta.border}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-full ${meta.iconBg}`}
+                      >
+                        <f.icon className="h-5 w-5" />
+                      </div>
+                      <span
+                        className={`rounded-full ${meta.bg} ${meta.text} px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider`}
+                      >
+                        {meta.label}
+                      </span>
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{f.desc}</p>
+                  </div>
+                );
+              })}
             </div>
           </section>
 

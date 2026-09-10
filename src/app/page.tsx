@@ -22,7 +22,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { PublicNavAuth, PublicNavAuthMobile } from "@/components/layout/public-nav-auth";
-import { ProPriceDual, ProAiPrice, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
+import { ProPrice, ProPriceDual, ProAiPrice, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
 // AnimatedDemo used to render on this page; moved to /features.
 // PathStep used to render on this page; moved to /features.
 import { StructuredData } from "@/components/seo/structured-data";
@@ -368,6 +368,62 @@ export default function LandingPage() {
               See a live Wall of Love →
             </TrackedLink>
           </p>
+        </div>
+      </section>
+
+      {/* Ask → Collect → Publish 3-step strip. Restored to home
+          per Neha's ask — visitors need this "here's the whole
+          flow in 3 beats" moment right after they see the wall.
+          Compact so it doesn't compete with the AI features band
+          that follows. Full narrative lives on /features. */}
+      <section className="border-t py-14">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="mb-8 text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              The whole flow
+            </p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
+              Ask → Collect → Publish
+            </h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                num: "1",
+                title: "Ask",
+                icon: "📨",
+                body:
+                  "Share your form via email, WhatsApp, DM, QR code, or an embed on your site. Or skip the form entirely and paste a customer's tweet directly.",
+              },
+              {
+                num: "2",
+                title: "Collect",
+                icon: "📥",
+                body:
+                  "Text, star ratings, video (1 free on every plan) — plus praise scraped from App Store, Play, Chrome, Product Hunt, Shopify — all land in one inbox.",
+              },
+              {
+                num: "3",
+                title: "Publish",
+                icon: "🚀",
+                body:
+                  "One line of JavaScript embeds the wall on your site. Or share your free hosted Wall of Love URL anywhere — bios, emails, QR codes.",
+              },
+            ].map((step) => (
+              <div key={step.num} className="rounded-2xl border bg-card p-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                    {step.num}
+                  </div>
+                  <div className="text-2xl">{step.icon}</div>
+                </div>
+                <p className="mt-4 text-base font-semibold">{step.title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  {step.body}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -726,12 +782,17 @@ export default function LandingPage() {
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
               <div className="text-3xl">💸</div>
               <h3 className="mt-3 text-lg font-bold">
-                $9 Pro · You email, I ship
+                {/* Auto-detected currency — Indian visitors see
+                    "₹499 Pro", everyone else sees "$9 Pro". Stops
+                    the awkward mismatch where the title was hard-
+                    coded USD but the body claimed native INR. */}
+                <ProPrice suffix="" /> Pro · You email, I ship
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Half of Senja, one-fifth of Testimonial.to. Native ₹499 in
-                India — no forex middleman. Every support email lands with
-                me directly and ships as code within days, not quarters.
+                Half of Senja, one-fifth of Testimonial.to. Native
+                pricing in USD or INR — no forex middleman. Every
+                support email lands with me directly and ships as
+                code within days, not quarters.
               </p>
             </div>
           </div>
@@ -795,6 +856,78 @@ export default function LandingPage() {
                 See all <ArrowRight className="h-3 w-3" />
               </TrackedLink>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* "Everything Testimoni does" — compact 6-card preview of
+          the full feature grid on /features. Sits right below the
+          doorway band so the visitor sees a taste before pricing:
+          "here are 6 things the product does, and 20+ more if you
+          click through." Doubles the depth signal without doubling
+          the scroll. Per Neha's ask 2026-09-10. */}
+      <section className="border-t py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-10 text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              Everything Testimoni does
+            </p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
+              Six of the twenty. See the rest.
+            </h2>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                emoji: "🐦",
+                title: "Paste-a-tweet",
+                body: "Turn any public X or LinkedIn URL into an approved testimonial in seconds.",
+              },
+              {
+                emoji: "🧠",
+                title: "Screenshot → testimonial (AI)",
+                body: "Drop a screenshot of DMs, Slack, WhatsApp, App Store — Claude Vision extracts it.",
+              },
+              {
+                emoji: "🏬",
+                title: "Auto-import reviews",
+                body: "App Store, Play, Chrome, Product Hunt, Shopify — free plan can connect + sync.",
+              },
+              {
+                emoji: "🎬",
+                title: "Video testimonials",
+                body: "1 free video per plan, unlimited on Pro. Plays inline on your wall + embed.",
+              },
+              {
+                emoji: "🎨",
+                title: "5 layouts",
+                body: "Grid, Masonry, Carousel, List, Marquee. Pick per widget.",
+              },
+              {
+                emoji: "💬",
+                title: "Ask My Wall chatbot",
+                body: "Embed an AI chatbot that answers visitors using your real customers, cited by name.",
+              },
+            ].map((f) => (
+              <div
+                key={f.title}
+                className="rounded-2xl border bg-card p-5 transition hover:border-primary hover:shadow"
+              >
+                <div className="text-2xl">{f.emoji}</div>
+                <h3 className="mt-3 text-base font-semibold">{f.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{f.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <TrackedLink
+              cta="everything_grid_see_all"
+              surface="home"
+              href="/features#features"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+            >
+              See all 20+ features → <ArrowRight className="h-3.5 w-3.5" />
+            </TrackedLink>
           </div>
         </div>
       </section>
