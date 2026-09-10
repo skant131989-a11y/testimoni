@@ -234,9 +234,6 @@ export default function SignupPage() {
             {isEmailLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create my account
           </Button>
-          <p className="text-center text-[11px] text-muted-foreground">
-            No email verification. You&rsquo;re in the moment you click.
-          </p>
         </form>
 
         {/* Divider */}
