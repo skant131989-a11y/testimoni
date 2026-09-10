@@ -118,10 +118,23 @@ export default function LandingPage() {
               Now free — App Store, Play Store, Shopify + 5 more
             </div>
             <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-              Any praise becomes a Wall of Love.{" "}
-              <span className="text-primary">Now the wall talks back.</span>
+              Any praise becomes a{" "}
+              <span className="bg-gradient-to-r from-purple-600 via-primary to-fuchsia-600 bg-clip-text text-transparent">
+                Wall of Love.
+              </span>{" "}
+              Now the wall talks back.
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground md:text-xl">
+            {/* Punchy "how fast + easiest path" line right under the
+                brand headline. Reinstates the 30-second promise and
+                the "paste a tweet" hook the old hero led with —
+                these were our biggest conversion drivers pre-brand
+                pivot, so they belong in the fold even if the H1 is
+                brand-first now. */}
+            <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary md:text-base">
+              <Zap className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              Paste a tweet → live wall in 30 seconds. No signup to preview.
+            </p>
+            <p className="mt-4 text-lg text-muted-foreground md:text-xl">
               Paste a tweet, drop a screenshot, or import from App
               Store, Play, Chrome, Product Hunt, Shopify. Testimoni
               turns every kind of praise into a Wall of Love — with

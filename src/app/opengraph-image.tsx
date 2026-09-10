@@ -158,34 +158,49 @@ export default function OpenGraphImage() {
             }}
           >
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {/* Eyebrow chip */}
+              {/* Eyebrow chip — leads with the punchy "paste-a-tweet
+                  + 30s" promise that was our biggest pre-brand-pivot
+                  conversion hook. The NOW FREE / new-sources story
+                  moved into the subhead below (still surfaced, just
+                  not competing for the eyebrow slot). */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  padding: "5px 11px",
+                  padding: "6px 12px",
                   borderRadius: 999,
                   background: "white",
                   border: "1.5px solid rgba(76, 29, 149, 0.4)",
-                  fontSize: 11,
-                  fontWeight: 800,
+                  fontSize: 12,
+                  fontWeight: 900,
                   color: "#4c1d95",
                   letterSpacing: "0.05em",
                   alignSelf: "flex-start",
                 }}
               >
-                <Sparkle size={10} color="#5b21b6" /> NOW FREE — APP STORE, PLAY, SHOPIFY + 5 MORE
+                <span style={{ display: "flex", fontSize: 14 }}>⚡</span>
+                PASTE A TWEET → LIVE WALL IN 30 SECONDS
               </div>
 
-              {/* Headline — two-line, second line in primary purple */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
-                }}
-              >
+              {/* Headline — three lines with color rhythm:
+                    line 1  "Any praise becomes a"           → black
+                    line 2  "Wall of Love."                   → primary purple
+                                                                (the sole
+                                                                 accent — home
+                                                                 hero uses a
+                                                                 gradient here
+                                                                 but Satori
+                                                                 doesn't
+                                                                 support
+                                                                 bg-clip-text)
+                    line 3  "Now the wall talks back."       → black to match
+                                                                the opening
+                                                                line — only
+                                                                "Wall of Love"
+                                                                gets the color
+                                                                pop */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <div
                   style={{
                     display: "flex",
@@ -203,7 +218,7 @@ export default function OpenGraphImage() {
                     display: "flex",
                     fontSize: 52,
                     fontWeight: 900,
-                    color: "#1a1a1a",
+                    color: "#5b21b6",
                     lineHeight: 1.02,
                     letterSpacing: "-0.03em",
                   }}
@@ -215,7 +230,7 @@ export default function OpenGraphImage() {
                     display: "flex",
                     fontSize: 52,
                     fontWeight: 900,
-                    color: "#5b21b6",
+                    color: "#1a1a1a",
                     lineHeight: 1.02,
                     letterSpacing: "-0.03em",
                     marginTop: 6,
