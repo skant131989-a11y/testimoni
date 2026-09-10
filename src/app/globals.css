@@ -99,6 +99,32 @@ body {
   animation: fade-up 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Shimmer sweep — used to gently pan a gradient across the hero
+   H1's "Wall of Love" text. Background-size 200% + background-
+   position 0% → 100% keyframe = the gradient slides through the
+   letters over 8s. Deliberately slow so it's a "wait, did that
+   just move?" beat, not a distracting loop. */
+@keyframes gradient-pan {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+.gradient-pan {
+  background-size: 200% 200%;
+  animation: gradient-pan 8s ease-in-out infinite alternate;
+}
+
+/* Card lift on hover — pairs with FadeIn's springy entrance so
+   the same card that just bounced into place also responds to
+   mouse. Subtle Y-translate + shadow bump; no rotation because
+   that fights with the shimmer above. */
+.card-lift {
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px -12px rgba(76, 29, 149, 0.28);
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

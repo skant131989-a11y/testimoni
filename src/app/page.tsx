@@ -122,7 +122,7 @@ export default function LandingPage() {
             </div>
             <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
               Any praise becomes a{" "}
-              <span className="bg-gradient-to-r from-purple-600 via-primary to-fuchsia-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-600 via-fuchsia-600 via-primary to-purple-600 bg-clip-text text-transparent gradient-pan">
                 Wall of Love.
               </span>{" "}
               Now the wall talks back.
