@@ -371,20 +371,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Ask → Collect → Publish 3-step strip. Restored to home
-          per Neha's ask — visitors need this "here's the whole
-          flow in 3 beats" moment right after they see the wall.
-          Compact so it doesn't compete with the AI features band
-          that follows. Full narrative lives on /features. */}
+      {/* Ask → Collect → Publish 3-step strip. This section is
+          specifically the FORM path — visitors have already seen
+          paste-a-tweet, screenshot, and App Store intakes in the
+          hero demo. Framed as "here's how you'd start from scratch
+          with fresh testimonials", not "the whole flow". */}
       <section className="border-t py-14">
         <div className="mx-auto max-w-5xl px-4">
           <div className="mb-8 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              The whole flow
+              Or start from scratch — the form path
             </p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
               Ask → Collect → Publish
             </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
+              No public praise yet? Send a form. New submissions land in your
+              inbox, you approve, they go live on your wall.
+            </p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
@@ -393,14 +397,14 @@ export default function LandingPage() {
                 title: "Ask",
                 icon: "📨",
                 body:
-                  "Share your form via email, WhatsApp, DM, QR code, or an embed on your site. Or skip the form entirely and paste a customer's tweet directly.",
+                  "Share your form via email, WhatsApp, DM, QR code, or an embed on your site. One link, five channels.",
               },
               {
                 num: "2",
                 title: "Collect",
                 icon: "📥",
                 body:
-                  "Text, star ratings, video (1 free on every plan) — plus praise scraped from App Store, Play, Chrome, Product Hunt, Shopify — all land in one inbox.",
+                  "Text, star ratings, and video (1 free on every plan). Submissions land in your inbox for one-click review.",
               },
               {
                 num: "3",
@@ -820,45 +824,11 @@ export default function LandingPage() {
       </section>
 
 
-      {/* "See what's inside Testimoni" band — the last-chance
-          deep-dive doorway right before pricing. High-intent
-          visitors who scrolled this far but aren't ready to buy
-          get one final path: chip-links into the /features deep
-          dive to answer the "but does it do X?" objections that
-          fire in the moment before a price commitment. When they
-          return from /features, /features' own CTAs (signup,
-          pricing) close the loop. */}
-      <section className="border-y bg-primary/[0.03] py-8">
-        <div className="mx-auto max-w-5xl px-4">
-          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                Everything inside Testimoni
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                The full flow, every intake path, every layout, every AI feature.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
-              <Link href="/features#how-it-works" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
-                How it works
-              </Link>
-              <Link href="/features#collect" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
-                Intake paths
-              </Link>
-              <Link href="/features#video" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
-                Video
-              </Link>
-              <Link href="/features#features" className="rounded-full border bg-card px-3 py-1.5 font-medium hover:border-primary hover:text-primary">
-                All features
-              </Link>
-              <TrackedLink cta="features_band_see_all" surface="home" href="/features" className="ml-1 inline-flex items-center gap-1 text-primary font-semibold hover:underline">
-                See all <ArrowRight className="h-3 w-3" />
-              </TrackedLink>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Deleted: the doorway chip-link band that used to sit
+          here. Two "click to /features" surfaces back-to-back was
+          redundant with the "Everything Testimoni does" grid
+          below, which delivers a richer preview + the same "See
+          all" link. Keeping only the grid. */}
 
       {/* "Everything Testimoni does" — compact 6-card preview of
           the full feature grid on /features. Sits right below the
