@@ -54,6 +54,14 @@ export function PublicNav({ right }: PublicNavProps) {
 
         <nav className="hidden items-center gap-6 md:flex">
           <TrackedLink
+            cta="nav_features"
+            surface="public_nav"
+            href="/features"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Features
+          </TrackedLink>
+          <TrackedLink
             cta="nav_demo"
             surface="public_nav"
             href="/demo"

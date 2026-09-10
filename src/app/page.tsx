@@ -48,6 +48,10 @@ import { FadeIn } from "@/components/fade-in";
 import { TestimonialMarquee } from "@/components/testimonial-marquee";
 import Script from "next/script";
 import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
+import { WedgeBanner } from "@/components/wedge-banner";
+import { LinkImportSection } from "@/components/link-import-section";
+import { StartFromScratch } from "@/components/start-from-scratch";
+import { ToolsGridSection } from "@/components/tools-grid-section";
 
 export default function LandingPage() {
   return (
@@ -80,6 +84,9 @@ export default function LandingPage() {
             <span className="text-xl font-bold">Testimoni</span>
           </div>
           <nav className="hidden items-center gap-6 md:flex">
+            <TrackedLink cta="nav_features" surface="home_nav" href="/features" className="text-sm text-muted-foreground hover:text-foreground">
+              Features
+            </TrackedLink>
             <TrackedLink cta="nav_demo" surface="home_nav" href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
               Live Demo
             </TrackedLink>
@@ -99,146 +106,159 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="mx-auto max-w-7xl px-4 py-10 md:py-16">
-        <div className="grid gap-10 md:grid-cols-2 md:items-center">
-          {/* Left column — sharp promise, quiet secondary CTA, no
-              competing noise. Deliberate hierarchy:
-                1. Badge  → tone
-                2. H1     → the promise, in the same voice as the badge
-                3. Sub    → what happens
-                4. Trust  → free / no card / 30s
-                5. Button → soft "Sign up free" for pre-sold visitors
-                6. Link   → "See a live wall" for demo-averse ones
-              The interactive paste demo lives in the right column
-              and IS the primary action for skeptics. */}
-          <div>
-            <div className="mb-3">
-              <LiveSignupTicker />
-            </div>
-            <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Now free — App Store, Play Store, Shopify + 5 more
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-              Any praise becomes a{" "}
-              <span className="bg-gradient-to-r from-purple-600 via-fuchsia-600 via-primary to-purple-600 bg-clip-text text-transparent gradient-pan">
-                Wall of Love.
-              </span>{" "}
-              Now the wall talks back.
-            </h1>
-            {/* Punchy "how fast + easiest path" line right under the
-                brand headline. Reinstates the 30-second promise and
-                the "paste a tweet" hook the old hero led with —
-                these were our biggest conversion drivers pre-brand
-                pivot, so they belong in the fold even if the H1 is
-                brand-first now. */}
-            <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary md:text-base">
-              <Zap className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              Paste a tweet → live wall in 30 seconds. No signup to preview.
-            </p>
-            <p className="mt-4 text-lg text-muted-foreground md:text-xl">
-              Paste a tweet, drop a screenshot, or import from App
-              Store, Play, Chrome, Product Hunt, Shopify. Testimoni
-              turns every kind of praise into a Wall of Love — with
-              an AI chatbot that answers visitors using real customer
-              quotes, cited by name.
-            </p>
+      {/* HERO — Section 1. The wedge banner is now the front door of
+          the whole site: "Paste your website → we find your customer
+          love." Animated mockup counts up "37 potential testimonials
+          for Acme" and cascades 5 source rows. Zero API cost. This
+          replaces the previous dual-column hero + dual-demo. */}
+      <WedgeBanner />
 
-            {/* Trust caption sits close to the sub — reads as
-                supporting proof, not a competing chip row. */}
-            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3 w-3 text-primary/60" />
-                Free forever
-              </span>
-              <span className="text-muted-foreground/40">·</span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3 w-3 text-primary/60" />
-                No credit card
-              </span>
-              <span className="text-muted-foreground/40">·</span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3 w-3 text-primary/60" />
-                Live in ~30s
-              </span>
-            </div>
+      {/* Section 2 — Merged hero-adjacent. Combines the OLD hero's
+          interactive paste-a-tweet demo (HeroDualDemo) with the
+          "Drop the link" copy. Left column: sales copy + CTA to the
+          full import panel. Right column: the live paste-a-tweet /
+          form demo. Users can BOTH read the pitch and try the tool
+          without leaving the page. */}
+      <LinkImportSection />
 
-            {/* Softened CTA — default size, no giant py-6, plain
-                "Sign up free" label. Catches pre-sold visitors
-                without competing with the demo card on the right. */}
-            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-              <TrackedLink cta="hero_signup" surface="home_hero" href="/signup">
-                <Button size="default" className="gap-2">
-                  Sign up free <ArrowRight className="h-4 w-4" />
-                </Button>
-              </TrackedLink>
-              <TrackedLink
-                cta="hero_wall_demo"
-                surface="home"
-                href="/w/demo"
-                className="font-medium text-muted-foreground underline decoration-muted-foreground/30 underline-offset-4 hover:text-foreground hover:decoration-foreground"
-              >
-                See a live wall →
-              </TrackedLink>
-            </div>
+      {/* Section 4 — Start from scratch. Third door for founders whose
+          customers don't tweet or write reviews — the classic form
+          path. Sign up + get a form link right after. */}
+      <StartFromScratch />
 
-            {/* Escape hatch for visitors whose customers don't tweet
-                yet. Without this line the hero shouts "paste a tweet"
-                so hard it hides the form path, and anyone without
-                public praise bounces before scrolling. One quiet
-                text link keeps the hero focused while signalling
-                the alternative path exists. Uses HeroScrollLink so
-                the hash gets cleaned up after scrolling — a plain
-                <a href="#form-path"> would leave #form-path stuck in
-                the URL, making the SECOND click a no-op. */}
-            {/* Escape hatch for visitors without public praise —
-                sends them to the /features "Two intake paths"
-                section (which now hosts the form-path detail;
-                it used to live on this page but moved during the
-                home-simplification pass). */}
-            <p className="mt-3 text-xs text-muted-foreground">
-              No public praise yet?{" "}
-              <TrackedLink
-                cta="hero_form_path"
-                surface="home_hero"
-                href="/features#collect"
-                className="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
-              >
-                Share a form instead →
-              </TrackedLink>
+      {/* Section 5 — Pro AI features band. Moved up from its old
+          "right before pricing" slot: with the 3 entry paths above,
+          the visitor has already seen how to fill their wall. Now
+          we show what Pro does with a filled wall — Score, Amplify,
+          Answer — before the money ask lands later. */}
+      <FadeIn>
+      <section id="new-ai-features" className="border-t bg-gradient-to-br from-primary/[0.04] via-background to-primary/[0.02] py-16 scroll-mt-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
+              <Sparkles className="h-3 w-3" />
+              New · Included in Pro
+            </div>
+            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+              Your wall of love, but smarter.
+            </h2>
+            <p className="mt-3 max-w-2xl text-muted-foreground">
+              Three AI features that turn testimonials into insight, tweets,
+              and answers — grounded on the real customers you already have.
             </p>
           </div>
 
-          {/* Right column — interactive dual demo. Tab 1 is paste-a-
-              tweet (proven, kept default). Tab 2 is the new
-              screenshot-to-testimonial autoplay demo (zero API cost —
-              pre-computed examples). Both feed the same signup CTA
-              so the funnel doesn't fork. See <HeroDualDemo>. */}
-          <div className="relative mx-auto w-full max-w-md">
-            <HeroDualDemo />
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {/* Wall Score */}
+            <Link
+              href="/signup?tool=wall-score"
+              className="group flex flex-col rounded-2xl border bg-card p-6 transition hover:border-primary hover:shadow-lg"
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                  <Gauge className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-blue-700">
+                  Wall Score
+                </span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">
+                Audit your wall 0–100
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                6 dimensions — volume, diversity, video, recency, verification,
+                ratings. Trend graph + specific next actions per weakness.
+              </p>
+              <div className="mt-4 flex items-center gap-1 text-sm font-medium text-blue-700 group-hover:gap-2 transition-all">
+                See how it works <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+
+            {/* Tweet drafts */}
+            <Link
+              href="/signup?tool=tweet-drafts"
+              className="group flex flex-col rounded-2xl border bg-card p-6 transition hover:border-primary hover:shadow-lg"
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                  <Send className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                  Tweet drafts
+                </span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">
+                Every quote → 3 tweets
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Quote, reaction, callout — three tweet-length drafts per
+                testimonial. One click opens X or LinkedIn compose, pre-filled.
+              </p>
+              <div className="mt-4 flex items-center gap-1 text-sm font-medium text-emerald-700 group-hover:gap-2 transition-all">
+                See how it works <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+
+            {/* Ask My Wall */}
+            <Link
+              href="/signup?tool=ask-my-wall"
+              className="group flex flex-col rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-background p-6 transition hover:border-primary hover:shadow-lg"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <MessageSquare className="h-5 w-5" />
+                  </div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+                    Ask My Wall
+                  </span>
+                </div>
+                <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">
+                  Wow
+                </span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">
+                AI chatbot, real quotes only
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Visitors ask questions on your site. Answers cite real
+                customers by name — Rachel at HubSpot said 4 hours. Never
+                invents.
+              </p>
+              <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
+                See how it works <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+          </div>
+
+          <div className="mt-8 flex flex-col items-center gap-2">
+            <TrackedLink
+              cta="new_features_band_cta"
+              surface="home"
+              href="/pricing"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+            >
+              All three included in Pro · $9/mo
+              <ArrowRight className="h-4 w-4" />
+            </TrackedLink>
+            <p className="text-xs text-muted-foreground">
+              Free plan gets 1 Wall Score audit + 5 tweet drafts/mo. Ask My
+              Wall is Pro-only.
+            </p>
           </div>
         </div>
       </section>
+      </FadeIn>
 
-      {/* "Loved by founders" — hand-curated real testimonial strip.
-          Extracted to <LovedByFoundersStrip /> so we drop the same
-          social-proof surface on /pricing, /features, and /demo
-          without duplicating the layout. */}
-      <LovedByFoundersStrip />
-
-      {/* Testimonial marquee — infinite right-to-left strip of
-          founder quotes, pauses on hover. On-brand for a
-          testimonial widget (obviously) and gives the page some
-          kinetic energy between the hero and the rest of the
-          scroll. */}
-      <TestimonialMarquee />
+      {/* The old LovedByFoundersStrip + TestimonialMarquee that
+          previously sat here have MOVED to just before Pricing so
+          social proof directly precedes the money ask. See below. */}
 
       <FadeIn>{/* Wall of Love preview — shows what a live wall actually looks like
           after all the collection + approval. Static grid, not interactive,
           links out to /w/demo for the full experience. Same testimonials as
           /w/demo so the click-through feels like "yes, exactly what I saw." */}
-      <section className="border-t bg-muted/30 py-16">
+      <section className="border-t bg-gradient-to-br from-fuchsia-50/40 via-background to-primary/[0.03] py-16">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mx-auto max-w-2xl text-center">
             <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border-2 border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
@@ -388,7 +408,7 @@ export default function LandingPage() {
           paste-a-tweet, screenshot, and App Store intakes in the
           hero demo. Framed as "here's how you'd start from scratch
           with fresh testimonials", not "the whole flow". */}
-      <section className="border-t py-14">
+      <section className="border-t bg-gradient-to-b from-violet-50/40 via-background to-background py-14">
         <div className="mx-auto max-w-5xl px-4">
           <div className="mb-8 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -444,308 +464,8 @@ export default function LandingPage() {
       </section>
 
       </FadeIn>
-
-      <FadeIn>{/* New Pro AI features band — sits right before pricing so
-          visitors see the upsell hook in the moment they're deciding
-          "free or Pro?". Compact by design — three tiles, one CTA.
-          The visual story: Score / Amplify / Answer — the three
-          verbs that describe what Pro does with the wall you've
-          already collected. */}
-      <section id="new-ai-features" className="border-t bg-gradient-to-br from-primary/[0.04] via-background to-primary/[0.02] py-16 scroll-mt-20">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="flex flex-col items-center gap-2 text-center">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
-              <Sparkles className="h-3 w-3" />
-              New · Included in Pro
-            </div>
-            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-              Your wall of love, but smarter.
-            </h2>
-            <p className="mt-3 max-w-2xl text-muted-foreground">
-              Three AI features that turn testimonials into insight, tweets,
-              and answers — grounded on the real customers you already have.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {/* Wall Score */}
-            <Link
-              href="/signup?tool=wall-score"
-              className="group flex flex-col rounded-2xl border bg-card p-6 transition hover:border-primary hover:shadow-lg"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
-                  <Gauge className="h-5 w-5" />
-                </div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-blue-700">
-                  Wall Score
-                </span>
-              </div>
-              <h3 className="mt-4 text-lg font-semibold">
-                Audit your wall 0–100
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                6 dimensions — volume, diversity, video, recency, verification,
-                ratings. Trend graph + specific next actions per weakness.
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-sm font-medium text-blue-700 group-hover:gap-2 transition-all">
-                See how it works <ArrowRight className="h-3.5 w-3.5" />
-              </div>
-            </Link>
-
-            {/* Tweet drafts */}
-            <Link
-              href="/signup?tool=tweet-drafts"
-              className="group flex flex-col rounded-2xl border bg-card p-6 transition hover:border-primary hover:shadow-lg"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
-                  <Send className="h-5 w-5" />
-                </div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-                  Tweet drafts
-                </span>
-              </div>
-              <h3 className="mt-4 text-lg font-semibold">
-                Every quote → 3 tweets
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Quote, reaction, callout — three tweet-length drafts per
-                testimonial. One click opens X or LinkedIn compose, pre-filled.
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-sm font-medium text-emerald-700 group-hover:gap-2 transition-all">
-                See how it works <ArrowRight className="h-3.5 w-3.5" />
-              </div>
-            </Link>
-
-            {/* Ask My Wall */}
-            <Link
-              href="/signup?tool=ask-my-wall"
-              className="group flex flex-col rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 to-background p-6 transition hover:border-primary hover:shadow-lg"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <MessageSquare className="h-5 w-5" />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-                    Ask My Wall
-                  </span>
-                </div>
-                <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">
-                  Wow
-                </span>
-              </div>
-              <h3 className="mt-4 text-lg font-semibold">
-                AI chatbot, real quotes only
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Visitors ask questions on your site. Answers cite real
-                customers by name — Rachel at HubSpot said 4 hours. Never
-                invents.
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
-                See how it works <ArrowRight className="h-3.5 w-3.5" />
-              </div>
-            </Link>
-          </div>
-
-          <div className="mt-8 flex flex-col items-center gap-2">
-            <TrackedLink
-              cta="new_features_band_cta"
-              surface="home"
-              href="/pricing"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-            >
-              All three included in Pro · $9/mo
-              <ArrowRight className="h-4 w-4" />
-            </TrackedLink>
-            <p className="text-xs text-muted-foreground">
-              Free plan gets 1 Wall Score audit + 5 tweet drafts/mo. Ask My
-              Wall is Pro-only.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      </FadeIn>
-
-      <FadeIn>{/* Review-platforms band — announces the newly-Free auto-import
-          from App Store / Play Store / Chrome Web Store / Product
-          Hunt. Sits above the AI features so the story reads
-          intake-first ("look at all the places we can pull praise
-          from") before value-add ("and here's what Pro adds on
-          top"). */}
-      <section className="border-t bg-gradient-to-b from-background via-primary/[0.02] to-background py-14">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="flex flex-col items-center gap-2 text-center">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-              <Sparkles className="h-3 w-3" />
-              Now free
-            </div>
-            <h2 className="mt-4 text-3xl font-bold md:text-4xl">
-              Auto-import from every review platform.
-            </h2>
-            <p className="mt-3 max-w-2xl text-muted-foreground">
-              Paste an App Store, Play Store, Chrome Web Store, or Product
-              Hunt URL. We pull the reviews, you approve, they land on your
-              Wall of Love — all on the Free plan.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-3 md:grid-cols-3 lg:grid-cols-5">
-            {[
-              {
-                name: "App Store",
-                logoBg: "bg-blue-500",
-                logoLetter: "A",
-                tagline: "iOS + macOS reviews",
-              },
-              {
-                name: "Play Store",
-                logoBg: "bg-emerald-500",
-                logoLetter: "P",
-                tagline: "Android apps",
-              },
-              {
-                name: "Chrome Web Store",
-                logoBg: "bg-yellow-500",
-                logoLetter: "C",
-                tagline: "Extension reviews",
-              },
-              {
-                name: "Product Hunt",
-                logoBg: "bg-orange-500",
-                logoLetter: "P",
-                tagline: "Launch reviews",
-              },
-              {
-                name: "Shopify",
-                logoBg: "bg-lime-600",
-                logoLetter: "S",
-                tagline: "Shopify App Store",
-              },
-            ].map((p) => (
-              <div
-                key={p.name}
-                className="flex items-center gap-3 rounded-xl border bg-card p-4 transition hover:border-primary hover:shadow"
-              >
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${p.logoBg} text-lg font-black text-white`}
-                >
-                  {p.logoLetter}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{p.name}</p>
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                    {p.tagline}
-                  </p>
-                </div>
-                <CheckCircle2 className="ml-auto h-4 w-4 shrink-0 text-emerald-500" />
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 flex flex-col items-center gap-2 text-center">
-            <TrackedLink
-              cta="review_sources_band_cta"
-              surface="home"
-              href="/signup?src=review_sources_band"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-            >
-              Start free — no credit card
-              <ArrowRight className="h-4 w-4" />
-            </TrackedLink>
-            <p className="text-xs text-muted-foreground">
-              Free: manual import + 10-testimonial cap. Pro: auto-sync every
-              24h + auto-approve + unlimited.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      </FadeIn>
-
-      {/* Free tools strip — moved down from just after paste-a-tweet
-          to here (after all four product demos: paste-a-tweet, form
-          path, video pitch, example wall). Reason: the tools compete
-          with the main product story if surfaced too early; placing
-          them after the visitor has SEEN what the product does frames
-          them as a nice-to-have bonus rather than a distraction.
-          Still above Features/Pricing so scanners find them. */}
-      <section className="border-b bg-background py-6">
-        <div className="mx-auto max-w-5xl px-4">
-          <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
-            <p className="text-sm text-muted-foreground">
-              <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-primary">
-                Also free
-              </span>
-              — 6 tools no signup required:
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <TrackedLink
-                cta="tools_strip_card"
-                surface="home"
-                href="/tools/testimonial-card"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                🖼️ Card generator
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_finder"
-                surface="home"
-                href="/tools/praise-tweet-finder"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                🔎 Praise tweet finder
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_writer"
-                surface="home"
-                href="/tools/testimonial-writer"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                ✍️ Testimonial writer
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_ask"
-                surface="home"
-                href="/tools/ask-templates"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                💬 Ask templates
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_linkedin"
-                surface="home"
-                href="/tools/linkedin-recommendation"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                💼 LinkedIn recommendation
-              </TrackedLink>
-              <TrackedLink
-                cta="tools_strip_badge"
-                surface="home"
-                href="/tools/star-badge"
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:border-primary/40 hover:bg-primary/5"
-              >
-                ⭐ Star badge
-              </TrackedLink>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features grid and "Get started in 3 steps" both moved to
-          /features so home stays focused. Feature grid was 100 lines
-          of card-tile duplication of what /features already carries;
-          the 3-step "how it works" section duplicated the earlier
-          Ask/Collect/Publish strip. The compact "Everything inside
-          Testimoni" band above the Wall of Love preview links visitors
-          who want the depth. */}
-
       {/* Why us — differentiators vs Senja / Testimonial.to */}
-      <section className="border-t py-20">
+      <section className="border-t bg-gradient-to-br from-slate-50 via-background to-primary/[0.03] py-20">
         <div className="mx-auto max-w-6xl px-4">
           <div className="text-center">
             <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs font-medium">
@@ -854,7 +574,7 @@ export default function LandingPage() {
           "here are 6 things the product does, and 20+ more if you
           click through." Doubles the depth signal without doubling
           the scroll. Per Neha's ask 2026-09-10. */}
-      <section className="border-t py-16">
+      <section className="border-t bg-gradient-to-br from-amber-50/40 via-background to-orange-50/20 py-16">
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-10 text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -922,8 +642,20 @@ export default function LandingPage() {
 
       </FadeIn>
 
+      {/* Section 10 — Tools grid. Replaces the old thin "6 tools" chip
+          strip. Full 8-tool card grid so every free tool has its own
+          real estate. */}
+      <ToolsGridSection />
+
+      {/* "Loved by founders" + Testimonial marquee — moved from just
+          under the hero to right before pricing so social proof
+          directly precedes the money ask. Nothing was deleted; both
+          strips still render, just repositioned. */}
+      <LovedByFoundersStrip />
+      <TestimonialMarquee />
+
       {/* Pricing Preview */}
-      <section className="border-t bg-muted/30 py-20">
+      <section className="border-t bg-gradient-to-br from-slate-50 via-muted/40 to-primary/[0.04] py-20">
         <div className="mx-auto max-w-7xl px-4 text-center">
           <h2 className="text-3xl font-bold">Simple, transparent pricing</h2>
           <p className="mt-4 text-muted-foreground">
@@ -1009,7 +741,7 @@ export default function LandingPage() {
           so first-time visitors know an industry-tailored page exists
           for them. Slim, single-row, near the bottom of the marketing
           flow so it doesn't compete with the hero. */}
-      <section className="border-y bg-primary/[0.03] py-10">
+      <section className="border-y bg-gradient-to-r from-primary/[0.05] via-fuchsia-50/40 to-primary/[0.05] py-10">
         <div className="mx-auto max-w-5xl px-4 text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">
             Built for
@@ -1039,9 +771,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20">
-        <div className="mx-auto max-w-5xl px-4">
+      {/* CTA — final close. Highlighted gradient matches the hero's
+          violet/purple energy so the visitor's eye lands one more
+          time on the brand color before conversion. */}
+      <section className="relative overflow-hidden border-t bg-gradient-to-br from-violet-200/70 via-purple-100 to-fuchsia-100 py-20">
+        <div className="pointer-events-none absolute -left-24 top-10 h-80 w-80 rounded-full bg-violet-500/25 blur-3xl" />
+        <div className="pointer-events-none absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-fuchsia-500/25 blur-3xl" />
+        <div className="relative mx-auto max-w-5xl px-4">
           <div className="grid gap-8 md:grid-cols-[1fr_1.1fr] md:gap-10">
             <div className="text-center md:text-left">
               <h2 className="text-3xl font-bold">

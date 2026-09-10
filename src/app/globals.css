@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+/* Global smooth-scroll. Sticky nav is 64px, launch bar can add
+   another ~40px on top; give hash-scrolls a bit of headroom so
+   section headers aren't tucked under the nav. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+/* Respect reduced-motion — turn off smooth-scroll AND every
+   custom animation. IntersectionObserver-driven fades still
+   render their final state; they just skip the tween. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
