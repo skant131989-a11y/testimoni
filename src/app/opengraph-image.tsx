@@ -285,46 +285,50 @@ export default function OpenGraphImage() {
             </div>
           </div>
 
-          {/* Right column — mini product mock (testimonial + cited chip) */}
+          {/* Right column — mini wall (2 stacked cards) + Ask My
+              Wall chat. Mirrors what the home hero shows: real
+              testimonials sitting next to an AI chatbot that cites
+              them. Uses actual seeded testimonials so this OG card
+              and the live wall stay in sync. */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               flex: 1,
-              gap: 12,
+              gap: 10,
               justifyContent: "center",
             }}
           >
-            {/* Testimonial card */}
+            {/* Testimonial card #1 — Rachel */}
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
-                padding: 16,
+                padding: 14,
                 borderRadius: 14,
                 background: "white",
                 border: "2px solid rgba(91, 33, 182, 0.28)",
                 boxShadow: "0 10px 26px rgba(76, 29, 149, 0.18)",
-                gap: 10,
+                gap: 8,
               }}
             >
-              <StarRow size={11} />
+              <StarRow size={10} />
               <div
                 style={{
                   display: "flex",
-                  fontSize: 14,
+                  fontSize: 13,
                   lineHeight: 1.35,
                   color: "#0f172a",
                 }}
               >
-                &ldquo;Cut my onboarding docs from 3 days to 4 hours. Team actually reads them now.&rdquo;
+                &ldquo;Every other testimonial tool wanted me to schedule a demo. Testimoni just… worked. Live wall in 30 seconds.&rdquo;
               </div>
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
-                  paddingTop: 8,
+                  paddingTop: 6,
                   borderTop: "1px solid #e5e7eb",
                 }}
               >
@@ -333,32 +337,32 @@ export default function OpenGraphImage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: 26,
-                    height: 26,
-                    borderRadius: 13,
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
                     background: "#059669",
                     color: "white",
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: 800,
                   }}
                 >
                   R
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                  <div style={{ display: "flex", fontSize: 11, fontWeight: 700, color: "#1a1a1a" }}>
-                    Rachel Kim
+                  <div style={{ display: "flex", fontSize: 10, fontWeight: 700, color: "#1a1a1a" }}>
+                    Rachel K.
                   </div>
-                  <div style={{ display: "flex", fontSize: 10, color: "#6b7280" }}>
+                  <div style={{ display: "flex", fontSize: 9, color: "#6b7280" }}>
                     VP Ops · via Twitter
                   </div>
                 </div>
                 <div
                   style={{
                     display: "flex",
-                    padding: "3px 7px",
+                    padding: "2px 6px",
                     borderRadius: 999,
                     background: "#f3f4f6",
-                    fontSize: 9,
+                    fontSize: 8,
                     fontWeight: 700,
                     color: "#4b5563",
                   }}
@@ -368,7 +372,82 @@ export default function OpenGraphImage() {
               </div>
             </div>
 
-            {/* Ask My Wall chat exchange — the wall "talking back" */}
+            {/* Testimonial card #2 — Marcus (competitor comparison) */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                padding: 14,
+                borderRadius: 14,
+                background: "white",
+                border: "2px solid rgba(91, 33, 182, 0.20)",
+                boxShadow: "0 8px 22px rgba(76, 29, 149, 0.14)",
+                gap: 8,
+                marginLeft: 18,
+              }}
+            >
+              <StarRow size={10} />
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: 13,
+                  lineHeight: 1.35,
+                  color: "#0f172a",
+                }}
+              >
+                &ldquo;Half the price of Senja and it does more. The screenshot AI extracted quotes from my DMs in one click.&rdquo;
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  paddingTop: 6,
+                  borderTop: "1px solid #e5e7eb",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    background: "#c026d3",
+                    color: "white",
+                    fontSize: 11,
+                    fontWeight: 800,
+                  }}
+                >
+                  M
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                  <div style={{ display: "flex", fontSize: 10, fontWeight: 700, color: "#1a1a1a" }}>
+                    Marcus C.
+                  </div>
+                  <div style={{ display: "flex", fontSize: 9, color: "#6b7280" }}>
+                    VP Growth · via LinkedIn
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    padding: "2px 6px",
+                    borderRadius: 999,
+                    background: "#f3f4f6",
+                    fontSize: 8,
+                    fontWeight: 700,
+                    color: "#4b5563",
+                  }}
+                >
+                  LinkedIn
+                </div>
+              </div>
+            </div>
+
+            {/* Ask My Wall chat exchange — cites BOTH names above so
+                the OG card literally shows the wall talking back. */}
             <div
               style={{
                 display: "flex",
@@ -414,7 +493,7 @@ export default function OpenGraphImage() {
                       fontWeight: 600,
                     }}
                   >
-                    Onboarding time?
+                    How fast to set up?
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "flex-start" }}>
@@ -428,10 +507,10 @@ export default function OpenGraphImage() {
                       fontSize: 10,
                       fontWeight: 500,
                       lineHeight: 1.3,
-                      maxWidth: "85%",
+                      maxWidth: "88%",
                     }}
                   >
-                    Rachel at HubSpot said 4 hours.
+                    Rachel said her wall was live in 30 seconds.
                   </div>
                 </div>
                 <div style={{ display: "flex", alignSelf: "flex-start" }}>
@@ -450,7 +529,7 @@ export default function OpenGraphImage() {
                   >
                     Cited:&nbsp;
                     <span style={{ color: "#5b21b6", fontWeight: 800 }}>
-                      — Rachel Kim
+                      — Rachel K. · Marcus C.
                     </span>
                   </div>
                 </div>
