@@ -26,6 +26,7 @@ import { LetterAvatar } from "@/components/letter-avatar";
 import { ImportSourcesRow } from "@/components/import-sources-row";
 import { WelcomeSplash } from "@/components/welcome-splash";
 import { PageLoadPerf } from "@/components/page-load-perf";
+import { FindMyProofCard } from "@/components/dashboard/find-my-proof-card";
 import { celebrateFirstTestimonial } from "@/lib/confetti";
 import { readSessionCache } from "@/lib/session-cache";
 import { SCREENSHOT_TAG } from "@/lib/screenshot-constants";
@@ -1150,6 +1151,12 @@ export function WelcomeClient({
       <WelcomeSplash active={isNewSignup} />
       <PageLoadPerf surface="welcome" />
       <div className="mx-auto max-w-4xl space-y-6 py-6">
+        {/* Find My Proof — the wedge nudge on the primary welcome
+            flow. Someone who signed up because they were curious
+            about auto-finding praise deserves that CTA in view
+            right away, not buried below the paste-a-tweet form. */}
+        <FindMyProofCard surface="welcome" dismissible />
+
         <div className="text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
           <Sparkles className="h-7 w-7 text-primary" />

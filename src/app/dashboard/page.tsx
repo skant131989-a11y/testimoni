@@ -27,6 +27,7 @@ import { TrackedLink } from "@/components/tracked-link";
 import { PageLoadPerf } from "@/components/page-load-perf";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
+import { FindMyProofCard } from "@/components/dashboard/find-my-proof-card";
 import { getEffectiveLimits } from "@/lib/plan";
 import { getDbUserWithWorkspace, loadDbUserWithWorkspaceFresh } from "@/lib/session";
 import {
@@ -254,6 +255,15 @@ export default async function DashboardPage() {
           formUrl={`${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}${formShareHref}`}
           surface="dashboard"
         />
+      )}
+
+      {/* Find My Proof nudge — sits under the form URL card so it's
+          visible without competing with the primary "share your form"
+          action. Dismissible per surface so it stops nagging after a
+          founder has tried it once. Only shown while the wall is still
+          small (< 10 testimonials) — power users don't need this. */}
+      {totalTestimonials < 10 && (
+        <FindMyProofCard surface="dashboard" dismissible />
       )}
 
       {/* Next best action — one clear CTA above stats so the page
