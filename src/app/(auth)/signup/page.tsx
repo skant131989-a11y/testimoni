@@ -9,6 +9,7 @@ import { track, identify, resetAnalytics } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Turnstile } from "@/components/turnstile";
 import {
   Card,
   CardHeader,
@@ -47,6 +48,41 @@ export default function SignupPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [botTrap, setBotTrap] = useState("");
   const [mountedAt] = useState(() => Date.now());
+  // Turnstile — required before either Google or password signup
+  // succeeds. Widget renders below the form and provides a token
+  // when the user (or Cloudflare's invisible behavioral check)
+  // resolves the challenge. When the env key isn't set, the
+  // component renders nothing and we skip the verify step.
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileConfigured = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  /** Verify Turnstile before proceeding. Returns true if verified
+   *  (or unconfigured), false if the check failed. */
+  async function verifyTurnstile(action: string): Promise<boolean> {
+    if (!turnstileConfigured) return true;
+    if (!turnstileToken) {
+      setError("Please wait for the security check to complete.");
+      return false;
+    }
+    try {
+      const res = await fetch("/api/verify-turnstile", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token: turnstileToken, action }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setError("Security check failed. Refresh and try again.");
+        setTurnstileToken(null);
+        return false;
+      }
+      return true;
+    } catch {
+      // Network fluke — fail open so a Cloudflare edge blip
+      // doesn't lock everyone out.
+      return true;
+    }
+  }
 
   async function handleEmailSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -68,6 +104,9 @@ export default function SignupPage() {
       setError("Password must be at least 8 characters.");
       return;
     }
+    // Turnstile gate — real users skip through invisibly, bots
+    // without a valid token get rejected before we touch Supabase.
+    if (!(await verifyTurnstile("signup_email"))) return;
 
     setIsEmailLoading(true);
     track(
@@ -130,6 +169,9 @@ export default function SignupPage() {
 
   async function handleGoogleSignup() {
     setError(null);
+    // Turnstile gate — this stops bots that use real Google
+    // accounts from farming signups via OAuth.
+    if (!(await verifyTurnstile("signup_google"))) return;
     setIsGoogleLoading(true);
     track(
       "signup_started",
@@ -235,6 +277,20 @@ export default function SignupPage() {
             Create my account
           </Button>
         </form>
+
+        {/* Turnstile — invisible on Managed mode for most users;
+            a challenge appears for suspicious traffic. Placed
+            outside the form so both Google + password submit
+            paths can consult the token. */}
+        {turnstileConfigured && (
+          <div className="mt-4 flex justify-center">
+            <Turnstile
+              onToken={setTurnstileToken}
+              onExpire={() => setTurnstileToken(null)}
+              size="normal"
+            />
+          </div>
+        )}
 
         {/* Divider */}
         <div className="relative my-6">

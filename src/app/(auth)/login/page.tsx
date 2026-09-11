@@ -9,6 +9,7 @@ import { track, identify, resetAnalytics } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Turnstile } from "@/components/turnstile";
 import {
   Card,
   CardHeader,
@@ -81,6 +82,33 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [botTrap, setBotTrap] = useState("");
   const [mountedAt] = useState(() => Date.now());
+  // Turnstile — same fail-open policy as signup.
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileConfigured = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  async function verifyTurnstile(action: string): Promise<boolean> {
+    if (!turnstileConfigured) return true;
+    if (!turnstileToken) {
+      setError("Please wait for the security check to complete.");
+      return false;
+    }
+    try {
+      const res = await fetch("/api/verify-turnstile", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token: turnstileToken, action }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setError("Security check failed. Refresh and try again.");
+        setTurnstileToken(null);
+        return false;
+      }
+      return true;
+    } catch {
+      return true;
+    }
+  }
 
   // Some auth callback errors arrive as fragment (?…#error=…) since
   // Supabase pushes to a hash on the OAuth return. Read both.
@@ -120,6 +148,7 @@ export default function LoginPage() {
       setError("Slow down a bit and try again.");
       return;
     }
+    if (!(await verifyTurnstile("login_email"))) return;
 
     setIsLoading(true);
     track("login_started", { method: "email_password" }, { instant: true });
@@ -166,6 +195,7 @@ export default function LoginPage() {
 
   async function handleGoogleLogin() {
     setError(null);
+    if (!(await verifyTurnstile("login_google"))) return;
     setIsGoogleLoading(true);
     track("login_started", { method: "google" }, { instant: true });
 
@@ -274,6 +304,16 @@ export default function LoginPage() {
             Sign in
           </Button>
         </form>
+
+        {turnstileConfigured && (
+          <div className="mt-4 flex justify-center">
+            <Turnstile
+              onToken={setTurnstileToken}
+              onExpire={() => setTurnstileToken(null)}
+              size="normal"
+            />
+          </div>
+        )}
 
         {/* Divider */}
         <div className="relative my-6">
