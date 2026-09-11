@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useCountUp } from "@/hooks/use-count-up";
 import { track } from "@/lib/analytics";
+import { HeroScrollHint } from "@/components/hero-scroll-hint";
 
 /**
  * WedgeBanner — the "paste your website, we find your love" pitch,
@@ -174,6 +175,10 @@ export function WedgeBanner() {
           <FindProofMockup step={step} typed={typed} quote={HERO_QUOTE} />
         </div>
       </div>
+
+      {/* Scroll-hint chip — signals "there's more below" on tall
+          Mac viewports where the hero exactly fills the screen. */}
+      <HeroScrollHint targetId="drop-link" />
     </section>
   );
 }

@@ -48,6 +48,22 @@ html {
   transform-origin: 70% 70%;
 }
 
+/* Scroll-hint bounce — a soft vertical pulse used on the hero
+   "there's more below" chip. Softer than the classic scroll-arrow
+   bounce so it doesn't feel like it's begging. */
+@keyframes hero-scroll-hint {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+.animate-hero-scroll-hint {
+  animation: hero-scroll-hint 1.4s ease-in-out infinite;
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
