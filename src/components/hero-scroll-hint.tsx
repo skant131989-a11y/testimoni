@@ -30,7 +30,7 @@ interface Props {
 
 export function HeroScrollHint({
   targetId = "drop-link",
-  label = "Or paste a tweet live below",
+  label = "Try it live: tweet · screenshot · App Store",
   revealDelayMs = 1600,
   hideAfterPx = 240,
 }: Props) {
