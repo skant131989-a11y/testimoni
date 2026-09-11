@@ -60,12 +60,11 @@ export function StartFromScratch() {
         </div>
       </div>
 
-      {/* Section-to-Tools connector — soft chip for visitors not
-          ready to sign up. Bridges from the "form path" pitch to
-          the free-tools grid without competing with the signup CTA
-          above. Matches the treatment of the Section 2 → Section 3
-          chip so the two connectors feel like a set. */}
-      <div className="relative mt-12 flex justify-center px-4">
+      {/* Section-to-next dual chip — two side-by-side off-ramps for
+          the two visitor types that end up here without signing up:
+          the hesitant one who wants to explore free, and the curious
+          one who wants to see the smart Pro AI story. */}
+      <div className="relative mt-12 flex flex-wrap items-center justify-center gap-3 px-4">
         <a
           href="#tools"
           onClick={() =>
@@ -73,9 +72,23 @@ export function StartFromScratch() {
           }
           className="group inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white/80 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow"
         >
-          Not ready to sign up?{" "}
+          Not sure yet?{" "}
           <span className="text-primary group-hover:underline">
-            Try 8 free tools first
+            Try 8 free tools
+          </span>
+          <span aria-hidden="true">↓</span>
+        </a>
+        <a
+          href="#new-ai-features"
+          onClick={() =>
+            track("home_section3_to_ai_click", { source: "start_from_scratch" })
+          }
+          className="group inline-flex items-center gap-1.5 rounded-full border border-violet-300 bg-gradient-to-br from-violet-50 to-purple-50/70 px-4 py-2 text-xs font-semibold text-violet-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-violet-500 hover:shadow"
+        >
+          <span aria-hidden="true">✨</span>
+          Curious?{" "}
+          <span className="text-violet-800 group-hover:underline">
+            See AI features
           </span>
           <span aria-hidden="true">↓</span>
         </a>
