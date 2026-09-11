@@ -1149,19 +1149,44 @@ export function WelcomeClient({
     <>
       <WelcomeSplash active={isNewSignup} />
       <PageLoadPerf surface="welcome" />
+
+      {/* Ambient brand backdrop — bleeds behind the whole page so the
+          welcome flow shares the marketing hero's aesthetic. Absolute
+          + z-negative keeps existing card layouts intact. */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-violet-50 via-purple-50/70 to-fuchsia-50/40">
+        <div className="absolute -left-32 top-24 h-96 w-96 rounded-full bg-violet-400/25 blur-3xl" />
+        <div className="absolute right-0 top-80 h-72 w-72 rounded-full bg-fuchsia-400/20 blur-3xl" />
+        <div className="absolute -left-24 bottom-24 h-72 w-72 rounded-full bg-purple-400/20 blur-3xl" />
+      </div>
+
       <div className="mx-auto max-w-4xl space-y-6 py-6">
         <div className="text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-          <Sparkles className="h-7 w-7 text-primary" />
-        </div>
-        <h1 className="mt-6 text-3xl font-bold tracking-tight md:text-4xl">
-          Welcome to {workspaceName || "Testimoni"} 👋
-        </h1>
-        <p className="mx-auto mt-3 max-w-lg text-lg text-muted-foreground">
-          {mode === "url"
-            ? "Let's get your first testimonial live in 30 seconds. Paste any public tweet or LinkedIn post about your work."
-            : "Type in a testimonial you already have — from an email, a DM, or a screenshot."}
-        </p>
+          {/* You're in — success chip. Sets the mood before the
+              welcome headline so first-mount reads as "yes, made it"
+              not "another blank page". */}
+          <div className="mx-auto inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+            You&rsquo;re in · Your workspace is live
+          </div>
+
+          <div className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25">
+            <Sparkles className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+            Welcome to{" "}
+            <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
+              {workspaceName || "Testimoni"}
+            </span>{" "}
+            <span className="inline-block animate-wave-hand origin-bottom-right">👋</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-slate-700 md:text-xl">
+            {mode === "url"
+              ? "Two ways to get your first testimonial live in 30 seconds — pick whichever feels closer to home."
+              : "Type in a testimonial you already have — from an email, a DM, or a screenshot."}
+          </p>
 
         {/* Two doors card — replaces the meh "3 quotes today" text
             with an actionable side-by-side: auto-find your praise
@@ -1169,54 +1194,69 @@ export function WelcomeClient({
             marketing brand's violet-purple gradient so a founder who
             signed up from the landing page recognises the aesthetic. */}
         {!imported && (
-          <div className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-2">
+          <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-2">
             <Link
               href="/tools/find-my-proof"
               onClick={() =>
                 track("welcome_two_doors_card_click", { door: "find_my_proof" })
               }
-              className="group relative overflow-hidden rounded-2xl border-2 border-violet-300/60 bg-gradient-to-br from-violet-100/80 via-purple-50 to-fuchsia-50/60 p-4 text-left shadow-md shadow-violet-500/10 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              className="group relative overflow-hidden rounded-3xl border-2 border-violet-300/70 bg-gradient-to-br from-violet-100 via-purple-50 to-fuchsia-50/80 p-6 text-left shadow-xl shadow-violet-500/15 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/25"
             >
-              <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-violet-400/25 blur-2xl" />
+              <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-400/30 blur-2xl" />
+              <div className="pointer-events-none absolute -left-6 -bottom-6 h-24 w-24 rounded-full bg-fuchsia-400/20 blur-2xl" />
               <div className="relative">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-violet-600/30 bg-white/70 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-700">
-                    Free · Auto
+                  <span className="inline-flex items-center gap-1 rounded-full border border-violet-600/40 bg-white/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-700 shadow-sm">
+                    ✨ Free · Auto
                   </span>
-                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-violet-600 group-hover:bg-violet-600 group-hover:text-white">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-violet-600 shadow-md transition-all group-hover:bg-violet-600 group-hover:text-white group-hover:translate-x-0.5">
                     →
                   </span>
                 </div>
-                <h3 className="mt-2 text-base font-bold leading-tight text-slate-900">
+                <h3 className="mt-4 text-lg font-bold leading-tight text-slate-900 md:text-xl">
                   Skip the ask —{" "}
-                  <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
                     find praise you already have
                   </span>
                 </h3>
-                <p className="mt-1 text-xs leading-relaxed text-slate-700">
+                <p className="mt-2 text-sm leading-relaxed text-slate-700">
                   Paste your website. We scan X, Reddit, LinkedIn, Product
                   Hunt & App Store for real customer love — you approve, it
                   lands on your wall.
                 </p>
+                <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-semibold text-violet-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">X</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">Reddit</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">LinkedIn</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">Product Hunt</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">App Store</span>
+                </div>
               </div>
             </Link>
 
-            <div className="rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-4">
+            <div className="relative overflow-hidden rounded-3xl border-2 border-slate-200 bg-white/80 p-6 shadow-md backdrop-blur">
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                <span className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
                   Or · Manual
                 </span>
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <span className="inline-flex h-8 w-8 animate-bounce items-center justify-center rounded-full bg-slate-100 text-slate-500">
                   ↓
                 </span>
               </div>
-              <h3 className="mt-2 text-base font-bold leading-tight text-slate-900">
-                Have a specific rave? Drop it below.
+              <h3 className="mt-4 text-lg font-bold leading-tight text-slate-900 md:text-xl">
+                Have a specific rave?{" "}
+                <span className="text-slate-500">Drop it below.</span>
               </h3>
-              <p className="mt-1 text-xs leading-relaxed text-slate-700">
-                A tweet URL, LinkedIn post, blog review, or a screenshot from
-                a DM. Extract, approve, publish — 30 seconds each.
+              <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                A tweet URL, LinkedIn post, blog review, or a screenshot
+                from a DM. Extract, approve, publish — 30 seconds each.
               </p>
+              <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-semibold text-slate-600">
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5">Tweet URL</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5">LinkedIn</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5">Reddit</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5">Screenshot</span>
+              </div>
             </div>
           </div>
         )}

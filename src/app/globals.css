@@ -25,6 +25,29 @@ html {
   }
 }
 
+/* Wave-hand emoji animation for welcome headers. Fires once on
+   mount, then a longer pause, then again. Gentle enough to catch
+   the eye without being twitchy. */
+@keyframes wave-hand {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+  10%,
+  30% {
+    transform: rotate(14deg);
+  }
+  20%,
+  40% {
+    transform: rotate(-8deg);
+  }
+}
+.animate-wave-hand {
+  animation: wave-hand 2.4s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
