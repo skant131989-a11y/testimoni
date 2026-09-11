@@ -259,12 +259,11 @@ export default async function DashboardPage() {
 
       {/* Find My Proof nudge — sits under the form URL card so it's
           visible without competing with the primary "share your form"
-          action. Dismissible per surface so it stops nagging after a
-          founder has tried it once. Only shown while the wall is still
-          small (< 10 testimonials) — power users don't need this. */}
-      {totalTestimonials < 10 && (
-        <FindMyProofCard surface="dashboard" dismissible />
-      )}
+          action. Dismissible; localStorage remembers the choice per
+          surface. Always shown until dismissed — even power users
+          should see the wedge exists (they often refer other founders
+          to it). */}
+      <FindMyProofCard surface="dashboard" dismissible />
 
       {/* Next best action — one clear CTA above stats so the page
           always feels forward-moving, never like a dead-end.
