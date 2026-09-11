@@ -201,31 +201,49 @@ export default async function OGImage() {
         >
           {/* Left — copy */}
           <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            {/* Three intake methods side-by-side — auto-find + tweet
+                + screenshot all get equal weight at the top. Form
+                gets a mention below the CTA so nothing is hidden. */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
-                paddingLeft: 12,
-                paddingRight: 12,
-                paddingTop: 6,
-                paddingBottom: 6,
-                borderRadius: 999,
-                border: `2px solid ${VIOLET_600}`,
-                color: VIOLET_700,
-                fontSize: 15,
-                fontWeight: 800,
-                letterSpacing: 0.6,
-                alignSelf: "flex-start",
+                flexWrap: "wrap",
               }}
             >
-              PASTE YOUR WEBSITE
+              {[
+                { label: "Paste website", primary: true },
+                { label: "Or paste tweet", primary: false },
+                { label: "Or screenshot", primary: false },
+              ].map((m) => (
+                <div
+                  key={m.label}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    paddingLeft: 12,
+                    paddingRight: 12,
+                    paddingTop: 5,
+                    paddingBottom: 5,
+                    borderRadius: 999,
+                    border: `2px solid ${m.primary ? VIOLET_600 : SLATE_300}`,
+                    background: m.primary ? "#ffffff" : "transparent",
+                    color: m.primary ? VIOLET_700 : SLATE_500,
+                    fontSize: 13,
+                    fontWeight: 800,
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {m.label.toUpperCase()}
+                </div>
+              ))}
             </div>
 
             <div
               style={{
-                marginTop: 22,
-                fontSize: 62,
+                marginTop: 18,
+                fontSize: 58,
                 lineHeight: 1.02,
                 fontWeight: 800,
                 letterSpacing: -1.4,
@@ -253,53 +271,70 @@ export default async function OGImage() {
 
             <div
               style={{
-                marginTop: 20,
-                fontSize: 22,
+                marginTop: 16,
+                fontSize: 20,
                 lineHeight: 1.35,
                 color: SLATE_500,
                 display: "flex",
               }}
             >
-              We scan X, Reddit, LinkedIn, Product Hunt, App Store & G2
-              for real praise about your product — before you send a form.
+              We scan X, Reddit, LinkedIn, Product Hunt, App Store & G2 for
+              real praise about your product.
             </div>
 
-            {/* Trust chips */}
+            {/* Signup CTA + form availability line */}
             <div
               style={{
-                marginTop: 26,
+                marginTop: 22,
                 display: "flex",
                 alignItems: "center",
-                gap: 14,
+                gap: 16,
               }}
             >
-              {["Free · No signup", "Or paste a tweet", "Or send a form"].map(
-                (t, i) => (
-                  <div
-                    key={t}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      paddingLeft: 12,
-                      paddingRight: 12,
-                      paddingTop: 6,
-                      paddingBottom: 6,
-                      borderRadius: 999,
-                      background: i === 0 ? "#ecfdf5" : "#ffffff",
-                      border:
-                        i === 0
-                          ? `1px solid ${EMERALD_500}`
-                          : `1px solid ${SLATE_300}`,
-                      color: i === 0 ? "#047857" : SLATE_700,
-                      fontSize: 15,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {t}
-                  </div>
-                ),
-              )}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  paddingLeft: 20,
+                  paddingRight: 20,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                  borderRadius: 999,
+                  background: `linear-gradient(90deg, ${VIOLET_600}, ${PURPLE_500})`,
+                  color: "#ffffff",
+                  fontSize: 18,
+                  fontWeight: 800,
+                  boxShadow: "0 8px 20px rgba(124,58,237,0.35)",
+                }}
+              >
+                Start free →
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 13,
+                  color: EMERALD_500,
+                  fontWeight: 700,
+                }}
+              >
+                Free forever
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                display: "flex",
+                fontSize: 13,
+                color: SLATE_500,
+                lineHeight: 1.35,
+              }}
+            >
+              Or send a form to your customers — review submissions,
+              approve, publish. All from one inbox.
             </div>
           </div>
 
