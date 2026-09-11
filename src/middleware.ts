@@ -18,20 +18,28 @@ const BOT_SENSITIVE_APIS = [
 
 /**
  * Fingerprint patterns that separate real browsers from headless-bot
- * tooling. The `Chrome/\d+\.0\.0\.0` catch is the biggest win: real
- * Chrome always ships a real build number (`Chrome/130.0.6723.116`),
- * while Puppeteer / Playwright defaults to `Chrome/XXX.0.0.0`. This
- * one regex kills the majority of account-seeding bots we've seen.
+ * tooling. IMPORTANT — do NOT try to match `Chrome/\d+\.0\.0\.0`.
+ * Google's User-Agent Reduction (rolled out through 2022) means real
+ * Chrome now emits exactly that format:
+ *   Chrome/131.0.0.0 Safari/537.36
+ * So the `.0.0.0` is universal, not a bot tell.
  *
- * The regexes below are ordered by frequency of hit so the common
- * cases short-circuit early.
+ * We stick to signals that are actually specific to headless
+ * automation and script clients:
+ *   - Explicit HeadlessChrome flag
+ *   - Named automation frameworks in the UA
+ *   - Named crawlers/bots
+ *   - Script clients (curl/wget/python-requests/etc.)
+ *   - Empty UA (any real browser sends one)
+ *
+ * This catches maybe 30-40% of the seeder fleet at zero false-
+ * positive risk. The rest is Turnstile's job.
  */
 const BOT_UA_PATTERNS: RegExp[] = [
-  /chrome\/\d+\.0\.0\.0/i,                          // Puppeteer / Playwright default
   /headlesschrome/i,                                // Explicit headless
+  /puppeteer|playwright|selenium|phantomjs/i,       // Automation frameworks
   /\b(bot|spider|crawler|scraper|scrapy)\b/i,       // Named crawlers
   /^(python-requests|curl|wget|go-http-client|node-fetch|okhttp|libwww-perl|http_request2)/i,
-  /puppeteer|playwright|selenium|phantomjs/i,
 ];
 
 function isBotUA(ua: string): boolean {
