@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link2, Sparkles, Store } from "lucide-react";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { ScreenshotDemo } from "@/components/screenshot-demo";
@@ -41,6 +41,26 @@ export function HeroDualDemo() {
     setTab(next);
     track("hero_tab_switched", { from: tab, to: next }, { anonymous: true });
   }
+
+  // Listen for cross-component tab-switch requests. Fired by the
+  // hero scroll-hint chip when it needs to route the user into the
+  // "paste tweet" flow specifically. Uses a custom window event so
+  // callers don't need a ref or context.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const next = (e as CustomEvent<Tab>).detail;
+      if (next && next !== tab) {
+        setTab(next);
+      }
+    };
+    window.addEventListener("hero-demo-select-tab", handler as EventListener);
+    return () => {
+      window.removeEventListener(
+        "hero-demo-select-tab",
+        handler as EventListener,
+      );
+    };
+  }, [tab]);
 
   return (
     <div className="mx-auto w-full max-w-md">

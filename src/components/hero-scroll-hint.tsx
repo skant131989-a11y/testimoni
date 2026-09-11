@@ -50,12 +50,33 @@ export function HeroScrollHint({
 
   function goToTarget() {
     track("hero_scroll_hint_click", { target: targetId });
+
+    // Ask HeroDualDemo to switch to the "paste tweet" tab if it
+    // isn't already. Fires as a custom window event so we don't
+    // need a ref or shared state — HeroDualDemo listens for this.
+    try {
+      window.dispatchEvent(
+        new CustomEvent("hero-demo-select-tab", { detail: "tweet" }),
+      );
+    } catch {}
+
     const el = document.getElementById(targetId);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     } else {
       window.scrollBy({ top: window.innerHeight * 0.9, behavior: "smooth" });
     }
+
+    // After the smooth-scroll settles (~700ms is typical), focus the
+    // tweet input in HeroDualDemo. preventScroll:true so focus
+    // doesn't jump the page and undo the scroll we just did.
+    setTimeout(() => {
+      const input = document.getElementById("hero-demo-tweet-input");
+      if (input instanceof HTMLInputElement) {
+        input.focus({ preventScroll: true });
+        track("hero_scroll_hint_focus_success", { target: targetId });
+      }
+    }, 700);
   }
 
   return (

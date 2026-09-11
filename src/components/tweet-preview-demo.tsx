@@ -148,6 +148,7 @@ export function TweetPreviewDemo({ isLoggedIn = false }: TweetPreviewDemoProps) 
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
+            id="hero-demo-tweet-input"
             type="url"
             inputMode="url"
             placeholder="Paste an X or LinkedIn URL"
