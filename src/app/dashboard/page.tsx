@@ -28,6 +28,7 @@ import { PageLoadPerf } from "@/components/page-load-perf";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
 import { FindMyProofCard } from "@/components/dashboard/find-my-proof-card";
+import { RotatingTip } from "@/components/dashboard/rotating-tip";
 import { getEffectiveLimits } from "@/lib/plan";
 import { getDbUserWithWorkspace, loadDbUserWithWorkspaceFresh } from "@/lib/session";
 import {
@@ -236,7 +237,7 @@ export default async function DashboardPage() {
   })();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageLoadPerf surface="dashboard" />
       {/* Page heading */}
       <div>
@@ -246,88 +247,21 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Persistent form-link card. Always visible when a form exists —
-          the form URL is the #1 asset new users need to share, and
-          hiding it behind an NBA that only fires under specific
-          conditions made it feel missing. See <FormUrlCard>. */}
-      {formShareHref && (
-        <FormUrlCard
-          formUrl={`${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}${formShareHref}`}
-          surface="dashboard"
-        />
-      )}
-
-      {/* Find My Proof nudge — sits under the form URL card so it's
-          visible without competing with the primary "share your form"
-          action. Dismissible; localStorage remembers the choice per
-          surface. Always shown until dismissed — even power users
-          should see the wedge exists (they often refer other founders
-          to it). */}
+      {/* TOP — Find My Proof nudge. Users repeatedly said the wedge
+          card should lead the dashboard, above everything else. Kept
+          dismissible; localStorage remembers the choice. */}
       <FindMyProofCard surface="dashboard" dismissible />
 
-      {/* Next best action — one clear CTA above stats so the page
-          always feels forward-moving, never like a dead-end.
-          Suppressed when a milestone card is showing below: the
-          milestone is the "hero moment" (celebration + share nudge),
-          so two purple cards stacked would compete for attention.
-          Milestone dismissal is per-session so if the user closes
-          it, they'll see "Do next" again on the next page load. */}
-      {/* Suppress the "Do next" nudge entirely when the user has
-          ZERO testimonials — the new DashboardEmptyState hero below
-          already asks them to paste their first tweet with a bigger,
-          more visual CTA. Two purple cards stacked with the same
-          call-to-action just competes. Milestone dismissal is per-
-          session so if the user closes it, they'll see "Do next"
-          again on the next page load. */}
-      {totalTestimonials > 0 && !MILESTONE_COUNTS.includes(approvedTestimonials) && (
-        <div className="rounded-xl border border-primary/25 bg-primary/[0.04] px-4 py-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-2.5">
-            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-                Do next
-              </p>
-              <p className="mt-0.5 text-sm font-semibold text-foreground">
-                {nba.title}
-              </p>
-            </div>
-          </div>
-          <Button asChild size="sm" className="shrink-0">
-            {nba.external ? (
-              <a href={nba.href} target="_blank" rel="noopener noreferrer">
-                {nba.label} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-              </a>
-            ) : (
-              <Link href={nba.href}>
-                {nba.label} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-              </Link>
-            )}
-          </Button>
-        </div>
-      </div>
-      )}
-
-      {/* Milestone celebration — fires when approvedTestimonials
-          matches an exact milestone (1, 5, 10, 25, 50, 100). Encourages
-          sharing at the moment social proof crosses a threshold. */}
-      {defaultWidget && wallUrl && (
+      {/* Milestone celebration — fires ONLY when approvedTestimonials
+          hits an exact milestone (1, 5, 10, 25, 50, 100). This is the
+          hero moment; the rotating tip below hides itself when a
+          milestone is showing so nothing competes for attention. */}
+      {defaultWidget && wallUrl && MILESTONE_COUNTS.includes(approvedTestimonials) && (
         <MilestoneNudge
           approvedCount={approvedTestimonials}
           widgetId={defaultWidget.id}
           wallUrl={wallUrl}
         />
-      )}
-
-      {/* Video-upgrade nudge — only surface once the user has some
-          real proof already (3+ testimonials). Before that the pitch
-          for "add a video" competes with the primary "collect your
-          first few" job. Component itself is now compact (one line)
-          so it slots into the dashboard without dominating it. */}
-      {totalTestimonials >= 3 && (
-        <VideoFreeBanner videoCount={videoCount} />
       )}
 
       {/* Stats cards — each links to the natural drill-down page for
@@ -408,6 +342,33 @@ export default async function DashboardPage() {
           </a>
         </Button>
       </div>
+
+      {/* Rotating tips — one-at-a-time notification strip that
+          cycles ~every 7 seconds. Feels like a live nudge feed
+          instead of the previous stacked-nudges wall. */}
+      <RotatingTip
+        state={{
+          totalTestimonials,
+          videoCount,
+          activeWidgets,
+          impressionsTotal,
+          hasWallScoreRun: false,
+          hasAskMyWall: false,
+          hasFormLink: !!formShareHref,
+        }}
+        wallUrl={wallUrl ?? undefined}
+      />
+
+      {/* Form-link card — moved BELOW the stats + actions because
+          users repeatedly said it dominated the top of the page,
+          pushing everything else down. Keeps it visible for the
+          share-the-form job, but as a secondary card. */}
+      {formShareHref && (
+        <FormUrlCard
+          formUrl={`${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}${formShareHref}`}
+          surface="dashboard"
+        />
+      )}
 
       {/* Recent testimonials — streamed in via <Suspense> so the
           stats + FormUrlCard render immediately and this card fills
