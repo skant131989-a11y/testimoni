@@ -59,6 +59,27 @@ export function StartFromScratch() {
           </div>
         </div>
       </div>
+
+      {/* Section-to-Tools connector — soft chip for visitors not
+          ready to sign up. Bridges from the "form path" pitch to
+          the free-tools grid without competing with the signup CTA
+          above. Matches the treatment of the Section 2 → Section 3
+          chip so the two connectors feel like a set. */}
+      <div className="relative mt-12 flex justify-center px-4">
+        <a
+          href="#tools"
+          onClick={() =>
+            track("home_section3_to_tools_click", { source: "start_from_scratch" })
+          }
+          className="group inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white/80 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow"
+        >
+          Not ready to sign up?{" "}
+          <span className="text-primary group-hover:underline">
+            Try 8 free tools first
+          </span>
+          <span aria-hidden="true">↓</span>
+        </a>
+      </div>
     </section>
   );
 }

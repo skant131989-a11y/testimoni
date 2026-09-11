@@ -54,20 +54,12 @@ export function PublicNav({ right }: PublicNavProps) {
 
         <nav className="hidden items-center gap-6 md:flex">
           <TrackedLink
-            cta="nav_features"
+            cta="nav_find_my_proof"
             surface="public_nav"
-            href="/features"
+            href="/tools/find-my-proof"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Features
-          </TrackedLink>
-          <TrackedLink
-            cta="nav_demo"
-            surface="public_nav"
-            href="/demo"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Live Demo
+            Find my proof
           </TrackedLink>
           <TrackedLink
             cta="nav_tools"
@@ -75,7 +67,15 @@ export function PublicNav({ right }: PublicNavProps) {
             href="/tools"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Free Tools
+            Free tools
+          </TrackedLink>
+          <TrackedLink
+            cta="nav_sample_wall"
+            surface="public_nav"
+            href="/w/demo"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Sample wall
           </TrackedLink>
           <TrackedLink
             cta="nav_pricing"

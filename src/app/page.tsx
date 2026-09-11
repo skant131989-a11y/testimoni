@@ -84,14 +84,14 @@ export default function LandingPage() {
             <span className="text-xl font-bold">Testimoni</span>
           </div>
           <nav className="hidden items-center gap-6 md:flex">
-            <TrackedLink cta="nav_features" surface="home_nav" href="/features" className="text-sm text-muted-foreground hover:text-foreground">
-              Features
-            </TrackedLink>
-            <TrackedLink cta="nav_demo" surface="home_nav" href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
-              Live Demo
+            <TrackedLink cta="nav_find_my_proof" surface="home_nav" href="/tools/find-my-proof" className="text-sm text-muted-foreground hover:text-foreground">
+              Find my proof
             </TrackedLink>
             <TrackedLink cta="nav_tools" surface="home_nav" href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
-              Free Tools
+              Free tools
+            </TrackedLink>
+            <TrackedLink cta="nav_sample_wall" surface="home_nav" href="/w/demo" className="text-sm text-muted-foreground hover:text-foreground">
+              Sample wall
             </TrackedLink>
             <TrackedLink cta="nav_pricing" surface="home_nav" href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
               Pricing
