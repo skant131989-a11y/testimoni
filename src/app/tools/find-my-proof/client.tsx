@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -100,7 +100,7 @@ export function FindMyProofClient() {
     return () => clearTimeout(t);
   }, [isImportMode]);
 
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState(() => searchParams?.get("url") ?? "");
   const [status, setStatus] = useState<"idle" | "searching" | "done" | "error">(
     "idle",
   );
@@ -111,14 +111,36 @@ export function FindMyProofClient() {
   const [twitterHandles, setTwitterHandles] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [extra, setExtra] = useState("");
+  // Auto-submit if the caller pre-filled a URL via ?url=... on the
+  // query string (used by the home hero form). Short delay so the
+  // user sees the input pop in before the loading UI takes over —
+  // reads as "your click worked" instead of "did anything happen?".
+  const autoSubmittedRef = useRef(false);
 
   useEffect(() => {
     if (status !== "searching") return;
     const t = setInterval(() => {
       setStage((s) => (s < STAGES.length - 1 ? s + 1 : s));
-    }, 2200);
-    return () => clearInterval(t);
+    }, 2200);    return () => clearInterval(t);
   }, [status]);
+
+  // Auto-submit if the URL came in on the query string (from the
+  // home hero form). Fires exactly once per mount.
+  useEffect(() => {
+    if (autoSubmittedRef.current) return;
+    const preUrl = searchParams?.get("url")?.trim();
+    if (!preUrl) return;
+    autoSubmittedRef.current = true;
+    const t = setTimeout(() => {
+      // Fake a form submit so all the existing handleSubmit logic
+      // runs (analytics, error handling, cache lookup).
+      document
+        .getElementById("find-my-proof-form")
+        ?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    }, 500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -219,7 +241,11 @@ export function FindMyProofClient() {
             see what we find.
           </p>
 
-          <form onSubmit={handleSubmit} className="mx-auto mt-10 max-w-xl">
+          <form
+            id="find-my-proof-form"
+            onSubmit={handleSubmit}
+            className="mx-auto mt-10 max-w-xl"
+          >
             <div className="flex flex-col gap-3 rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-lg md:flex-row">
               <div className="flex flex-1 items-center gap-2 px-3">
                 <Search className="h-5 w-5 shrink-0 text-muted-foreground" />

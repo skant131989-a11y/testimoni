@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Sparkles,
@@ -54,6 +55,8 @@ const HERO_QUOTE = {
 const URL_TEXT = "acme.com";
 
 export function WedgeBanner() {
+  const router = useRouter();
+  const [heroUrl, setHeroUrl] = useState("");
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [typed, setTyped] = useState("");
 
@@ -120,36 +123,79 @@ export function WedgeBanner() {
             in 30 seconds.
           </h2>
           <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-            Paste your website. We scan{" "}
-            <span className="font-semibold text-foreground">X, Reddit, LinkedIn, Product Hunt, App Store, G2</span>
-            {" "}& more for real customer love — <em>before</em> you ever send a form.
+            Paste your website. We find real customer love from across the
+            public web.
           </p>
-          <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <Link
-              href="/tools/find-my-proof"
-              onClick={() => track("home_wedge_banner_cta", { placement: "section1" })}
-              className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/30 md:text-base"
+
+          {/* Inline URL input — replaces the old CTA button so curious
+              visitors can try the tool without a nav click. On submit
+              we redirect to /tools/find-my-proof?url=... which reads
+              the param on mount, pre-fills, and auto-triggers the
+              search. */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const trimmed = heroUrl.trim();
+              if (!trimmed) return;
+              track("hero_url_submitted", { url: trimmed, source: "hero" });
+              const target = `/tools/find-my-proof?url=${encodeURIComponent(trimmed)}&from=hero`;
+              router.push(target);
+            }}
+            className="mt-8 flex w-full flex-col gap-3 sm:max-w-xl sm:flex-row"
+          >
+            <div className="flex flex-1 items-center gap-2 rounded-full border-2 border-violet-500/40 bg-white p-2 pl-4 shadow-md shadow-violet-500/10 focus-within:border-violet-600">
+              <Search className="h-4 w-4 shrink-0 text-violet-500" />
+              <input
+                type="text"
+                value={heroUrl}
+                onChange={(e) => setHeroUrl(e.target.value)}
+                onFocus={() =>
+                  track("hero_url_input_focused", { source: "hero" })
+                }
+                placeholder="acme.com"
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400 md:text-base"
+                aria-label="Your website URL"
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={!heroUrl.trim()}
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-60 md:text-base"
             >
-              <Search className="h-4 w-4" />
-              Paste your website — free
+              Find
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </button>
+          </form>
+
+          <p className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
+            <span>No credit card</span>
+            <span>·</span>
+            <span>10 testimonials free</span>
+            <span>·</span>
+            <Link
+              href="/tools"
+              onClick={() =>
+                track("hero_free_tools_hint_click", { source: "hero" })
+              }
+              className="font-semibold text-violet-700 underline-offset-4 hover:underline"
+            >
+              Or explore 8 free tools first →
             </Link>
-            {/* Secondary "just get me to the product" path — for
-                visitors who already know they want a wall and don't
-                need the auto-find flourish. */}
+          </p>
+
+          <p className="mt-2 text-xs text-muted-foreground">
             <Link
               href="/signup?src=home_hero"
               onClick={() =>
                 track("home_wedge_banner_signup_cta", { placement: "section1" })
               }
-              className="group inline-flex items-center gap-1.5 rounded-full border-2 border-violet-600/30 bg-white px-5 py-3 text-sm font-bold text-violet-700 transition-all hover:-translate-y-0.5 hover:border-violet-600 hover:shadow-md md:text-base"
+              className="font-semibold text-violet-700 underline-offset-4 hover:underline"
             >
-              Show me my wall
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              Or show me my wall →
             </Link>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            No credit card · 10 testimonials free forever · Live in ~30 seconds
           </p>
 
           {/* Sources strip */}
