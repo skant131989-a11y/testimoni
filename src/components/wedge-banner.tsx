@@ -112,10 +112,11 @@ export function WedgeBanner() {
             <Sparkles className="h-3 w-3" /> New · Free · No signup
           </span>
           <h2 className="mt-4 text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
-            Your Wall of Love,{" "}
+            Find the customer proof{" "}
             <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
-              in 30 seconds.
-            </span>
+              you already have,
+            </span>{" "}
+            in 30 seconds.
           </h2>
           <p className="mt-5 max-w-lg text-lg text-muted-foreground">
             Paste your website. We scan{" "}
