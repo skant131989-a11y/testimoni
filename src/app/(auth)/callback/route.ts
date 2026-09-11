@@ -33,6 +33,20 @@ function classifyCallbackError(message: string): string {
   if (m.includes("pkce") || m.includes("code verifier")) {
     return "pkce_mismatch";
   }
+  // Google occasionally 500s or bounces users back with these codes on
+  // the first attempt. Working on retry is the expected behaviour, so
+  // tag them separately from real callback errors — the login page
+  // shows a "Try Google again" retry prompt.
+  if (
+    m.includes("server_error") ||
+    m.includes("server error") ||
+    m.includes("temporarily unavailable")
+  ) {
+    return "provider_hiccup";
+  }
+  if (m.includes("access_denied") || m.includes("access denied")) {
+    return "access_denied";
+  }
   return "unknown";
 }
 
