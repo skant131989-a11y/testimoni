@@ -26,7 +26,6 @@ import { LetterAvatar } from "@/components/letter-avatar";
 import { ImportSourcesRow } from "@/components/import-sources-row";
 import { WelcomeSplash } from "@/components/welcome-splash";
 import { PageLoadPerf } from "@/components/page-load-perf";
-import { FindMyProofCard } from "@/components/dashboard/find-my-proof-card";
 import { celebrateFirstTestimonial } from "@/lib/confetti";
 import { readSessionCache } from "@/lib/session-cache";
 import { SCREENSHOT_TAG } from "@/lib/screenshot-constants";
@@ -1151,12 +1150,6 @@ export function WelcomeClient({
       <WelcomeSplash active={isNewSignup} />
       <PageLoadPerf surface="welcome" />
       <div className="mx-auto max-w-4xl space-y-6 py-6">
-        {/* Find My Proof — the wedge nudge on the primary welcome
-            flow. Someone who signed up because they were curious
-            about auto-finding praise deserves that CTA in view
-            right away, not buried below the paste-a-tweet form. */}
-        <FindMyProofCard surface="welcome" dismissible />
-
         <div className="text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
           <Sparkles className="h-7 w-7 text-primary" />
@@ -1170,20 +1163,61 @@ export function WelcomeClient({
             : "Type in a testimonial you already have — from an email, a DM, or a screenshot."}
         </p>
 
-        {/* First-run collect-3 goal — turns the open-ended paste
-            prompt into a completable checklist. Any source counts:
-            tweet URL, LinkedIn URL, manual entry, or fresh submissions
-            through the collection form. */}
+        {/* Two doors card — replaces the meh "3 quotes today" text
+            with an actionable side-by-side: auto-find your praise
+            (find-my-proof) OR paste it manually below. Uses the
+            marketing brand's violet-purple gradient so a founder who
+            signed up from the landing page recognises the aesthetic. */}
         {!imported && (
-          <div className="mx-auto mt-6 max-w-lg rounded-xl border border-primary/20 bg-primary/5 p-3 text-sm">
-            <p className="font-medium text-primary">
-              🎯 Get your first 3 customer quotes today
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Paste a customer&apos;s tweet or LinkedIn post, type in a quote
-              from an email/DM/review, or send customers your form to collect
-              new ones. All of them count.
-            </p>
+          <div className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-2">
+            <Link
+              href="/tools/find-my-proof"
+              onClick={() =>
+                track("welcome_two_doors_card_click", { door: "find_my_proof" })
+              }
+              className="group relative overflow-hidden rounded-2xl border-2 border-violet-300/60 bg-gradient-to-br from-violet-100/80 via-purple-50 to-fuchsia-50/60 p-4 text-left shadow-md shadow-violet-500/10 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            >
+              <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-violet-400/25 blur-2xl" />
+              <div className="relative">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-violet-600/30 bg-white/70 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-700">
+                    Free · Auto
+                  </span>
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-violet-600 group-hover:bg-violet-600 group-hover:text-white">
+                    →
+                  </span>
+                </div>
+                <h3 className="mt-2 text-base font-bold leading-tight text-slate-900">
+                  Skip the ask —{" "}
+                  <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
+                    find praise you already have
+                  </span>
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-slate-700">
+                  Paste your website. We scan X, Reddit, LinkedIn, Product
+                  Hunt & App Store for real customer love — you approve, it
+                  lands on your wall.
+                </p>
+              </div>
+            </Link>
+
+            <div className="rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-4">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                  Or · Manual
+                </span>
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  ↓
+                </span>
+              </div>
+              <h3 className="mt-2 text-base font-bold leading-tight text-slate-900">
+                Have a specific rave? Drop it below.
+              </h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-700">
+                A tweet URL, LinkedIn post, blog review, or a screenshot from
+                a DM. Extract, approve, publish — 30 seconds each.
+              </p>
+            </div>
           </div>
         )}
       </div>

@@ -574,12 +574,33 @@ export default function ImportClient({ isPro }: ImportClientProps) {
       <div>
         <h1 className="text-3xl font-bold">Import Testimonials</h1>
         <p className="text-muted-foreground">
-          Turn public praise from X or LinkedIn into an approved testimonial,
-          or add one manually.
+          Auto-scan your website for existing praise, paste a public URL,
+          type it in manually, or extract from a screenshot.
         </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
+        {/* From-your-website — routes to /tools/find-my-proof. Rendered
+            first because it's the most magical import path and the one
+            that reflects the current marketing pitch. */}
+        <Button
+          asChild
+          variant="outline"
+          className="border-2 border-violet-300 bg-gradient-to-br from-violet-50 to-purple-50/60 text-violet-700 hover:border-violet-500 hover:text-violet-800"
+        >
+          <Link
+            href="/tools/find-my-proof"
+            onClick={() =>
+              track("import_tab_selected", { tab: "website_find_my_proof" })
+            }
+          >
+            <Sparkles className="mr-2 h-4 w-4 text-violet-600" />
+            From your website
+            <span className="ml-2 rounded-full bg-violet-600 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
+              New
+            </span>
+          </Link>
+        </Button>
         <Button
           variant={mode === "url" ? "default" : "outline"}
           onClick={() => {
