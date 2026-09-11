@@ -13,7 +13,10 @@ import { track } from "@/lib/analytics";
 
 export function StartFromScratch() {
   return (
-    <section className="relative overflow-hidden border-t bg-gradient-to-br from-emerald-50 via-teal-50/70 to-cyan-50/40 py-16 md:py-24">
+    <section
+      id="start-fresh"
+      className="relative overflow-hidden border-t bg-gradient-to-br from-emerald-50 via-teal-50/70 to-cyan-50/40 py-16 md:py-24"
+    >
       {/* Ambient depth — mint blobs, mirrors the hero/section-2 style
           so the three top sections read as a coordinated triptych. */}
       <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-emerald-300/25 blur-3xl" />

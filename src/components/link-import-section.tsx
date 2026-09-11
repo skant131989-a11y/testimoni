@@ -146,6 +146,26 @@ export function LinkImportSection() {
           </ul>
         </div>
       </div>
+
+      {/* Section-to-section connector — soft chip that hints there's
+          a third door below. Positions itself out of the way of the
+          main CTA so it reads as an alternative, not the primary
+          action. */}
+      <div className="relative mt-12 flex justify-center px-4">
+        <a
+          href="#start-fresh"
+          onClick={() =>
+            track("home_section2_to_section3_click", { source: "link_import" })
+          }
+          className="group inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-emerald-500 hover:text-emerald-700 hover:shadow"
+        >
+          Not into pasting?{" "}
+          <span className="text-emerald-700 group-hover:underline">
+            See the classic form path
+          </span>
+          <span aria-hidden="true">↓</span>
+        </a>
+      </div>
     </section>
   );
 }
