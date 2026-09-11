@@ -13,7 +13,14 @@
  * Fires instantly the moment a user clicks a link into /dashboard.
  * No DB call, no client JS beyond Tailwind — the skeleton is server-
  * rendered by Next's loading.tsx convention.
+ *
+ * <StuckReloader /> — client component that force-reloads once
+ * after 8s if the skeleton is still visible. Fixes the occasional
+ * post-Google-OAuth hang where Supabase's session cookie takes
+ * an extra tick to commit.
  */
+
+import { StuckReloader } from "@/components/stuck-reloader";
 
 function Block({ className = "" }: { className?: string }) {
   return (
@@ -116,6 +123,7 @@ export default function DashboardLoading() {
           </div>
         ))}
       </div>
+      <StuckReloader scope="dashboard" timeoutMs={8000} />
     </div>
   );
 }
