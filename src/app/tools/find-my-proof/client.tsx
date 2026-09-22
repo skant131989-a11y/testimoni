@@ -125,13 +125,18 @@ export function FindMyProofClient() {
   }, [status]);
 
   // Auto-submit if the URL came in on the query string (from the
-  // home hero form). Fires exactly once per mount.
+  // home hero form). Fires exactly once per mount — the ref
+  // check/set lives inside the timeout callback, not at effect-setup
+  // time, because Strict Mode's dev-only mount → cleanup → mount
+  // cycle would otherwise set the ref true on the first (discarded)
+  // pass and then bail out of the real second pass before ever
+  // scheduling a timer, so the auto-submit would silently never fire.
   useEffect(() => {
-    if (autoSubmittedRef.current) return;
     const preUrl = searchParams?.get("url")?.trim();
     if (!preUrl) return;
-    autoSubmittedRef.current = true;
     const t = setTimeout(() => {
+      if (autoSubmittedRef.current) return;
+      autoSubmittedRef.current = true;
       // Fake a form submit so all the existing handleSubmit logic
       // runs (analytics, error handling, cache lookup).
       document

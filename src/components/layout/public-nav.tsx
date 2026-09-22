@@ -54,12 +54,12 @@ export function PublicNav({ right }: PublicNavProps) {
 
         <nav className="hidden items-center gap-6 md:flex">
           <TrackedLink
-            cta="nav_find_my_proof"
+            cta="nav_customer_voice"
             surface="public_nav"
-            href="/tools/find-my-proof"
+            href="/tools/customer-voice"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Find my proof
+            Find customer mentions
           </TrackedLink>
           <TrackedLink
             cta="nav_tools"

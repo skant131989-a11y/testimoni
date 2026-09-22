@@ -39,12 +39,6 @@ import "@/lib/razorpay-window";
  *   Extra `surface` prop lets us slice which trigger converted.
  */
 
-declare global {
-  interface Window {
-    Razorpay?: new (opts: import("@/lib/razorpay-window").RazorpayCheckoutOptions) => { open: () => void };
-  }
-}
-
 async function ensureRazorpayLoaded(): Promise<void> {
   if (typeof window === "undefined") return;
   if (window.Razorpay) return;

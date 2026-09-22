@@ -28,8 +28,34 @@ export interface RazorpayCheckoutOptions {
   modal?: { ondismiss?: () => void };
 }
 
+/**
+ * One-time Order checkout (e.g. the $9 scan-report unlock) — same
+ * modal, different options shape: `order_id` + explicit
+ * `amount`/`currency` instead of `subscription_id`. Kept as a
+ * separate interface so the subscription-checkout callers above are
+ * untouched.
+ */
+export interface RazorpayOrderCheckoutOptions {
+  key: string;
+  order_id: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description?: string;
+  prefill?: { email?: string; name?: string };
+  theme?: { color?: string };
+  handler?: (response: {
+    razorpay_payment_id?: string;
+    razorpay_order_id?: string;
+    razorpay_signature?: string;
+  }) => void;
+  modal?: { ondismiss?: () => void };
+}
+
 declare global {
   interface Window {
-    Razorpay?: new (opts: RazorpayCheckoutOptions) => { open: () => void };
+    Razorpay?: new (
+      opts: RazorpayCheckoutOptions | RazorpayOrderCheckoutOptions
+    ) => { open: () => void };
   }
 }

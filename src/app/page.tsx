@@ -84,8 +84,8 @@ export default function LandingPage() {
             <span className="text-xl font-bold">Testimoni</span>
           </div>
           <nav className="hidden items-center gap-6 md:flex">
-            <TrackedLink cta="nav_find_my_proof" surface="home_nav" href="/tools/find-my-proof" className="text-sm text-muted-foreground hover:text-foreground">
-              Find my proof
+            <TrackedLink cta="nav_customer_voice" surface="home_nav" href="/tools/customer-voice" className="text-sm text-muted-foreground hover:text-foreground">
+              Find customer mentions
             </TrackedLink>
             <TrackedLink cta="nav_tools" surface="home_nav" href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
               Free tools

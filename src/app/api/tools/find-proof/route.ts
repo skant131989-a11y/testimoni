@@ -329,6 +329,7 @@ Return 3-10 topQuotes. If none, empty array.`;
           type: "web_search_20260209",
           name: "web_search",
           max_uses: 3,
+          allowed_callers: ["direct"],
         },
       ],
       messages: [

@@ -16,6 +16,7 @@ import { PLAN_LIMITS } from "@/lib/constants";
 import { usePricing } from "@/lib/use-pricing";
 import { CurrencySwitcher } from "@/components/pricing/price-display";
 import { track } from "@/lib/analytics";
+import "@/lib/razorpay-window";
 
 interface Subscription {
   plan: "FREE" | "PRO";
@@ -32,11 +33,6 @@ interface Usage {
 /** Minimal window.Razorpay shape — the SDK is loaded via <Script>.
  *  Shared declaration in src/lib/razorpay-window.ts so this page
  *  and <UpgradeProButton> agree on the type. */
-declare global {
-  interface Window {
-    Razorpay?: new (opts: import("@/lib/razorpay-window").RazorpayCheckoutOptions) => { open: () => void };
-  }
-}
 
 type RazorpayOptions = import("@/lib/razorpay-window").RazorpayCheckoutOptions;
 

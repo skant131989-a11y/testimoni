@@ -461,3 +461,69 @@ model AskMyWallConfig {
 
   @@map("ask_my_wall_configs")
 }
+
+// ── URL scan tool ("Find + Understand") ─────────────────────────
+// No-login, public scan: paste a URL, we discover + classify public
+// customer mentions (praise/complaint/feature request/use case/
+// testimonial/competitor) and cache the result by normalized URL so
+// repeat visitors (and our own re-checks) don't re-pay for Tavily/
+// Groq/Claude. Deliberately NOT workspace-scoped — every other model
+// in this schema requires a workspaceId, but this tool has none.
+model UrlScan {
+  id            String @id @default(cuid())
+  normalizedUrl String @unique @map("normalized_url")
+  brand         String
+  // { totalMentions, counts, summary, mentions: [{content, author,
+  //   role?, source, sourceUrl, category, score}] } — see
+  // src/app/api/scans/route.ts for the authoritative shape.
+  resultJson    Json   @map("result_json")
+  provider      String // "tavily" | "groq" | "claude"
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  refreshedAt DateTime @default(now()) @map("refreshed_at")
+
+  purchases ScanPurchase[]
+
+  @@map("url_scans")
+}
+
+// One-time $9 unlock for a UrlScan's full report. Tied to an email
+// the visitor types in, not a User/Workspace — this tool requires no
+// login. unlockToken is emailed as a return link so the buyer can
+// come back on any device without an account.
+model ScanPurchase {
+  id     String  @id @default(cuid())
+  scanId String  @map("scan_id")
+  scan   UrlScan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  email    String
+  amount   Int // minor units (paise for INR, cents for USD)
+  currency String // "INR" | "USD"
+
+  razorpayOrderId   String             @unique @map("razorpay_order_id")
+  razorpayPaymentId String?            @map("razorpay_payment_id")
+  status            ScanPurchaseStatus @default(PENDING)
+  tier              ScanReportTier     @default(DEEP)
+  unlockToken       String             @unique @map("unlock_token")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  paidAt    DateTime? @map("paid_at")
+
+  @@index([scanId])
+  @@map("scan_purchases")
+}
+
+// QUICK = all evidence unlocked, basic summary only.
+// DEEP  = everything QUICK has, plus the extended AI insight
+// sections (why chosen, strongest social proof, competitors) and
+// export. See src/lib/scan-report.ts buildQuick/buildFull.
+enum ScanReportTier {
+  QUICK
+  DEEP
+}
+
+enum ScanPurchaseStatus {
+  PENDING
+  PAID
+  FAILED
+}

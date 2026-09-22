@@ -36,3 +36,28 @@ export function verifyWebhookSignature(rawBody: string, signature: string): bool
     return false;
   }
 }
+
+/**
+ * Verify the signature Razorpay Checkout returns to the client after
+ * a one-time Order payment succeeds. Different formula from the
+ * webhook signature above: HMAC-SHA256 of `${orderId}|${paymentId}`
+ * signed with the account's key secret (not the separate webhook
+ * secret), per Razorpay's order-payment verification scheme.
+ */
+export function verifyOrderPaymentSignature(
+  orderId: string,
+  paymentId: string,
+  signature: string
+): boolean {
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) return false;
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(`${orderId}|${paymentId}`)
+    .digest("hex");
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+  } catch {
+    return false;
+  }
+}

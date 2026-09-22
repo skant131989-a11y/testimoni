@@ -35,12 +35,13 @@ import { HeroScrollHint } from "@/components/hero-scroll-hint";
  * so scannable and doesn't feel like fake variability.
  */
 
-const SOURCE_ROWS = [
-  { icon: Twitter, label: "X posts", count: 14, color: "text-sky-500" },
-  { icon: MessageCircle, label: "Reddit comments", count: 8, color: "text-orange-500" },
-  { icon: Trophy, label: "Product Hunt comments", count: 6, color: "text-orange-600" },
-  { icon: Star, label: "App Store reviews", count: 5, color: "text-yellow-500" },
-  { icon: Linkedin, label: "LinkedIn posts", count: 4, color: "text-blue-600" },
+const CATEGORY_ROWS = [
+  { emoji: "❤️", label: "Praise", count: 14 },
+  { emoji: "😤", label: "Complaints", count: 8 },
+  { emoji: "💡", label: "Feature requests", count: 6 },
+  { emoji: "🎯", label: "Use cases", count: 5 },
+  { emoji: "🏆", label: "Testimonials", count: 3 },
+  { emoji: "⚔️", label: "Competitor mentions", count: 1 },
 ];
 
 const HERO_QUOTE = {
@@ -116,20 +117,20 @@ export function WedgeBanner() {
             <Sparkles className="h-3 w-3" /> New · Free · No signup
           </span>
           <h2 className="mt-4 text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
-            Find the customer proof{" "}
+            Find what customers{" "}
             <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
-              you already have,
+              really say
             </span>{" "}
-            in 30 seconds.
+            about any company.
           </h2>
           <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-            Paste your website. We find real customer love from across the
-            public web.
+            Discover praise, complaints, feature requests, use cases,
+            testimonials and customer language from public conversations.
           </p>
 
           {/* Inline URL input — replaces the old CTA button so curious
               visitors can try the tool without a nav click. On submit
-              we redirect to /tools/find-my-proof?url=... which reads
+              we redirect to /tools/customer-voice?url=... which reads
               the param on mount, pre-fills, and auto-triggers the
               search. */}
           <form
@@ -138,7 +139,7 @@ export function WedgeBanner() {
               const trimmed = heroUrl.trim();
               if (!trimmed) return;
               track("hero_url_submitted", { url: trimmed, source: "hero" });
-              const target = `/tools/find-my-proof?url=${encodeURIComponent(trimmed)}&from=hero`;
+              const target = `/tools/customer-voice?url=${encodeURIComponent(trimmed)}&from=hero`;
               router.push(target);
             }}
             className="mt-8 flex w-full flex-col gap-3 sm:max-w-xl sm:flex-row"
@@ -152,9 +153,9 @@ export function WedgeBanner() {
                 onFocus={() =>
                   track("hero_url_input_focused", { source: "hero" })
                 }
-                placeholder="acme.com"
+                placeholder="Paste company or product URL"
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400 md:text-base"
-                aria-label="Your website URL"
+                aria-label="Company or product URL"
                 autoComplete="off"
                 autoCapitalize="none"
                 spellCheck={false}
@@ -165,15 +166,43 @@ export function WedgeBanner() {
               disabled={!heroUrl.trim()}
               className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-60 md:text-base"
             >
-              Find
+              Find customer mentions
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
           </form>
 
+          {/* Small secondary link to the old praise-only tool — no
+              paywall ever, but only praise. Deliberately tiny and
+              below the fold of the primary CTA so it never competes
+              with the main flow; still reachable for the minority
+              who want zero-paywall praise search only. */}
+          <Link
+            href="/tools/find-my-proof"
+            onClick={() =>
+              track("hero_find_my_proof_click", { source: "hero" })
+            }
+            className="mt-3 inline-flex items-center gap-1 rounded-full border border-violet-300/60 bg-white/60 px-3 py-1 text-[11px] font-medium text-violet-700 transition-colors hover:bg-white hover:border-violet-400"
+          >
+            Just want praise, no paywall ever? Try classic search →
+          </Link>
+
           <p className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
+            <span>Try:</span>
+            {["notion.so", "linear.app", "a small SaaS website"].map((example) => (
+              <button
+                key={example}
+                type="button"
+                onClick={() => setHeroUrl(example === "a small SaaS website" ? "" : example)}
+                className="font-semibold text-violet-700 underline-offset-4 hover:underline"
+              >
+                {example}
+              </button>
+            ))}
+          </p>
+          <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
             <span>No credit card</span>
             <span>·</span>
-            <span>10 testimonials free</span>
+            <span>No signup to see what we find</span>
             <span>·</span>
             <Link
               href="/tools"
@@ -198,8 +227,25 @@ export function WedgeBanner() {
             </Link>
           </p>
 
+          {/* Category strip — what we sort mentions into, not where
+              we look (that's the sources strip below). Spec asks
+              this be visible "below/around the input". */}
+          <div className="mt-8">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              We sort every mention into
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+              <span>❤️ Praise</span>
+              <span>😤 Complaints</span>
+              <span>💡 Feature Requests</span>
+              <span>🎯 Use Cases</span>
+              <span>🏆 Testimonials</span>
+              <span>⚔️ Competitor Mentions</span>
+            </div>
+          </div>
+
           {/* Sources strip */}
-          <div className="mt-10">
+          <div className="mt-6">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
               We look everywhere your customers talk
             </p>
@@ -286,7 +332,7 @@ function FindProofMockup({
         <div className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
         <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
         <div className="ml-3 flex-1 rounded-md bg-slate-100 px-2 py-1 text-[10px] text-slate-500">
-          testimoni.io/tools/find-my-proof
+          testimoni.io/tools/customer-voice
         </div>
       </div>
 
@@ -302,7 +348,7 @@ function FindProofMockup({
           />
         </div>
         <div className="rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-1 text-[10px] font-bold text-white">
-          Find my proof
+          Find customer mentions
         </div>
       </div>
 
@@ -318,31 +364,27 @@ function FindProofMockup({
         <p className="mt-2 text-lg font-bold leading-snug md:text-xl">
           We found{" "}
           <span className="text-violet-600 tabular-nums">{count}</span>{" "}
-          potential testimonials for{" "}
+          customer conversations about{" "}
           <span className="text-violet-600">Acme</span>
         </p>
 
-        {/* Source rows — cascade in with staggered delay */}
+        {/* Category rows — cascade in with staggered delay */}
         <ul className="mt-3 space-y-1.5">
-          {SOURCE_ROWS.map((row, i) => {
-            const Icon = row.icon;
-            return (
-              <li
-                key={row.label}
-                className={`flex items-center gap-2 rounded-lg border bg-white/80 px-2.5 py-1.5 text-xs transition-all duration-300 ${
-                  step >= 1
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 -translate-x-2"
-                }`}
-                style={{ transitionDelay: `${300 + i * 120}ms` }}
-              >
-                <span className="text-red-500">❤️</span>
-                <Icon className={`h-3.5 w-3.5 ${row.color}`} />
-                <span className="font-bold tabular-nums">{row.count}</span>
-                <span className="text-muted-foreground">{row.label}</span>
-              </li>
-            );
-          })}
+          {CATEGORY_ROWS.map((row, i) => (
+            <li
+              key={row.label}
+              className={`flex items-center gap-2 rounded-lg border bg-white/80 px-2.5 py-1.5 text-xs transition-all duration-300 ${
+                step >= 1
+                  ? "opacity-100 translate-x-0"
+                  : "opacity-0 -translate-x-2"
+              }`}
+              style={{ transitionDelay: `${300 + i * 120}ms` }}
+            >
+              <span>{row.emoji}</span>
+              <span className="font-bold tabular-nums">{row.count}</span>
+              <span className="text-muted-foreground">{row.label}</span>
+            </li>
+          ))}
         </ul>
       </div>
 

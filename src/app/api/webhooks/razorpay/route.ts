@@ -16,7 +16,9 @@ interface RazorpayWebhookPayload {
   event: string;
   payload: {
     subscription?: { entity: RazorpaySubscription };
-    payment?: { entity: { subscription_id?: string } };
+    payment?: {
+      entity: { id: string; subscription_id?: string; order_id?: string };
+    };
   };
 }
 
@@ -41,7 +43,22 @@ export async function POST(request: Request) {
     subscription?.id || event.payload.payment?.entity.subscription_id;
 
   if (!subscriptionId) {
-    // Not a subscription-related event we care about — ack and move on
+    // Not a subscription event — check if it's a one-time scan-report
+    // order payment instead (backstop for /api/scans/[id]/verify, in
+    // case the buyer's tab closed before that call completed).
+    const orderId = event.payload.payment?.entity.order_id;
+    const paymentId = event.payload.payment?.entity.id;
+    if (orderId && (eventName === "payment.captured" || eventName === "order.paid")) {
+      const purchase = await prisma.scanPurchase.findUnique({
+        where: { razorpayOrderId: orderId },
+      });
+      if (purchase && purchase.status !== "PAID") {
+        await prisma.scanPurchase.update({
+          where: { id: purchase.id },
+          data: { status: "PAID", razorpayPaymentId: paymentId, paidAt: new Date() },
+        });
+      }
+    }
     return NextResponse.json({ received: true });
   }
 

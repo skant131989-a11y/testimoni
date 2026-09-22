@@ -83,6 +83,14 @@ export function ToolsHeader({ backToTools = false }: { backToTools?: boolean }) 
             Free Tools
           </TrackedLink>
           <TrackedLink
+            cta="tools_nav_customer_voice"
+            surface="tools_nav"
+            href="/tools/customer-voice"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Find customer mentions
+          </TrackedLink>
+          <TrackedLink
             cta="tools_nav_pricing"
             surface="tools_nav"
             href="/pricing"
