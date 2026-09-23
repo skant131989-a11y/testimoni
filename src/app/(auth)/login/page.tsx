@@ -88,23 +88,28 @@ export default function LoginPage() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [turnstileUnavailable, setTurnstileUnavailable] = useState(false);
+  const [turnstilePassedAt, setTurnstilePassedAt] = useState<number | null>(null);
+  const TURNSTILE_PASS_TTL_MS = 10 * 60 * 1000;
   const turnstileConfigured = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   async function verifyTurnstile(action: string): Promise<boolean> {
     // Fail open if the widget can't run at all (script blocked by an
     // extension or network) — see components/turnstile.tsx.
     if (!turnstileConfigured || turnstileUnavailable) return true;
+    // Already passed on this visit — don't challenge again. A retry
+    // after a mistyped password shouldn't run a fresh challenge (which
+    // can escalate to a click-to-verify prompt for a real person).
+    if (turnstilePassedAt && Date.now() - turnstilePassedAt < TURNSTILE_PASS_TTL_MS) {
+      return true;
+    }
     if (!turnstileToken) {
       track("turnstile_blocked", { action, reason: "no_token" });
       setError("Please wait a moment for the security check, then try again.");
       return false;
     }
-    // Turnstile tokens are single-use. Spend this one and ask for a
-    // fresh token straight away — otherwise a retry (say, after a
-    // mistyped password) resends a spent token and can never succeed.
+    // Turnstile tokens are single-use, so this one is spent either way.
     const token = turnstileToken;
     setTurnstileToken(null);
-    setTurnstileResetKey((k) => k + 1);
     try {
       const res = await fetch("/api/verify-turnstile", {
         method: "POST",
@@ -115,8 +120,11 @@ export default function LoginPage() {
       if (!res.ok || !data.ok) {
         track("turnstile_blocked", { action, reason: "verify_failed" });
         setError("Security check failed. Please try again in a moment.");
+        // Only a failed check needs a fresh token for the retry.
+        setTurnstileResetKey((k) => k + 1);
         return false;
       }
+      setTurnstilePassedAt(Date.now());
       return true;
     } catch {
       return true;
@@ -429,9 +437,9 @@ export default function LoginPage() {
             <Turnstile
               onToken={setTurnstileToken}
               onExpire={() => setTurnstileToken(null)}
-              onUnavailable={() => {
+              onUnavailable={(reason) => {
                 setTurnstileUnavailable(true);
-                track("turnstile_unavailable", { page: "login" });
+                track("turnstile_unavailable", { page: "login", reason });
               }}
               resetSignal={turnstileResetKey}
               appearance="interaction-only"

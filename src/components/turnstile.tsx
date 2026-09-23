@@ -24,7 +24,7 @@ interface Props {
   /** Called when the widget can't work at all (script blocked, widget
    *  error). Parents should fail open per the file header rather than
    *  leave the user waiting on a token that will never arrive. */
-  onUnavailable?: () => void;
+  onUnavailable?: (reason: string) => void;
   /** Optional theme override — defaults to auto (follows OS). */
   theme?: "auto" | "light" | "dark";
   /** Size of the widget — invisible for Managed mode, or "normal". */
@@ -74,7 +74,7 @@ interface TurnstileWindow extends Window {
         sitekey: string;
         callback: (token: string) => void;
         "expired-callback"?: () => void;
-        "error-callback"?: () => void;
+        "error-callback"?: (code?: string) => void;
         theme?: string;
         size?: string;
         appearance?: string;
@@ -107,7 +107,7 @@ export function Turnstile({
   // the form fails open instead of waiting forever.
   function armTokenTimeout() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => onUnavailable?.(), TOKEN_TIMEOUT_MS);
+    timeoutRef.current = setTimeout(() => onUnavailable?.("timeout"), TOKEN_TIMEOUT_MS);
   }
   function clearTokenTimeout() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -131,9 +131,13 @@ export function Turnstile({
             onToken(token);
           },
           "expired-callback": () => onExpire?.(),
-          "error-callback": () => {
+          // Cloudflare passes an error code (e.g. 110200 = hostname
+          // not allowed, 600010 = challenge failed in this browser).
+          // Surface it so a "Verification failed" widget can be
+          // diagnosed from analytics instead of guessed at.
+          "error-callback": (code?: string) => {
             onExpire?.();
-            onUnavailable?.();
+            onUnavailable?.(`error:${code ?? "unknown"}`);
           },
           theme,
           size,
@@ -143,7 +147,7 @@ export function Turnstile({
       .catch(() => {
         // Fail-open — see file header. Tell the parent so it stops
         // waiting for a token that will never arrive.
-        onUnavailable?.();
+        onUnavailable?.("script_blocked");
       });
 
     return () => {
