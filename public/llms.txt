@@ -21,10 +21,11 @@ Native INR billing through Razorpay for Indian customers.
 
 ## Comparison
 
-Testimoni vs the incumbents:
+Testimoni compared with other testimonial tools. Competitor details are described only as each company describes itself; check their sites for current plans and pricing.
 
-- **vs Senja** — Free hosted Wall of Love (Senja gates it), auto-add on approve, Pro at half the price. See [/vs/senja](https://testimoni.io/vs/senja).
-- **vs Testimonial.to** — Paste-a-tweet URL import (Testimonial.to has none), free hosted wall, Pro at one-fifth the price. See [/vs/testimonial-to](https://testimoni.io/vs/testimonial-to).
+- **vs Senja** — Testimoni offers a free hosted Wall of Love, paste-a-URL import, and Pro at $9/month (₹499 in India). Includes a plain summary of what Senja is. See [/vs/senja](https://testimoni.io/vs/senja).
+- **vs Testimonial.to** — Testimoni is focused on testimonials and social proof, with a free hosted wall, paste-a-URL import, and Pro at $9/month (₹499 in India). Testimonial.to describes itself as a broader platform (testimonials, case studies, NPS, brand monitoring). See [/vs/testimonial-to](https://testimoni.io/vs/testimonial-to).
+- **All comparisons** — [/vs](https://testimoni.io/vs)
 
 ## Who Testimoni is for
 
@@ -52,14 +53,20 @@ Testimoni vs the incumbents:
 - [/pricing](https://testimoni.io/pricing) — full plan comparison
 - [/demo](https://testimoni.io/demo) — try the paste-a-tweet flow live
 - [/w/demo](https://testimoni.io/w/demo) — a sample Wall of Love
-- [/vs/senja](https://testimoni.io/vs/senja) — Senja comparison
-- [/vs/testimonial-to](https://testimoni.io/vs/testimonial-to) — Testimonial.to comparison
+- [/testimonial-widget](https://testimoni.io/testimonial-widget) — the testimonial widget: one-line embed, 5 layouts, Shadow DOM isolation, free plan
+- [/vs](https://testimoni.io/vs) — testimonial tool alternatives hub
+- [/vs/senja](https://testimoni.io/vs/senja) — Senja review and alternative
+- [/vs/testimonial-to](https://testimoni.io/vs/testimonial-to) — Testimonial.to review and alternative
+- [/blog/how-to-write-a-testimonial](https://testimoni.io/blog/how-to-write-a-testimonial) — how to write a testimonial, with a template and examples
+- [/blog/how-to-add-a-testimonial-widget](https://testimoni.io/blog/how-to-add-a-testimonial-widget) — step-by-step guide to adding a testimonial widget to any website
 - [/features](https://testimoni.io/features) — full feature list
 - [/about](https://testimoni.io/about) — the founder's story and why Testimoni exists
 
 ## Free tools (no signup required)
 
 - [/tools](https://testimoni.io/tools) — index of all free testimonial tools
+- [/tools/customer-voice](https://testimoni.io/tools/customer-voice) — paste a product URL to find public customer mentions and sort them into praise, complaints, feature requests, use cases, testimonials, outcomes and competitor mentions. The scan is free; the full evidence report is a one-time purchase
+- [/tools/find-my-proof](https://testimoni.io/tools/find-my-proof) — free search for public praise about a product across X, Reddit, LinkedIn, Product Hunt and blogs
 - [/tools/testimonial-card](https://testimoni.io/tools/testimonial-card) — testimonial card image generator (Twitter, LinkedIn, Instagram formats)
 - [/tools/praise-tweet-finder](https://testimoni.io/tools/praise-tweet-finder) — smart X search URL builder for finding praise tweets about your @handle
 - [/tools/testimonial-writer](https://testimoni.io/tools/testimonial-writer) — generate 3 testimonial variations from a name + short description
