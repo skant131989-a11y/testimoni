@@ -86,24 +86,35 @@ export default function LoginPage() {
   const [mountedAt] = useState(() => Date.now());
   // Turnstile — same fail-open policy as signup.
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [turnstileUnavailable, setTurnstileUnavailable] = useState(false);
   const turnstileConfigured = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   async function verifyTurnstile(action: string): Promise<boolean> {
-    if (!turnstileConfigured) return true;
+    // Fail open if the widget can't run at all (script blocked by an
+    // extension or network) — see components/turnstile.tsx.
+    if (!turnstileConfigured || turnstileUnavailable) return true;
     if (!turnstileToken) {
-      setError("Please wait for the security check to complete.");
+      track("turnstile_blocked", { action, reason: "no_token" });
+      setError("Please wait a moment for the security check, then try again.");
       return false;
     }
+    // Turnstile tokens are single-use. Spend this one and ask for a
+    // fresh token straight away — otherwise a retry (say, after a
+    // mistyped password) resends a spent token and can never succeed.
+    const token = turnstileToken;
+    setTurnstileToken(null);
+    setTurnstileResetKey((k) => k + 1);
     try {
       const res = await fetch("/api/verify-turnstile", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ token: turnstileToken, action }),
+        body: JSON.stringify({ token, action }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setError("Security check failed. Refresh and try again.");
-        setTurnstileToken(null);
+        track("turnstile_blocked", { action, reason: "verify_failed" });
+        setError("Security check failed. Please try again in a moment.");
         return false;
       }
       return true;
@@ -140,9 +151,10 @@ export default function LoginPage() {
 
     if (botTrap) {
       track("login_rejected", { reason: "honeypot", method: "email" });
-      setError(
-        "Login blocked. If your password manager filled a hidden field, refresh and try again.",
-      );
+      // Clear it so a one-off autofill by a password manager or
+      // extension doesn't block this visitor for the rest of the visit.
+      setBotTrap("");
+      setError("Something looked off. Please try again.");
       return;
     }
     if (Date.now() - mountedAt < 800) {
@@ -379,6 +391,10 @@ export default function LoginPage() {
             name="fx-check-9a2f"
             tabIndex={-1}
             autoComplete="off"
+            data-lpignore="true"
+            data-1p-ignore="true"
+            data-bwignore="true"
+            data-form-type="other"
             value={botTrap}
             onChange={(e) => setBotTrap(e.target.value)}
             style={{
@@ -413,6 +429,12 @@ export default function LoginPage() {
             <Turnstile
               onToken={setTurnstileToken}
               onExpire={() => setTurnstileToken(null)}
+              onUnavailable={() => {
+                setTurnstileUnavailable(true);
+                track("turnstile_unavailable", { page: "login" });
+              }}
+              resetSignal={turnstileResetKey}
+              appearance="interaction-only"
               size="normal"
             />
           </div>

@@ -21,12 +21,27 @@ interface Props {
   onToken: (token: string) => void;
   /** Called with null when the widget expires or errors. */
   onExpire?: () => void;
+  /** Called when the widget can't work at all (script blocked, widget
+   *  error). Parents should fail open per the file header rather than
+   *  leave the user waiting on a token that will never arrive. */
+  onUnavailable?: () => void;
   /** Optional theme override — defaults to auto (follows OS). */
   theme?: "auto" | "light" | "dark";
   /** Size of the widget — invisible for Managed mode, or "normal". */
   size?: "invisible" | "normal" | "compact";
+  /** "interaction-only" hides the widget unless Cloudflare needs the
+   *  visitor to interact. Defaults to "always" (unchanged behaviour). */
+  appearance?: "always" | "execute" | "interaction-only";
+  /** Bump this number to reset the widget and get a fresh token.
+   *  Tokens are single-use, so callers must do this after every
+   *  verification attempt or the next submit reuses a spent token. */
+  resetSignal?: number;
   className?: string;
 }
+
+// How long to wait for a token before treating the widget as
+// unavailable. Cloudflare normally resolves in a second or two.
+const TOKEN_TIMEOUT_MS = 15_000;
 
 // One-time script loader so multiple widgets on the page share the
 // same fetch.
@@ -62,6 +77,7 @@ interface TurnstileWindow extends Window {
         "error-callback"?: () => void;
         theme?: string;
         size?: string;
+        appearance?: string;
       },
     ) => string;
     remove: (id: string) => void;
@@ -72,14 +88,31 @@ interface TurnstileWindow extends Window {
 export function Turnstile({
   onToken,
   onExpire,
+  onUnavailable,
   theme = "auto",
   size = "normal",
+  appearance = "always",
+  resetSignal = 0,
   className,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  // Some browsers and extensions load the Turnstile script but block
+  // its challenge frame, so the widget never resolves and never
+  // errors. If no token shows up in time, report it unavailable so
+  // the form fails open instead of waiting forever.
+  function armTokenTimeout() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => onUnavailable?.(), TOKEN_TIMEOUT_MS);
+  }
+  function clearTokenTimeout() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = null;
+  }
 
   useEffect(() => {
     if (!siteKey) return;
@@ -90,21 +123,32 @@ export function Turnstile({
         if (cancelled) return;
         const w = window as TurnstileWindow;
         if (!w.turnstile || !containerRef.current) return;
+        armTokenTimeout();
         widgetIdRef.current = w.turnstile.render(containerRef.current, {
           sitekey: siteKey,
-          callback: (token: string) => onToken(token),
+          callback: (token: string) => {
+            clearTokenTimeout();
+            onToken(token);
+          },
           "expired-callback": () => onExpire?.(),
-          "error-callback": () => onExpire?.(),
+          "error-callback": () => {
+            onExpire?.();
+            onUnavailable?.();
+          },
           theme,
           size,
+          appearance,
         });
       })
       .catch(() => {
-        // Fail-open — see file header.
+        // Fail-open — see file header. Tell the parent so it stops
+        // waiting for a token that will never arrive.
+        onUnavailable?.();
       });
 
     return () => {
       cancelled = true;
+      clearTokenTimeout();
       const w = window as TurnstileWindow;
       if (widgetIdRef.current && w.turnstile) {
         try {
@@ -115,6 +159,18 @@ export function Turnstile({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [siteKey]);
+
+  useEffect(() => {
+    if (!resetSignal) return;
+    const w = window as TurnstileWindow;
+    if (widgetIdRef.current && w.turnstile) {
+      try {
+        w.turnstile.reset(widgetIdRef.current);
+        armTokenTimeout();
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetSignal]);
 
   if (!siteKey) return null;
   return <div ref={containerRef} className={className} />;
