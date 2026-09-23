@@ -248,6 +248,57 @@ export const PAGE_FAQS = {
         "Testimoni. Free forever plan does everything a solo founder needs at launch (10 testimonials, hosted wall, embed). If you outgrow it, Pro is $9/month with unlimited everything. Testimonial.to's paid tier starts higher and locks core features behind it.",
     },
   ],
+
+  testimonialWidget: [
+    {
+      question: "What is a testimonial widget?",
+      answer:
+        "A testimonial widget is a block you embed on your website that displays customer testimonials — quotes, ratings, and photos — so visitors see social proof right where they decide. Testimoni's widget pulls from your testimonial library and can auto-add testimonials the moment you approve them.",
+    },
+    {
+      question: "How do I add a testimonial widget to my website?",
+      answer:
+        "Add your testimonials, pick a layout, then paste one script tag — <script src=\"https://testimoni.io/embed/widget.js\" data-widget-id=\"YOUR_WIDGET_ID\"></script> — into your page. It works on Framer, Webflow, WordPress, Shopify, Bubble, React, Vue, Next.js, or plain HTML.",
+    },
+    {
+      question: "Is the testimonial widget free?",
+      answer:
+        "Yes. The free plan includes 10 testimonials, 1 collection form, 1 widget, a hosted Wall of Love page and the one-line embed, with no credit card. Pro is $9/month (₹499/month in India) for higher limits.",
+    },
+    {
+      question: "Will the widget break my site's design?",
+      answer:
+        "No. The widget renders inside a Shadow DOM, so its styles can't leak into your page and your page's CSS can't break the widget.",
+    },
+    {
+      question: "Which widget layouts are available?",
+      answer:
+        "Five: Grid, Masonry, Carousel, List and Marquee. You can switch layouts without re-adding testimonials.",
+    },
+    {
+      question: "Can the widget show video testimonials?",
+      answer:
+        "Yes. Every plan, including Free, includes 1 video testimonial; Pro unlocks unlimited video.",
+    },
+  ],
+
+  vsIndex: [
+    {
+      question: "What should I compare when choosing a testimonial tool?",
+      answer:
+        "Five things: free-plan limits (testimonials, forms, widgets), whether you get a hosted wall page, how you can import existing praise (forms only, or also social URLs), how the embed works and whether it can conflict with your site's CSS, and pricing in your currency.",
+    },
+    {
+      question: "How is Testimoni different from other testimonial tools?",
+      answer:
+        "You can paste an X or LinkedIn URL and get an approved testimonial in about 30 seconds, every workspace gets a hosted Wall of Love URL on the free plan, and Pro is $9/month with native INR billing (₹499/month) for Indian teams.",
+    },
+    {
+      question: "Where can I see detailed comparisons?",
+      answer:
+        "Testimoni vs Senja and Testimoni vs Testimonial.to each have a feature-by-feature table and an honest 'pick them if…' section.",
+    },
+  ],
 } as const;
 
 // Breadcrumbs for each page — keeps the SERP link showing
@@ -259,6 +310,13 @@ export function toolBreadcrumbs(name: string, slug: string) {
     { name: "Home", url: SITE_URL },
     { name: "Tools", url: `${SITE_URL}/tools` },
     { name, url: `${SITE_URL}/tools/${slug}` },
+  ];
+}
+
+export function pageBreadcrumbs(name: string, path: string) {
+  return [
+    { name: "Home", url: SITE_URL },
+    { name, url: `${SITE_URL}${path}` },
   ];
 }
 

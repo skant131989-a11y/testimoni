@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { track } from "@/lib/analytics";
-import { addPendingTestimonial } from "@/lib/pending-testimonials";
+import { addPendingTestimonial, addPendingTestimonials } from "@/lib/pending-testimonials";
 import { detectCurrency, type Currency } from "@/lib/constants";
 import "@/lib/razorpay-window";
 import type { ScanCategory } from "@/lib/scan-report";
@@ -299,6 +299,26 @@ export function ScanResultView({
     }
   }
 
+  // Praise/testimonial mentions currently visible (free samples while
+  // locked, everything once unlocked) — what "save to my Wall" carries
+  // through signup via the shared pending-testimonials tray.
+  const wallEligible = result.mentions.filter(
+    (m) => m.categories.includes("praise") || m.categories.includes("testimonial")
+  );
+  function saveAllToWallTray() {
+    addPendingTestimonials(
+      wallEligible.map((m) => ({
+        content: m.content,
+        author: m.author,
+        role: m.role,
+        source: m.source,
+        sourceUrl: m.sourceUrl,
+        origin: "customer_voice_scan",
+      }))
+    );
+    track("scan_wall_cta_clicked", { scanId: result.id, count: wallEligible.length });
+  }
+
   const busy = checkingOutTier !== null || verifying;
   const visibleCategories = CATEGORY_ORDER.filter((cat) => result.counts[cat] > 0);
   const filteredCategories = filter === "all" ? visibleCategories : visibleCategories.filter((c) => c === filter);
@@ -476,6 +496,35 @@ export function ScanResultView({
         })}
       </div>
         </>
+      )}
+
+      {/* Subscription funnel: praise found here is exactly what a Wall
+          of Love is made of, so offer that before (and independent of)
+          the one-time report purchase. */}
+      {wallEligible.length > 0 && (
+        <div className="mt-12 rounded-3xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 via-background to-fuchsia-50 p-8 text-center">
+          <h3 className="text-2xl font-bold md:text-3xl">
+            Turn this praise into a Wall of Love
+          </h3>
+          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+            Sign up free and we&rsquo;ll save {wallEligible.length === 1 ? "this testimonial" : `these ${wallEligible.length} testimonials`} to
+            an embeddable wall you can drop on your site with one line of code. No credit card.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/signup?src=customer_voice&import=pending" onClick={saveAllToWallTray}>
+              <Button size="lg" className="gap-2">
+                Sign up &amp; save {wallEligible.length} to my wall <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link
+              href="/login"
+              onClick={saveAllToWallTray}
+              className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+            >
+              Already have an account? Log in
+            </Link>
+          </div>
+        </div>
       )}
 
       {/* Zero mentions — nothing to sell. Skip the paywall entirely

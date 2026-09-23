@@ -113,6 +113,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${SITE_URL}/vs`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/testimonial-widget`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: `${SITE_URL}/vs/senja`,
       lastModified: now,
       changeFrequency: "monthly",
@@ -128,6 +140,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // pull organic traffic that converts to signup via the gates.
     {
       url: `${SITE_URL}/tools`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/tools/customer-voice`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/tools/find-my-proof`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.85,

@@ -557,6 +557,14 @@ export default function LandingPage() {
             >
               vs Testimonial.to
             </TrackedLink>
+            <TrackedLink
+              cta="testimonial_widget"
+              surface="home"
+              href="/testimonial-widget"
+              className="rounded-full border px-3 py-1 font-medium text-primary hover:bg-primary/5"
+            >
+              Testimonial widget
+            </TrackedLink>
           </div>
         </div>
       </section>

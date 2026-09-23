@@ -116,16 +116,17 @@ export function WedgeBanner() {
           <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-600/30 bg-violet-600/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-700">
             <Sparkles className="h-3 w-3" /> New · Free · No signup
           </span>
-          <h2 className="mt-4 text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
-            Find what customers{" "}
+          <h1 className="mt-4 text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
+            Find what your customers{" "}
             <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
               really say
             </span>{" "}
-            about any company.
-          </h2>
+            about your product.
+          </h1>
           <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-            Discover praise, complaints, feature requests, use cases,
-            testimonials and customer language from public conversations.
+            Discover praise, complaints, feature requests and use cases from
+            public conversations — then turn the best testimonials into a
+            Wall of Love.
           </p>
 
           {/* Inline URL input — replaces the old CTA button so curious
@@ -153,9 +154,9 @@ export function WedgeBanner() {
                 onFocus={() =>
                   track("hero_url_input_focused", { source: "hero" })
                 }
-                placeholder="Paste company or product URL"
+                placeholder="Paste your product URL"
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400 md:text-base"
-                aria-label="Company or product URL"
+                aria-label="Your product URL"
                 autoComplete="off"
                 autoCapitalize="none"
                 spellCheck={false}

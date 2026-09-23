@@ -389,7 +389,7 @@ export function FindMyProofClient() {
       ) : status === "searching" ? (
         <SearchingState stageIdx={stage} url={url} />
       ) : (
-        <ResultView result={result!} onReset={reset} />
+        <ResultView result={result!} onReset={reset} searchedUrl={url.trim()} />
       )}
     </div>
   );
@@ -429,7 +429,15 @@ function SearchingState({ stageIdx, url }: { stageIdx: number; url: string }) {
   );
 }
 
-function ResultView({ result, onReset }: { result: Result; onReset: () => void }) {
+function ResultView({
+  result,
+  onReset,
+  searchedUrl,
+}: {
+  result: Result;
+  onReset: () => void;
+  searchedUrl: string;
+}) {
   // Local mutable state — user-added quotes from the import panel
   // get appended here so the results list grows in real time.
   const [added, setAdded] = useState<Quote[]>([]);
@@ -557,6 +565,30 @@ function ResultView({ result, onReset }: { result: Result; onReset: () => void }
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Upsell to Customer Voice — this tool only looks for praise.
+          The same URL scanned there also surfaces complaints, feature
+          requests, use cases and competitor mentions. */}
+      {searchedUrl && (
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border-2 border-primary/25 bg-primary/5 p-5 text-center sm:flex-row sm:text-left">
+          <div>
+            <p className="font-semibold">Want more than praise?</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              See the complaints, feature requests, use cases and competitor
+              mentions for {result.brand} too.
+            </p>
+          </div>
+          <Link
+            href={`/tools/customer-voice?url=${encodeURIComponent(searchedUrl)}&from=find_my_proof`}
+            onClick={() => track("find_proof_to_customer_voice_click", { url: searchedUrl })}
+            className="shrink-0"
+          >
+            <Button className="gap-2">
+              Scan with Customer Voice <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       )}
 
