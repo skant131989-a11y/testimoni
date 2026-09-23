@@ -107,6 +107,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${SITE_URL}/blog/how-to-write-a-testimonial`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${SITE_URL}/blog/how-to-add-a-testimonial-widget`,
       lastModified: now,
       changeFrequency: "monthly",

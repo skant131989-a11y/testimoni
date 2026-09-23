@@ -28,6 +28,15 @@ interface Post {
 
 const posts: Post[] = [
   {
+    slug: "how-to-write-a-testimonial",
+    title: "How to write a testimonial (with examples and a template)",
+    excerpt:
+      "What makes a good testimonial, a fill-in-the-blank template, examples for SaaS, coaches, agencies and stores, and how to get testimonials from customers.",
+    date: "Sep 23, 2026",
+    dateISO: "2026-09-23",
+    readMinutes: 6,
+  },
+  {
     slug: "how-to-add-a-testimonial-widget",
     title: "How to add a testimonial widget to your website in 5 minutes",
     excerpt:

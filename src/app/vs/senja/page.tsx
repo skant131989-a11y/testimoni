@@ -11,9 +11,9 @@ import { PAGE_FAQS, vsBreadcrumbs } from "@/lib/seo-faqs";
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
-  title: "Senja alternative — Paste a Tweet, Free Wall of Love",
+  title: "Senja review and alternative — free testimonial tool",
   description:
-    "Looking for a Senja alternative? Testimoni lets you paste an X or LinkedIn URL and get an approved testimonial in 30 seconds. Every workspace gets a hosted Wall of Love URL on the free plan. Pro at $9/month.",
+    "What is Senja, and is there a Senja alternative? A plain-English look at Senja's testimonial features, plus Testimoni: paste an X or LinkedIn URL, get an approved testimonial in 30 seconds, free hosted Wall of Love. Pro at $9/month.",
   alternates: { canonical: "/vs/senja" },
   openGraph: {
     title: "Testimoni vs Senja — Testimonial widget comparison",
@@ -30,40 +30,44 @@ interface Row {
   highlight?: boolean;
 }
 
+const SEE_SITE = "See their site";
+
 const rows: Row[] = [
-  { feature: "Free plan testimonials", testimoni: "10", senja: "10" },
-  { feature: "Free plan collection forms", testimoni: "1", senja: "Multiple" },
-  { feature: "Free plan widgets", testimoni: "1", senja: "1" },
+  // Testimoni column = our own facts. Senja cells say "See their site"
+  // unless Senja states it itself (video/text collection, import from
+  // other platforms) — plans and features change, and we don't want
+  // to assert numbers we can't verify.
+  { feature: "Free plan testimonials", testimoni: "10", senja: SEE_SITE },
+  { feature: "Free plan collection forms", testimoni: "1", senja: SEE_SITE },
+  { feature: "Free plan widgets", testimoni: "1", senja: SEE_SITE },
   {
     feature: "Hosted Wall of Love page on free plan",
     testimoni: true,
-    senja: false,
+    senja: SEE_SITE,
     highlight: true,
   },
   {
     feature: "Auto-add testimonials to widget on approve",
     testimoni: true,
-    senja: false,
+    senja: SEE_SITE,
     highlight: true,
   },
   {
-    feature: "Import from tweet / LinkedIn URL",
-    testimoni: true,
-    senja: true,
+    feature: "Import existing praise",
+    testimoni: "X, LinkedIn, app stores, Shopify, screenshots",
+    senja: "30+ platforms or CSV",
   },
-  { feature: "Free plan watermark", testimoni: "Small footer", senja: "Small footer" },
-  { feature: "Pro starting price", testimoni: "$9/mo · ₹499", senja: "$19+/mo", highlight: true },
-  { feature: "Native INR pricing (India-first)", testimoni: true, senja: false, highlight: true },
-  { feature: "One library → unlimited widgets (Pro)", testimoni: true, senja: true },
+  { feature: "Free plan watermark", testimoni: "Small footer", senja: SEE_SITE },
+  { feature: "Pro starting price", testimoni: "$9/mo · ₹499", senja: SEE_SITE, highlight: true },
+  { feature: "Native INR pricing (India-first)", testimoni: true, senja: SEE_SITE, highlight: true },
   { feature: "Video testimonials", testimoni: true, senja: true },
   {
     feature: "5 layouts (Grid, Masonry, Carousel, List, Marquee)",
     testimoni: true,
-    senja: true,
+    senja: SEE_SITE,
   },
-  { feature: "One-line embed with Shadow DOM isolation", testimoni: true, senja: true },
-  { feature: "Multi-currency billing", testimoni: "USD + INR", senja: "USD" },
-  { feature: "Open-source / self-host", testimoni: false, senja: false },
+  { feature: "One-line embed with Shadow DOM isolation", testimoni: true, senja: SEE_SITE },
+  { feature: "Multi-currency billing", testimoni: "USD + INR", senja: SEE_SITE },
 ];
 
 export default function SenjaVsPage() {
@@ -89,12 +93,32 @@ export default function SenjaVsPage() {
               Testimoni vs Senja
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-              Two headline differences: <span className="font-semibold text-foreground">paste any X or LinkedIn URL and get an approved testimonial in 30 seconds</span>, and{" "}
-              <span className="font-semibold text-foreground">a public Wall of Love URL free on day one</span> —
-              Senja gates both. Everything else below is the standard
-              testimonial-tool comparison.
+              Two things Testimoni is built around: <span className="font-semibold text-foreground">paste any X or LinkedIn URL and get an approved testimonial in 30 seconds</span>, and{" "}
+              <span className="font-semibold text-foreground">a public Wall of Love URL free on day one</span>.
+              Below is how the two tools compare — check Senja&apos;s site for their current plans
+              and features.
             </p>
           </div>
+
+          {/* What is Senja — people searching the bare name want to
+              understand the tool first. Only facts Senja states about
+              itself on its own site. */}
+          <section className="mt-12 rounded-2xl border bg-card p-6">
+            <h2 className="text-xl font-bold">What is Senja?</h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Senja is a testimonial platform for collecting, managing and displaying customer
+              testimonials. By its own description, you can collect video and text testimonials
+              through forms, import existing ones from 30+ platforms or a CSV, and show them with
+              embeddable widgets and a &ldquo;Wall of Love&rdquo;. It has a free plan and two paid plans.
+            </p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Summarised from{" "}
+              <a href="https://senja.io" target="_blank" rel="noopener noreferrer" className="underline">
+                senja.io
+              </a>
+              , September 2026. Check their site for current plans and pricing.
+            </p>
+          </section>
 
           {/* Big differentiators — hero cards */}
           <section className="mt-12 grid gap-4 md:grid-cols-3">
@@ -102,24 +126,24 @@ export default function SenjaVsPage() {
               <Sparkles className="h-5 w-5 text-primary" />
               <p className="mt-3 text-sm font-bold">Paste-a-tweet import</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Paste an X or LinkedIn URL — we pull the author and text.
-                Senja makes you screenshot or copy-paste.
+                Paste an X or LinkedIn URL — we pull the author and text, and you
+                approve it. First testimonial in about 30 seconds.
               </p>
             </div>
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
               <Sparkles className="h-5 w-5 text-primary" />
               <p className="mt-3 text-sm font-bold">Free hosted Wall of Love</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Every workspace gets a public URL. Drop it in your Instagram bio.
-                Senja gates this behind Pro.
+                Every workspace gets a public URL on the free plan. Drop it in
+                your Instagram bio.
               </p>
             </div>
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
               <Sparkles className="h-5 w-5 text-primary" />
-              <p className="mt-3 text-sm font-bold">Half the Pro price</p>
+              <p className="mt-3 text-sm font-bold">Simple pricing</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Testimoni Pro is $9/mo. Senja starts around $19/mo. Native INR
-                pricing for Indian teams too.
+                Testimoni Pro is $9/mo, or ₹499/mo with native INR billing for
+                Indian teams.
               </p>
             </div>
           </section>
@@ -178,9 +202,12 @@ export default function SenjaVsPage() {
             <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-6">
               <h2 className="text-xl font-bold">Pick Testimoni if…</h2>
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li>• You want a hosted Wall of Love without paying for Pro</li>
-                <li>• You want approved testimonials live instantly (auto-add)</li>
-                <li>• You&apos;re price-sensitive — $9/mo Pro vs Senja&apos;s $19+</li>
+                <li>• You want a hosted Wall of Love URL without paying for Pro</li>
+                <li>• You want testimonials you import to go live on your wall straight away, while form submissions wait for your approval so nothing unvetted goes public</li>
+                <li>• You want to pull praise in from where it already lives — X and LinkedIn URLs, App Store, Google Play, Chrome Web Store, Shopify and Product Hunt reviews, even screenshots of DMs and emails</li>
+                <li>• You want to see what people already say about you before you ask — the free Customer Voice scan finds public mentions and sorts praise from complaints and feature requests</li>
+                <li>• You want an AI chatbot on your site that answers visitor questions using only your real testimonials (Ask My Wall, Pro)</li>
+                <li>• You want a Pro plan that starts at $9/mo</li>
                 <li>• You&apos;re an Indian founder or serving Indian customers (INR billing)</li>
                 <li>• You&apos;re new and value fast, minimal UI over a mature product</li>
               </ul>
@@ -188,10 +215,8 @@ export default function SenjaVsPage() {
             <div className="rounded-2xl border bg-card p-6">
               <h2 className="text-xl font-bold">Pick Senja if…</h2>
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li>• You need deep integrations (Zapier, native CRM connectors)</li>
-                <li>• You&apos;re on the Senja team plan and value seat-based pricing</li>
-                <li>• You want a product with years of user reviews and support history</li>
-                <li>• Manual curation on approve is a feature, not a bug, for you</li>
+                <li>• You&apos;re already on Senja and it&apos;s working — switch only if a specific gap matters to you</li>
+                <li>• Their current plans and limits fit your needs better — compare on their site</li>
               </ul>
             </div>
           </section>

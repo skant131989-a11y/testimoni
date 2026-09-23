@@ -197,12 +197,12 @@ export const PAGE_FAQS = {
     {
       question: "What's the biggest difference between Testimoni and Senja?",
       answer:
-        "Both let you collect and embed testimonials. Testimoni's differentiator is the paste-a-URL flow: paste any tweet, LinkedIn post, Reddit thread, or Hacker News comment and get an approved testimonial in 30 seconds — no manual copy-paste of screenshots. Testimoni is also cheaper at $9/mo (vs Senja's $19) and offers native INR pricing at ₹499/mo.",
+        "Both let you collect and embed testimonials. Testimoni is built around a paste-a-URL flow: paste a tweet or LinkedIn post and get an approved testimonial in about 30 seconds. Testimoni Pro is $9/mo, with native INR pricing at ₹499/mo. Senja describes importing from 30+ platforms or a CSV — check senja.io for their current features and pricing.",
     },
     {
       question: "Is Testimoni actually free forever, unlike Senja?",
       answer:
-        "Both have free plans. Testimoni's free plan: 10 testimonials, 1 form, 1 widget, hosted Wall of Love URL, one-line embed. Senja's free plan: similar limits but caps at 10 testimonials collected via forms only. Testimoni's paste-a-tweet works on the free plan too.",
+        "Both have free plans. Testimoni's free plan: 10 testimonials, 1 form, 1 widget, hosted Wall of Love URL, one-line embed, and the paste-a-tweet flow. See senja.io for what their free plan currently includes.",
     },
     {
       question: "Can I migrate from Senja to Testimoni?",
@@ -212,12 +212,12 @@ export const PAGE_FAQS = {
     {
       question: "Which is better for founders in India?",
       answer:
-        "Testimoni offers native INR billing at ₹499/mo through Razorpay — no FX fees, GST-compliant invoices. Senja bills in USD only. If you're an Indian founder or agency serving Indian clients, Testimoni is 30-40% cheaper after FX + GST.",
+        "Testimoni offers native INR billing at ₹499/mo through Razorpay, so there are no currency-conversion fees on your card. If you're an Indian founder or agency serving Indian clients, compare that with what you'd pay in USD after conversion and GST on any other tool.",
     },
     {
       question: "Does Testimoni have video testimonials like Senja?",
       answer:
-        "Yes. Every plan (including Free) includes 1 free video testimonial. Pro unlocks unlimited video, same as Senja Pro — but at less than half the price.",
+        "Yes. Every Testimoni plan (including Free) includes 1 video testimonial, and Pro unlocks unlimited video. Senja also collects video and text testimonials.",
     },
   ],
 
@@ -225,27 +225,27 @@ export const PAGE_FAQS = {
     {
       question: "What's the difference between Testimoni and Testimonial.to?",
       answer:
-        "Testimonial.to is primarily a video testimonial collection tool. Testimoni handles video AND text — plus a paste-a-URL flow that turns existing tweets/LinkedIn posts into testimonials in 30 seconds. Testimoni is also 50% cheaper ($9/mo vs Testimonial.to's starter tier) and offers native INR pricing.",
+        "Testimonial.to describes itself as an all-in-one platform for testimonials, case studies, NPS and brand monitoring, and it collects video and text testimonials. Testimoni is focused on testimonials and social proof, handling video AND text — plus a paste-a-URL flow that turns existing tweets and LinkedIn posts into testimonials in about 30 seconds. Testimoni Pro is $9/month, with native INR pricing (₹499/month). Check Testimonial.to's site for their current pricing.",
     },
     {
       question: "Which is faster to set up?",
       answer:
-        "Testimoni's paste-a-URL demo works with zero signup — try it on the home page. Testimonial.to requires an account to try their form flow. First testimonial live in Testimoni: ~30 seconds. First testimonial in Testimonial.to: ~5-10 minutes.",
+        "With Testimoni, the paste-a-URL demo on the home page works with zero signup, and a first testimonial takes about 30 seconds. Try both and see which fits how you work.",
     },
     {
-      question: "Which has better free plan?",
+      question: "What does Testimoni's free plan include?",
       answer:
-        "Testimoni's free plan is more generous: 10 testimonials, 1 form, 1 widget, hosted Wall of Love URL, one-line embed, 1 video testimonial. Testimonial.to's free plan caps at 3 testimonials and 2 video responses.",
+        "10 testimonials, 1 collection form, 1 widget, a hosted Wall of Love URL, the one-line embed, and 1 video testimonial. Compare that with Testimonial.to's current free plan on their site.",
     },
     {
       question: "Can I embed Testimoni on Framer or Webflow like Testimonial.to?",
       answer:
-        "Yes. Both offer one-line JavaScript embeds that work on Framer, Webflow, WordPress, Shopify, or any custom site. Testimoni uses Shadow DOM isolation to prevent CSS conflicts with your host site's styles.",
+        "Yes. Testimoni's one-line embed works on Framer, Webflow, WordPress, Shopify, or any custom site, and uses Shadow DOM isolation to prevent CSS conflicts with your host site's styles. Testimonial.to also embeds with a short snippet of HTML.",
     },
     {
       question: "Which is better for solo founders on a budget?",
       answer:
-        "Testimoni. Free forever plan does everything a solo founder needs at launch (10 testimonials, hosted wall, embed). If you outgrow it, Pro is $9/month with unlimited everything. Testimonial.to's paid tier starts higher and locks core features behind it.",
+        "Testimoni's free plan covers what a solo founder needs at launch (10 testimonials, hosted wall, embed), and Pro is $9/month if you outgrow it. Compare against Testimonial.to's current plans and pick the one that fits your budget and use case.",
     },
   ],
 
@@ -279,6 +279,29 @@ export const PAGE_FAQS = {
       question: "Can the widget show video testimonials?",
       answer:
         "Yes. Every plan, including Free, includes 1 video testimonial; Pro unlocks unlimited video.",
+    },
+  ],
+
+  howToWriteTestimonial: [
+    {
+      question: "How long should a testimonial be?",
+      answer:
+        "Usually two to three sentences. Long enough to name the problem and the result, short enough that a visitor reads it in a few seconds. If a customer sends a long story, pull out the one or two most specific sentences and get their approval to shorten it.",
+    },
+    {
+      question: "What is the difference between a testimonial and a review?",
+      answer:
+        "A testimonial is a statement from a customer about their experience that a business collects and shares on its own site or marketing. A review is usually written on a third-party platform where the business doesn't control the wording. Both are social proof; testimonials are easier to curate.",
+    },
+    {
+      question: "Can I write a testimonial for my own product?",
+      answer:
+        "Don't invent one. A testimonial should come from a real customer, in their words, with their permission. You can help a happy customer get started by giving them prompts or a draft to edit, but they should approve it, and it should be true.",
+    },
+    {
+      question: "How do I ask a customer for a testimonial?",
+      answer:
+        "Ask right after a good moment, such as a result or a compliment, make it one click to answer, and give two or three prompts so they aren't facing a blank box. Testimoni's free ask templates and testimonial writer help with both.",
     },
   ],
 

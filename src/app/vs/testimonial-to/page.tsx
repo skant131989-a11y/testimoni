@@ -11,9 +11,9 @@ import { PAGE_FAQS, vsBreadcrumbs } from "@/lib/seo-faqs";
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
-  title: "Testimonial.to alternative — Paste a Tweet, Free Wall of Love",
+  title: "Testimonial.to review and alternative — free tool",
   description:
-    "Looking for a Testimonial.to alternative? Testimoni lets you paste an X or LinkedIn URL and get an approved testimonial in 30 seconds. Every workspace gets a hosted Wall of Love URL on the free plan. Pro at $9/month.",
+    "What is Testimonial.to, and is there a Testimonial.to alternative? A plain-English look at what it does, plus Testimoni: paste an X or LinkedIn URL, get an approved testimonial in 30 seconds, free hosted Wall of Love. Pro at $9/month.",
   alternates: { canonical: "/vs/testimonial-to" },
   openGraph: {
     title: "Testimoni vs Testimonial.to — Testimonial widget comparison",
@@ -30,37 +30,41 @@ interface Row {
   highlight?: boolean;
 }
 
+const SEE_SITE = "See their site";
+
 const rows: Row[] = [
-  { feature: "Free plan testimonials", testimoni: "10", theirs: "10" },
-  { feature: "Free plan collection forms / spaces", testimoni: "1", theirs: "2" },
-  { feature: "Free plan widgets", testimoni: "1", theirs: "2" },
+  // Testimoni column = our own facts. Competitor cells say "See their
+  // site" unless the company states it itself — plans and features
+  // change, and we don't want to assert numbers we can't verify.
+  { feature: "Free plan testimonials", testimoni: "10", theirs: SEE_SITE },
+  { feature: "Free plan collection forms", testimoni: "1", theirs: SEE_SITE },
+  { feature: "Free plan widgets", testimoni: "1", theirs: SEE_SITE },
   {
     feature: "Hosted Wall of Love page on free plan",
     testimoni: true,
-    theirs: false,
+    theirs: SEE_SITE,
     highlight: true,
   },
   {
     feature: "Auto-add testimonials to widget on approve",
     testimoni: true,
-    theirs: false,
+    theirs: SEE_SITE,
     highlight: true,
   },
   {
-    feature: "Import from tweet / LinkedIn URL",
+    feature: "Import existing praise (social posts, app stores, screenshots)",
     testimoni: true,
-    theirs: true,
+    theirs: SEE_SITE,
   },
-  { feature: "Pro starting price", testimoni: "$9/mo · ₹499", theirs: "$50+/mo", highlight: true },
-  { feature: "Native INR pricing (India-first)", testimoni: true, theirs: false, highlight: true },
-  { feature: "One library → unlimited widgets (Pro)", testimoni: true, theirs: true },
+  { feature: "Pro starting price", testimoni: "$9/mo · ₹499", theirs: SEE_SITE, highlight: true },
+  { feature: "Native INR pricing (India-first)", testimoni: true, theirs: SEE_SITE, highlight: true },
   { feature: "Video testimonials", testimoni: true, theirs: true },
   {
     feature: "5 layouts (Grid, Masonry, Carousel, List, Marquee)",
     testimoni: true,
-    theirs: true,
+    theirs: SEE_SITE,
   },
-  { feature: "One-line embed with Shadow DOM isolation", testimoni: true, theirs: true },
+  { feature: "One-line embed with Shadow DOM isolation", testimoni: true, theirs: SEE_SITE },
 ];
 
 export default function TestimonialToVsPage() {
@@ -83,12 +87,31 @@ export default function TestimonialToVsPage() {
               Testimoni vs Testimonial.to
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-              Two headline differences: <span className="font-semibold text-foreground">paste any X or LinkedIn URL and get an approved testimonial in 30 seconds</span>, and{" "}
-              <span className="font-semibold text-foreground">a public Wall of Love URL free on day one</span> —
-              Testimonial.to has neither. Everything else below is the standard
-              testimonial-tool comparison.
+              Two things Testimoni is built around: <span className="font-semibold text-foreground">paste any X or LinkedIn URL and get an approved testimonial in 30 seconds</span>, and{" "}
+              <span className="font-semibold text-foreground">a public Wall of Love URL free on day one</span>.
+              Below is how the two tools compare — check Testimonial.to&apos;s site for their
+              current plans and features.
             </p>
           </div>
+
+          {/* What is Testimonial.to — only what the company says about
+              itself on its own site. */}
+          <section className="mt-12 rounded-2xl border bg-card p-6">
+            <h2 className="text-xl font-bold">What is Testimonial.to?</h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Testimonial.to (which now brands itself simply &ldquo;Testimonial&rdquo;) describes
+              itself as an all-in-one platform to capture, measure and showcase customer love —
+              testimonials, case studies, NPS and brand monitoring in one place. It collects video
+              and text testimonials, and you embed them on your site with a short snippet of HTML.
+            </p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Summarised from{" "}
+              <a href="https://testimonial.to" target="_blank" rel="noopener noreferrer" className="underline">
+                testimonial.to
+              </a>
+              , September 2026. Check their site for current plans and pricing.
+            </p>
+          </section>
 
           {/* Big differentiators */}
           <section className="mt-12 grid gap-4 md:grid-cols-3">
@@ -96,8 +119,8 @@ export default function TestimonialToVsPage() {
               <Sparkles className="h-5 w-5 text-primary" />
               <p className="mt-3 text-sm font-bold">Paste-a-tweet import</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Paste an X or LinkedIn URL — we pull the author and text.
-                Testimonial.to has no URL-import flow.
+                Paste an X or LinkedIn URL — we pull the author and text, and you
+                approve it. First testimonial in about 30 seconds.
               </p>
             </div>
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
@@ -105,15 +128,15 @@ export default function TestimonialToVsPage() {
               <p className="mt-3 text-sm font-bold">Free hosted Wall of Love</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Every workspace gets a public URL to share in your Instagram
-                bio. Testimonial.to doesn&apos;t have a dedicated hosted wall.
+                bio, on the free plan.
               </p>
             </div>
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
               <Sparkles className="h-5 w-5 text-primary" />
-              <p className="mt-3 text-sm font-bold">One-fifth the Pro price</p>
+              <p className="mt-3 text-sm font-bold">Simple pricing</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Testimoni Pro is $9/mo. Testimonial.to&apos;s Startup tier is
-                $50+. Native INR pricing at ₹499/mo for Indian teams.
+                Testimoni Pro is $9/mo, or ₹499/mo with native INR billing for
+                Indian teams.
               </p>
             </div>
           </section>
@@ -172,7 +195,11 @@ export default function TestimonialToVsPage() {
               <h2 className="text-xl font-bold">Pick Testimoni if…</h2>
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <li>• You want a hosted Wall of Love URL without paying for Pro</li>
-                <li>• You want testimonials live on your wall the moment you approve them</li>
+                <li>• You want testimonials you import to go live on your wall straight away, while form submissions wait for your approval so nothing unvetted goes public</li>
+                <li>• You want to pull praise in from where it already lives — X and LinkedIn URLs, App Store, Google Play, Chrome Web Store, Shopify and Product Hunt reviews, even screenshots of DMs and emails</li>
+                <li>• You want to see what people already say about you before you ask — the free Customer Voice scan finds public mentions and sorts praise from complaints and feature requests</li>
+                <li>• You want an AI chatbot on your site that answers visitor questions using only your real testimonials (Ask My Wall, Pro)</li>
+                <li>• You want a focused testimonial tool, not a broader platform</li>
                 <li>• You want a Pro plan that starts under $10/mo</li>
                 <li>• You&apos;re building for Indian customers (native INR pricing)</li>
                 <li>• You value simple, fast UI over a mature enterprise product</li>
@@ -181,10 +208,8 @@ export default function TestimonialToVsPage() {
             <div className="rounded-2xl border bg-card p-6">
               <h2 className="text-xl font-bold">Pick Testimonial.to if…</h2>
               <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                <li>• Video testimonials are your #1 use case and the polish matters</li>
-                <li>• You want 2 free spaces vs Testimoni&apos;s 1 form limit</li>
-                <li>• Your budget allows for Startup at $50/mo</li>
-                <li>• You want the longest-established brand with the most social proof</li>
+                <li>• You want more than testimonials — case studies, NPS and brand monitoring in one platform</li>
+                <li>• Their current plans and limits fit your needs better — compare on their site</li>
               </ul>
             </div>
           </section>
