@@ -286,7 +286,81 @@ async function fetchHackerNews(url: string): Promise<ImportResult | null> {
 // often live behind lazy-loaded JSON, so the best public signal is
 // the product's og:description + og:title.
 async function fetchProductHunt(url: string): Promise<ImportResult | null> {
+  // A specific comment (`?comment=<id>`) can't be read from the page:
+  // Product Hunt loads comments after the page renders, and the og
+  // tags only describe the product. Importing them would save the
+  // product tagline as if it were the comment, so a comment link only
+  // works through the API. Without a token we return null and the UI
+  // asks the user to paste the text.
+  const commentId = url.match(/[?&]comment=(\d+)/)?.[1];
+  if (commentId) return await fetchProductHuntComment(commentId, url);
   return await fetchOgTags(url, "PRODUCT_HUNT", { authorFromMeta: false });
+}
+
+// Reads one comment through Product Hunt's GraphQL API. Needs a free
+// developer token (PRODUCT_HUNT_API_TOKEN) — create an app at
+// producthunt.com/v2/oauth/applications. Fails soft: any problem
+// returns null and the user falls back to pasting the text.
+async function fetchProductHuntComment(
+  id: string,
+  url: string
+): Promise<ImportResult | null> {
+  const token = process.env.PRODUCT_HUNT_API_TOKEN;
+  if (!token) return null;
+  try {
+    const res = await fetch("https://api.producthunt.com/v2/api/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query:
+          "query($id: ID!) { comment(id: $id) { body user { name username headline } } }",
+        variables: { id },
+      }),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      data?: {
+        comment?: {
+          body?: string | null;
+          user?: {
+            name?: string | null;
+            username?: string | null;
+            headline?: string | null;
+          } | null;
+        } | null;
+      };
+    };
+    const comment = json.data?.comment;
+    if (!comment) return null;
+    let content = sanitizeImportedText(comment.body ?? "");
+    if (!content) return null;
+    const MAX = 1000;
+    if (content.length > MAX) {
+      content = content.slice(0, MAX).replace(/\s+\S*$/, "") + "…";
+    }
+    // Product Hunt redacts other users' identity fields for most API
+    // tokens — the literal string "[REDACTED]" comes back instead of a
+    // name. Never store that as a customer name; fall back to the
+    // generic label and let the owner edit it after import.
+    const real = (v?: string | null) =>
+      v && v.trim() && !/^\[?redacted\]?$/i.test(v.trim()) ? v.trim() : null;
+    const username = real(comment.user?.username);
+    return {
+      content,
+      customerName:
+        real(comment.user?.name) || username || "Product Hunt user",
+      customerTitle: real(comment.user?.headline),
+      customerUrl: username ? `https://www.producthunt.com/@${username}` : null,
+      source: "PRODUCT_HUNT",
+      sourceUrl: url,
+    };
+  } catch {
+    return null;
+  }
 }
 
 // Shared OG-tag reader used by Reddit fallback + Product Hunt. Reads
@@ -455,8 +529,9 @@ export async function POST(request: Request) {
     const messages: Record<string, string> = {
       reddit:
         "Reddit blocks us from reading this post directly. Paste the comment text below and we'll save it with the source link.",
-      producthunt:
-        "We couldn't parse this Product Hunt page. Paste the comment text below and we'll save it with the source link.",
+      producthunt: /[?&]comment=\d+/.test(url)
+        ? "Product Hunt doesn't let us read individual comments automatically. Paste the comment text below and we'll save it with the source link."
+        : "We couldn't parse this Product Hunt page. Paste the comment text below and we'll save it with the source link.",
       hackernews:
         "Couldn't read that HN item — it may be deleted, or you can paste the text below.",
       twitter:

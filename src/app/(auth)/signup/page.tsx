@@ -54,6 +54,9 @@ export default function SignupPage() {
   // resolves the challenge. When the env key isn't set, the
   // component renders nothing and we skip the verify step.
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  // The widget only mounts once someone starts using the email form,
+  // so people who sign up with Google never load or see it.
+  const [emailFormTouched, setEmailFormTouched] = useState(false);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [turnstileUnavailable, setTurnstileUnavailable] = useState(false);
   const [turnstilePassedAt, setTurnstilePassedAt] = useState<number | null>(null);
@@ -107,6 +110,7 @@ export default function SignupPage() {
   async function handleEmailSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setEmailFormTouched(true);
 
     if (botTrap) {
       track("signup_rejected", { reason: "honeypot", method: "email" });
@@ -190,9 +194,8 @@ export default function SignupPage() {
 
   async function handleGoogleSignup() {
     setError(null);
-    // Turnstile gate — this stops bots that use real Google
-    // accounts from farming signups via OAuth.
-    if (!(await verifyTurnstile("signup_google"))) return;
+    // No Turnstile on the Google path — Google already verifies who
+    // this is, and the check was getting in the way of real signups.
     setIsGoogleLoading(true);
     track(
       "signup_started",
@@ -235,7 +238,11 @@ export default function SignupPage() {
       <CardContent>
         {/* Email + password — primary form (visible first, focused
             first). Google fallback lives below the divider. */}
-        <form onSubmit={handleEmailSignup} className="space-y-4">
+        <form
+          onSubmit={handleEmailSignup}
+          onFocus={() => setEmailFormTouched(true)}
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label htmlFor="email">Work email</Label>
             <Input
@@ -307,7 +314,7 @@ export default function SignupPage() {
             a challenge appears for suspicious traffic. Placed
             outside the form so both Google + password submit
             paths can consult the token. */}
-        {turnstileConfigured && (
+        {turnstileConfigured && emailFormTouched && (
           <div className="mt-4 flex justify-center">
             <Turnstile
               onToken={setTurnstileToken}

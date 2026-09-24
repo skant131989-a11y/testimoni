@@ -86,6 +86,9 @@ export default function LoginPage() {
   const [mountedAt] = useState(() => Date.now());
   // Turnstile — same fail-open policy as signup.
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  // The widget only mounts once someone starts using the email form,
+  // so people who sign in with Google never load or see it.
+  const [emailFormTouched, setEmailFormTouched] = useState(false);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [turnstileUnavailable, setTurnstileUnavailable] = useState(false);
   const [turnstilePassedAt, setTurnstilePassedAt] = useState<number | null>(null);
@@ -156,6 +159,7 @@ export default function LoginPage() {
   async function handleEmailLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setEmailFormTouched(true);
 
     if (botTrap) {
       track("login_rejected", { reason: "honeypot", method: "email" });
@@ -217,7 +221,8 @@ export default function LoginPage() {
 
   async function handleGoogleLogin() {
     setError(null);
-    if (!(await verifyTurnstile("login_google"))) return;
+    // No Turnstile here: Google already verifies who this is, and
+    // logging in to an existing account can't farm signups.
     setIsGoogleLoading(true);
     track("login_started", { method: "google" }, { instant: true });
 
@@ -358,7 +363,11 @@ export default function LoginPage() {
 
         {/* Email + password — primary form (visible first). Google
             fallback lives below the divider. */}
-        <form onSubmit={handleEmailLogin} className="space-y-4">
+        <form
+          onSubmit={handleEmailLogin}
+          onFocus={() => setEmailFormTouched(true)}
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -432,7 +441,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        {turnstileConfigured && (
+        {turnstileConfigured && emailFormTouched && (
           <div className="mt-4 flex justify-center">
             <Turnstile
               onToken={setTurnstileToken}
