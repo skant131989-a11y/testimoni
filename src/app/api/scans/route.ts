@@ -6,6 +6,7 @@ import { groqChat, GROQ_CHAT_MODEL } from "@/lib/groq";
 import { tavilySearch, hasTavily } from "@/lib/tavily";
 import { detectHandlesFromUrl } from "@/lib/handle-detect";
 import { checkAndIncrement } from "@/lib/ask-rate-limit";
+import { isOwnBrandUrl, getOwnBrandQuotes } from "@/lib/own-brand-proof";
 import {
   buildTeaser,
   countByCategory,
@@ -409,9 +410,32 @@ export async function POST(req: NextRequest) {
   linkedinRefs.push(...scraped.linkedin);
 
   let discovery: { brand: string; mentions: ScanMention[] } | null = null;
-  let provider: "tavily" | "claude" = "tavily";
+  let provider: "tavily" | "claude" | "own" = "tavily";
 
-  if (hasTavily() && process.env.GROQ_API_KEY) {
+  // Our own domain: use the real, sourced testimonials from our own
+  // wall (lib/own-brand-proof.ts) instead of searching — search finds
+  // little for a young brand. Falls through to normal discovery if
+  // there are none.
+  if (isOwnBrandUrl(normalized)) {
+    const quotes = await getOwnBrandQuotes();
+    if (quotes.length > 0) {
+      discovery = {
+        brand,
+        mentions: quotes.map((q) => ({
+          content: q.content,
+          author: q.author,
+          role: q.role,
+          source: q.source,
+          sourceUrl: q.sourceUrl,
+          categories: ["praise", "testimonial"],
+          score: q.score,
+        })),
+      };
+      provider = "own";
+    }
+  }
+
+  if (!discovery && hasTavily() && process.env.GROQ_API_KEY) {
     try {
       const host = new URL(normalized).hostname.replace(/^www\./, "");
       const broadQuery = `"${host}" OR "${brand}" review OR complaint OR "feature request" OR alternative`;

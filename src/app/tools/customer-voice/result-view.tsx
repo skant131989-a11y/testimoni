@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { track } from "@/lib/analytics";
 import { addPendingTestimonial, addPendingTestimonials } from "@/lib/pending-testimonials";
+import { saveToWall, type WallItem } from "@/lib/save-to-wall";
+import { useIsLoggedIn } from "@/lib/use-is-logged-in";
 import { detectCurrency, type Currency } from "@/lib/constants";
 import "@/lib/razorpay-window";
 import type { ScanCategory } from "@/lib/scan-report";
@@ -208,18 +210,50 @@ export function ScanResultView({
     return map;
   }, [result.mentions]);
 
-  function addToWall(m: ApiMention) {
-    const key = `${m.author}:${m.content}`;
-    addPendingTestimonial({
+  const loggedIn = useIsLoggedIn();
+  const [savingKeys, setSavingKeys] = useState<Set<string>>(new Set());
+  const [savingAll, setSavingAll] = useState(false);
+  const [wallNotice, setWallNotice] = useState<string | null>(null);
+
+  function toWallItem(m: ApiMention): WallItem {
+    return {
       content: m.content,
       author: m.author,
       role: m.role,
       source: m.source,
       sourceUrl: m.sourceUrl,
       origin: "customer_voice_scan",
-    });
+    };
+  }
+
+  async function addToWall(m: ApiMention) {
+    const key = `${m.author}:${m.content}`;
+    setWallNotice(null);
+    if (loggedIn) {
+      // Signed in: save straight into their workspace. Fall back to
+      // the tray (imported on next sign-in/welcome) only if the save
+      // fails, so a click is never silently lost.
+      setSavingKeys((prev) => new Set(prev).add(key));
+      const res = await saveToWall([toWallItem(m)]);
+      setSavingKeys((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+      if (!res.ok) {
+        addPendingTestimonial(toWallItem(m));
+        setWallNotice(
+          res.status === 401
+            ? "We couldn't find a workspace on your account, so we kept this in your tray. Open your dashboard to finish setup."
+            : "Couldn't save to your wall just now — kept it in your tray. Try again in a moment."
+        );
+        return;
+      }
+    } else {
+      addPendingTestimonial(toWallItem(m));
+    }
     setAdded((prev) => new Set(prev).add(key));
-    track("scan_testimonial_imported", { scanId: result.id, categories: m.categories });
+    track("scan_testimonial_imported", { scanId: result.id, categories: m.categories, direct: !!loggedIn });
   }
 
   async function handleUnlock(tier: "quick" | "deep") {
@@ -306,17 +340,30 @@ export function ScanResultView({
     (m) => m.categories.includes("praise") || m.categories.includes("testimonial")
   );
   function saveAllToWallTray() {
-    addPendingTestimonials(
-      wallEligible.map((m) => ({
-        content: m.content,
-        author: m.author,
-        role: m.role,
-        source: m.source,
-        sourceUrl: m.sourceUrl,
-        origin: "customer_voice_scan",
-      }))
-    );
+    addPendingTestimonials(wallEligible.map(toWallItem));
     track("scan_wall_cta_clicked", { scanId: result.id, count: wallEligible.length });
+  }
+  async function saveAllToWallDirect() {
+    setWallNotice(null);
+    setSavingAll(true);
+    const res = await saveToWall(wallEligible.map(toWallItem));
+    setSavingAll(false);
+    track("scan_wall_cta_clicked", { scanId: result.id, count: wallEligible.length, direct: true });
+    if (!res.ok) {
+      addPendingTestimonials(wallEligible.map(toWallItem));
+      setWallNotice("Couldn't save to your wall just now — kept them in your tray. Try again in a moment.");
+      return;
+    }
+    setAdded((prev) => {
+      const next = new Set(prev);
+      for (const m of wallEligible) next.add(`${m.author}:${m.content}`);
+      return next;
+    });
+    setWallNotice(
+      res.saved > 0
+        ? `Added ${res.saved} to your wall${res.skippedDuplicates ? ` (${res.skippedDuplicates} already there)` : ""}.`
+        : "These are already on your wall."
+    );
   }
 
   const busy = checkingOutTier !== null || verifying;
@@ -470,10 +517,19 @@ export function ScanResultView({
                           <button
                             type="button"
                             onClick={() => addToWall(m)}
-                            disabled={added.has(key)}
+                            disabled={added.has(key) || savingKeys.has(key)}
                             className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline disabled:text-muted-foreground"
                           >
-                            <Plus className="h-3 w-3" /> {added.has(key) ? "Added" : "Add to Wall"}
+                            {savingKeys.has(key) ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Plus className="h-3 w-3" />
+                            )}{" "}
+                            {added.has(key)
+                              ? loggedIn
+                                ? "Added to your wall"
+                                : "Added"
+                              : "Add to Wall"}
                           </button>
                         )}
                       </div>
@@ -501,7 +557,33 @@ export function ScanResultView({
       {/* Subscription funnel: praise found here is exactly what a Wall
           of Love is made of, so offer that before (and independent of)
           the one-time report purchase. */}
-      {wallEligible.length > 0 && (
+      {wallEligible.length > 0 && loggedIn && (
+        <div className="mt-12 rounded-3xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 via-background to-fuchsia-50 p-8 text-center">
+          <h3 className="text-2xl font-bold md:text-3xl">Add this praise to your Wall of Love</h3>
+          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+            You&rsquo;re signed in — save {wallEligible.length === 1 ? "this testimonial" : `these ${wallEligible.length} testimonials`} straight
+            to your wall. Each one keeps its source link.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Button size="lg" className="gap-2" onClick={saveAllToWallDirect} disabled={savingAll}>
+              {savingAll ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Add {wallEligible.length} to my wall
+            </Button>
+            <Link
+              href="/dashboard/testimonials"
+              className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+            >
+              View my testimonials
+            </Link>
+          </div>
+        </div>
+      )}
+      {wallNotice && loggedIn && (
+        <p className="mt-3 text-center text-sm text-muted-foreground" role="status">
+          {wallNotice}
+        </p>
+      )}
+      {wallEligible.length > 0 && loggedIn === false && (
         <div className="mt-12 rounded-3xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 via-background to-fuchsia-50 p-8 text-center">
           <h3 className="text-2xl font-bold md:text-3xl">
             Turn this praise into a Wall of Love
@@ -517,7 +599,7 @@ export function ScanResultView({
               </Button>
             </Link>
             <Link
-              href="/login"
+              href="/login?next=/dashboard/welcome"
               onClick={saveAllToWallTray}
               className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
             >

@@ -4,6 +4,7 @@ import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
 import { groqChat, GROQ_COMPOUND_MODEL, GROQ_CHAT_MODEL } from "@/lib/groq";
 import { tavilySearch, hasTavily } from "@/lib/tavily";
 import { detectHandlesFromUrl } from "@/lib/handle-detect";
+import { isOwnBrandUrl, getOwnBrandQuotes } from "@/lib/own-brand-proof";
 
 /**
  * POST /api/tools/find-proof
@@ -113,87 +114,6 @@ function normalizeUrl(input: string): string | null {
   }
 }
 
-/**
- * Hand-curated result for testimoni.io — because our own brand is
- * so new that neither Tavily nor Claude web-search finds anything
- * indexed. We dogfood the founder-wall content so someone testing
- * the tool on our own domain gets the exact WOW moment we're
- * pitching them.
- *
- * Anyone else searching this domain (competitors, curious founders)
- * sees this same set — every quote here is real, sourced from our
- * seed founder wall.
- */
-const HANDCURATED_BY_HOSTNAME: Record<string, Result> = {
-  "testimoni.io": {
-    brand: "Testimoni",
-    totalMentions: 12,
-    platforms: [
-      { name: "X", count: 4 },
-      { name: "LinkedIn", count: 3 },
-      { name: "Reddit", count: 2 },
-      { name: "Product Hunt", count: 2 },
-      { name: "Blog", count: 1 },
-    ],
-    topQuotes: [
-      {
-        content:
-          "Set up my Wall of Love in 5 minutes yesterday. Pasted 6 tweets, hit approve, dropped one line of JS on my landing page. Wild.",
-        author: "Priya M.",
-        role: "Solo founder, SaaS",
-        source: "X",
-        sourceUrl: "https://testimoni.io/w/founder-wall",
-        score: 92,
-      },
-      {
-        content:
-          "Every other testimonial tool wanted me to schedule a demo. Testimoni just… worked. Live wall in 30 seconds. That's the entire pitch.",
-        author: "Rachel K.",
-        role: "VP Ops, HubSpot",
-        source: "X",
-        sourceUrl: "https://testimoni.io/w/founder-wall",
-        score: 95,
-      },
-      {
-        content:
-          "Half the price of Senja and it does more. The screenshot AI extracted quotes from my DMs in one click.",
-        author: "Marcus C.",
-        role: "VP Growth, 200-person startup",
-        source: "LinkedIn",
-        sourceUrl: "https://testimoni.io/w/founder-wall",
-        score: 88,
-      },
-      {
-        content:
-          "Ask My Wall answered a visitor's question about onboarding by quoting one of my customers by name. She DM'd me asking if it was real. Yes.",
-        author: "Owen B.",
-        role: "PLG founder",
-        source: "X",
-        sourceUrl: "https://testimoni.io/w/founder-wall",
-        score: 94,
-      },
-      {
-        content:
-          "Turned 47 scattered praise tweets into one clean wall in 30 seconds. Sign-up rate went up the same week.",
-        author: "Aditi P.",
-        role: "Indie hacker",
-        source: "Reddit",
-        sourceUrl: "https://testimoni.io/w/founder-wall",
-        score: 86,
-      },
-    ],
-  },
-};
-
-function getHandcuratedResult(url: string): Result | null {
-  try {
-    const host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
-    return HANDCURATED_BY_HOSTNAME[host] ?? null;
-  } catch {
-    return null;
-  }
-}
-
 function brandFromUrl(url: string): string {
   const host = new URL(url).hostname.replace(/^www\./, "");
   const parts = host.split(".");
@@ -224,16 +144,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ...cached.result, cached: true });
   }
 
-  // Hand-curated bypass — testimoni.io (and any other brand we've
-  // pre-baked) skips search entirely and returns the dogfood set.
-  // Zero API cost, always looks great, gets us the WOW moment we
-  // want anyone testing on our own domain to feel.
-  const handcurated = getHandcuratedResult(normalized);
-  if (handcurated) {
-    return NextResponse.json({
-      ...handcurated,
-      provider: "curated",
-    });
+  // Our own domain: search finds almost nothing for a young brand, so
+  // return the real, sourced testimonials from our own wall instead
+  // (see lib/own-brand-proof.ts — only ones with a source link).
+  // Zero API cost. Falls through to normal search if there are none.
+  if (isOwnBrandUrl(normalized)) {
+    const quotes = await getOwnBrandQuotes();
+    if (quotes.length > 0) {
+      const byPlatform = new Map<string, number>();
+      for (const q of quotes) {
+        byPlatform.set(q.source, (byPlatform.get(q.source) ?? 0) + 1);
+      }
+      return NextResponse.json({
+        brand: "Testimoni",
+        totalMentions: quotes.length,
+        platforms: [...byPlatform.entries()].map(([name, count]) => ({ name, count })),
+        topQuotes: quotes,
+        provider: "own",
+      });
+    }
   }
 
   // Pick provider. Preference order:

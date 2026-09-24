@@ -22,6 +22,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { track } from "@/lib/analytics";
+import { saveToWall } from "@/lib/save-to-wall";
+import { useIsLoggedIn } from "@/lib/use-is-logged-in";
 import {
   addPendingTestimonial,
   addPendingTestimonials,
@@ -47,7 +49,7 @@ interface Result {
   platforms: Platform[];
   topQuotes: Quote[];
   cached?: boolean;
-  provider?: "tavily" | "groq" | "claude";
+  provider?: "tavily" | "groq" | "claude" | "own";
 }
 
 // Stage messages shown during the API call. Each one dwells long
@@ -186,8 +188,10 @@ export function FindMyProofClient() {
       setStatus("done");
       // Drop everything we found into the anonymous tray so it
       // survives to signup. onAdd (in ResultView) adds imported
-      // quotes on top of these.
-      if (Array.isArray(data.topQuotes) && data.topQuotes.length > 0) {
+      // quotes on top of these. Skipped for our own domain: those are
+      // Testimoni's own testimonials, not praise for the visitor's
+      // product, so they must not be carried into their account.
+      if (data.provider !== "own" && Array.isArray(data.topQuotes) && data.topQuotes.length > 0) {
         addPendingTestimonials(
           data.topQuotes.map((q: Quote) => ({
             content: q.content,
@@ -429,6 +433,74 @@ function SearchingState({ stageIdx, url }: { stageIdx: number; url: string }) {
   );
 }
 
+// Signed-in visitors don't need signup: save the quotes straight into
+// their workspace. Falls back to the tray if the save fails so nothing
+// is lost.
+function SaveToMyWall({
+  quotes,
+  origin,
+  secondary,
+}: {
+  quotes: Quote[];
+  origin: string;
+  secondary?: React.ReactNode;
+}) {
+  const [state, setState] = useState<"idle" | "saving" | "done">("idle");
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function save() {
+    setState("saving");
+    setMessage(null);
+    const items = quotes.map((q) => ({
+      content: q.content,
+      author: q.author,
+      role: q.role,
+      source: q.source,
+      sourceUrl: q.sourceUrl,
+      origin,
+    }));
+    const res = await saveToWall(items);
+    if (!res.ok) {
+      addPendingTestimonials(items);
+      setState("idle");
+      setMessage("Couldn't save to your wall just now — kept them in your tray. Try again in a moment.");
+      return;
+    }
+    setState("done");
+    setMessage(
+      res.saved > 0
+        ? `Added ${res.saved} to your wall${res.skippedDuplicates ? ` (${res.skippedDuplicates} already there)` : ""}.`
+        : "These are already on your wall."
+    );
+    track("find_proof_saved_to_wall", { count: res.saved, origin });
+  }
+
+  return (
+    <div className="mt-6 flex flex-col items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        {state === "done" ? (
+          <Link href="/dashboard/testimonials">
+            <Button size="lg" className="gap-2">
+              View my testimonials <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        ) : (
+          <Button size="lg" className="gap-2" onClick={save} disabled={state === "saving" || quotes.length === 0}>
+            {state === "saving" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {quotes.length > 0 ? `Add ${quotes.length} to my wall` : "Nothing to add yet"}
+          </Button>
+        )}
+        {secondary}
+      </div>
+      {message && (
+        <p className="text-sm text-muted-foreground" role="status">
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function ResultView({
   result,
   onReset,
@@ -440,9 +512,15 @@ function ResultView({
 }) {
   // Local mutable state — user-added quotes from the import panel
   // get appended here so the results list grows in real time.
+  const loggedIn = useIsLoggedIn();
   const [added, setAdded] = useState<Quote[]>([]);
   const allQuotes = [...result.topQuotes, ...added];
   const hasQuotes = allQuotes.length > 0;
+  // What the signup call to action promises to save. For our own
+  // domain the search results aren't carried into the tray, so only
+  // quotes the visitor added themselves count.
+  const ctaQuotes = result.provider === "own" ? added : allQuotes;
+  const ctaHasQuotes = ctaQuotes.length > 0;
 
   function addQuote(q: Quote) {
     setAdded((prev) => [...prev, q]);
@@ -601,32 +679,58 @@ function ResultView({
       {/* CTA */}
       <div className="mt-12 rounded-3xl border-2 border-primary/40 bg-gradient-to-br from-primary/5 via-background to-fuchsia-50 p-8 text-center">
         <h3 className="text-2xl font-bold md:text-3xl">
-          {hasQuotes
-            ? `Save ${allQuotes.length === 1 ? "this" : `these ${allQuotes.length}`} to your Wall of Love`
+          {ctaHasQuotes
+            ? `Save ${ctaQuotes.length === 1 ? "this" : `these ${ctaQuotes.length}`} to your Wall of Love`
             : "Start your Wall of Love"}
         </h3>
         <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-          {hasQuotes
-            ? "Sign up free — we'll turn these into an embeddable widget you can drop on your site with one line of code."
-            : "Sign up free — 10 testimonials, 1 wall, one line of embed. No credit card."}
+          {loggedIn
+            ? "You're signed in — save these straight to your wall, no signup needed."
+            : ctaHasQuotes
+              ? "Sign up free — we'll turn these into an embeddable widget you can drop on your site with one line of code."
+              : "Sign up free — 10 testimonials, 1 wall, one line of embed. No credit card."}
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/signup?src=find_my_proof&import=pending">
-            <Button size="lg" className="gap-2">
-              {allQuotes.length > 0
-                ? `Sign up & save ${allQuotes.length} to my wall`
-                : "Sign up free"}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <button
-            type="button"
-            onClick={onReset}
-            className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
-          >
-            Try another URL
-          </button>
-        </div>
+        {loggedIn ? (
+          <SaveToMyWall
+            quotes={ctaQuotes}
+            origin="find_my_proof_search"
+            secondary={
+              <button
+                type="button"
+                onClick={onReset}
+                className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+              >
+                Try another URL
+              </button>
+            }
+          />
+        ) : (
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/signup?src=find_my_proof&import=pending">
+              <Button size="lg" className="gap-2">
+                {ctaHasQuotes
+                  ? `Sign up & save ${ctaQuotes.length} to my wall`
+                  : "Sign up free"}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            {ctaHasQuotes && (
+              <Link
+                href="/login?next=/dashboard/welcome"
+                className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+              >
+                Log in
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={onReset}
+              className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+            >
+              Try another URL
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="mt-8 text-center text-xs text-muted-foreground">
@@ -642,7 +746,9 @@ function ResultView({
               ? "Tavily+Groq (free)"
               : result.provider === "groq"
                 ? "Groq (free)"
-                : "Claude"}
+                : result.provider === "own"
+                  ? "Testimoni's own wall"
+                  : "Claude"}
           </span>
         )}
         {result.cached && (
@@ -915,6 +1021,7 @@ function TabButton({
 // intro entirely and puts the ImportPanel front and center.
 
 function ImportModeIdle({ onSearchInstead }: { onSearchInstead: () => void }) {
+  const loggedIn = useIsLoggedIn();
   const [added, setAdded] = useState<Quote[]>([]);
   function addQuote(q: Quote) {
     setAdded((prev) => [...prev, q]);
@@ -993,26 +1100,51 @@ function ImportModeIdle({ onSearchInstead }: { onSearchInstead: () => void }) {
             : "Save what you paste to your wall"}
         </h3>
         <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-          Sign up free — we&rsquo;ll add each testimonial to your embeddable
-          Wall of Love. No credit card, no gimmicks.
+          {loggedIn
+            ? "You’re signed in — save each testimonial straight to your wall."
+            : "Sign up free — we’ll add each testimonial to your embeddable Wall of Love. No credit card, no gimmicks."}
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/signup?src=find_my_proof_import&import=pending">
-            <Button size="lg" className="gap-2">
-              {added.length > 0
-                ? `Sign up & save ${added.length}`
-                : "Sign up free"}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <button
-            type="button"
-            onClick={onSearchInstead}
-            className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
-          >
-            Or search a whole website →
-          </button>
-        </div>
+        {loggedIn ? (
+          <SaveToMyWall
+            quotes={added}
+            origin="find_my_proof_import_mode"
+            secondary={
+              <button
+                type="button"
+                onClick={onSearchInstead}
+                className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+              >
+                Or search a whole website →
+              </button>
+            }
+          />
+        ) : (
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/signup?src=find_my_proof_import&import=pending">
+              <Button size="lg" className="gap-2">
+                {added.length > 0
+                  ? `Sign up & save ${added.length}`
+                  : "Sign up free"}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            {added.length > 0 && (
+              <Link
+                href="/login?next=/dashboard/welcome"
+                className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+              >
+                Log in
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={onSearchInstead}
+              className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+            >
+              Or search a whole website →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
