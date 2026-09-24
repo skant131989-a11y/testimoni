@@ -113,6 +113,11 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
           )}
         </div>
 
+        {/* Scrollable middle. The aside is a fixed-height column inside an
+            overflow-hidden layout, so on shorter screens everything below
+            the fold was clipped and unreachable. The logo above and the
+            footer below stay pinned; this region scrolls between them. */}
+        <div className="min-h-0 flex-1 overflow-y-auto">
         {/* Workspace name */}
         {!collapsed && (
           <div className="border-b px-4 py-3">
@@ -205,7 +210,7 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 px-2 py-4">
+        <nav className="space-y-1 px-2 py-4">
           {navItems.map((item) => {
             const isActive =
               item.href === "/dashboard"
@@ -271,8 +276,10 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
           </div>
         )}
 
+        </div>
+
         {/* Collapse toggle */}
-        <div className="border-t p-2 space-y-1">
+        <div className="shrink-0 border-t p-2 space-y-1">
           <Link
             href="/contact"
             target="_blank"
