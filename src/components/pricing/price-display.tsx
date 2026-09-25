@@ -4,11 +4,11 @@ import { usePricing } from "@/lib/use-pricing";
 
 /**
  * Founding member pricing — the visible $9/mo (₹499) is a locked-in
- * "founding rate" available only until Dec 31, 2026. New signups after
+ * "founding rate" available only until Sep 30, 2026. New signups after
  * that date will pay the regular price. Existing founding members keep
  * $9 forever.
  */
-export const FOUNDING_MEMBER_DEADLINE = "Nov 30, 2026";
+export const FOUNDING_MEMBER_DEADLINE = "Sep 30, 2026";
 const REGULAR_USD = "$20";
 const REGULAR_INR = "₹1099";
 
