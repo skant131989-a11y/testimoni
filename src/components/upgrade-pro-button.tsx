@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
-import { detectCurrency, type Currency } from "@/lib/constants";
+import type { Currency } from "@/lib/constants";
+import { resolveCurrencyByGeo } from "@/lib/geo-currency";
 import { track } from "@/lib/analytics";
 import "@/lib/razorpay-window";
 
@@ -16,7 +17,7 @@ import "@/lib/razorpay-window";
  *
  * This button collapses that to one click, from anywhere in the
  * dashboard. Sequence on click:
- *   1. Detect currency (INR / USD from timezone).
+ *   1. Detect currency (INR / USD from IP country).
  *   2. Lazy-load Razorpay checkout.js (~30KB, only on demand).
  *   3. POST /api/billing/razorpay/checkout to open a subscription.
  *   4. Show Razorpay's own modal.
@@ -91,7 +92,7 @@ export function UpgradeProButton({
 
   async function handleClick() {
     setUpgrading(true);
-    const currency = currencyProp ?? detectCurrency();
+    const currency = currencyProp ?? (await resolveCurrencyByGeo());
     track("upgrade_clicked", { currency, plan: "PRO", surface });
     try {
       await ensureRazorpayLoaded();

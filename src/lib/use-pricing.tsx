@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { detectCurrency, formatPrice, PRICING, type Currency } from "@/lib/constants";
+import { resolveCurrencyByGeo } from "@/lib/geo-currency";
 
 interface PricingContextValue {
   currency: Currency;
@@ -19,19 +20,31 @@ interface PricingContextValue {
 const PricingContext = createContext<PricingContextValue | null>(null);
 
 export function PricingProvider({ children }: { children: ReactNode }) {
-  // SSR default is USD (safe fallback). On mount we swap to the auto-detected
-  // currency — Asia/Kolkata timezone → INR, everything else → USD. No manual
-  // switcher on public pages: showing both currencies would let non-Indian
-  // visitors notice the ~$6 INR price and arbitrage.
+  // SSR default is USD (safe fallback). On mount we swap to the currency for
+  // the visitor's IP country — India → INR, everything else → USD (follows a
+  // VPN; the browser timezone doesn't). No manual switcher on public pages:
+  // showing both currencies would let non-Indian visitors notice the ~$6 INR
+  // price and arbitrage.
   const [currency, setCurrencyState] = useState<Currency>("USD");
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("currency") : null;
-    if (stored === "USD" || stored === "INR") {
-      setCurrencyState(stored);
-      return;
+    let cancelled = false;
+    // Dev-only test override: localStorage.setItem("currency", "USD")
+    let override: string | null = null;
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        override = localStorage.getItem("currency");
+      } catch {}
     }
-    setCurrencyState(detectCurrency());
+    (override === "USD" || override === "INR"
+      ? Promise.resolve<Currency>(override)
+      : resolveCurrencyByGeo()
+    ).then((c) => {
+      if (!cancelled) setCurrencyState(c);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const setCurrency = (c: Currency) => {

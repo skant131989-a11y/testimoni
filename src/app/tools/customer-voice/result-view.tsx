@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ExternalLink,
@@ -21,7 +21,8 @@ import { track } from "@/lib/analytics";
 import { addPendingTestimonial, addPendingTestimonials } from "@/lib/pending-testimonials";
 import { saveToWall, type WallItem } from "@/lib/save-to-wall";
 import { useIsLoggedIn } from "@/lib/use-is-logged-in";
-import { detectCurrency, type Currency } from "@/lib/constants";
+import type { Currency } from "@/lib/constants";
+import { resolveCurrencyByGeo } from "@/lib/geo-currency";
 import "@/lib/razorpay-window";
 import type { ScanCategory } from "@/lib/scan-report";
 import type { RazorpayOrderCheckoutOptions } from "@/lib/razorpay-window";
@@ -110,7 +111,7 @@ async function ensureRazorpayLoaded(): Promise<void> {
  * the real Pro subscription checkout elsewhere — a testing override
  * has no business touching that path even in dev.
  */
-function resolveCurrency(): Currency {
+async function resolveCurrency(): Promise<Currency> {
   if (process.env.NODE_ENV !== "production") {
     try {
       const override = window.localStorage.getItem("currency");
@@ -119,7 +120,8 @@ function resolveCurrency(): Currency {
       // localStorage unavailable (SSR, blocked, private mode) — fall through
     }
   }
-  return detectCurrency();
+  // IP country, so it follows a VPN (browser timezone doesn't).
+  return resolveCurrencyByGeo();
 }
 
 // Display-only "was" pricing for the discount badge — the actual
@@ -211,6 +213,18 @@ export function ScanResultView({
   }, [result.mentions]);
 
   const loggedIn = useIsLoggedIn();
+  // USD until the country lookup returns, so the server render and the
+  // first client render match.
+  const [displayCurrency, setDisplayCurrency] = useState<Currency>("USD");
+  useEffect(() => {
+    let cancelled = false;
+    resolveCurrency().then((c) => {
+      if (!cancelled) setDisplayCurrency(c);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [savingKeys, setSavingKeys] = useState<Set<string>>(new Set());
   const [savingAll, setSavingAll] = useState(false);
   const [wallNotice, setWallNotice] = useState<string | null>(null);
@@ -261,7 +275,7 @@ export function ScanResultView({
     if (!trimmed) return;
     setPayError(null);
     setCheckingOutTier(tier);
-    const currency = resolveCurrency();
+    const currency = await resolveCurrency();
     track("scan_checkout_started", { scanId: result.id, currency, tier });
     try {
       await ensureRazorpayLoaded();
@@ -647,7 +661,7 @@ export function ScanResultView({
 
           <div className="mx-auto mt-8 grid max-w-2xl gap-4 sm:grid-cols-2">
             {(["quick", "deep"] as const).map((tier) => {
-              const pricing = TIER_PRICING[tier][resolveCurrency()];
+              const pricing = TIER_PRICING[tier][displayCurrency];
               return (
                 <div
                   key={tier}
