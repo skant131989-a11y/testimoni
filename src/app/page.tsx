@@ -45,7 +45,6 @@ import { LiveSignupTicker } from "@/components/live-signup-ticker";
 import { LaunchBar } from "@/components/launch-bar";
 import { PricingCta } from "@/components/pricing/pricing-cta";
 import { FadeIn } from "@/components/fade-in";
-import { TestimonialMarquee } from "@/components/testimonial-marquee";
 import Script from "next/script";
 import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
 import { WedgeBanner } from "@/components/wedge-banner";
@@ -111,15 +110,17 @@ export default function LandingPage() {
           love." Animated mockup counts up "37 potential testimonials
           for Acme" and cascades 5 source rows. Zero API cost. This
           replaces the previous dual-column hero + dual-demo. */}
-      <WedgeBanner />
-
-      {/* Section 2 — Merged hero-adjacent. Combines the OLD hero's
-          interactive paste-a-tweet demo (HeroDualDemo) with the
-          "Drop the link" copy. Left column: sales copy + CTA to the
-          full import panel. Right column: the live paste-a-tweet /
-          form demo. Users can BOTH read the pitch and try the tool
-          without leaving the page. */}
+      {/* Section 1 (hero) — the paste-a-tweet section leads: it matches
+          what the site sells (testimonials) and the searches that
+          bring visitors here. Copy on the left, the live paste-a-tweet
+          / screenshot / App Store demo on the right — try it with no
+          signup. Carries the page's single <h1>. */}
       <LinkImportSection />
+
+      {/* Section 2 — Customer Voice scan: "paste your website, see
+          what people say about you". Free teaser, one-time paid
+          report. Also in the nav as "Find customer mentions". */}
+      <WedgeBanner />
 
       {/* Section 4 — Start from scratch. Third door for founders whose
           customers don't tweet or write reviews — the classic form
@@ -655,12 +656,11 @@ export default function LandingPage() {
           real estate. */}
       <ToolsGridSection />
 
-      {/* "Loved by founders" + Testimonial marquee — moved from just
-          under the hero to right before pricing so social proof
-          directly precedes the money ask. Nothing was deleted; both
-          strips still render, just repositioned. */}
+      {/* "Loved by founders" — real, source-linked quotes only. Sits
+          right before pricing so social proof precedes the money ask.
+          The hand-written "Real founders, real walls" marquee was
+          removed: its quotes weren't from real people. */}
       <LovedByFoundersStrip />
-      <TestimonialMarquee />
 
       {/* Pricing Preview */}
       <section className="border-t bg-gradient-to-br from-slate-50 via-muted/40 to-primary/[0.04] py-20">

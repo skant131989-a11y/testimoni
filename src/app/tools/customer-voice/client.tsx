@@ -120,18 +120,18 @@ export function CustomerVoiceClient() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 text-center md:py-24">
       <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-        <Sparkles className="h-3 w-3" /> New
+        <Sparkles className="h-3 w-3" /> Free · No signup · 10 seconds
       </div>
       <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-        Find what customers{" "}
+        People are talking about your product.{" "}
         <span className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
-          really say
-        </span>{" "}
-        about your product.
+          Are you listening?
+        </span>
       </h1>
       <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
-        Paste your website. We find the praise, the complaints, the feature requests, and the
-        competitor mentions — all in one report. No signup to see what we find.
+        Paste your website. We dig up the praise, complaints, feature requests and competitor
+        chatter from around the web — including the ones you never got tagged in. No signup to see
+        what we find.
       </p>
 
       <form id="customer-voice-form" onSubmit={handleSubmit} className="mx-auto mt-10 max-w-xl">
@@ -140,7 +140,7 @@ export function CustomerVoiceClient() {
             <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="acme.com"
+              placeholder="yourproduct.com"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               className="border-0 bg-transparent text-lg shadow-none focus-visible:ring-0"
@@ -149,7 +149,7 @@ export function CustomerVoiceClient() {
             />
           </div>
           <Button type="submit" size="lg" className="gap-2 shrink-0" disabled={!url.trim()}>
-            Find out <ArrowRight className="h-4 w-4" />
+            Show me what they&rsquo;re saying <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">

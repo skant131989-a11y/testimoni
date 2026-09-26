@@ -6,7 +6,8 @@ export const contentType = "image/png";
 /**
  * OpenGraph card for testimoni.io.
  *
- * v14 — Paste-a-website wedge card.
+ * v15 — matches the home hero: paste a tweet, turn it into a
+ * testimonial (scan-your-website is the second path).
  *
  * v13 mirrored the old hero. The new hero is the "paste your URL,
  * we find your customer love" wedge, so the OG follows.
@@ -60,64 +61,6 @@ function XLogo({ color }: { color: string }) {
     </svg>
   );
 }
-
-function RedditLogo({ color }: { color: string }) {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="10" fill={color} />
-      <circle cx="9" cy="12" r="1.5" fill="#ffffff" />
-      <circle cx="15" cy="12" r="1.5" fill="#ffffff" />
-      <path d="M8 14.5c1 1.2 2.5 1.7 4 1.7s3-.5 4-1.7" stroke="#ffffff" strokeWidth="1.2" fill="none" />
-    </svg>
-  );
-}
-
-function PHLogo({ color }: { color: string }) {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="10" fill={color} />
-      <path d="M9 7v10h1.5v-3H13a3.5 3.5 0 000-7H9zm1.5 1.5H13a2 2 0 010 4h-2.5v-4z" fill="#ffffff" />
-    </svg>
-  );
-}
-
-function StarIcon({ color }: { color: string }) {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7-6.3-4-6.3 4 1.7-7L2 9.5l7.1-.6L12 2z"
-        fill={color}
-      />
-    </svg>
-  );
-}
-
-function LinkedInLogo({ color }: { color: string }) {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="2" width="20" height="20" rx="3" fill={color} />
-      <path
-        d="M7 10h2v7H7v-7zm1-3.2A1.2 1.2 0 108 9a1.2 1.2 0 000-2.2zM11 10h2v1c.5-.7 1.4-1.2 2.5-1.2 1.9 0 2.5 1.3 2.5 3.1V17h-2v-3.6c0-.9-.3-1.4-1.1-1.4-.9 0-1.4.6-1.4 1.4V17h-2v-7z"
-        fill="#ffffff"
-      />
-    </svg>
-  );
-}
-
-interface SourceRow {
-  Icon: React.ComponentType<{ color: string }>;
-  iconColor: string;
-  count: number;
-  label: string;
-}
-
-const SOURCE_ROWS: SourceRow[] = [
-  { Icon: XLogo, iconColor: SLATE_900, count: 16, label: "X posts" },
-  { Icon: RedditLogo, iconColor: "#ff4500", count: 10, label: "Reddit comments" },
-  { Icon: PHLogo, iconColor: "#ea580c", count: 7, label: "Product Hunt" },
-  { Icon: StarIcon, iconColor: "#f59e0b", count: 6, label: "App Store" },
-  { Icon: LinkedInLogo, iconColor: "#2563eb", count: 5, label: "LinkedIn posts" },
-];
 
 export default async function OGImage() {
   return new ImageResponse(
@@ -185,7 +128,7 @@ export default async function OGImage() {
               letterSpacing: 0.4,
             }}
           >
-            NEW · FREE WEDGE
+            FREE · NO SIGNUP
           </div>
         </div>
 
@@ -213,8 +156,8 @@ export default async function OGImage() {
               }}
             >
               {[
-                { label: "Paste website", primary: true },
-                { label: "Or paste tweet", primary: false },
+                { label: "Paste a tweet", primary: true },
+                { label: "Or scan your website", primary: false },
                 { label: "Or screenshot", primary: false },
               ].map((m) => (
                 <div
@@ -243,17 +186,18 @@ export default async function OGImage() {
             <div
               style={{
                 marginTop: 18,
-                fontSize: 58,
-                lineHeight: 1.02,
+                fontSize: 44,
+                lineHeight: 1.08,
                 fontWeight: 800,
-                letterSpacing: -1.4,
+                letterSpacing: -1.2,
                 color: SLATE_900,
                 display: "flex",
                 flexDirection: "column",
               }}
             >
-              <div style={{ display: "flex" }}>Find your customer</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ display: "flex" }}>Someone already said</div>
+              <div style={{ display: "flex" }}>something great about you.</div>
+              <div style={{ display: "flex", marginTop: 4 }}>
                 <span
                   style={{
                     backgroundImage: `linear-gradient(90deg, ${VIOLET_600}, ${FUCHSIA_500})`,
@@ -261,10 +205,7 @@ export default async function OGImage() {
                     color: "transparent",
                   }}
                 >
-                  love
-                </span>
-                <span style={{ color: SLATE_700, fontWeight: 700 }}>
-                  in 30 seconds.
+                  Turn it into a testimonial.
                 </span>
               </div>
             </div>
@@ -278,8 +219,8 @@ export default async function OGImage() {
                 display: "flex",
               }}
             >
-              We scan X, Reddit, LinkedIn, Product Hunt, App Store & G2 for
-              real praise about your product.
+              Paste the link — we pull the quote, author and source. Then
+              scan your website to find everything else customers are saying.
             </div>
 
             {/* Signup CTA + form availability line */}
@@ -308,7 +249,7 @@ export default async function OGImage() {
                   boxShadow: "0 8px 20px rgba(124,58,237,0.35)",
                 }}
               >
-                Start free →
+                Put it on my wall →
               </div>
               <div
                 style={{
@@ -333,8 +274,8 @@ export default async function OGImage() {
                 lineHeight: 1.35,
               }}
             >
-              Or send a form to your customers — review submissions,
-              approve, publish. All from one inbox.
+              Or send a form to your customers — approve what comes back and
+              publish it on your wall.
             </div>
           </div>
 
@@ -385,7 +326,7 @@ export default async function OGImage() {
                   display: "flex",
                 }}
               >
-                testimoni.io/tools/find-my-proof
+                testimoni.io
               </div>
             </div>
 
@@ -410,7 +351,7 @@ export default async function OGImage() {
                   flex: 1,
                 }}
               >
-                acme.com
+                x.com/…/status/181593048…
               </div>
               <div
                 style={{
@@ -427,7 +368,7 @@ export default async function OGImage() {
                   fontWeight: 800,
                 }}
               >
-                Find my proof
+                Add link
               </div>
             </div>
 
@@ -449,81 +390,75 @@ export default async function OGImage() {
                 letterSpacing: 0.5,
               }}
             >
-              ✨ FOUND IT
+              ✨ EXTRACTED
             </div>
 
-            {/* Result headline */}
-            <div
-              style={{
-                display: "flex",
-                marginTop: 8,
-                fontSize: 24,
-                lineHeight: 1.15,
-                fontWeight: 800,
-                color: SLATE_900,
-                flexWrap: "wrap",
-              }}
-            >
-              We found{" "}
-              <span style={{ color: VIOLET_600, marginLeft: 6, marginRight: 6 }}>
-                44
-              </span>{" "}
-              potential testimonials for{" "}
-              <span style={{ color: VIOLET_600, marginLeft: 6 }}>Acme</span>
-            </div>
-
-            {/* Source rows */}
+            {/* Extracted quote card — clearly an example, not a real tweet */}
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 marginTop: 12,
-                gap: 6,
+                padding: 16,
+                borderRadius: 14,
+                border: `2px solid ${SLATE_100}`,
+                background: "#faf5ff",
               }}
             >
-              {SOURCE_ROWS.map((row) => {
-                const Icon = row.Icon;
-                return (
-                  <div
-                    key={row.label}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      paddingLeft: 10,
-                      paddingRight: 10,
-                      paddingTop: 6,
-                      paddingBottom: 6,
-                      borderRadius: 10,
-                      background: SLATE_100,
-                    }}
-                  >
-                    <div style={{ display: "flex", color: "#ef4444", fontSize: 14 }}>
-                      ❤
-                    </div>
-                    <Icon color={row.iconColor} />
-                    <div
-                      style={{
-                        display: "flex",
-                        fontSize: 15,
-                        fontWeight: 800,
-                        color: SLATE_900,
-                      }}
-                    >
-                      {row.count}
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        fontSize: 14,
-                        color: SLATE_500,
-                      }}
-                    >
-                      {row.label}
-                    </div>
-                  </div>
-                );
-              })}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <XLogo color={SLATE_900} />
+                <div style={{ display: "flex", fontSize: 13, fontWeight: 700, color: VIOLET_700 }}>
+                  EXAMPLE · via X
+                </div>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  marginTop: 10,
+                  fontSize: 20,
+                  lineHeight: 1.3,
+                  fontWeight: 600,
+                  fontStyle: "italic",
+                  color: SLATE_900,
+                }}
+              >
+                “Finally, proof on my homepage — it took thirty seconds.”
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 30,
+                    height: 30,
+                    borderRadius: 999,
+                    background: VIOLET_600,
+                    color: "#ffffff",
+                    fontSize: 14,
+                    fontWeight: 800,
+                  }}
+                >
+                  E
+                </div>
+                <div style={{ display: "flex", fontSize: 14, color: SLATE_500 }}>
+                  Example customer · source linked
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                marginTop: 12,
+                alignItems: "center",
+                gap: 8,
+                fontSize: 14,
+                color: EMERALD_500,
+                fontWeight: 700,
+              }}
+            >
+              Quote · author · original link — imported
             </div>
           </div>
         </div>
@@ -539,10 +474,10 @@ export default async function OGImage() {
             color: SLATE_500,
           }}
         >
-          <div style={{ display: "flex" }}>testimoni.io/tools/find-my-proof</div>
+          <div style={{ display: "flex" }}>testimoni.io</div>
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <Quote size={12} color={VIOLET_600} />
-            Real search · Real quotes · Yours to keep
+            Real quotes · Credit intact · Yours to keep
           </div>
         </div>
       </div>

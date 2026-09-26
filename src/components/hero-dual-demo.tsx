@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Link2, Sparkles, Store } from "lucide-react";
+import { Globe, Link2, Sparkles, Store } from "lucide-react";
 import { TweetPreviewDemo } from "@/components/tweet-preview-demo";
 import { ScreenshotDemo } from "@/components/screenshot-demo";
 import { AppStoreDemo } from "@/components/app-store-demo";
+import { WebsiteScanDemo } from "@/components/website-scan-demo";
 import { TiltCard } from "@/components/tilt-card";
 import { track } from "@/lib/analytics";
 
 /**
- * Hero-tab wrapper — switches between the three primary intake demos:
+ * Hero-tab wrapper — switches between the four primary intake demos:
  *   1. Paste a tweet URL       → live testimonial preview
- *   2. Upload a screenshot     → AI-extracted testimonial
- *   3. Import App Store review → animated stack of star-rated cards
+ *   2. Scan a website          → opens the Customer Voice scan
+ *   3. Upload a screenshot     → AI-extracted testimonial
+ *   4. Import App Store review → animated stack of star-rated cards
  *
  * All three are LIVE demos of Testimoni's intake paths. Tweet is
  * the default (proven conversion). Screenshot is the AI wow moment.
@@ -31,7 +33,15 @@ import { track } from "@/lib/analytics";
  * responsibility ("hero-slot intake demo") hasn't changed.
  */
 
-type Tab = "tweet" | "screenshot" | "app_store";
+type Tab = "tweet" | "website" | "screenshot" | "app_store";
+
+// Short labels for phones (four tabs in ~340px), long labels from sm up.
+const TABS: { id: Tab; Icon: typeof Link2; short: string; long: string }[] = [
+  { id: "tweet", Icon: Link2, short: "Tweet", long: "Paste tweet" },
+  { id: "website", Icon: Globe, short: "Website", long: "Scan website" },
+  { id: "screenshot", Icon: Sparkles, short: "Screenshot", long: "Drop screenshot" },
+  { id: "app_store", Icon: Store, short: "App Store", long: "App Store" },
+];
 
 export function HeroDualDemo() {
   const [tab, setTab] = useState<Tab>("tweet");
@@ -70,47 +80,25 @@ export function HeroDualDemo() {
       <div
         role="tablist"
         aria-label="Choose demo"
-        className="mb-4 grid grid-cols-3 gap-1 rounded-full border-2 border-primary/20 bg-primary/[0.03] p-1"
+        className="mb-4 grid grid-cols-4 gap-1 rounded-full border-2 border-primary/20 bg-primary/[0.03] p-1"
       >
-        <button
-          role="tab"
-          aria-selected={tab === "tweet"}
-          onClick={() => selectTab("tweet")}
-          className={`inline-flex items-center justify-center gap-1 rounded-full px-2 py-1.5 text-[11px] font-semibold transition-all sm:text-xs ${
-            tab === "tweet"
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Link2 className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Paste </span>tweet
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === "screenshot"}
-          onClick={() => selectTab("screenshot")}
-          className={`inline-flex items-center justify-center gap-1 rounded-full px-2 py-1.5 text-[11px] font-semibold transition-all sm:text-xs ${
-            tab === "screenshot"
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Sparkles className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Drop </span>screenshot
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === "app_store"}
-          onClick={() => selectTab("app_store")}
-          className={`inline-flex items-center justify-center gap-1 rounded-full px-2 py-1.5 text-[11px] font-semibold transition-all sm:text-xs ${
-            tab === "app_store"
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Store className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">App </span>Store
-        </button>
+        {TABS.map(({ id, Icon, short, long }) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => selectTab(id)}
+            className={`inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-full px-1.5 py-1.5 text-[11px] font-semibold transition-all sm:px-2 sm:text-xs ${
+              tab === id
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Icon className="hidden h-3.5 w-3.5 sm:block" />
+            <span className="sm:hidden">{short}</span>
+            <span className="hidden sm:inline">{long}</span>
+          </button>
+        ))}
       </div>
 
       {/* Panels — render all three (display:none the inactive ones)
@@ -120,6 +108,9 @@ export function HeroDualDemo() {
         <TiltCard>
           <TweetPreviewDemo />
         </TiltCard>
+      </div>
+      <div className={tab === "website" ? "block" : "hidden"}>
+        <WebsiteScanDemo />
       </div>
       <div className={tab === "screenshot" ? "block" : "hidden"}>
         <ScreenshotDemo />

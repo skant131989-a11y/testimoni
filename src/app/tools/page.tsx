@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Sparkles, Image as ImageIcon, Search, PenLine, ArrowRight, MessageCircle, Linkedin, Star } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Search, PenLine, ArrowRight, MessageCircle, Linkedin, Star, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolsHeader } from "@/components/tools-header";
 import { TrackedLink } from "@/components/tracked-link";
@@ -28,6 +28,14 @@ const TOOLS = [
       "Drop any screenshot of praise — DM, tweet, Slack, email, review. AI extracts the quote, author, and source into a testimonial card. 3 free extractions with signup.",
     cta: "Extract now →",
     badge: "NEW · AI",
+  },
+  {
+    href: "/tools/find-my-proof",
+    icon: Heart,
+    title: "Find my proof",
+    description:
+      "Paste your website and we search the web for public praise about it — tweets, Reddit, Product Hunt and more. Free, no paywall, no signup.",
+    cta: "Find praise →",
   },
   {
     href: "/tools/testimonial-card",

@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { useCountUp } from "@/hooks/use-count-up";
 import { track } from "@/lib/analytics";
-import { HeroScrollHint } from "@/components/hero-scroll-hint";
 
 /**
  * WedgeBanner — the "paste your website, we find your love" pitch,
@@ -44,13 +43,17 @@ const CATEGORY_ROWS = [
   { emoji: "⚔️", label: "Competitor mentions", count: 1 },
 ];
 
+const TOTAL_MENTIONS = CATEGORY_ROWS.reduce((sum, row) => sum + row.count, 0);
+
+// Illustrative example for the "Acme" mockup — labelled as such in the
+// card, never presented as a real customer's tweet.
 const HERO_QUOTE = {
   content:
-    "Testimoni pulled 27 real customer quotes I'd forgotten I had. Zero forms. Zero begging. It's magic.",
-  author: "@nikhil",
-  role: "Founder, ShipHub",
+    "Finally — a clear look at what customers say about Acme, praise and complaints in one place.",
+  author: "Example customer",
+  role: "Illustrative quote",
   score: 92,
-  source: "X",
+  source: "Example",
 };
 
 const URL_TEXT = "acme.com";
@@ -114,19 +117,18 @@ export function WedgeBanner() {
         {/* Left column — copy + CTA */}
         <div>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-600/30 bg-violet-600/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-700">
-            <Sparkles className="h-3 w-3" /> New · Free · No signup
+            <Sparkles className="h-3 w-3" /> Free · No signup · 10 seconds
           </span>
-          <h1 className="mt-4 text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
-            Find what your customers{" "}
+          <h2 className="mt-4 text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl">
+            People are talking about your product.{" "}
             <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
-              really say
-            </span>{" "}
-            about your product.
-          </h1>
+              Are you listening?
+            </span>
+          </h2>
           <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-            Discover praise, complaints, feature requests and use cases from
-            public conversations — then turn the best testimonials into a
-            Wall of Love.
+            Paste your website. We dig up the praise, complaints, feature
+            requests and competitor chatter from around the web — including
+            the ones you never got tagged in.
           </p>
 
           {/* Inline URL input — replaces the old CTA button so curious
@@ -154,7 +156,7 @@ export function WedgeBanner() {
                 onFocus={() =>
                   track("hero_url_input_focused", { source: "hero" })
                 }
-                placeholder="Paste your product URL"
+                placeholder="yourproduct.com"
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400 md:text-base"
                 aria-label="Your product URL"
                 autoComplete="off"
@@ -167,33 +169,18 @@ export function WedgeBanner() {
               disabled={!heroUrl.trim()}
               className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-60 md:text-base"
             >
-              Find customer mentions
+              Show me what they&rsquo;re saying
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
           </form>
 
-          {/* Small secondary link to the old praise-only tool — no
-              paywall ever, but only praise. Deliberately tiny and
-              below the fold of the primary CTA so it never competes
-              with the main flow; still reachable for the minority
-              who want zero-paywall praise search only. */}
-          <Link
-            href="/tools/find-my-proof"
-            onClick={() =>
-              track("hero_find_my_proof_click", { source: "hero" })
-            }
-            className="mt-3 inline-flex items-center gap-1 rounded-full border border-violet-300/60 bg-white/60 px-3 py-1 text-[11px] font-medium text-violet-700 transition-colors hover:bg-white hover:border-violet-400"
-          >
-            Just want praise, no paywall ever? Try classic search →
-          </Link>
-
-          <p className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
+          <p className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
             <span>Try:</span>
-            {["notion.so", "linear.app", "a small SaaS website"].map((example) => (
+            {["notion.so", "linear.app"].map((example) => (
               <button
                 key={example}
                 type="button"
-                onClick={() => setHeroUrl(example === "a small SaaS website" ? "" : example)}
+                onClick={() => setHeroUrl(example)}
                 className="font-semibold text-violet-700 underline-offset-4 hover:underline"
               >
                 {example}
@@ -204,16 +191,6 @@ export function WedgeBanner() {
             <span>No credit card</span>
             <span>·</span>
             <span>No signup to see what we find</span>
-            <span>·</span>
-            <Link
-              href="/tools"
-              onClick={() =>
-                track("hero_free_tools_hint_click", { source: "hero" })
-              }
-              className="font-semibold text-violet-700 underline-offset-4 hover:underline"
-            >
-              Or explore 8 free tools first →
-            </Link>
           </p>
 
           <p className="mt-2 text-xs text-muted-foreground">
@@ -269,9 +246,23 @@ export function WedgeBanner() {
         </div>
       </div>
 
-      {/* Scroll-hint chip — signals "there's more below" on tall
-          Mac viewports where the hero exactly fills the screen. */}
-      <HeroScrollHint targetId="drop-link" />
+      {/* Off-ramp to the next section for visitors with no public
+          praise to scan. */}
+      <div className="relative mt-12 flex justify-center px-4">
+        <a
+          href="#start-fresh"
+          onClick={() =>
+            track("home_section2_to_section3_click", { source: "customer_voice" })
+          }
+          className="group inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-emerald-500 hover:text-emerald-700 hover:shadow"
+        >
+          Nothing public to find yet?{" "}
+          <span className="text-emerald-700 group-hover:underline">
+            See the classic form path
+          </span>
+          <span aria-hidden="true">↓</span>
+        </a>
+      </div>
     </section>
   );
 }
@@ -320,7 +311,12 @@ function FindProofMockup({
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  const count = useCountUp(37, 900, inView && step >= 1);
+  const counting = inView && step >= 1;
+  const animated = useCountUp(TOTAL_MENTIONS, 900, counting);
+  // Until the animation is running show the real total, so the
+  // server-rendered HTML (crawlers, link previews, no-JS) says
+  // "We found 37", not "We found 0".
+  const count = counting ? animated : TOTAL_MENTIONS;
 
   return (
     <div
@@ -398,15 +394,15 @@ function FindProofMockup({
         }`}
       >
         <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold text-violet-700">
-          <Twitter className="h-3 w-3" />
-          via {quote.source} · {quote.score}/100
+          <Sparkles className="h-3 w-3" />
+          Example · {quote.score}/100
         </div>
         <p className="text-sm italic leading-relaxed text-slate-800">
           &ldquo;{quote.content}&rdquo;
         </p>
         <div className="mt-2 flex items-center gap-2 border-t pt-2 text-xs">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-500 text-[10px] font-bold text-white">
-            N
+            E
           </div>
           <div>
             <p className="font-semibold">{quote.author}</p>

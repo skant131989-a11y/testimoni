@@ -60,6 +60,25 @@ export default function AboutPage() {
             </p>
           </section>
 
+          <section className="mt-16 space-y-6">
+            <h2 className="text-2xl font-bold">Find what your customers really say</h2>
+            <p className="text-muted-foreground">
+              Paste your website and we discover praise, complaints, feature
+              requests and use cases from public conversations — then you can
+              turn the best testimonials into a Wall of Love.{" "}
+              <Link href="/tools/customer-voice" className="font-medium text-primary underline underline-offset-4">
+                Try the customer mention scan
+              </Link>
+              .
+            </p>
+            <h3 className="text-lg font-semibold">Already have a rave in mind? Drop the link.</h3>
+            <p className="text-muted-foreground">
+              Saw a tweet praising you? A LinkedIn post? A blog review? Paste
+              the URL and we pull the quote, author and source instantly — no
+              signup needed to try it.
+            </p>
+          </section>
+
           <section className="mt-16 grid gap-6 md:grid-cols-3">
             <div className="rounded-2xl border bg-card p-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">

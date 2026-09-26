@@ -64,7 +64,7 @@ export function LinkImportSection() {
   return (
     <section
       id="drop-link"
-      className="relative overflow-hidden border-t bg-gradient-to-br from-violet-100/70 via-purple-50 to-indigo-50/40 py-16 md:py-24"
+      className="relative overflow-hidden border-t bg-gradient-to-br from-violet-100/70 via-purple-50 to-indigo-50/40 py-10 md:py-14"
     >
       {/* Ambient blobs to mirror the hero's depth without repeating
           its exact palette — this section is blue/indigo where the
@@ -72,30 +72,29 @@ export function LinkImportSection() {
       <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-violet-400/20 blur-3xl" />
       <div className="pointer-events-none absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-purple-400/20 blur-3xl" />
 
-      <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 md:grid-cols-2 md:gap-14">
+      <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 md:grid-cols-[1.2fr_1fr] md:gap-10">
         {/* Interactive demo — left on desktop for variety with the hero */}
-        <div className="md:order-2">
+        <div className="order-2">
           <HeroDualDemo />
         </div>
         {/* Copy */}
-        <div className="md:order-1">
+        <div className="order-1">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-600/30 bg-violet-600/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-700">
             <Link2 className="h-3 w-3" /> Try it live · No signup
           </span>
-          <h2 className="mt-4 text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl">
-            Already have a rave{" "}
+          <h1 className="mt-3 text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl md:text-[2.4rem] lg:text-[2.7rem]">
+            Someone already said something great about you.{" "}
             <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-              in mind?
-            </span>{" "}
-            Drop the link — right here.
-          </h2>
-          <p className="mt-4 max-w-lg text-lg text-muted-foreground">
-            Saw a tweet praising you? A LinkedIn post? A blog review? Paste
-            the URL in the box → we pull the quote, author, and source
-            instantly. Try it live in the panel — <em>no signup, real result.</em>
+              Turn it into a testimonial.
+            </span>
+          </h1>
+          <p className="mt-3 max-w-xl text-base text-muted-foreground md:text-lg">
+            That tweet or post is proof you&rsquo;ve already earned. Paste the
+            link and we pull the quote, author and source in seconds — credit
+            intact. <em>No signup.</em>
           </p>
 
-          <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Free
               forever
@@ -110,7 +109,7 @@ export function LinkImportSection() {
             </span>
           </div>
 
-          <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="mt-5 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               href="/signup?src=home_drop_link"
               onClick={() =>
@@ -120,15 +119,16 @@ export function LinkImportSection() {
               }
               className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/30 md:text-base"
             >
-              Turn these into my wall
+              Put it on my wall
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <p className="text-xs text-muted-foreground">
-              10 testimonials free, forever.
+              10 testimonials free, forever. Every quote stays linked to the
+              original post.
             </p>
           </div>
 
-          <ul className="mt-6 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+          <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
             <li className="flex items-center gap-1.5">
               <Twitter className="h-3.5 w-3.5 text-sky-500" /> Tweets / X posts
             </li>
@@ -147,25 +147,6 @@ export function LinkImportSection() {
         </div>
       </div>
 
-      {/* Section-to-section connector — soft chip that hints there's
-          a third door below. Positions itself out of the way of the
-          main CTA so it reads as an alternative, not the primary
-          action. */}
-      <div className="relative mt-12 flex justify-center px-4">
-        <a
-          href="#start-fresh"
-          onClick={() =>
-            track("home_section2_to_section3_click", { source: "link_import" })
-          }
-          className="group inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-emerald-500 hover:text-emerald-700 hover:shadow"
-        >
-          Not into pasting?{" "}
-          <span className="text-emerald-700 group-hover:underline">
-            See the classic form path
-          </span>
-          <span aria-hidden="true">↓</span>
-        </a>
-      </div>
     </section>
   );
 }
