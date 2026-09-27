@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -84,54 +84,48 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [botTrap, setBotTrap] = useState("");
   const [mountedAt] = useState(() => Date.now());
-  // Turnstile — same fail-open policy as signup.
+  // ── Anti-bot, as of 2026-09-27: telemetry only, never blocking ───
+  // Same policy and reasoning as signup/page.tsx — see the note
+  // there. Honeypot, mount-timestamp check and Turnstile all still
+  // run and report to PostHog, but nothing here blocks a login.
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  // The widget only mounts once someone starts using the email form,
-  // so people who sign in with Google never load or see it.
-  const [emailFormTouched, setEmailFormTouched] = useState(false);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
-  const [turnstileUnavailable, setTurnstileUnavailable] = useState(false);
-  const [turnstilePassedAt, setTurnstilePassedAt] = useState<number | null>(null);
-  const TURNSTILE_PASS_TTL_MS = 10 * 60 * 1000;
   const turnstileConfigured = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const tokenWaitersRef = useRef<((token: string | null) => void)[]>([]);
+  const TURNSTILE_WAIT_MS = 8_000;
 
-  async function verifyTurnstile(action: string): Promise<boolean> {
-    // Fail open if the widget can't run at all (script blocked by an
-    // extension or network) — see components/turnstile.tsx.
-    if (!turnstileConfigured || turnstileUnavailable) return true;
-    // Already passed on this visit — don't challenge again. A retry
-    // after a mistyped password shouldn't run a fresh challenge (which
-    // can escalate to a click-to-verify prompt for a real person).
-    if (turnstilePassedAt && Date.now() - turnstilePassedAt < TURNSTILE_PASS_TTL_MS) {
-      return true;
-    }
-    if (!turnstileToken) {
-      track("turnstile_blocked", { action, reason: "no_token" });
-      setError("Please wait a moment for the security check, then try again.");
-      return false;
-    }
-    // Turnstile tokens are single-use, so this one is spent either way.
-    const token = turnstileToken;
-    setTurnstileToken(null);
-    try {
-      const res = await fetch("/api/verify-turnstile", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ token, action }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        track("turnstile_blocked", { action, reason: "verify_failed" });
-        setError("Security check failed. Please try again in a moment.");
-        // Only a failed check needs a fresh token for the retry.
-        setTurnstileResetKey((k) => k + 1);
-        return false;
+  /** Fire-and-forget Cloudflare check, purely for visibility into bot
+   *  traffic — never awaited by a caller and never blocks the form. */
+  function reportTurnstile(action: string) {
+    if (!turnstileConfigured) return;
+    (async () => {
+      let token = turnstileToken;
+      if (!token) {
+        token = await new Promise<string | null>((resolve) => {
+          tokenWaitersRef.current.push(resolve);
+          setTimeout(() => resolve(null), TURNSTILE_WAIT_MS);
+        });
       }
-      setTurnstilePassedAt(Date.now());
-      return true;
-    } catch {
-      return true;
-    }
+      if (!token) {
+        track("turnstile_blocked", { action, reason: "no_token", enforced: false });
+        return;
+      }
+      setTurnstileToken(null);
+      setTurnstileResetKey((k) => k + 1); // arm the widget for a fresh token next time
+      try {
+        const res = await fetch("/api/verify-turnstile", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ token, action }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          track("turnstile_blocked", { action, reason: "verify_failed", enforced: false });
+        }
+      } catch {
+        // Best-effort telemetry — nothing to do either way.
+      }
+    })();
   }
 
   // Some auth callback errors arrive as fragment (?…#error=…) since
@@ -159,22 +153,19 @@ export default function LoginPage() {
   async function handleEmailLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    setEmailFormTouched(true);
 
     if (botTrap) {
-      track("login_rejected", { reason: "honeypot", method: "email" });
-      // Clear it so a one-off autofill by a password manager or
-      // extension doesn't block this visitor for the rest of the visit.
+      // Logged, not blocked — see the anti-bot note above. Clear it
+      // so a one-off autofill doesn't keep tripping for the rest of
+      // this visit.
+      track("login_rejected", { reason: "honeypot", method: "email", enforced: false });
       setBotTrap("");
-      setError("Something looked off. Please try again.");
-      return;
     }
     if (Date.now() - mountedAt < 800) {
-      track("login_rejected", { reason: "too_fast", method: "email" });
-      setError("Slow down a bit and try again.");
-      return;
+      track("login_rejected", { reason: "too_fast", method: "email", enforced: false });
     }
-    if (!(await verifyTurnstile("login_email"))) return;
+    // Telemetry only — see reportTurnstile above. Never blocks.
+    reportTurnstile("login_email");
 
     setIsLoading(true);
     track("login_started", { method: "email_password" }, { instant: true });
@@ -363,11 +354,7 @@ export default function LoginPage() {
 
         {/* Email + password — primary form (visible first). Google
             fallback lives below the divider. */}
-        <form
-          onSubmit={handleEmailLogin}
-          onFocus={() => setEmailFormTouched(true)}
-          className="space-y-4"
-        >
+        <form onSubmit={handleEmailLogin} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -402,7 +389,16 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Honeypot */}
+          {/* Honeypot — display:none (not off-screen positioning) is
+              what actually keeps browser-native autofill / password
+              managers out of it: an off-screen-but-rendered field
+              still has a non-zero size and can get autofilled by
+              Chrome/Safari along with the real email+password fields
+              for a returning user, which was silently rejecting real
+              logins as bots. display:none is reliably skipped by
+              autofill in every major browser, while a JS bot that
+              blindly fills every <input> by selector still triggers
+              it exactly as before. */}
           <input
             type="text"
             name="fx-check-9a2f"
@@ -414,14 +410,7 @@ export default function LoginPage() {
             data-form-type="other"
             value={botTrap}
             onChange={(e) => setBotTrap(e.target.value)}
-            style={{
-              position: "absolute",
-              left: "-9999px",
-              width: "1px",
-              height: "1px",
-              opacity: 0,
-              pointerEvents: "none",
-            }}
+            style={{ display: "none" }}
             aria-hidden="true"
           />
 
@@ -441,14 +430,27 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        {turnstileConfigured && emailFormTouched && (
+        {/* Turnstile — telemetry only (see the anti-bot note above),
+            so nothing here can ever block login. Mounted immediately
+            on page load rather than gated on the user touching the
+            email form, so it has the most possible lead time to
+            produce a token in the background. Still invisible for
+            Google-only visitors (interaction-only appearance). */}
+        {turnstileConfigured && (
           <div className="mt-4 flex justify-center">
             <Turnstile
-              onToken={setTurnstileToken}
+              onToken={(t) => {
+                setTurnstileToken(t);
+                const waiters = tokenWaitersRef.current;
+                tokenWaitersRef.current = [];
+                waiters.forEach((w) => w(t));
+              }}
               onExpire={() => setTurnstileToken(null)}
               onUnavailable={(reason) => {
-                setTurnstileUnavailable(true);
                 track("turnstile_unavailable", { page: "login", reason });
+                const waiters = tokenWaitersRef.current;
+                tokenWaitersRef.current = [];
+                waiters.forEach((w) => w(null));
               }}
               resetSignal={turnstileResetKey}
               appearance="interaction-only"
