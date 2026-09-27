@@ -97,6 +97,18 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
       <TabsWithProgress tabs={tabs} activeValue={activeFilter} />
 
       <InboxList
+        // Force a fresh component instance per tab. InboxList seeds
+        // its local state from `initial`/`testimonialCount`/
+        // `atTestimonialLimit` via useState, which only reads those
+        // props on first mount — without this key, switching tabs via
+        // the Link-based TabsWithProgress (a client-side soft nav)
+        // reuses the same InboxList instance, so its submissions list
+        // stays stuck on whatever the FIRST tab visited in this
+        // session showed, even though the server always sends fresh
+        // data and the tab counts (server-rendered, no client state)
+        // update correctly. This was reported as "tabs show the right
+        // counts but the Approved tab shows nothing."
+        key={activeFilter}
         initial={inboxSubmissions}
         activeFilter={activeFilter}
         atTestimonialLimit={atTestimonialLimit}

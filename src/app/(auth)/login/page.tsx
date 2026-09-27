@@ -84,48 +84,62 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [botTrap, setBotTrap] = useState("");
   const [mountedAt] = useState(() => Date.now());
-  // ── Anti-bot, as of 2026-09-27: telemetry only, never blocking ───
-  // Same policy and reasoning as signup/page.tsx — see the note
-  // there. Honeypot, mount-timestamp check and Turnstile all still
-  // run and report to PostHog, but nothing here blocks a login.
+  // ── Anti-bot, as of 2026-09-27 ────────────────────────────────────
+  // Same policy as signup/page.tsx — see the fuller note on
+  // verifyTurnstile there. Honeypot and the mount-timestamp check are
+  // telemetry only. Turnstile blocks only on a real Cloudflare
+  // `verify_failed` verdict; a missing token (widget never resolved —
+  // ad blocker, blocked network, etc.) fails open.
+  //
+  // Unlike signup, login also gets FREE_FAILED_ATTEMPTS free passes:
+  // nobody solves a security check to log in on a normal first try —
+  // only credential-guessing (repeated wrong passwords) looks like a
+  // bot here, so Turnstile only engages once a real Supabase
+  // authError has happened this many times.
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const turnstileConfigured = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const [verifyingTurnstile, setVerifyingTurnstile] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const FREE_FAILED_ATTEMPTS = 2;
   const tokenWaitersRef = useRef<((token: string | null) => void)[]>([]);
   const TURNSTILE_WAIT_MS = 8_000;
 
-  /** Fire-and-forget Cloudflare check, purely for visibility into bot
-   *  traffic — never awaited by a caller and never blocks the form. */
-  function reportTurnstile(action: string) {
-    if (!turnstileConfigured) return;
-    (async () => {
-      let token = turnstileToken;
-      if (!token) {
-        token = await new Promise<string | null>((resolve) => {
-          tokenWaitersRef.current.push(resolve);
-          setTimeout(() => resolve(null), TURNSTILE_WAIT_MS);
-        });
+  async function verifyTurnstile(action: string): Promise<boolean> {
+    if (!turnstileConfigured) return true;
+    let token = turnstileToken;
+    if (!token) {
+      setVerifyingTurnstile(true);
+      token = await new Promise<string | null>((resolve) => {
+        tokenWaitersRef.current.push(resolve);
+        setTimeout(() => resolve(null), TURNSTILE_WAIT_MS);
+      });
+      setVerifyingTurnstile(false);
+    }
+    if (!token) {
+      track("turnstile_blocked", { action, reason: "no_token", enforced: false });
+      return true;
+    }
+    setTurnstileToken(null);
+    setTurnstileResetKey((k) => k + 1);
+    try {
+      const res = await fetch("/api/verify-turnstile", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token, action }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) return true;
+      if (data.error === "verify_failed") {
+        track("turnstile_blocked", { action, reason: "verify_failed", codes: data.codes, enforced: true });
+        setError("Security check failed. Please try again in a moment.");
+        return false;
       }
-      if (!token) {
-        track("turnstile_blocked", { action, reason: "no_token", enforced: false });
-        return;
-      }
-      setTurnstileToken(null);
-      setTurnstileResetKey((k) => k + 1); // arm the widget for a fresh token next time
-      try {
-        const res = await fetch("/api/verify-turnstile", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ token, action }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data.ok) {
-          track("turnstile_blocked", { action, reason: "verify_failed", enforced: false });
-        }
-      } catch {
-        // Best-effort telemetry — nothing to do either way.
-      }
-    })();
+      track("turnstile_blocked", { action, reason: data.error || "unknown", enforced: false });
+      return true;
+    } catch {
+      return true;
+    }
   }
 
   // Some auth callback errors arrive as fragment (?…#error=…) since
@@ -164,8 +178,12 @@ export default function LoginPage() {
     if (Date.now() - mountedAt < 800) {
       track("login_rejected", { reason: "too_fast", method: "email", enforced: false });
     }
-    // Telemetry only — see reportTurnstile above. Never blocks.
-    reportTurnstile("login_email");
+    // Skip the check entirely for the first couple of attempts — see
+    // the note above. Only blocks (once engaged) on a real Cloudflare
+    // "verify_failed" verdict.
+    if (failedAttempts >= FREE_FAILED_ATTEMPTS) {
+      if (!(await verifyTurnstile("login_email"))) return;
+    }
 
     setIsLoading(true);
     track("login_started", { method: "email_password" }, { instant: true });
@@ -190,6 +208,7 @@ export default function LoginPage() {
           reason,
           error: authError.message,
         });
+        setFailedAttempts((n) => n + 1);
         return;
       }
 
@@ -425,17 +444,20 @@ export default function LoginPage() {
             size="lg"
             disabled={isLoading || isGoogleLoading || !email || !password}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign in
+            {(isLoading || verifyingTurnstile) && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            {verifyingTurnstile ? "Verifying…" : "Sign in"}
           </Button>
         </form>
 
-        {/* Turnstile — telemetry only (see the anti-bot note above),
-            so nothing here can ever block login. Mounted immediately
-            on page load rather than gated on the user touching the
-            email form, so it has the most possible lead time to
-            produce a token in the background. Still invisible for
-            Google-only visitors (interaction-only appearance). */}
+        {/* Turnstile — blocks only on a real Cloudflare verify_failed
+            verdict (see verifyTurnstile above). Mounted immediately on
+            page load rather than gated on the user touching the email
+            form, so it has the most possible lead time to produce a
+            token in the background before anyone submits. Still
+            invisible for Google-only visitors (interaction-only
+            appearance). */}
         {turnstileConfigured && (
           <div className="mt-4 flex justify-center">
             <Turnstile
