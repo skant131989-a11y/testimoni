@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { track, identify, resetAnalytics } from "@/lib/analytics";
+import { isGmailDotStuffing } from "@/lib/bot-email";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +38,9 @@ import {
  * telemetry only — never block. Turnstile is telemetry-only for every
  * outcome *except* a real negative verdict from Cloudflare
  * (`verify_failed`) — see the note above `verifyTurnstile` for why
- * that one line is drawn there.
+ * that one line is drawn there. As of 2026-09-29, Gmail dot-stuffing
+ * (see bot-email.ts) is also a real, hard block — confirmed against
+ * production data with zero false positives.
  */
 
 export default function SignupPage() {
@@ -139,6 +142,14 @@ export default function SignupPage() {
     }
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
+      return;
+    }
+    // Gmail dot-stuffing — a real, near-zero-false-positive bot
+    // signal (see bot-email.ts), so unlike honeypot/too_fast above
+    // this one actually blocks.
+    if (isGmailDotStuffing(email)) {
+      track("signup_rejected", { reason: "gmail_dot_pattern", method: "email", enforced: true });
+      setError("Please sign up with your regular email address.");
       return;
     }
     // Only blocks on a real Cloudflare "verify_failed" verdict — see

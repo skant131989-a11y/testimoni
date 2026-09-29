@@ -527,3 +527,154 @@ enum ScanPurchaseStatus {
   PAID
   FAILED
 }
+
+// ── Testimoni Growth Engine (/admin/leads) ──────────────────────
+// Internal, admin-only lead-discovery tool. Finds companies that
+// already have public customer praise but appear to underuse it as
+// social proof — the strongest possible Testimoni lead. Never sends
+// outreach automatically; every send is a human copying a generated
+// draft. Not workspace-scoped (same reasoning as UrlScan — this is
+// an internal tool, not a customer feature).
+model Lead {
+  id String @id @default(cuid())
+
+  companyName         String? @map("company_name")
+  productName         String? @map("product_name")
+  website             String  @map("website") // normalized, deduped on this
+  founderName         String? @map("founder_name")
+  founderSocial       String? @map("founder_social")
+  publicBusinessEmail String? @map("public_business_email")
+
+  // Where THIS row was first discovered (not every praise signal —
+  // see LeadPraiseSignal for the full list).
+  source    LeadSource
+  sourceUrl String     @map("source_url")
+
+  // Best/first praise evidence, denormalized for the card view.
+  // Full list (possibly several) lives in `praiseSignals`.
+  praiseSource  String? @map("praise_source")
+  praiseUrl     String? @map("praise_url")
+  praiseExcerpt String? @map("praise_excerpt") @db.VarChar(600)
+  // Count of praise signals attached — kept in sync by the scan
+  // pipeline on every upsert, not computed per-request.
+  praiseCount   Int     @default(0) @map("praise_count")
+
+  category String? // free-form product category, when inferable
+
+  score       Int    @default(0)
+  scoreReason String @default("") @map("score_reason") @db.VarChar(1000)
+
+  socialProofStatus SocialProofStatus @default(UNKNOWN) @map("social_proof_status")
+
+  status LeadStatus @default(NEW)
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+
+  praiseSignals  LeadPraiseSignal[]
+  outreachDrafts LeadOutreachDraft[]
+
+  // Dedup key. `website` is the normalized hostname (no protocol/www/
+  // path) — the spec's "deduplicate primarily by company/product
+  // domain."
+  @@unique([website])
+  @@index([status, score])
+  @@index([lastSeenAt])
+  @@map("leads")
+}
+
+enum LeadSource {
+  HACKER_NEWS
+  PRODUCT_HUNT
+  REDDIT
+  MANUAL
+}
+
+enum SocialProofStatus {
+  NO_SOCIAL_PROOF
+  WEAK_SOCIAL_PROOF
+  HAS_TESTIMONIALS
+  STRONG_SOCIAL_PROOF
+  UNKNOWN
+}
+
+enum LeadStatus {
+  NEW
+  QUALIFIED
+  DRAFT_READY
+  CONTACTED
+  REPLIED
+  SIGNUP
+  CONVERTED
+  IGNORED
+}
+
+// One real, sourced piece of public praise found for a lead. A lead
+// can have several — praise scattered across platforms is itself a
+// strong signal (spec: "multiple praise sources" raises score).
+// Content is a short excerpt only, never the full post — spec:
+// "store only the minimum excerpt/context needed to qualify."
+model LeadPraiseSignal {
+  id     String @id @default(cuid())
+  leadId String @map("lead_id")
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  source  LeadSource
+  url     String
+  excerpt String     @db.VarChar(600)
+  // Who said it, if visible — never invented, matches the scan
+  // tool's "author = real handle or Anonymous" rule.
+  author  String?
+
+  foundAt DateTime @default(now()) @map("found_at")
+
+  @@unique([leadId, url])
+  @@map("lead_praise_signals")
+}
+
+// A generated outreach draft. Storing every generation (not just the
+// latest) gives a paper trail of what was actually offered to send —
+// useful once a human decides to actually send one manually.
+model LeadOutreachDraft {
+  id     String @id @default(cuid())
+  leadId String @map("lead_id")
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  content String @db.VarChar(2000)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([leadId, createdAt])
+  @@map("lead_outreach_drafts")
+}
+
+// One row per scan trigger (manual "Run Scan Now" or scheduled cron).
+// Powers the admin page's "last scan" stats strip.
+model LeadScanRun {
+  id String @id @default(cuid())
+
+  status LeadScanRunStatus @default(RUNNING)
+
+  companiesScanned   Int @default(0) @map("companies_scanned")
+  praiseSignalsFound Int @default(0) @map("praise_signals_found")
+  newQualifiedLeads  Int @default(0) @map("new_qualified_leads")
+  highIntentLeads    Int @default(0) @map("high_intent_leads")
+
+  // Short, non-sensitive provider-level errors — e.g. "reddit:
+  // not configured", "product_hunt: 401" — never a full stack trace.
+  providerErrors String[] @default([]) @map("provider_errors")
+
+  triggeredBy String @map("triggered_by") // admin email, or "cron"
+
+  startedAt  DateTime  @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+
+  @@index([startedAt])
+  @@map("lead_scan_runs")
+}
+
+enum LeadScanRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
