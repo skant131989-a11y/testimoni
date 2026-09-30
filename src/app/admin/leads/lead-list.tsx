@@ -101,6 +101,12 @@ function LeadCardView({
   const [busyStatus, setBusyStatus] = useState<string | null>(null);
 
   const proof = SOCIAL_PROOF_LABEL[lead.socialProofStatus] ?? SOCIAL_PROOF_LABEL.UNKNOWN;
+  const hasEvidence = lead.praiseSignals.length > 0;
+  // Discovered leads without evidence aren't worth emailing yet — but
+  // a MANUAL lead is one the admin deliberately chose, so it's always
+  // preparable even with zero scraped praise (falls back to a
+  // generic-but-honest draft — see outreach.ts).
+  const canPrepare = hasEvidence || lead.source === "MANUAL";
 
   async function setStatus(status: string) {
     setBusyStatus(status);
@@ -353,14 +359,17 @@ function LeadCardView({
           </div>
         )}
 
-        {lead.praiseSignals.length > 0 && (
+        {canPrepare && (
           <div className="mt-4 flex flex-wrap items-center gap-1.5 text-xs">
             <span className="text-muted-foreground">Email angle:</span>
             {(
               [
                 { v: "wall" as const, label: "1 · Wall of Love" },
                 { v: "hook" as const, label: "2 · Curiosity + $9/mo" },
-                { v: "paid_scan" as const, label: "3 · $9 Scan pitch" },
+                // "We found public mentions of you" would be dishonest
+                // for a lead with zero real evidence — only offer it
+                // once there's actual praise found.
+                ...(hasEvidence ? [{ v: "paid_scan" as const, label: "3 · $9 Scan pitch" }] : []),
               ]
             ).map((opt) => (
               <button
@@ -394,7 +403,7 @@ function LeadCardView({
           <Button
             size="sm"
             onClick={prepareEmail}
-            disabled={preparing || lead.praiseSignals.length === 0}
+            disabled={preparing || !canPrepare}
             className="gap-1"
           >
             <Sparkles className="h-3.5 w-3.5" />

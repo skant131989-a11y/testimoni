@@ -1,5 +1,12 @@
 import type { SocialProofInspection } from "@/lib/leads/types";
 
+export interface SiteInspection extends SocialProofInspection {
+  /** A real contact email scraped from THEIR OWN public page (a
+   *  mailto: link or visible address) — never guessed/pattern-
+   *  generated. null when none is visibly published. */
+  email: string | null;
+}
+
 /**
  * Inspects a company's public homepage for existing social proof —
  * spec section 4. Deterministic keyword/structure heuristics, not an
@@ -94,22 +101,60 @@ function countOccurrences(haystack: string, needle: string): number {
   return count;
 }
 
-export async function inspectSocialProof(website: string): Promise<SocialProofInspection> {
+const JUNK_LOCAL_PARTS = /^(no-?reply|donotreply|postmaster|abuse|webmaster)@/i;
+// Placeholder domains that show up in <input placeholder="you@example.com">
+// text and get swept up by the plain-text fallback regex below —
+// confirmed by testing against our own site's signup form.
+const JUNK_DOMAINS = new Set(["example.com", "example.org", "example.net", "domain.com", "yourdomain.com", "test.com", "email.com", "acme.com"]);
+const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+/** Scraped, never guessed — a mailto: link or visible address on
+ *  their own page. Prefers an address on their own domain (looks
+ *  like a real business contact) over an unrelated one (e.g. a
+ *  third-party widget's support address) picked up incidentally. */
+function extractContactEmail(rawHtml: string, website: string): string | null {
+  const mailtoRe = /mailto:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/gi;
+  const found = new Set<string>();
+  let m: RegExpExecArray | null;
+  while ((m = mailtoRe.exec(rawHtml))) found.add(m[1].toLowerCase());
+  if (found.size === 0) {
+    // Fall back to a plain visible address — less common, still real
+    // if present (some pages write "Contact: hello@x.com" with no link).
+    const plain = rawHtml.match(EMAIL_RE) || [];
+    for (const e of plain.slice(0, 20)) found.add(e.toLowerCase());
+  }
+  const candidates = [...found].filter(
+    (e) => !JUNK_LOCAL_PARTS.test(e) && !JUNK_DOMAINS.has(e.split("@")[1] || "")
+  );
+  if (candidates.length === 0) return null;
+  const sameDomain = candidates.find((e) => e.endsWith(`@${website}`));
+  return sameDomain ?? candidates[0];
+}
+
+export async function inspectSocialProof(website: string): Promise<SiteInspection> {
   const homepageHtml = await fetchText(`https://${website}`);
   if (!homepageHtml) {
     // Try common testimonial-page paths directly — sometimes the
     // homepage fetch fails (bot-blocking, redirect loop) but a
     // dedicated page still answers. Still UNKNOWN if all fail.
-    for (const path of ["/testimonials", "/wall-of-love", "/customers"]) {
+    for (const path of ["/testimonials", "/wall-of-love", "/customers", "/contact"]) {
       const html = await fetchText(`https://${website}${path}`);
       if (html) {
-        return classify(htmlToLowerText(html), true);
+        return { ...classify(htmlToLowerText(html), true), email: extractContactEmail(html, website) };
       }
     }
-    return { status: "UNKNOWN", reason: "Website could not be fetched." };
+    return { status: "UNKNOWN", reason: "Website could not be fetched.", email: null };
   }
 
-  return classify(htmlToLowerText(homepageHtml), false);
+  let email = extractContactEmail(homepageHtml, website);
+  if (!email) {
+    // Homepage rarely lists an email directly — try /contact, one
+    // extra fetch, only when the homepage came up empty.
+    const contactHtml = await fetchText(`https://${website}/contact`);
+    if (contactHtml) email = extractContactEmail(contactHtml, website);
+  }
+
+  return { ...classify(htmlToLowerText(homepageHtml), false), email };
 }
 
 function classify(text: string, fromDedicatedPage: boolean): SocialProofInspection {

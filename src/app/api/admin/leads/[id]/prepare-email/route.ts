@@ -41,6 +41,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     socialProofReason: lead.socialProofStatus.replace(/_/g, " ").toLowerCase(),
     praiseExcerpts: lead.praiseSignals.map((s) => ({ source: s.source, excerpt: s.excerpt })),
     variant,
+    extraContext: lead.notes,
   });
 
   return NextResponse.json({

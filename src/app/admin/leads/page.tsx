@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { LeadList, type LeadCard } from "./lead-list";
 import { RunScanButton } from "./run-scan-button";
+import { ManualLeadForm } from "./manual-lead-form";
 import { TabsWithProgress } from "@/components/tabs-with-progress";
 
 /**
@@ -147,6 +148,8 @@ export default async function AdminLeadsPage({
       </header>
 
       <main className="mx-auto max-w-6xl space-y-6 px-6 py-6">
+        <ManualLeadForm />
+
         {/* Last scan stats strip */}
         {lastRun && (
           <div className="grid grid-cols-2 gap-3 rounded-xl border bg-white p-4 text-sm sm:grid-cols-4">

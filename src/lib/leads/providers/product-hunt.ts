@@ -6,17 +6,23 @@ import type { ProviderResult, RawCandidate } from "@/lib/leads/types";
  * (src/app/api/testimonials/import-url/route.ts). Authorized/official
  * per the spec's "optional when permitted/configured" list.
  *
- * Pulls recently-launched products + their public comments — directly
- * matches spec section 2's "recently launched product with users" and
- * "launch comments containing customer praise". No token configured
- * → returns an empty result with an error string, never throws; the
- * scan just runs without this source.
+ * Two queries, merged:
+ *   NEWEST — catches "recently launched" + founders asking about
+ *            testimonials on their own fresh launch thread.
+ *   VOTES (last 45 days) — catches products with real traction.
+ *            Confirmed live: a top-voted post routinely has 100-200+
+ *            comments vs. near-zero on a brand-new launch, so this is
+ *            a much denser source of genuine customer praise — the
+ *            core "already has testimonials worth surfacing" signal.
+ * No token configured → returns an empty result with an error
+ * string, never throws; the scan just runs without this source.
  */
 
 const PH_ENDPOINT = "https://api.producthunt.com/v2/api/graphql";
 const FETCH_TIMEOUT_MS = 10_000;
 const REDIRECT_TIMEOUT_MS = 6_000;
 const RESOLVE_CONCURRENCY = 5;
+const VOTES_WINDOW_DAYS = 45;
 
 /**
  * Product Hunt's GraphQL `website` field returns their own click-
@@ -73,16 +79,14 @@ export function hasProductHunt(): boolean {
   return !!process.env.PRODUCT_HUNT_API_TOKEN;
 }
 
-export async function fetchProductHuntLeads(opts?: { limit?: number }): Promise<ProviderResult> {
-  const token = process.env.PRODUCT_HUNT_API_TOKEN;
-  if (!token) {
-    return { source: "PRODUCT_HUNT", candidates: [], error: "not_configured" };
-  }
-
-  const limit = opts?.limit ?? 15;
+async function fetchPosts(
+  token: string,
+  order: "NEWEST" | "VOTES",
+  first: number,
+  postedAfter?: string
+): Promise<{ posts: PHPostNode[]; error?: string }> {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
   try {
     const res = await fetch(PH_ENDPOINT, {
       method: "POST",
@@ -93,8 +97,8 @@ export async function fetchProductHuntLeads(opts?: { limit?: number }): Promise<
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        query: `query($first: Int!) {
-          posts(order: NEWEST, first: $first) {
+        query: `query($first: Int!, $after: DateTime) {
+          posts(order: ${order}, first: $first, postedAfter: $after) {
             edges {
               node {
                 id
@@ -111,19 +115,47 @@ export async function fetchProductHuntLeads(opts?: { limit?: number }): Promise<
             }
           }
         }`,
-        variables: { first: limit },
+        variables: { first, after: postedAfter },
       }),
     });
-    if (!res.ok) {
-      return { source: "PRODUCT_HUNT", candidates: [], error: `http_${res.status}` };
-    }
+    if (!res.ok) return { posts: [], error: `http_${res.status}` };
     const json = (await res.json()) as PHResponse;
-    if (json.errors?.length) {
-      return { source: "PRODUCT_HUNT", candidates: [], error: json.errors[0]?.message ?? "graphql_error" };
-    }
+    if (json.errors?.length) return { posts: [], error: json.errors[0]?.message ?? "graphql_error" };
+    return { posts: json.data?.posts?.edges?.map((e) => e.node).filter((n): n is PHPostNode => !!n) ?? [] };
+  } catch (err) {
+    return { posts: [], error: err instanceof Error ? err.message : "product_hunt_failed" };
+  } finally {
+    clearTimeout(t);
+  }
+}
 
-    const posts = json.data?.posts?.edges?.map((e) => e.node).filter((n): n is PHPostNode => !!n) ?? [];
+export async function fetchProductHuntLeads(opts?: { limit?: number }): Promise<ProviderResult> {
+  const token = process.env.PRODUCT_HUNT_API_TOKEN;
+  if (!token) {
+    return { source: "PRODUCT_HUNT", candidates: [], error: "not_configured" };
+  }
 
+  const limit = opts?.limit ?? 15;
+  const votesAfter = new Date(Date.now() - VOTES_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
+
+  const [newest, popular] = await Promise.all([
+    fetchPosts(token, "NEWEST", limit),
+    fetchPosts(token, "VOTES", Math.max(10, Math.round(limit / 2)), votesAfter),
+  ]);
+  const errors = [newest.error, popular.error].filter(Boolean) as string[];
+  if (errors.length === 2) {
+    // Both queries failed — nothing to work with.
+    return { source: "PRODUCT_HUNT", candidates: [], error: errors.join("; ") };
+  }
+
+  const seen = new Set<string>();
+  const posts = [...newest.posts, ...popular.posts].filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+
+  try {
     // Resolve every post's real website up front (bounded concurrency)
     // so both the post candidate and its comment candidates use the
     // real domain, not the PH redirect.
@@ -165,7 +197,8 @@ export async function fetchProductHuntLeads(opts?: { limit?: number }): Promise<
             ? `https://www.producthunt.com/@${maker.username}`
             : undefined,
       });
-      // Its public comments — where launch-day praise lives.
+      // Its public comments — where launch-day (or, for popular
+      // posts, ongoing) praise lives.
       const comments = post.comments?.edges?.map((e) => e.node).filter((n): n is PHCommentNode => !!n) ?? [];
       for (const c of comments) {
         if (!c.body) continue;
@@ -180,14 +213,12 @@ export async function fetchProductHuntLeads(opts?: { limit?: number }): Promise<
         });
       }
     }
-    return { source: "PRODUCT_HUNT", candidates };
+    return { source: "PRODUCT_HUNT", candidates, error: errors[0] };
   } catch (err) {
     return {
       source: "PRODUCT_HUNT",
       candidates: [],
       error: err instanceof Error ? err.message : "product_hunt_failed",
     };
-  } finally {
-    clearTimeout(t);
   }
 }

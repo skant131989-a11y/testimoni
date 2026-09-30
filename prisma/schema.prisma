@@ -561,6 +561,13 @@ model Lead {
 
   category String? // free-form product category, when inferable
 
+  // Free-text background an admin typed in manually (the "website
+  // details" field on the manual-outreach form) — NEVER a customer
+  // quote, kept separate from praiseSignals so it's never rendered
+  // or prompted as if a real customer said it. Used only as tone/
+  // relevance context when drafting an email — see outreach.ts.
+  notes String? @db.VarChar(1000)
+
   score       Int    @default(0)
   scoreReason String @default("") @map("score_reason") @db.VarChar(1000)
 

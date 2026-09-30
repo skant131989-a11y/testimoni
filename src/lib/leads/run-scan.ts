@@ -190,12 +190,21 @@ export async function runLeadScan(triggeredBy: string): Promise<ScanStats> {
     let highIntentLeads = 0;
 
     for (const agg of aggregated) {
-      const inspection = inspections.get(agg.website) ?? { status: "UNKNOWN" as const, reason: "Not inspected." };
+      const inspection = inspections.get(agg.website) ?? {
+        status: "UNKNOWN" as const,
+        reason: "Not inspected.",
+        email: null,
+      };
       const existing = await prisma.lead.findUnique({ where: { website: agg.website } });
 
       const founderName = pickNonNull(agg.founderName, existing?.founderName ?? null);
       const founderSocial = pickNonNull(agg.founderSocial, existing?.founderSocial ?? null);
-      const publicBusinessEmail = pickNonNull(agg.publicBusinessEmail, existing?.publicBusinessEmail ?? null);
+      // Classifier-extracted (from a comment) or scraped straight off
+      // their own site (mailto:/contact page) — never guessed.
+      const publicBusinessEmail = pickNonNull(
+        pickNonNull(agg.publicBusinessEmail, inspection.email),
+        existing?.publicBusinessEmail ?? null
+      );
       const alreadyContacted = existing ? CONTACTED_STATUSES.has(existing.status) : false;
 
       const isRecent =

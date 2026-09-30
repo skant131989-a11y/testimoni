@@ -31,6 +31,12 @@ export interface OutreachInput {
   socialProofReason: string;
   praiseExcerpts: { source: string; excerpt: string }[];
   variant: OutreachVariant;
+  /** Admin-typed background (the manual-outreach form's "website
+   *  details" field) — NEVER a customer quote. Kept structurally
+   *  separate from praiseExcerpts and always labeled as such in the
+   *  prompt, so it can never be mistaken for (or written up as) a
+   *  real customer saying something. */
+  extraContext?: string | null;
 }
 
 const VARIANT_ANGLE: Record<OutreachVariant, string> = {
@@ -55,23 +61,24 @@ const FALLBACK_TEMPLATE = (input: OutreachInput): string => {
   const name = input.founderName ? input.founderName.split(" ")[0] : "there";
   const product = input.productName || input.companyName;
   const firstSource = input.praiseExcerpts[0]?.source;
+  const contextLine = input.extraContext ? `\n\n${input.extraContext.trim()}` : "";
   if (input.variant === "paid_scan") {
     return `Hey ${name} — we ran a scan and found people talking about ${product}${firstSource ? ` on ${firstSource}` : ""}.
 
-Testimoni's Customer Voice report shows every public mention we found — praise, complaints, feature requests, the lot. Quick Scan (all evidence) is $9; the Deep Report adds AI insights and competitor mentions for $19.
+Testimoni's Customer Voice report shows every public mention we found — praise, complaints, feature requests, the lot. Quick Scan (all evidence) is $9; the Deep Report adds AI insights and competitor mentions for $19.${contextLine}
 
 Thought you'd want to see what's out there about ${product}.`;
   }
   if (input.variant === "hook") {
     return `Quick question — do you know everywhere customers have said something nice about ${product}${firstSource ? ` (we spotted one on ${firstSource})` : ""}?
 
-It looks like some of that proof could easily get lost across different places.
+It looks like some of that proof could easily get lost across different places.${contextLine}
 
 I'm building Testimoni to help founders collect that existing praise and turn it into a shareable Wall of Love — free for up to 10 testimonials, $9/mo on Pro for unlimited.
 
 Thought this might be relevant for ${product}.`;
   }
-  return `Hey ${name} — came across ${product}${firstSource ? ` and noticed customers saying good things about it on ${firstSource}` : ""}.
+  return `Hey ${name} — came across ${product}${firstSource ? ` and noticed customers saying good things about it on ${firstSource}` : ""}.${contextLine}
 
 It looks like some of that customer proof could easily get lost across different places.
 
@@ -84,7 +91,9 @@ export async function generateOutreachDraft(input: OutreachInput): Promise<{ sub
   const productLabel = input.productName || input.companyName;
   const subject = subjectFor(input.variant, productLabel);
 
-  if (!process.env.ANTHROPIC_API_KEY || input.praiseExcerpts.length === 0) {
+  const hasEvidence = input.praiseExcerpts.length > 0;
+  const hasContext = !!input.extraContext?.trim();
+  if (!process.env.ANTHROPIC_API_KEY || (!hasEvidence && !hasContext)) {
     return { subject, body: FALLBACK_TEMPLATE(input) };
   }
 
@@ -101,13 +110,15 @@ export async function generateOutreachDraft(input: OutreachInput): Promise<{ sub
       system: `You write a single short, casual, personalized cold-outreach draft for a founder, pitching Testimoni. This is a DRAFT a human will review and edit before manually sending — never claim it was sent, never add a subject line or sign-off with a made-up name.
 
 ANGLE FOR THIS DRAFT: ${VARIANT_ANGLE[input.variant]}
+${!hasEvidence ? "\nNo specific customer quotes were found for this one — write a more general, consultative pitch instead of referencing praise that doesn't exist. Use the background context below for relevance/tone only." : ""}
 
 HARD RULES
 1. Use ONLY the real evidence given below. Never invent a compliment, a quote, a fact, or a detail not present in the evidence.
 2. If you reference a specific piece of praise, quote or closely paraphrase ONLY from the excerpts given — never fabricate what a customer said.
 3. 3-5 short sentences/paragraphs. No emoji, no exclamation-point stacking.
 4. Never mention sending, DMing, emailing, or automation — just write the message text itself.
-5. Never invent or state a price other than the exact figures given in the angle above (if any).`,
+5. Never invent or state a price other than the exact figures given in the angle above (if any).
+6. The "background context" section below (if present) is the admin's own notes, NOT a customer quote — never write it as if a customer said it.`,
       messages: [
         {
           role: "user",
@@ -116,9 +127,8 @@ Product: ${productLabel}
 Founder name (use first name only, or "there" if not given): ${input.founderName || "not given"}
 Website: ${input.website}
 Website's social proof status: ${input.socialProofReason}
-
-Real customer praise found:
-${evidence}
+${hasContext ? `\nBackground context (admin's own notes, NOT a customer quote):\n${input.extraContext!.trim()}\n` : ""}
+${hasEvidence ? `Real customer praise found:\n${evidence}` : "No customer praise found yet for this one."}
 
 Write the outreach draft now — just the message text.`,
         },

@@ -10,7 +10,9 @@ export type ScanCategory =
   | "praise"
   | "complaint"
   | "feature_request"
+  | "question"
   | "use_case"
+  | "objection"
   | "testimonial"
   | "outcome"
   | "competitor_mention";
@@ -19,7 +21,9 @@ export const CATEGORY_ORDER: ScanCategory[] = [
   "praise",
   "complaint",
   "feature_request",
+  "question",
   "use_case",
+  "objection",
   "testimonial",
   "outcome",
   "competitor_mention",
@@ -69,7 +73,9 @@ export function emptyCounts(): Record<ScanCategory, number> {
     praise: 0,
     complaint: 0,
     feature_request: 0,
+    question: 0,
     use_case: 0,
+    objection: 0,
     testimonial: 0,
     outcome: 0,
     competitor_mention: 0,

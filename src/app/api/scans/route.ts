@@ -54,7 +54,9 @@ const CATEGORY_ENUM = z.enum([
   "praise",
   "complaint",
   "feature_request",
+  "question",
   "use_case",
+  "objection",
   "testimonial",
   "outcome",
   "competitor_mention",
@@ -169,7 +171,9 @@ const CLASSIFY_RULES = `CATEGORIES — a quote can belong to MORE THAN ONE categ
   testimonial       — a fuller, quotable endorsement with a specific outcome/result (display-ready)
   complaint         — frustration, a bug, something that didn't work, dissatisfaction
   feature_request   — an explicit ask for something the product doesn't do yet
+  question          — someone asking how the product works, whether it does X, pricing, or other pre-purchase/how-to questions — not a complaint or a request, genuinely just asking
   use_case          — a description of how someone actually uses the product (sentiment-neutral is fine)
+  objection         — a stated reason someone DIDN'T buy/use it, or hesitation/doubt about it (price, trust, missing feature, "not sure this is for me") — distinct from complaint, which is dissatisfaction from an existing user
   outcome           — a MEASURABLE result: saved time, increased revenue, replaced another tool, improved productivity, reduced effort. Often overlaps with praise/testimonial — tag both when true.
   competitor_mention — compares the product to a named competitor, or mentions switching to/from one. When you use this category, ALSO set competitorName to the other product's name.
 
