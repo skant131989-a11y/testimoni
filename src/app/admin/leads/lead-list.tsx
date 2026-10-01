@@ -91,7 +91,7 @@ function LeadCardView({
   onStatusChanged: () => void;
 }) {
   const [showPraise, setShowPraise] = useState(false);
-  const [variant, setVariant] = useState<"wall" | "hook" | "paid_scan">("wall");
+  const [variant, setVariant] = useState<"wall" | "hook" | "paid_scan" | "combo">("wall");
   const [preparing, setPreparing] = useState(false);
   const [preview, setPreview] = useState<{ to: string | null; subject: string; body: string } | null>(null);
   const [sending, setSending] = useState(false);
@@ -369,7 +369,12 @@ function LeadCardView({
                 // "We found public mentions of you" would be dishonest
                 // for a lead with zero real evidence — only offer it
                 // once there's actual praise found.
-                ...(hasEvidence ? [{ v: "paid_scan" as const, label: "3 · $9 Scan pitch" }] : []),
+                ...(hasEvidence
+                  ? [
+                      { v: "paid_scan" as const, label: "3 · $9 Scan pitch" },
+                      { v: "combo" as const, label: "4 · Both offers" },
+                    ]
+                  : []),
               ]
             ).map((opt) => (
               <button

@@ -105,7 +105,17 @@ const JUNK_LOCAL_PARTS = /^(no-?reply|donotreply|postmaster|abuse|webmaster)@/i;
 // Placeholder domains that show up in <input placeholder="you@example.com">
 // text and get swept up by the plain-text fallback regex below —
 // confirmed by testing against our own site's signup form.
-const JUNK_DOMAINS = new Set(["example.com", "example.org", "example.net", "domain.com", "yourdomain.com", "test.com", "email.com", "acme.com"]);
+const JUNK_DOMAINS = new Set([
+  "example.com", "example.org", "example.net", "domain.com", "yourdomain.com",
+  "test.com", "email.com", "acme.com", "acme.co", "acme.io", "yourcompany.com",
+  "company.com", "mysite.com", "website.com",
+]);
+// "Jane Cooper" is the single most common UI-mockup placeholder name
+// (Tailwind UI, Figma kits, etc.) — confirmed catching one in
+// production (jane.cooper@acme.co, scraped off a demo/example
+// section of a real page). Filtering the exact name, not a pattern,
+// so this can't over-match a real person who happens to share it.
+const JUNK_NAMES = new Set(["jane.cooper", "jane cooper", "john.doe", "john doe", "jane.doe", "jane doe"]);
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
 /** Scraped, never guessed — a mailto: link or visible address on
@@ -123,9 +133,11 @@ function extractContactEmail(rawHtml: string, website: string): string | null {
     const plain = rawHtml.match(EMAIL_RE) || [];
     for (const e of plain.slice(0, 20)) found.add(e.toLowerCase());
   }
-  const candidates = [...found].filter(
-    (e) => !JUNK_LOCAL_PARTS.test(e) && !JUNK_DOMAINS.has(e.split("@")[1] || "")
-  );
+  const candidates = [...found].filter((e) => {
+    const local = e.split("@")[0] || "";
+    const domain = e.split("@")[1] || "";
+    return !JUNK_LOCAL_PARTS.test(e) && !JUNK_DOMAINS.has(domain) && !JUNK_NAMES.has(local);
+  });
   if (candidates.length === 0) return null;
   const sameDomain = candidates.find((e) => e.endsWith(`@${website}`));
   return sameDomain ?? candidates[0];

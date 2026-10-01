@@ -20,8 +20,13 @@ import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
  *   paid_scan — leads with "we found public mentions of you", makes
  *               the Customer Voice report the ask (Quick Scan $9 /
  *               Deep Report $19, one-time) instead of signup.
+ *   combo     — mentions BOTH offers explicitly: the one-time $9/$19
+ *               Customer Voice report as the low-commitment way in,
+ *               AND the $9/mo Pro subscription for turning praise
+ *               into a permanent Wall of Love. Two clear options,
+ *               let the reader pick — not two competing pitches.
  */
-export type OutreachVariant = "wall" | "hook" | "paid_scan";
+export type OutreachVariant = "wall" | "hook" | "paid_scan" | "combo";
 
 export interface OutreachInput {
   companyName: string;
@@ -44,6 +49,8 @@ const VARIANT_ANGLE: Record<OutreachVariant, string> = {
   hook: "The VERY FIRST sentence must be a short, genuine, curiosity-driving QUESTION about their customer praise or reviews — not a statement. Same underlying pitch as a Wall of Love, but this time mention that Testimoni has a free plan (10 testimonials) and Pro is $9/mo for unlimited — state the $9/mo figure naturally, once, don't dwell on it. The actual ask/CTA is still to start free, not to subscribe immediately.",
   paid_scan:
     "Lead with the fact that a scan already turned up real public mentions of their product. The ask is Testimoni's Customer Voice report, not a free signup: mention explicitly that a Quick Scan (all evidence) is $9 and a Deep Report (adds AI insights, competitor mentions, export) is $19. Tone: consultative and evidence-led, not salesy — you're handing them a finding, not pitching a tool.",
+  combo:
+    "Lead with the fact that a scan found real public mentions of their product. Then present TWO clear, distinct options, not one pitch: (1) the one-time Customer Voice report — Quick Scan $9 for all the evidence, Deep Report $19 for AI insights + competitor mentions + export — the fast, no-commitment way to see everything; (2) Testimoni Pro at $9/mo, for turning that praise into a permanent, embeddable Wall of Love on their own site. Make clear these are two different things solving two different needs (one-time research vs. ongoing social proof), not an upsell ladder. Consultative, evidence-led tone — end by letting them pick whichever is relevant, not pushing one over the other.",
 };
 
 function subjectFor(variant: OutreachVariant, productLabel: string): string {
@@ -54,6 +61,8 @@ function subjectFor(variant: OutreachVariant, productLabel: string): string {
       return `Quick question about ${productLabel}'s customers`;
     case "paid_scan":
       return `We found public mentions of ${productLabel} — want the full list?`;
+    case "combo":
+      return `What we found about ${productLabel} (and two ways to use it)`;
   }
 }
 
@@ -62,6 +71,13 @@ const FALLBACK_TEMPLATE = (input: OutreachInput): string => {
   const product = input.productName || input.companyName;
   const firstSource = input.praiseExcerpts[0]?.source;
   const contextLine = input.extraContext ? `\n\n${input.extraContext.trim()}` : "";
+  if (input.variant === "combo") {
+    return `Hey ${name} — we ran a scan and found people talking about ${product}${firstSource ? ` on ${firstSource}` : ""}.${contextLine}
+
+Two ways that might be useful: our Customer Voice report shows every public mention we found — Quick Scan (all evidence) is $9, Deep Report (AI insights + competitor mentions + export) is $19, one-time, no subscription. If you'd rather turn that praise into something permanent on your own site, Testimoni Pro is $9/mo for an embeddable Wall of Love.
+
+No pressure either way — thought both might be worth knowing about for ${product}.`;
+  }
   if (input.variant === "paid_scan") {
     return `Hey ${name} — we ran a scan and found people talking about ${product}${firstSource ? ` on ${firstSource}` : ""}.
 

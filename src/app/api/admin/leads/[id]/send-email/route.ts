@@ -17,7 +17,7 @@ const BODY = z.object({
   to: z.string().email(),
   subject: z.string().min(1).max(200),
   body: z.string().min(1).max(4000),
-  variant: z.enum(["wall", "hook", "paid_scan"]).default("wall"),
+  variant: z.enum(["wall", "hook", "paid_scan", "combo"]).default("wall"),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {

@@ -11,7 +11,7 @@ import { generateOutreachDraft, type OutreachVariant } from "@/lib/leads/outreac
  * Send on what's shown here.
  */
 const BODY = z.object({
-  variant: z.enum(["wall", "hook", "paid_scan"]).default("wall"),
+  variant: z.enum(["wall", "hook", "paid_scan", "combo"]).default("wall"),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {

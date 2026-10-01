@@ -26,10 +26,11 @@ export interface LeadOutreachEmailData {
   leadWebsite: string;
   /** wall/hook: signup primary, Customer Voice secondary (unchanged
    *  default). paid_scan: swapped — the Customer Voice report ($9/$19)
-   *  is the primary ask, signup becomes the smaller link. Must match
-   *  whatever variant generated bodyText, or the CTA won't match the
-   *  copy the reader just read. */
-  variant: "wall" | "hook" | "paid_scan";
+   *  is the primary ask, signup becomes the smaller link. combo: both
+   *  shown as equal-weight buttons, matching the copy's "two options"
+   *  framing. Must match whatever variant generated bodyText, or the
+   *  CTA won't match the copy the reader just read. */
+  variant: "wall" | "hook" | "paid_scan" | "combo";
 }
 
 // Always the real production domain, never NEXT_PUBLIC_APP_URL — that
@@ -72,7 +73,29 @@ export function leadOutreachEmailHtml(data: LeadOutreachEmailData): string {
     .join("");
 
   const primaryHtml =
-    variant === "paid_scan"
+    variant === "combo"
+      ? // Two equal-weight buttons — matches the copy's explicit "two
+        // options, pick whichever" framing. Stacked (not side-by-side)
+        // so it never breaks on a narrow mobile inbox.
+        `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 6px 0;">
+                <tr>
+                  <td style="background-color:#5b21b6;border-radius:8px;">
+                    <a href="${customerVoiceUrl}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                      See what we found — from $9 &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0;">
+                <tr>
+                  <td style="background-color:#ffffff;border:2px solid #5b21b6;border-radius:8px;">
+                    <a href="${signupUrl}" target="_blank" style="display:inline-block;padding:10px 20px;color:#5b21b6;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                      Start a Wall of Love — $9/mo &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>`
+      : variant === "paid_scan"
       ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 10px 0;">
                 <tr>
                   <td style="background-color:#5b21b6;border-radius:8px;">
