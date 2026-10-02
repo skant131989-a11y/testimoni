@@ -22,7 +22,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { PublicNavAuth, PublicNavAuthMobile } from "@/components/layout/public-nav-auth";
-import { ProPrice, ProPriceDual, ProAiPrice, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
+import { ProPrice, ProAiPrice, FreePrice } from "@/components/pricing/price-display";
 // AnimatedDemo used to render on this page; moved to /features.
 // PathStep used to render on this page; moved to /features.
 import { StructuredData } from "@/components/seo/structured-data";
@@ -525,17 +525,13 @@ export default function LandingPage() {
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-6">
               <div className="text-3xl">💸</div>
               <h3 className="mt-3 text-lg font-bold">
-                {/* Auto-detected currency — Indian visitors see
-                    "₹499 Pro", everyone else sees "$9 Pro". Stops
-                    the awkward mismatch where the title was hard-
-                    coded USD but the body claimed native INR. */}
                 <ProPrice suffix="" /> Pro · You email, I ship
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Half of Senja, one-fifth of Testimonial.to. Native
-                pricing in USD or INR — no forex middleman. Every
-                support email lands with me directly and ships as
-                code within days, not quarters.
+                Half of Senja, one-fifth of Testimonial.to. Flat
+                $19/mo, no forex middleman. Every support email
+                lands with me directly and ships as code within
+                days, not quarters.
               </p>
             </div>
           </div>
@@ -693,12 +689,8 @@ export default function LandingPage() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
                 Most Popular
               </div>
-              <div className="mb-2">
-                <FoundingBadge />
-              </div>
               <h3 className="text-lg font-semibold">Pro</h3>
-              <p className="mt-2 text-3xl font-bold"><ProPriceDual /></p>
-              <FoundingExplainer className="mt-2" />
+              <p className="mt-2 text-3xl font-bold"><ProPrice /></p>
               <p className="mt-3 text-sm text-muted-foreground">Unlimited utility + one AI perk</p>
               <ul className="mt-6 space-y-2.5">
                 {PRO_FEATURES.map((f) => (

@@ -22,7 +22,7 @@ import { LaunchBar } from "@/components/launch-bar";
 import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
 import { StructuredData } from "@/components/seo/structured-data";
 import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
-import { ProPriceDual, FreePrice } from "@/components/pricing/price-display";
+import { ProPrice, FreePrice } from "@/components/pricing/price-display";
 
 /**
  * /v2 — A/B alternative to /.
@@ -392,7 +392,7 @@ export default function LandingV2() {
               </div>
               <h3 className="text-xl font-semibold">Pro</h3>
               <p className="mt-2 text-3xl font-bold">
-                <ProPriceDual />
+                <ProPrice />
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 All utility + all AI features. One clean upgrade.

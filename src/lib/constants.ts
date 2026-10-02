@@ -80,7 +80,7 @@ export const PRICING: Record<
   USD: {
     symbol: "$",
     code: "USD",
-    proMonthly: 9,
+    proMonthly: 19,
     proAiMonthly: 29,
     locale: "en-US",
   },

@@ -10,8 +10,10 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const currency = body?.currency === "USD" ? "USD" : "INR";
   const tier = body?.tier === "pro_ai" ? "pro_ai" : "pro";
+  // Pro is flat $19/mo USD everywhere now — no more INR branch for it.
+  // Pro AI (a separate, newer tier) still supports INR if requested.
+  const currency = tier === "pro_ai" && body?.currency === "INR" ? "INR" : "USD";
 
   // Route to the right plan-ID env var based on tier + currency.
   // Pro AI plans must be created separately in Razorpay (₹1499

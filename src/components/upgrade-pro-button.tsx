@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import type { Currency } from "@/lib/constants";
-import { resolveCurrencyByGeo } from "@/lib/geo-currency";
 import { track } from "@/lib/analytics";
 import "@/lib/razorpay-window";
 
@@ -17,21 +16,19 @@ import "@/lib/razorpay-window";
  *
  * This button collapses that to one click, from anywhere in the
  * dashboard. Sequence on click:
- *   1. Detect currency (INR / USD from IP country).
- *   2. Lazy-load Razorpay checkout.js (~30KB, only on demand).
- *   3. POST /api/billing/razorpay/checkout to open a subscription.
- *   4. Show Razorpay's own modal.
- *   5. On payment success: poll /api/billing/razorpay/verify until
+ *   1. Lazy-load Razorpay checkout.js (~30KB, only on demand).
+ *   2. POST /api/billing/razorpay/checkout to open a subscription.
+ *   3. Show Razorpay's own modal.
+ *   4. On payment success: poll /api/billing/razorpay/verify until
  *      the plan flips, then reload the page so Pro state renders
  *      everywhere.
  *
  * /dashboard/settings/billing stays as-is for edge cases:
- * currency switching, cancellation, subscription details.
+ * cancellation, subscription details.
  *
  * ─── Design choices ─────────────────────────────────────────
- * - No currency toggle in this button. 95% of users accept the
- *   detected currency; the 5% who don't can go to /billing manually.
- *   A toggle here would rebuild the two-step problem.
+ * - Flat $19/mo USD, no region pricing — nothing to detect or
+ *   toggle. `currency` prop kept only for API compatibility.
  * - Errors surface as an alert() rather than inline state so the
  *   button stays stateless across surfaces (settings, walls,
  *   inbox limits — they all just want "click, upgrade, done").
@@ -92,7 +89,7 @@ export function UpgradeProButton({
 
   async function handleClick() {
     setUpgrading(true);
-    const currency = currencyProp ?? (await resolveCurrencyByGeo());
+    const currency = currencyProp ?? "USD";
     track("upgrade_clicked", { currency, plan: "PRO", surface });
     try {
       await ensureRazorpayLoaded();

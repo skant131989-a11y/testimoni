@@ -50,7 +50,7 @@ export async function POST(
     return NextResponse.json({ error: "Scan not found" }, { status: 404 });
   }
 
-  const currency = body.currency ?? "INR";
+  const currency = body.currency ?? "USD";
   const amount = PRICE[body.tier][currency];
   const unlockToken = crypto.randomBytes(24).toString("hex");
 

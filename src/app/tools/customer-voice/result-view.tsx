@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ExternalLink,
@@ -21,8 +21,6 @@ import { track } from "@/lib/analytics";
 import { addPendingTestimonial, addPendingTestimonials } from "@/lib/pending-testimonials";
 import { saveToWall, type WallItem } from "@/lib/save-to-wall";
 import { useIsLoggedIn } from "@/lib/use-is-logged-in";
-import type { Currency } from "@/lib/constants";
-import { resolveCurrencyByGeo } from "@/lib/geo-currency";
 import "@/lib/razorpay-window";
 import type { ScanCategory } from "@/lib/scan-report";
 import type { RazorpayOrderCheckoutOptions } from "@/lib/razorpay-window";
@@ -106,48 +104,21 @@ async function ensureRazorpayLoaded(): Promise<void> {
   });
 }
 
-/**
- * Dev-only test override: `localStorage.setItem("currency", "USD")`
- * (or "INR") forces that currency on this tool without needing to
- * spoof the browser's timezone. Inert in production — real visitors
- * can't use this to pick their own price. Scoped to this file rather
- * than `detectCurrency()` itself, since that function also drives
- * the real Pro subscription checkout elsewhere — a testing override
- * has no business touching that path even in dev.
- */
-async function resolveCurrency(): Promise<Currency> {
-  if (process.env.NODE_ENV !== "production") {
-    try {
-      const override = window.localStorage.getItem("currency");
-      if (override === "USD" || override === "INR") return override;
-    } catch {
-      // localStorage unavailable (SSR, blocked, private mode) — fall through
-    }
-  }
-  // IP country, so it follows a VPN (browser timezone doesn't).
-  return resolveCurrencyByGeo();
-}
-
 // Display-only "was" pricing for the discount badge — the actual
 // charge always comes from the server's checkout response (env-var
 // driven, see /api/scans/[id]/checkout/route.ts). These compare-at
 // numbers don't have to reconcile to anything charged; they're a
-// marketing anchor, same as any "was $X, now $Y" pattern.
+// marketing anchor, same as any "was $X, now $Y" pattern. Flat USD
+// everywhere — no region pricing for this tool.
 interface TierPricing {
   current: string;
   was: string;
   discountPct: number;
 }
 
-const TIER_PRICING: Record<"quick" | "deep", Record<Currency, TierPricing>> = {
-  quick: {
-    USD: { current: "$9", was: "$19", discountPct: 53 },
-    INR: { current: "₹749", was: "₹2,000", discountPct: 63 },
-  },
-  deep: {
-    USD: { current: "$19", was: "$49", discountPct: 61 },
-    INR: { current: "₹1,581", was: "₹4,000", discountPct: 60 },
-  },
+const TIER_PRICING: Record<"quick" | "deep", TierPricing> = {
+  quick: { current: "$9", was: "$19", discountPct: 53 },
+  deep: { current: "$19", was: "$49", discountPct: 61 },
 };
 
 function csvEscape(value: string): string {
@@ -217,18 +188,6 @@ export function ScanResultView({
   }, [result.mentions]);
 
   const loggedIn = useIsLoggedIn();
-  // USD until the country lookup returns, so the server render and the
-  // first client render match.
-  const [displayCurrency, setDisplayCurrency] = useState<Currency>("USD");
-  useEffect(() => {
-    let cancelled = false;
-    resolveCurrency().then((c) => {
-      if (!cancelled) setDisplayCurrency(c);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
   const [savingKeys, setSavingKeys] = useState<Set<string>>(new Set());
   const [savingAll, setSavingAll] = useState(false);
   const [wallNotice, setWallNotice] = useState<string | null>(null);
@@ -279,14 +238,13 @@ export function ScanResultView({
     if (!trimmed) return;
     setPayError(null);
     setCheckingOutTier(tier);
-    const currency = await resolveCurrency();
-    track("scan_checkout_started", { scanId: result.id, currency, tier });
+    track("scan_checkout_started", { scanId: result.id, tier });
     try {
       await ensureRazorpayLoaded();
       const res = await fetch(`/api/scans/${result.id}/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed, tier, currency }),
+        body: JSON.stringify({ email: trimmed, tier }),
       });
       const data = await res.json();
       if (!res.ok || !data.order_id) {
@@ -665,7 +623,7 @@ export function ScanResultView({
 
           <div className="mx-auto mt-8 grid max-w-2xl gap-4 sm:grid-cols-2">
             {(["quick", "deep"] as const).map((tier) => {
-              const pricing = TIER_PRICING[tier][displayCurrency];
+              const pricing = TIER_PRICING[tier];
               return (
                 <div
                   key={tier}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
-import { ProPriceDual, ProAiPrice, FreePrice, FoundingBadge, FoundingExplainer } from "@/components/pricing/price-display";
+import { ProPrice, ProAiPrice, FreePrice } from "@/components/pricing/price-display";
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
@@ -76,14 +76,10 @@ export default function PricingPage() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
                 Most Popular
               </div>
-              <div className="mb-2">
-                <FoundingBadge />
-              </div>
               <h3 className="text-xl font-semibold">Pro</h3>
               <p className="mt-2 text-3xl font-bold">
-                <ProPriceDual suffix="/month" />
+                <ProPrice suffix="/month" />
               </p>
-              <FoundingExplainer className="mt-2" />
               <p className="mt-3 text-sm text-muted-foreground">
                 Unlimited utility + one AI perk (unlimited tweet drafts).
               </p>

@@ -1,8 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import { detectCurrency, formatPrice, PRICING, type Currency } from "@/lib/constants";
-import { resolveCurrencyByGeo } from "@/lib/geo-currency";
 
 interface PricingContextValue {
   currency: Currency;
@@ -20,39 +19,12 @@ interface PricingContextValue {
 const PricingContext = createContext<PricingContextValue | null>(null);
 
 export function PricingProvider({ children }: { children: ReactNode }) {
-  // SSR default is USD (safe fallback). On mount we swap to the currency for
-  // the visitor's IP country — India → INR, everything else → USD (follows a
-  // VPN; the browser timezone doesn't). No manual switcher on public pages:
-  // showing both currencies would let non-Indian visitors notice the ~$6 INR
-  // price and arbitrage.
-  const [currency, setCurrencyState] = useState<Currency>("USD");
-
-  useEffect(() => {
-    let cancelled = false;
-    // Dev-only test override: localStorage.setItem("currency", "USD")
-    let override: string | null = null;
-    if (process.env.NODE_ENV !== "production") {
-      try {
-        override = localStorage.getItem("currency");
-      } catch {}
-    }
-    (override === "USD" || override === "INR"
-      ? Promise.resolve<Currency>(override)
-      : resolveCurrencyByGeo()
-    ).then((c) => {
-      if (!cancelled) setCurrencyState(c);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const setCurrency = (c: Currency) => {
-    setCurrencyState(c);
-    try {
-      localStorage.setItem("currency", c);
-    } catch {}
-  };
+  // Pro is a flat $19/mo everywhere — no more region-based INR pricing,
+  // so there's nothing to detect or switch. Kept as a fixed value (not
+  // a literal constant inline) so every consumer still reads through
+  // this one context.
+  const currency: Currency = "USD";
+  const setCurrency = () => {};
 
   const proMonthly = PRICING[currency].proMonthly;
   const proMonthlyFormatted = formatPrice(proMonthly, currency);
