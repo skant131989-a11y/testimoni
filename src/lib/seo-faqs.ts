@@ -67,7 +67,7 @@ export const PAGE_FAQS = {
     {
       question: "Can I customize the card colors and branding?",
       answer:
-        "Yes. Pick from preset themes for free. Sign up to Testimoni Pro ($9/month) to use your brand colors, upload a logo, and remove the small 'Testimoni' watermark from the corner.",
+        "Yes. Pick from preset themes for free. Sign up to Testimoni Pro ($19/month) to use your brand colors, upload a logo, and remove the small 'Testimoni' watermark from the corner.",
     },
     {
       question: "Does the tool work with LinkedIn posts too?",
@@ -174,7 +174,7 @@ export const PAGE_FAQS = {
     {
       question: "Are the badges free to use?",
       answer:
-        "Yes. Generate and download unlimited static badges for free. Pro ($9/month) unlocks live badges that pull your actual Testimoni rating in real time — so the number updates without you touching code.",
+        "Yes. Generate and download unlimited static badges for free. Pro ($19/month) unlocks live badges that pull your actual Testimoni rating in real time — so the number updates without you touching code.",
     },
     {
       question: "Do star badges actually improve conversions?",
@@ -197,7 +197,7 @@ export const PAGE_FAQS = {
     {
       question: "What's the biggest difference between Testimoni and Senja?",
       answer:
-        "Both let you collect and embed testimonials. Testimoni is built around a paste-a-URL flow: paste a tweet or LinkedIn post and get an approved testimonial in about 30 seconds. Testimoni Pro is $9/mo, with native INR pricing at ₹499/mo. Senja describes importing from 30+ platforms or a CSV — check senja.io for their current features and pricing.",
+        "Both let you collect and embed testimonials. Testimoni is built around a paste-a-URL flow: paste a tweet or LinkedIn post and get an approved testimonial in about 30 seconds. Testimoni Pro is a flat $19/mo. Senja describes importing from 30+ platforms or a CSV — check senja.io for their current features and pricing.",
     },
     {
       question: "Is Testimoni actually free forever, unlike Senja?",
@@ -212,7 +212,7 @@ export const PAGE_FAQS = {
     {
       question: "Which is better for founders in India?",
       answer:
-        "Testimoni offers native INR billing at ₹499/mo through Razorpay, so there are no currency-conversion fees on your card. If you're an Indian founder or agency serving Indian clients, compare that with what you'd pay in USD after conversion and GST on any other tool.",
+        "Both work for Indian founders — Testimoni bills a flat $19/mo globally through Razorpay, which accepts Indian cards. Compare that against whatever Senja charges after your bank's conversion fees.",
     },
     {
       question: "Does Testimoni have video testimonials like Senja?",
@@ -225,7 +225,7 @@ export const PAGE_FAQS = {
     {
       question: "What's the difference between Testimoni and Testimonial.to?",
       answer:
-        "Testimonial.to describes itself as an all-in-one platform for testimonials, case studies, NPS and brand monitoring, and it collects video and text testimonials. Testimoni is focused on testimonials and social proof, handling video AND text — plus a paste-a-URL flow that turns existing tweets and LinkedIn posts into testimonials in about 30 seconds. Testimoni Pro is $9/month, with native INR pricing (₹499/month). Check Testimonial.to's site for their current pricing.",
+        "Testimonial.to describes itself as an all-in-one platform for testimonials, case studies, NPS and brand monitoring, and it collects video and text testimonials. Testimoni is focused on testimonials and social proof, handling video AND text — plus a paste-a-URL flow that turns existing tweets and LinkedIn posts into testimonials in about 30 seconds. Testimoni Pro is a flat $19/month. Check Testimonial.to's site for their current pricing.",
     },
     {
       question: "Which is faster to set up?",
@@ -245,7 +245,7 @@ export const PAGE_FAQS = {
     {
       question: "Which is better for solo founders on a budget?",
       answer:
-        "Testimoni's free plan covers what a solo founder needs at launch (10 testimonials, hosted wall, embed), and Pro is $9/month if you outgrow it. Compare against Testimonial.to's current plans and pick the one that fits your budget and use case.",
+        "Testimoni's free plan covers what a solo founder needs at launch (10 testimonials, hosted wall, embed), and Pro is $19/month if you outgrow it. Compare against Testimonial.to's current plans and pick the one that fits your budget and use case.",
     },
   ],
 
@@ -263,7 +263,7 @@ export const PAGE_FAQS = {
     {
       question: "Is the testimonial widget free?",
       answer:
-        "Yes. The free plan includes 10 testimonials, 1 collection form, 1 widget, a hosted Wall of Love page and the one-line embed, with no credit card. Pro is $9/month (₹499/month in India) for higher limits.",
+        "Yes. The free plan includes 10 testimonials, 1 collection form, 1 widget, a hosted Wall of Love page and the one-line embed, with no credit card. Pro is $19/month for higher limits.",
     },
     {
       question: "Will the widget break my site's design?",
@@ -314,7 +314,7 @@ export const PAGE_FAQS = {
     {
       question: "How is Testimoni different from other testimonial tools?",
       answer:
-        "You can paste an X or LinkedIn URL and get an approved testimonial in about 30 seconds, every workspace gets a hosted Wall of Love URL on the free plan, and Pro is $9/month with native INR billing (₹499/month) for Indian teams.",
+        "You can paste an X or LinkedIn URL and get an approved testimonial in about 30 seconds, every workspace gets a hosted Wall of Love URL on the free plan, and Pro is a flat $19/month.",
     },
     {
       question: "Where can I see detailed comparisons?",

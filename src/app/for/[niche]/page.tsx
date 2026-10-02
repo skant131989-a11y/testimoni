@@ -54,7 +54,7 @@ function buildNicheFaqs(audience: string) {
   return [
     {
       question: `Is Testimoni free for ${audience}?`,
-      answer: `Yes. The free forever plan includes 10 testimonials, 1 collection form, 1 widget, and a hosted Wall of Love URL — no credit card. Pro is $9/month or ₹499/month for unlimited testimonials, forms, widgets, and video testimonials.`,
+      answer: `Yes. The free forever plan includes 10 testimonials, 1 collection form, 1 widget, and a hosted Wall of Love URL — no credit card. Pro is $19/month for unlimited testimonials, forms, widgets, and video testimonials.`,
     },
     {
       question: `How do ${audience} collect testimonials with Testimoni?`,

@@ -14,7 +14,7 @@ import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
  *               Love signup as the ask, no pricing mentioned.
  *   hook      — opens with a direct question instead of a statement,
  *               for A/B testing open/reply rates, and states
- *               Testimoni's Pro subscription price ($9/mo) so the
+ *               Testimoni's Pro subscription price ($19/mo) so the
  *               reader knows the paid tier upfront — free plan is
  *               still the actual CTA.
  *   paid_scan — leads with "we found public mentions of you", makes
@@ -22,7 +22,7 @@ import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
  *               Deep Report $19, one-time) instead of signup.
  *   combo     — mentions BOTH offers explicitly: the one-time $9/$19
  *               Customer Voice report as the low-commitment way in,
- *               AND the $9/mo Pro subscription for turning praise
+ *               AND the $19/mo Pro subscription for turning praise
  *               into a permanent Wall of Love. Two clear options,
  *               let the reader pick — not two competing pitches.
  */
@@ -46,11 +46,11 @@ export interface OutreachInput {
 
 const VARIANT_ANGLE: Record<OutreachVariant, string> = {
   wall: "Pitch: sign up free to Testimoni and turn this scattered praise into a shareable Wall of Love widget for their site. Open with an observation, not a question. Low-pressure tone.",
-  hook: "The VERY FIRST sentence must be a short, genuine, curiosity-driving QUESTION about their customer praise or reviews — not a statement. Same underlying pitch as a Wall of Love, but this time mention that Testimoni has a free plan (10 testimonials) and Pro is $9/mo for unlimited — state the $9/mo figure naturally, once, don't dwell on it. The actual ask/CTA is still to start free, not to subscribe immediately.",
+  hook: "The VERY FIRST sentence must be a short, genuine, curiosity-driving QUESTION about their customer praise or reviews — not a statement. Same underlying pitch as a Wall of Love, but this time mention that Testimoni has a free plan (10 testimonials) and Pro is $19/mo for unlimited — state the $19/mo figure naturally, once, don't dwell on it. The actual ask/CTA is still to start free, not to subscribe immediately.",
   paid_scan:
     "Lead with the fact that a scan already turned up real public mentions of their product. The ask is Testimoni's Customer Voice report, not a free signup: mention explicitly that a Quick Scan (all evidence) is $9 and a Deep Report (adds AI insights, competitor mentions, export) is $19. Tone: consultative and evidence-led, not salesy — you're handing them a finding, not pitching a tool.",
   combo:
-    "Lead with the fact that a scan found real public mentions of their product. Then present TWO clear, distinct options, not one pitch: (1) the one-time Customer Voice report — Quick Scan $9 for all the evidence, Deep Report $19 for AI insights + competitor mentions + export — the fast, no-commitment way to see everything; (2) Testimoni Pro at $9/mo, for turning that praise into a permanent, embeddable Wall of Love on their own site. Make clear these are two different things solving two different needs (one-time research vs. ongoing social proof), not an upsell ladder. Consultative, evidence-led tone — end by letting them pick whichever is relevant, not pushing one over the other.",
+    "Lead with the fact that a scan found real public mentions of their product. Then present TWO clear, distinct options, not one pitch: (1) the one-time Customer Voice report — Quick Scan $9 for all the evidence, Deep Report $19 for AI insights + competitor mentions + export — the fast, no-commitment way to see everything; (2) Testimoni Pro at $19/mo, for turning that praise into a permanent, embeddable Wall of Love on their own site. Make clear these are two different things solving two different needs (one-time research vs. ongoing social proof), not an upsell ladder. Consultative, evidence-led tone — end by letting them pick whichever is relevant, not pushing one over the other.",
 };
 
 function subjectFor(variant: OutreachVariant, productLabel: string): string {
@@ -74,7 +74,7 @@ const FALLBACK_TEMPLATE = (input: OutreachInput): string => {
   if (input.variant === "combo") {
     return `Hey ${name} — we ran a scan and found people talking about ${product}${firstSource ? ` on ${firstSource}` : ""}.${contextLine}
 
-Two ways that might be useful: our Customer Voice report shows every public mention we found — Quick Scan (all evidence) is $9, Deep Report (AI insights + competitor mentions + export) is $19, one-time, no subscription. If you'd rather turn that praise into something permanent on your own site, Testimoni Pro is $9/mo for an embeddable Wall of Love.
+Two ways that might be useful: our Customer Voice report shows every public mention we found — Quick Scan (all evidence) is $9, Deep Report (AI insights + competitor mentions + export) is $19, one-time, no subscription. If you'd rather turn that praise into something permanent on your own site, Testimoni Pro is $19/mo for an embeddable Wall of Love.
 
 No pressure either way — thought both might be worth knowing about for ${product}.`;
   }
@@ -90,7 +90,7 @@ Thought you'd want to see what's out there about ${product}.`;
 
 It looks like some of that proof could easily get lost across different places.${contextLine}
 
-I'm building Testimoni to help founders collect that existing praise and turn it into a shareable Wall of Love — free for up to 10 testimonials, $9/mo on Pro for unlimited.
+I'm building Testimoni to help founders collect that existing praise and turn it into a shareable Wall of Love — free for up to 10 testimonials, $19/mo on Pro for unlimited.
 
 Thought this might be relevant for ${product}.`;
   }

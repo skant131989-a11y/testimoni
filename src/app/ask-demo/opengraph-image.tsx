@@ -182,7 +182,7 @@ export default function AskDemoImage() {
                 color: "#4c1d95",
               }}
             >
-              Included in Pro · $9/mo
+              Included in Pro · $19/mo
             </div>
             <div
               style={{

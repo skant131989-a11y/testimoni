@@ -13,12 +13,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 export const metadata: Metadata = {
   title: "Senja review and alternative — free testimonial tool",
   description:
-    "What is Senja, and is there a Senja alternative? A plain-English look at Senja's testimonial features, plus Testimoni: paste an X or LinkedIn URL, get an approved testimonial in 30 seconds, free hosted Wall of Love. Pro at $9/month.",
+    "What is Senja, and is there a Senja alternative? A plain-English look at Senja's testimonial features, plus Testimoni: paste an X or LinkedIn URL, get an approved testimonial in 30 seconds, free hosted Wall of Love. Pro at $19/month.",
   alternates: { canonical: "/vs/senja" },
   openGraph: {
     title: "Testimoni vs Senja — Testimonial widget comparison",
     description:
-      "The Senja alternative for SaaS founders, coaches, and D2C brands. Free hosted wall, auto-add on approve, cheaper Pro, native INR pricing.",
+      "The Senja alternative for SaaS founders, coaches, and D2C brands. Free hosted wall, auto-add on approve, cheaper Pro.",
     url: "/vs/senja",
   },
 };
@@ -58,8 +58,7 @@ const rows: Row[] = [
     senja: "30+ platforms or CSV",
   },
   { feature: "Free plan watermark", testimoni: "Small footer", senja: SEE_SITE },
-  { feature: "Pro starting price", testimoni: "$9/mo · ₹499", senja: SEE_SITE, highlight: true },
-  { feature: "Native INR pricing (India-first)", testimoni: true, senja: SEE_SITE, highlight: true },
+  { feature: "Pro starting price", testimoni: "$19/mo", senja: SEE_SITE, highlight: true },
   { feature: "Video testimonials", testimoni: true, senja: true },
   {
     feature: "5 layouts (Grid, Masonry, Carousel, List, Marquee)",
@@ -67,7 +66,6 @@ const rows: Row[] = [
     senja: SEE_SITE,
   },
   { feature: "One-line embed with Shadow DOM isolation", testimoni: true, senja: SEE_SITE },
-  { feature: "Multi-currency billing", testimoni: "USD + INR", senja: SEE_SITE },
 ];
 
 export default function SenjaVsPage() {
@@ -142,8 +140,7 @@ export default function SenjaVsPage() {
               <Sparkles className="h-5 w-5 text-primary" />
               <p className="mt-3 text-sm font-bold">Simple pricing</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Testimoni Pro is $9/mo, or ₹499/mo with native INR billing for
-                Indian teams.
+                Testimoni Pro is a flat $19/mo. No tiers, no forex markup.
               </p>
             </div>
           </section>
@@ -207,8 +204,7 @@ export default function SenjaVsPage() {
                 <li>• You want to pull praise in from where it already lives — X and LinkedIn URLs, App Store, Google Play, Chrome Web Store, Shopify and Product Hunt reviews, even screenshots of DMs and emails</li>
                 <li>• You want to see what people already say about you before you ask — the free Customer Voice scan finds public mentions and sorts praise from complaints and feature requests</li>
                 <li>• You want an AI chatbot on your site that answers visitor questions using only your real testimonials (Ask My Wall, Pro)</li>
-                <li>• You want a Pro plan that starts at $9/mo</li>
-                <li>• You&apos;re an Indian founder or serving Indian customers (INR billing)</li>
+                <li>• You want a Pro plan at a flat $19/mo</li>
                 <li>• You&apos;re new and value fast, minimal UI over a mature product</li>
               </ul>
             </div>

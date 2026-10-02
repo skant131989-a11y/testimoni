@@ -365,7 +365,7 @@ function LeadCardView({
             {(
               [
                 { v: "wall" as const, label: "1 · Wall of Love" },
-                { v: "hook" as const, label: "2 · Curiosity + $9/mo" },
+                { v: "hook" as const, label: "2 · Curiosity + $19/mo" },
                 // "We found public mentions of you" would be dishonest
                 // for a lead with zero real evidence — only offer it
                 // once there's actual praise found.

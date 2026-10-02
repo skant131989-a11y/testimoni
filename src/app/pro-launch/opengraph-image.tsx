@@ -152,7 +152,7 @@ export default function ProLaunchImage() {
               fontWeight: 800,
             }}
           >
-            <Sparkle size={13} color="#fbbf24" /> Just shipped · Pro $9/mo
+            <Sparkle size={13} color="#fbbf24" /> Just shipped · Pro $19/mo
           </div>
         </div>
 
@@ -223,7 +223,7 @@ export default function ProLaunchImage() {
               color: "#4c1d95",
             }}
           >
-            Free forever plan · Pro $9/mo (₹499)
+            Free forever plan · Pro $19/mo
           </div>
           <div
             style={{

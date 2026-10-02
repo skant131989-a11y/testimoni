@@ -155,7 +155,7 @@ export default function TestimonialWidgetPage() {
             <h2 className="text-2xl font-bold">Free to start</h2>
             <p className="mt-2 text-muted-foreground">
               The free plan includes 10 testimonials, 1 collection form, 1 widget, a hosted Wall of
-              Love page and the one-line embed. Pro is $9/month (₹499/month in India).
+              Love page and the one-line embed. Pro is $19/month.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Button asChild>

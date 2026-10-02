@@ -239,7 +239,7 @@ export default function LandingPage() {
               href="/pricing"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
             >
-              All three included in Pro · $9/mo
+              All three included in Pro · $19/mo
               <ArrowRight className="h-4 w-4" />
             </TrackedLink>
             <p className="text-xs text-muted-foreground">

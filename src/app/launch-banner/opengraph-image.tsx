@@ -472,7 +472,7 @@ export default function LaunchBannerImage() {
               letterSpacing: "0.04em",
             }}
           >
-            <Sparkle size={11} color="#fbbf24" /> JUST SHIPPED · PRO $9/mo
+            <Sparkle size={11} color="#fbbf24" /> JUST SHIPPED · PRO $19/mo
           </div>
         </div>
 

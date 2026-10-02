@@ -52,7 +52,7 @@ import { ProPrice, FreePrice } from "@/components/pricing/price-display";
 export const metadata: Metadata = {
   title: "Testimoni — Turn every praise into a testimonial widget",
   description:
-    "Paste a tweet, drop a screenshot, or import from App Store — Testimoni turns any praise into a Wall of Love. Free forever plan. Pro $9/mo.",
+    "Paste a tweet, drop a screenshot, or import from App Store — Testimoni turns any praise into a Wall of Love. Free forever plan. Pro $19/mo.",
   alternates: { canonical: "/v2" },
 };
 
@@ -201,7 +201,7 @@ export default function LandingV2() {
                 <Check className="h-3.5 w-3.5 text-emerald-600" /> Free forever plan
               </div>
               <div className="inline-flex items-center gap-1.5">
-                <Check className="h-3.5 w-3.5 text-emerald-600" /> Pro $9/mo
+                <Check className="h-3.5 w-3.5 text-emerald-600" /> Pro $19/mo
               </div>
               <div className="inline-flex items-center gap-1.5">
                 <Check className="h-3.5 w-3.5 text-emerald-600" /> No credit card
@@ -298,7 +298,7 @@ export default function LandingV2() {
           <div className="mb-10 flex flex-col items-center gap-2 text-center">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
               <Sparkles className="h-3 w-3" />
-              Pro · $9/mo
+              Pro · $19/mo
             </div>
             <h2 className="mt-4 text-3xl font-bold md:text-4xl">
               Three things nobody else does.

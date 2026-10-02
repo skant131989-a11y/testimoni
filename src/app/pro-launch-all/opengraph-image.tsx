@@ -212,7 +212,7 @@ export default function ProLaunchAllImage() {
             }}
           >
             <div style={{ display: "flex", fontSize: 15, fontWeight: 700, color: "#4c1d95" }}>
-              Included in Pro · $9/mo (₹499)
+              Included in Pro · $19/mo
             </div>
             <div style={{ display: "flex", fontSize: 15, fontWeight: 800, color: "#a78bfa" }}>
               testimoni.io

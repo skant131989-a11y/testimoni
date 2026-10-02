@@ -90,7 +90,7 @@ export function leadOutreachEmailHtml(data: LeadOutreachEmailData): string {
                 <tr>
                   <td style="background-color:#ffffff;border:2px solid #5b21b6;border-radius:8px;">
                     <a href="${signupUrl}" target="_blank" style="display:inline-block;padding:10px 20px;color:#5b21b6;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-                      Start a Wall of Love — $9/mo &rarr;
+                      Start a Wall of Love — $19/mo &rarr;
                     </a>
                   </td>
                 </tr>

@@ -3,16 +3,16 @@
  * home page's pricing preview and the full /pricing page import from
  * this file, so a copy change on one lands on the other for free.
  *
- * ─── Pricing model (2026-09) ─────────────────────────────────────
+ * ─── Pricing model (2026-10) ─────────────────────────────────────
  *   Free              — try before you buy; viral loops live here
- *   Pro   ($9/mo)     — everything unlimited, including all AI
+ *   Pro   ($19/mo)    — everything unlimited, including all AI
  *                        features (Wall Score tracking, Ask My Wall,
  *                        auto-tweet drafts, case studies).
  *
  * We ran an internal experiment with a third "Pro AI" tier at $29
  * but pulled it back — the added complexity wasn't paying for
  * itself pre-scale. Every Pro AI feature is now included in Pro
- * at $9. We can split the tier back out when we have >100 Pro
+ * at $19. We can split the tier back out when we have >100 Pro
  * users and observable heavy-vs-light AI usage. Until then, one
  * clear upgrade path.
  *

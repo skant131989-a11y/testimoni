@@ -27,7 +27,7 @@ const HOME_FAQS: FAQ[] = [
   {
     question: "Is there a free plan?",
     answer:
-      "Yes. The free plan includes 10 testimonials, 1 collection form, 1 widget, and grid layout. No credit card required. Upgrade to Pro at $9/month or ₹499/month for unlimited everything.",
+      "Yes. The free plan includes 10 testimonials, 1 collection form, 1 widget, and grid layout. No credit card required. Upgrade to Pro at $19/month for unlimited everything.",
   },
   {
     question: "Does Testimoni work with Framer, Webflow, Bubble, WordPress, or Shopify?",
@@ -91,17 +91,10 @@ export function StructuredData({ faqs, breadcrumbs, faqId }: StructuredDataProps
         {
           "@type": "Offer",
           name: "Pro",
-          price: "9",
+          price: "19",
           priceCurrency: "USD",
           description:
             "Unlimited testimonials, forms, widgets. All layouts (Grid, Masonry, Carousel, List, Marquee). No watermark. Video testimonials.",
-        },
-        {
-          "@type": "Offer",
-          name: "Pro (INR)",
-          price: "499",
-          priceCurrency: "INR",
-          description: "Same Pro plan, billed in INR through Razorpay.",
         },
       ],
       featureList: [
@@ -114,7 +107,6 @@ export function StructuredData({ faqs, breadcrumbs, faqId }: StructuredDataProps
         "One-line JavaScript embed on any site",
         "Shadow DOM CSS isolation",
         "Custom branding and colors",
-        "Multi-currency pricing (USD, INR)",
         "Auto-generated share URLs and QR codes",
       ],
       aggregateRating: undefined, // add once you have reviews

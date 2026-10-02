@@ -235,7 +235,7 @@ export default function FeaturesPage() {
           <section className="mt-16 rounded-3xl border-2 border-violet-200/60 bg-gradient-to-br from-violet-50 via-purple-50/60 to-fuchsia-50/40 p-6 md:p-10">
             <div className="text-center">
               <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-                <Sparkles className="h-3 w-3" /> Pro AI · $9/mo
+                <Sparkles className="h-3 w-3" /> Pro AI · $19/mo
               </div>
               <h2 className="text-3xl font-bold md:text-4xl">Your wall, but smarter.</h2>
               <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">

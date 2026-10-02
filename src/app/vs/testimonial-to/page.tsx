@@ -13,12 +13,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 export const metadata: Metadata = {
   title: "Testimonial.to review and alternative — free tool",
   description:
-    "What is Testimonial.to, and is there a Testimonial.to alternative? A plain-English look at what it does, plus Testimoni: paste an X or LinkedIn URL, get an approved testimonial in 30 seconds, free hosted Wall of Love. Pro at $9/month.",
+    "What is Testimonial.to, and is there a Testimonial.to alternative? A plain-English look at what it does, plus Testimoni: paste an X or LinkedIn URL, get an approved testimonial in 30 seconds, free hosted Wall of Love. Pro at $19/month.",
   alternates: { canonical: "/vs/testimonial-to" },
   openGraph: {
     title: "Testimoni vs Testimonial.to — Testimonial widget comparison",
     description:
-      "The Testimonial.to alternative for SaaS founders, coaches, and D2C brands. Free hosted wall, auto-add on approve, cheaper Pro, native INR pricing.",
+      "The Testimonial.to alternative for SaaS founders, coaches, and D2C brands. Free hosted wall, auto-add on approve, cheaper Pro.",
     url: "/vs/testimonial-to",
   },
 };
@@ -56,8 +56,7 @@ const rows: Row[] = [
     testimoni: true,
     theirs: SEE_SITE,
   },
-  { feature: "Pro starting price", testimoni: "$9/mo · ₹499", theirs: SEE_SITE, highlight: true },
-  { feature: "Native INR pricing (India-first)", testimoni: true, theirs: SEE_SITE, highlight: true },
+  { feature: "Pro starting price", testimoni: "$19/mo", theirs: SEE_SITE, highlight: true },
   { feature: "Video testimonials", testimoni: true, theirs: true },
   {
     feature: "5 layouts (Grid, Masonry, Carousel, List, Marquee)",
@@ -135,8 +134,7 @@ export default function TestimonialToVsPage() {
               <Sparkles className="h-5 w-5 text-primary" />
               <p className="mt-3 text-sm font-bold">Simple pricing</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Testimoni Pro is $9/mo, or ₹499/mo with native INR billing for
-                Indian teams.
+                Testimoni Pro is a flat $19/mo. No tiers, no forex markup.
               </p>
             </div>
           </section>
@@ -200,8 +198,7 @@ export default function TestimonialToVsPage() {
                 <li>• You want to see what people already say about you before you ask — the free Customer Voice scan finds public mentions and sorts praise from complaints and feature requests</li>
                 <li>• You want an AI chatbot on your site that answers visitor questions using only your real testimonials (Ask My Wall, Pro)</li>
                 <li>• You want a focused testimonial tool, not a broader platform</li>
-                <li>• You want a Pro plan that starts under $10/mo</li>
-                <li>• You&apos;re building for Indian customers (native INR pricing)</li>
+                <li>• You want a Pro plan at a flat $19/mo</li>
                 <li>• You value simple, fast UI over a mature enterprise product</li>
               </ul>
             </div>

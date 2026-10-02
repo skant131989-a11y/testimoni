@@ -137,7 +137,7 @@ function UpgradeGate() {
         <h2 className="text-lg font-semibold">Pro feature</h2>
       </div>
       <p className="mt-2 text-sm text-muted-foreground">
-        Ask My Wall answers visitor questions using your real customer testimonials — grounded, cited, never made-up. Included in Pro at $9/mo.
+        Ask My Wall answers visitor questions using your real customer testimonials — grounded, cited, never made-up. Included in Pro at $19/mo.
       </p>
       <Link href="/pricing" className="mt-4 inline-block">
         <Button variant="link" className="h-auto p-0 text-sm">See what&rsquo;s in Pro →</Button>

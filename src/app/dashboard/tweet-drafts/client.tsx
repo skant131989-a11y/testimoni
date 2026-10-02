@@ -265,7 +265,7 @@ export function TweetDraftsClient({ testimonials, plan, socialAccounts, autoPost
             <Button variant="link" className="h-auto p-0 text-sm">See what&rsquo;s in Pro →</Button>
           </Link>
           <div className="mt-4">
-            <UpgradeProButton surface="tweet_drafts_upgrade_card" label="Upgrade to Pro — $9/mo" />
+            <UpgradeProButton surface="tweet_drafts_upgrade_card" label="Upgrade to Pro — $19/mo" />
           </div>
         </div>
       )}

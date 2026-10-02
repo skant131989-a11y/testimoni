@@ -510,7 +510,7 @@ function SignupWall({
             Sign up free & see my extraction <ArrowRight className="h-4 w-4" />
           </Button>
           <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            No credit card. Unlimited extractions on Pro ($9/mo).
+            No credit card. Unlimited extractions on Pro ($19/mo).
           </p>
         </div>
       </div>

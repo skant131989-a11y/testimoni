@@ -15,12 +15,12 @@ const PRO_AI_FEATURES: readonly string[] = [];
 export const metadata: Metadata = {
   title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",
   description:
-    "Free plan includes paste-a-tweet import, Screenshot → testimonial (AI), a hosted Wall of Love URL, 10 testimonials (any format), 1 video testimonial, and one-line embed — no credit card. Pro at $9/month (₹499) for unlimited testimonials, forms, widgets, video, and batch screenshot upload.",
+    "Free plan includes paste-a-tweet import, Screenshot → testimonial (AI), a hosted Wall of Love URL, 10 testimonials (any format), 1 video testimonial, and one-line embed — no credit card. Pro at $19/month for unlimited testimonials, forms, widgets, video, and batch screenshot upload.",
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "Testimoni Pricing — Free forever with paste-a-tweet + Wall of Love",
     description:
-      "Free plan includes paste-a-tweet import and a hosted Wall of Love URL. Pro at $9/mo (₹499) for unlimited testimonials, forms, and widgets.",
+      "Free plan includes paste-a-tweet import and a hosted Wall of Love URL. Pro at $19/mo for unlimited testimonials, forms, and widgets.",
     url: "/pricing",
   },
 };

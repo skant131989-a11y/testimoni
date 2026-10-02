@@ -28,13 +28,13 @@ const COMPARISONS = [
     href: "/vs/senja",
     title: "Testimoni vs Senja",
     blurb:
-      "Looking for a Senja alternative? Paste-a-URL import, a hosted Wall of Love on the free plan, and Pro at $9/month.",
+      "Looking for a Senja alternative? Paste-a-URL import, a hosted Wall of Love on the free plan, and Pro at $19/month.",
   },
   {
     href: "/vs/testimonial-to",
     title: "Testimoni vs Testimonial.to",
     blurb:
-      "Looking for a Testimonial.to alternative? Text and video testimonials, one-line embed, and INR pricing.",
+      "Looking for a Testimonial.to alternative? Text and video testimonials, one-line embed, and a hosted Wall of Love.",
   },
 ];
 
