@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       website: lead.website,
       socialProofReason: lead.socialProofStatus.replace(/_/g, " ").toLowerCase(),
       praiseExcerpts: lead.praiseSignals.map((s) => ({ source: s.source, excerpt: s.excerpt })),
-      variant: "combo",
+      variant: "pro",
       extraContext: lead.notes,
     });
 
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       senderName: "Neha",
       senderEmail: "neha@testimoni.io",
       leadWebsite: lead.website,
-      variant: "combo",
+      variant: "pro",
     });
     const sendResult = await sendEmail({
       to: email,

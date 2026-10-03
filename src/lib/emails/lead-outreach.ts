@@ -24,13 +24,12 @@ export interface LeadOutreachEmailData {
   /** The lead's own domain, used to pre-fill the Customer Voice link
    *  so it's a one-click "see what we found about you" scan. */
   leadWebsite: string;
-  /** wall/hook: signup primary, Customer Voice secondary (unchanged
-   *  default). paid_scan: swapped — the Customer Voice report ($9/$19)
-   *  is the primary ask, signup becomes the smaller link. combo: both
-   *  shown as equal-weight buttons, matching the copy's "two options"
-   *  framing. Must match whatever variant generated bodyText, or the
-   *  CTA won't match the copy the reader just read. */
-  variant: "wall" | "hook" | "paid_scan" | "combo";
+  /** pro: signup (Pro $19/mo) is the big button, Customer Voice a
+   *  smaller P.S. link. voice: swapped — Customer Voice is the big
+   *  button, Pro the smaller link. Must match whatever variant
+   *  generated bodyText, or the CTA won't match the copy the reader
+   *  just read. */
+  variant: "pro" | "voice";
 }
 
 // Always the real production domain, never NEXT_PUBLIC_APP_URL — that
@@ -73,52 +72,30 @@ export function leadOutreachEmailHtml(data: LeadOutreachEmailData): string {
     .join("");
 
   const primaryHtml =
-    variant === "combo"
-      ? // Two equal-weight buttons — matches the copy's explicit "two
-        // options, pick whichever" framing. Stacked (not side-by-side)
-        // so it never breaks on a narrow mobile inbox.
-        `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 6px 0;">
-                <tr>
-                  <td style="background-color:#5b21b6;border-radius:8px;">
-                    <a href="${customerVoiceUrl}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-                      See what we found — from $9 &rarr;
-                    </a>
-                  </td>
-                </tr>
-              </table>
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0;">
-                <tr>
-                  <td style="background-color:#ffffff;border:2px solid #5b21b6;border-radius:8px;">
-                    <a href="${signupUrl}" target="_blank" style="display:inline-block;padding:10px 20px;color:#5b21b6;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-                      Start a Wall of Love — $19/mo &rarr;
-                    </a>
-                  </td>
-                </tr>
-              </table>`
-      : variant === "paid_scan"
+    variant === "voice"
       ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 10px 0;">
                 <tr>
                   <td style="background-color:#5b21b6;border-radius:8px;">
                     <a href="${customerVoiceUrl}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-                      See what we found — Quick Scan $9 &rarr;
+                      Scan your site free &mdash; full report from $9 &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
               <p style="margin:0 0 20px 0;font-size:13px;">
-                <a href="${signupUrl}" target="_blank" style="color:#5b21b6;text-decoration:underline;">Or start a free Wall of Love &rarr;</a>
+                <a href="${signupUrl}" target="_blank" style="color:#5b21b6;text-decoration:underline;">Or start a free Wall of Love &mdash; Pro is $19/mo &rarr;</a>
               </p>`
       : `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 10px 0;">
                 <tr>
                   <td style="background-color:#5b21b6;border-radius:8px;">
                     <a href="${signupUrl}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-                      Start your free Wall of Love &rarr;
+                      Start free &mdash; Pro is $19/mo &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
               <p style="margin:0 0 20px 0;font-size:13px;">
-                <a href="${customerVoiceUrl}" target="_blank" style="color:#5b21b6;text-decoration:underline;">Or see what we found about you first &rarr;</a>
+                <a href="${customerVoiceUrl}" target="_blank" style="color:#5b21b6;text-decoration:underline;">P.S. See what people are saying about you &mdash; free scan, $9 / $19 full report &rarr;</a>
               </p>`;
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

@@ -8,25 +8,18 @@ import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
  * their site. The prompt explicitly forbids inventing anything not
  * given here, mirroring scan-report.ts's summarizeWithClaude.
  *
- * Three variants, same evidence, different angle — admin picks one
- * on the leads page before sending:
- *   wall      — current default. Observational hook, free Wall of
- *               Love signup as the ask, no pricing mentioned.
- *   hook      — opens with a direct question instead of a statement,
- *               for A/B testing open/reply rates, and states
- *               Testimoni's Pro subscription price ($19/mo) so the
- *               reader knows the paid tier upfront — free plan is
- *               still the actual CTA.
- *   paid_scan — leads with "we found public mentions of you", makes
- *               the Customer Voice report the ask (Quick Scan $9 /
- *               Deep Report $19, one-time) instead of signup.
- *   combo     — mentions BOTH offers explicitly: the one-time $9/$19
- *               Customer Voice report as the low-commitment way in,
- *               AND the $19/mo Pro subscription for turning praise
- *               into a permanent Wall of Love. Two clear options,
- *               let the reader pick — not two competing pitches.
+ * Two variants, both pitching BOTH offers and both usable for every
+ * lead (with or without scraped praise) — admin picks one on the
+ * leads page before sending:
+ *   pro   — leads with Testimoni Pro ($19/mo flat, free plan to
+ *           start), Customer Voice report ($9 Quick / $19 Deep) as a
+ *           clearly secondary P.S.
+ *   voice — leads with Customer Voice (free scan, $9 / $19 full
+ *           report), Pro ($19/mo) as the second option.
+ * "We found public mentions of you" is only ever written when real
+ * praise excerpts exist — see the hard rules in the prompt.
  */
-export type OutreachVariant = "wall" | "hook" | "paid_scan" | "combo";
+export type OutreachVariant = "pro" | "voice";
 
 export interface OutreachInput {
   companyName: string;
@@ -44,25 +37,20 @@ export interface OutreachInput {
   extraContext?: string | null;
 }
 
+const OFFERS =
+  "Testimoni Pro: flat $19/mo, unlimited testimonials, widgets and layouts, no watermark, AI features included (tweet drafts from every quote, an 'Ask My Wall' chatbot that only quotes real customers); embeds as a Wall of Love with one line of code; free plan (10 testimonials) to start, no card. Customer Voice report: scans X, Reddit and LinkedIn for what people say about a product, sorted into praise, complaints, feature requests and competitor mentions; the scan is free, $9 (Quick Scan) unlocks every mention, $19 (Deep Report) adds why customers choose them, strongest proof, competitors mentioned and CSV export.";
+
 const VARIANT_ANGLE: Record<OutreachVariant, string> = {
-  wall: "Pitch: sign up free to Testimoni and turn this scattered praise into a shareable Wall of Love widget for their site. Open with an observation, not a question. Low-pressure tone.",
-  hook: "The VERY FIRST sentence must be a short, genuine, curiosity-driving QUESTION about their customer praise or reviews — not a statement. Same underlying pitch as a Wall of Love, but this time mention that Testimoni has a free plan (10 testimonials) and Pro is $19/mo for unlimited — state the $19/mo figure naturally, once, don't dwell on it. The actual ask/CTA is still to start free, not to subscribe immediately.",
-  paid_scan:
-    "Lead with the fact that a scan already turned up real public mentions of their product. The ask is Testimoni's Customer Voice report, not a free signup: mention explicitly that a Quick Scan (all evidence) is $9 and a Deep Report (adds AI insights, competitor mentions, export) is $19. Tone: consultative and evidence-led, not salesy — you're handing them a finding, not pitching a tool.",
-  combo:
-    "Lead with the fact that a scan found real public mentions of their product. Then present TWO clear, distinct options, not one pitch: (1) the one-time Customer Voice report — Quick Scan $9 for all the evidence, Deep Report $19 for AI insights + competitor mentions + export — the fast, no-commitment way to see everything; (2) Testimoni Pro at $19/mo, for turning that praise into a permanent, embeddable Wall of Love on their own site. Make clear these are two different things solving two different needs (one-time research vs. ongoing social proof), not an upsell ladder. Consultative, evidence-led tone — end by letting them pick whichever is relevant, not pushing one over the other.",
+  pro: `Lead with Testimoni Pro. Open with ONE specific, true observation about them (from the real praise if any, else from the background context, else something plain about their product) and why owned social proof matters for them. Then pitch Pro: $19/mo flat, free plan to start. Finish with a short, clearly secondary P.S. paragraph about the Customer Voice scan (free to run; $9 Quick / $19 Deep to unlock the full report). Offers available: ${OFFERS}`,
+  voice: `Lead with Customer Voice. Open with ONE honest, curious question about what people are really saying about their product online, then explain the scan is free and the full report is $9 (Quick) or $19 (Deep). Second paragraph: if they would rather turn praise into permanent proof on their own site, Testimoni Pro is $19/mo flat with a free plan to start. Offers available: ${OFFERS}`,
 };
 
 function subjectFor(variant: OutreachVariant, productLabel: string): string {
   switch (variant) {
-    case "wall":
-      return `Loved what people are saying about ${productLabel}`;
-    case "hook":
-      return `Quick question about ${productLabel}'s customers`;
-    case "paid_scan":
-      return `We found public mentions of ${productLabel} — want the full list?`;
-    case "combo":
-      return `What we found about ${productLabel} (and two ways to use it)`;
+    case "pro":
+      return `A Wall of Love for ${productLabel} — free to start, $19/mo for everything`;
+    case "voice":
+      return `What are people really saying about ${productLabel}?`;
   }
 }
 
@@ -71,36 +59,20 @@ const FALLBACK_TEMPLATE = (input: OutreachInput): string => {
   const product = input.productName || input.companyName;
   const firstSource = input.praiseExcerpts[0]?.source;
   const contextLine = input.extraContext ? `\n\n${input.extraContext.trim()}` : "";
-  if (input.variant === "combo") {
-    return `Hey ${name} — we ran a scan and found people talking about ${product}${firstSource ? ` on ${firstSource}` : ""}.${contextLine}
+  const seen = firstSource ? `we spotted people talking about ${product} on ${firstSource}` : `I came across ${product}`;
 
-Two ways that might be useful: our Customer Voice report shows every public mention we found — Quick Scan (all evidence) is $9, Deep Report (AI insights + competitor mentions + export) is $19, one-time, no subscription. If you'd rather turn that praise into something permanent on your own site, Testimoni Pro is $19/mo for an embeddable Wall of Love.
+  if (input.variant === "voice") {
+    return `Hey ${name} — ${seen}, and it made me curious what the full picture looks like.${contextLine}
 
-No pressure either way — thought both might be worth knowing about for ${product}.`;
+Our Customer Voice scan checks X, Reddit and LinkedIn for what people say about ${product} and sorts it into praise, complaints, feature requests and competitor mentions. The scan is free; $9 unlocks every mention, $19 adds competitor mentions, why customers choose you and a CSV export.
+
+If you'd rather turn that praise into permanent proof on your own site, Testimoni Pro is a flat $19/mo for an embeddable Wall of Love, with a free plan to start.`;
   }
-  if (input.variant === "paid_scan") {
-    return `Hey ${name} — we ran a scan and found people talking about ${product}${firstSource ? ` on ${firstSource}` : ""}.
+  return `Hey ${name} — ${seen}.${contextLine}
 
-Testimoni's Customer Voice report shows every public mention we found — praise, complaints, feature requests, the lot. Quick Scan (all evidence) is $9; the Deep Report adds AI insights and competitor mentions for $19.${contextLine}
+Good customer words tend to get scattered across stores, threads and DMs. Testimoni turns them into proof you own: collect or import them, approve the best, and show a Wall of Love on ${input.website} with one line of code. Pro is a flat $19/mo for unlimited testimonials and widgets, and there's a free plan to start, no card.
 
-Thought you'd want to see what's out there about ${product}.`;
-  }
-  if (input.variant === "hook") {
-    return `Quick question — do you know everywhere customers have said something nice about ${product}${firstSource ? ` (we spotted one on ${firstSource})` : ""}?
-
-It looks like some of that proof could easily get lost across different places.${contextLine}
-
-I'm building Testimoni to help founders collect that existing praise and turn it into a shareable Wall of Love — free for up to 10 testimonials, $19/mo on Pro for unlimited.
-
-Thought this might be relevant for ${product}.`;
-  }
-  return `Hey ${name} — came across ${product}${firstSource ? ` and noticed customers saying good things about it on ${firstSource}` : ""}.${contextLine}
-
-It looks like some of that customer proof could easily get lost across different places.
-
-I'm building Testimoni to help founders collect that existing praise and turn it into a shareable Wall of Love/widgets.
-
-Thought this might be relevant for ${product}.`;
+P.S. Want to see what people already say about ${product}? Our Customer Voice scan is free to run; $9 unlocks every mention, $19 adds competitor mentions and a CSV export.`;
 };
 
 export async function generateOutreachDraft(input: OutreachInput): Promise<{ subject: string; body: string }> {
@@ -109,7 +81,7 @@ export async function generateOutreachDraft(input: OutreachInput): Promise<{ sub
 
   const hasEvidence = input.praiseExcerpts.length > 0;
   const hasContext = !!input.extraContext?.trim();
-  if (!process.env.ANTHROPIC_API_KEY || (!hasEvidence && !hasContext)) {
+  if (!process.env.ANTHROPIC_API_KEY) {
     return { subject, body: FALLBACK_TEMPLATE(input) };
   }
 
@@ -122,19 +94,20 @@ export async function generateOutreachDraft(input: OutreachInput): Promise<{ sub
 
     const response = (await anthropic.messages.create({
       model: CHAT_MODEL,
-      max_tokens: 400,
-      system: `You write a single short, casual, personalized cold-outreach draft for a founder, pitching Testimoni. This is a DRAFT a human will review and edit before manually sending — never claim it was sent, never add a subject line or sign-off with a made-up name.
+      max_tokens: 600,
+      system: `You write a single short, punchy, personalized cold-outreach draft for a founder, pitching Testimoni. This is a DRAFT a human will review and edit before manually sending — never claim it was sent, never add a subject line or sign-off with a made-up name.
 
 ANGLE FOR THIS DRAFT: ${VARIANT_ANGLE[input.variant]}
-${!hasEvidence ? "\nNo specific customer quotes were found for this one — write a more general, consultative pitch instead of referencing praise that doesn't exist. Use the background context below for relevance/tone only." : ""}
+${!hasEvidence ? "\nNo specific customer quotes were found for this one — do NOT say or imply you found, saw or read praise about them. Use the background context below (if any) for relevance and tone only." : ""}
 
 HARD RULES
-1. Use ONLY the real evidence given below. Never invent a compliment, a quote, a fact, or a detail not present in the evidence.
+1. Use ONLY the real evidence and background given below. Never invent a compliment, a quote, a fact, a number or a detail not present there.
 2. If you reference a specific piece of praise, quote or closely paraphrase ONLY from the excerpts given — never fabricate what a customer said.
-3. 3-5 short sentences/paragraphs. No emoji, no exclamation-point stacking.
-4. Never mention sending, DMing, emailing, or automation — just write the message text itself.
-5. Never invent or state a price other than the exact figures given in the angle above (if any).
-6. The "background context" section below (if present) is the admin's own notes, NOT a customer quote — never write it as if a customer said it.`,
+3. Never say or imply that you "found", "spotted" or "saw" customer praise unless it is listed under "Real customer praise found".
+4. 3-5 short paragraphs, vivid and specific, no emoji, no exclamation-point stacking.
+5. Never mention sending, DMing, emailing, or automation — just write the message text itself.
+6. Never invent or state a price other than the exact figures in the offers above.
+7. The "background context" section below (if present) is the admin's own notes, NOT a customer quote — never write it as if a customer said it.`,
       messages: [
         {
           role: "user",
