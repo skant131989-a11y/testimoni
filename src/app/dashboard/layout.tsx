@@ -11,6 +11,7 @@ import { AuthIdentifier } from "@/components/auth-identifier";
 import { Header } from "@/components/layout/header";
 import { generateSlug } from "@/lib/utils";
 import { getEffectivePlan } from "@/lib/plan";
+import { claimPendingGrants } from "@/lib/grants";
 import { safeDisplayName } from "@/lib/name-utils";
 import { DashboardPageTracker } from "@/components/dashboard-page-tracker";
 import { SessionCacheWriter } from "@/components/session-cache-writer";
@@ -124,6 +125,9 @@ export default async function DashboardLayout({
     );
 
     await prisma.$transaction(ops);
+
+    // Bundle grants queued for this email before they had an account.
+    await claimPendingGrants(authUser.email, workspaceId);
 
     // First-time signup path — everything above just created the
     // user's workspace + form + widget + subscription. Fire a

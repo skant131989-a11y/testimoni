@@ -10,6 +10,10 @@
     {
       "path": "/api/cron/wall-score-weekly",
       "schedule": "37 2 * * 1"
+    },
+    {
+      "path": "/api/cron/expire-grants",
+      "schedule": "15 1 * * *"
     }
   ],
   "headers": [

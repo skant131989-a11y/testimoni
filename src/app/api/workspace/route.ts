@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { generateSlug } from "@/lib/utils";
+import { claimPendingGrants } from "@/lib/grants";
 
 export async function POST() {
   try {
@@ -86,6 +87,8 @@ export async function POST() {
 
       return { user: newUser, workspace };
     });
+
+    await claimPendingGrants(result.user.email, result.workspace.id);
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {

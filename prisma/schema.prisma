@@ -279,12 +279,41 @@ model Subscription {
   currentPeriodEnd   DateTime? @map("current_period_end")
   cancelAtPeriodEnd  Boolean   @default(false) @map("cancel_at_period_end")
 
+  // Free months granted by the server-to-server grant API (bundles).
+  // Plan checks don't look at period end, so the expire-grants cron
+  // downgrades a granted PRO once this AND currentPeriodEnd have passed
+  // (a real paid Razorpay period pushes currentPeriodEnd past it).
+  grantedUntil DateTime? @map("granted_until")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+enum PlanGrantStatus {
+  PENDING // email has no Testimoni account yet; applied at first signup
+  APPLIED
+}
+
+/// Audit trail + idempotency + pending queue for POST /api/internal/grant-subscription.
+model PlanGrant {
+  id          String          @id @default(cuid())
+  email       String
+  months      Int
+  source      String?
+  externalRef String?         @unique @map("external_ref")
+  status      PlanGrantStatus
+  workspaceId String?         @map("workspace_id")
+  appliedAt   DateTime?       @map("applied_at")
+  // Access-until date the workspace had right after this grant applied.
+  accessUntil DateTime?       @map("access_until")
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@index([email, status])
+  @@map("plan_grants")
 }
 
 enum PlanType {
