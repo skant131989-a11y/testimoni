@@ -31,7 +31,11 @@ export async function POST(req: NextRequest) {
   const dryRun = url.searchParams.get("dryRun") === "1";
   const limit = Math.min(Number(url.searchParams.get("limit")) || 30, 50);
 
-  const leads = await prisma.lead.findMany({
+  const suppressed = new Set(
+    (await prisma.outreachSuppression.findMany({ select: { email: true } })).map((s) => s.email)
+  );
+
+  const candidates = await prisma.lead.findMany({
     where: {
       publicBusinessEmail: { not: null },
       status: { notIn: CONTACTED_STATUSES as never[] },
@@ -40,6 +44,9 @@ export async function POST(req: NextRequest) {
     orderBy: { score: "desc" },
     take: limit,
   });
+  const leads = candidates.filter(
+    (l) => !suppressed.has(l.publicBusinessEmail!.trim().toLowerCase())
+  );
 
   const results: Array<{
     website: string;

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/admin";
 import { generateOutreachDraft, type OutreachVariant } from "@/lib/leads/outreach";
+import { isSuppressed } from "@/lib/leads/suppression";
 
 /**
  * POST /api/admin/leads/[id]/prepare-email — builds an editable
@@ -44,9 +45,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     extraContext: lead.notes,
   });
 
+  const suppressed = await isSuppressed(lead.publicBusinessEmail);
+
   return NextResponse.json({
     ok: true,
-    to: lead.publicBusinessEmail, // null → UI shows "no email found" instead of a send button
+    // null → UI shows "no email found" and disables Send. Also null when
+    // the address asked not to be contacted.
+    to: suppressed ? null : lead.publicBusinessEmail,
     subject,
     body,
     variant,

@@ -50,6 +50,7 @@ model Workspace {
   wallScoreAudits WallScoreAudit[]
   socialAccounts  SocialAccount[]
   askMyWall       AskMyWallConfig?
+  mentionScan     WorkspaceMentionScan?
 
   @@index([publicListing])
   @@map("workspaces")
@@ -291,6 +292,42 @@ model Subscription {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+/// Addresses that asked not to be contacted — checked by every Growth
+/// Engine send path. Email stored lowercase.
+model OutreachSuppression {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  reason    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("outreach_suppressions")
+}
+
+/// Latest background Customer Voice scan of a workspace's own product —
+/// powers the dashboard card/banner and the weekly new-mentions email.
+model WorkspaceMentionScan {
+  id                String    @id @default(cuid())
+  workspaceId       String    @unique @map("workspace_id")
+  normalizedUrl     String    @map("normalized_url")
+  scanId            String?   @map("scan_id")
+  // Mentions tagged praise/testimonial/outcome in the latest scan.
+  praiseCount       Int       @default(0) @map("praise_count")
+  totalMentions     Int       @default(0) @map("total_mentions")
+  scannedAt         DateTime? @map("scanned_at")
+  // Praise count the owner was last emailed about, so each email only
+  // goes out when there is something new.
+  emailedPraiseCount Int      @default(0) @map("emailed_praise_count")
+  lastEmailedAt     DateTime? @map("last_emailed_at")
+  // Owner closed the 'what's your product URL' prompt.
+  urlPromptDismissedAt DateTime? @map("url_prompt_dismissed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_mention_scans")
 }
 
 enum PlanGrantStatus {

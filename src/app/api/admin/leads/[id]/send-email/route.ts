@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/admin";
 import { sendEmail } from "@/lib/emails/send";
 import { leadOutreachEmailHtml } from "@/lib/emails/lead-outreach";
+import { isSuppressed } from "@/lib/leads/suppression";
 
 /**
  * POST /api/admin/leads/[id]/send-email — the ONLY place an outreach
@@ -34,6 +35,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const lead = await prisma.lead.findUnique({ where: { id } });
   if (!lead) return NextResponse.json({ error: "not_found" }, { status: 404 });
+
+  if (await isSuppressed(parsed.to)) {
+    return NextResponse.json(
+      { error: "This address asked not to be contacted — not sent." },
+      { status: 403 }
+    );
+  }
 
   const html = leadOutreachEmailHtml({
     bodyText: parsed.body,

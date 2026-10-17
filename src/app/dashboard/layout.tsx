@@ -12,6 +12,7 @@ import { Header } from "@/components/layout/header";
 import { generateSlug } from "@/lib/utils";
 import { getEffectivePlan } from "@/lib/plan";
 import { claimPendingGrants } from "@/lib/grants";
+import { MentionsBanner } from "@/components/dashboard/mentions-banner";
 import { safeDisplayName } from "@/lib/name-utils";
 import { DashboardPageTracker } from "@/components/dashboard-page-tracker";
 import { SessionCacheWriter } from "@/components/session-cache-writer";
@@ -257,7 +258,10 @@ export default async function DashboardLayout({
           userAvatarUrl={displayAvatar}
           workspaceName={workspace.name}
         />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6">
+          <MentionsBanner />
+          {children}
+        </main>
       </div>
     </div>
   );
