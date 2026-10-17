@@ -5,6 +5,7 @@ import { PricingProvider } from "@/lib/use-pricing";
 import { AnalyticsInit } from "@/components/analytics-init";
 import { PageviewTracker } from "@/components/pageview-tracker";
 import { TopProgressBar } from "@/components/top-progress-bar";
+import { PublicMentionsBanner } from "@/components/dashboard/public-mentions-banner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -126,6 +127,7 @@ export default function RootLayout({
         <TopProgressBar />
         <AnalyticsInit />
         <PageviewTracker />
+        <PublicMentionsBanner />
         <PricingProvider>{children}</PricingProvider>
       </body>
     </html>
