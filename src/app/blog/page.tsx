@@ -28,6 +28,15 @@ interface Post {
 
 const posts: Post[] = [
   {
+    slug: "put-scattered-customer-praise-to-work",
+    title: "Your best customer praise is scattered across the internet. Here's how to put it to work.",
+    excerpt:
+      "Customers already praise your product on X, LinkedIn, Reddit and app stores — almost none of it is on your website. Turn it into a Wall of Love in minutes.",
+    date: "Oct 19, 2026",
+    dateISO: "2026-10-19",
+    readMinutes: 5,
+  },
+  {
     slug: "how-to-write-a-testimonial",
     title: "How to write a testimonial (with examples and a template)",
     excerpt:
