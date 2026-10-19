@@ -84,7 +84,7 @@ export default function HowToWriteATestimonialPage() {
             </div>
           </div>
 
-          <div className="prose prose-neutral mt-12 max-w-none dark:prose-invert">
+          <div className="blogprose blogprose-neutral mt-12 max-w-none dark:blogprose-invert">
             <p className="text-lg leading-relaxed text-muted-foreground">
               A <strong>testimonial</strong> is a customer&apos;s own statement about what it was like
               to use your product or service. The good ones are short, specific and believable. This
@@ -93,7 +93,7 @@ export default function HowToWriteATestimonialPage() {
               customers write theirs.
             </p>
 
-            <div className="not-prose my-8 rounded-2xl border-2 border-primary/30 bg-primary/5 p-5">
+            <div className="not-blogprose my-8 rounded-2xl border-2 border-primary/30 bg-primary/5 p-5">
               <p className="text-sm font-bold">The short version</p>
               <p className="mt-2 text-sm text-muted-foreground">
                 A good testimonial names a specific problem or result, sounds like a real person, is
@@ -134,7 +134,7 @@ export default function HowToWriteATestimonialPage() {
             </ol>
 
             <h2 className="mt-10 text-2xl font-bold">A simple testimonial template</h2>
-            <div className="not-prose rounded-xl border bg-card p-5 text-sm">
+            <div className="not-blogprose rounded-xl border bg-card p-5 text-sm">
               <p className="italic">
                 &ldquo;Before I used <strong>[product or service]</strong>, I <strong>[problem]</strong>.
                 After <strong>[what they did]</strong>, <strong>[specific result]</strong>. I&apos;d
@@ -151,7 +151,7 @@ export default function HowToWriteATestimonialPage() {
               These examples are illustrative — written to show the structure, not quotes from real
               customers. Notice that each one names a concrete outcome and attributes it to a person.
             </p>
-            <div className="not-prose mt-4 space-y-4">
+            <div className="not-blogprose mt-4 space-y-4">
               {EXAMPLES.map((e) => (
                 <figure key={e.label} className="rounded-xl border bg-card p-5">
                   <p className="text-xs font-semibold uppercase tracking-wider text-primary">

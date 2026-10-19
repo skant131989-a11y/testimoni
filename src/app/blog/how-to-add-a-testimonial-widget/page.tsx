@@ -42,7 +42,7 @@ export default function TestimonialWidgetGuidePage() {
             </div>
           </div>
 
-          <div className="prose prose-neutral mt-12 max-w-none dark:prose-invert">
+          <div className="blogprose blogprose-neutral mt-12 max-w-none dark:blogprose-invert">
             <p className="text-lg leading-relaxed text-muted-foreground">
               Adding a <strong>testimonial widget</strong> to your website is the
               fastest way to turn happy customers into social proof — and it&apos;s
@@ -74,7 +74,7 @@ export default function TestimonialWidgetGuidePage() {
             {/* Step-by-step */}
             <h2 className="mt-10 text-2xl font-bold">The 5-minute setup</h2>
 
-            <div className="not-prose mt-6 space-y-6">
+            <div className="not-blogprose mt-6 space-y-6">
               <div className="rounded-xl border bg-card p-6">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
@@ -117,7 +117,7 @@ export default function TestimonialWidgetGuidePage() {
 
               {/* Inline CTA #1 — user just read about sharing the form,
                   showing them the end result reinforces the payoff. */}
-              <div className="not-prose flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="not-blogprose flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-bold">
                     💜 Want to see what the end result looks like?
@@ -196,7 +196,7 @@ export default function TestimonialWidgetGuidePage() {
 
             {/* Inline CTA #2 — after user just learned about embedding,
                 introduce the hosted-wall alternative for no-code users. */}
-            <div className="not-prose mt-8 flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="not-blogprose mt-8 flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold">
                   ⚡ Not ready to embed? Share a hosted URL instead.
@@ -258,7 +258,7 @@ export default function TestimonialWidgetGuidePage() {
               every page.
             </p>
 
-            <div className="not-prose mt-12 rounded-2xl bg-primary/5 p-8 text-center">
+            <div className="not-blogprose mt-12 rounded-2xl bg-primary/5 p-8 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                 <Layers className="h-6 w-6 text-primary" />
               </div>

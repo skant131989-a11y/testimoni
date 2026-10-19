@@ -38,7 +38,7 @@ export default function ScatteredPraisePost() {
             </div>
           </div>
 
-          <div className="prose prose-neutral mt-12 max-w-none dark:prose-invert">
+          <div className="blogprose blogprose-neutral mt-12 max-w-none dark:blogprose-invert">
             <p className="text-lg leading-relaxed text-muted-foreground">
               Open your own X mentions, your LinkedIn notifications, your Product Hunt launch
               comments, your App Store reviews. Somewhere in there, real customers have already said
@@ -53,6 +53,15 @@ export default function ScatteredPraisePost() {
               generic copy like &ldquo;loved by teams everywhere.&rdquo; That gap is what Testimoni is
               built to close.
             </p>
+
+            <div className="not-blogprose my-8 rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-background to-fuchsia-50 p-6 dark:to-background">
+              <p className="text-xs font-bold uppercase tracking-wider text-primary">The short version</p>
+              <ul className="mt-3 space-y-2 text-sm">
+                <li className="flex gap-2"><span className="text-primary">✓</span> Paste a tweet or LinkedIn URL, get an approved testimonial in about 30 seconds</li>
+                <li className="flex gap-2"><span className="text-primary">✓</span> Show it on your site as a Wall of Love with one line of code</li>
+                <li className="flex gap-2"><span className="text-primary">✓</span> Free to start; Pro is a flat $19/month</li>
+              </ul>
+            </div>
 
             <h2 className="mt-10 text-2xl font-bold">The problem with the usual testimonial playbook</h2>
             <p>
@@ -114,19 +123,28 @@ export default function ScatteredPraisePost() {
             </p>
 
             <h2 className="mt-10 text-2xl font-bold">What it costs</h2>
-            <ul>
-              <li>
-                <strong>Free forever:</strong> 10 testimonials, 1 collection form, 1 widget, a hosted
-                Wall of Love page and the one-line embed. No credit card.
-              </li>
-              <li>
-                <strong>Pro, $19/month flat:</strong> unlimited testimonials, forms and widgets, all five
-                layouts, video testimonials, custom branding and no watermark, plus the AI features: an
-                &ldquo;Ask My Wall&rdquo; chatbot that answers visitor questions using only your real
-                testimonials, a Wall Score that audits how strong your proof is, and one-click tweet
-                drafts from any quote.
-              </li>
-            </ul>
+            <div className="not-blogprose my-6 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border bg-card p-5">
+                <p className="text-sm font-semibold text-muted-foreground">Free forever</p>
+                <p className="mt-1 text-3xl font-bold">$0</p>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  10 testimonials, 1 collection form, 1 widget, a hosted Wall of Love page and the
+                  one-line embed. No credit card.
+                </p>
+              </div>
+              <div className="rounded-2xl border-2 border-primary bg-primary/5 p-5">
+                <p className="text-sm font-semibold text-primary">Pro</p>
+                <p className="mt-1 text-3xl font-bold">
+                  $19<span className="text-base font-normal text-muted-foreground">/month, flat</span>
+                </p>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  Unlimited testimonials, forms and widgets, all five layouts, video testimonials, custom
+                  branding, no watermark, plus the AI features: an &ldquo;Ask My Wall&rdquo; chatbot that
+                  answers visitor questions using only your real testimonials, a Wall Score that audits
+                  your proof, and one-click tweet drafts from any quote.
+                </p>
+              </div>
+            </div>
             <p>One price, no per-seat fees, cancel any time.</p>
 
             <h2 className="mt-10 text-2xl font-bold">Who it&apos;s for</h2>

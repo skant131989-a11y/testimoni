@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+/* Blog typography. Custom class name (blogprose) so the plugin does NOT
+   restyle the existing `prose` usages on terms / privacy / story. */
+@plugin "@tailwindcss/typography" {
+  className: blogprose;
+}
+
+.blogprose {
+  --tw-prose-links: hsl(var(--primary));
+  --tw-prose-bullets: hsl(var(--primary));
+  --tw-prose-counters: hsl(var(--primary));
+  --tw-prose-quote-borders: hsl(var(--primary));
+  --tw-prose-invert-links: hsl(var(--primary));
+  --tw-prose-invert-bullets: hsl(var(--primary));
+  --tw-prose-invert-counters: hsl(var(--primary));
+  --tw-prose-invert-quote-borders: hsl(var(--primary));
+}
+.blogprose a:not(:where(.not-blogprose, .not-blogprose *)) {
+  font-weight: 600;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.blogprose h2:not(:where(.not-blogprose, .not-blogprose *)) {
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 0.75rem;
+}
+.blogprose blockquote:not(:where(.not-blogprose, .not-blogprose *)) {
+  background: hsl(var(--primary) / 0.06);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+.blogprose strong:not(:where(.not-blogprose, .not-blogprose *)) {
+  color: hsl(var(--primary));
+}
+.blogprose li:not(:where(.not-blogprose, .not-blogprose *))::marker {
+  font-weight: 700;
+}
+
 /* Global smooth-scroll. Sticky nav is 64px, launch bar can add
    another ~40px on top; give hash-scrolls a bit of headroom so
    section headers aren't tucked under the nav. */
