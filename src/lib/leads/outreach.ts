@@ -35,6 +35,9 @@ export interface OutreachInput {
    *  prompt, so it can never be mistaken for (or written up as) a
    *  real customer saying something. */
   extraContext?: string | null;
+  /** false = never call the Anthropic API; use the deterministic
+   *  template (still grounded: only real praise/notes are ever cited). */
+  useClaude?: boolean;
 }
 
 const OFFERS =
@@ -81,7 +84,7 @@ export async function generateOutreachDraft(input: OutreachInput): Promise<{ sub
 
   const hasEvidence = input.praiseExcerpts.length > 0;
   const hasContext = !!input.extraContext?.trim();
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (input.useClaude === false || !process.env.ANTHROPIC_API_KEY) {
     return { subject, body: FALLBACK_TEMPLATE(input) };
   }
 

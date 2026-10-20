@@ -43,3 +43,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# daily outreach batches (contain prospect emails)
+/outreach-batches/
+/article-copies/
+/article-testimoni-medium.md
+/outreach-drafts-oct-2026.md

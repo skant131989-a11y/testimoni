@@ -1,24 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateOutreachDraft } from "@/lib/leads/outreach";
+import { generateOutreachDraft, type OutreachVariant } from "@/lib/leads/outreach";
 import { leadOutreachEmailHtml } from "@/lib/emails/lead-outreach";
 import { sendEmail } from "@/lib/emails/send";
 
 /**
- * POST /api/cron/send-combo-batch — one-off batch sender, same
- * CRON_SECRET auth pattern as /api/cron/leads-scan (no browser
- * session needed). NOT wired into any schedule; triggered manually
- * for the "find N leads with an email, pitch both offers" request.
- * Reuses the exact same generateOutreachDraft / leadOutreachEmailHtml
- * / sendEmail code the per-lead admin-UI Send button uses — this is
- * not a separate, divergent send path, just a batched caller of it.
+ * POST /api/cron/send-combo-batch — batch outreach, CRON_SECRET auth
+ * (no browser session needed). NOT on any schedule; run manually.
  *
- * ?dryRun=1 — generates everything, sends nothing, returns what
- * WOULD be sent to whom, so the batch can be reviewed before any
- * real email leaves. Omit it (or dryRun=0) to actually send.
- * ?limit=N caps how many get processed in one call (default 30).
+ * Both templates are used: leads alternate Pro-first / Customer
+ * Voice-first down the list. Drafts are built from the deterministic
+ * template — this route never calls the Anthropic API.
+ *
+ *   ?dryRun=1        generate everything, send nothing, return it all.
+ *   ?leadIds=a,b,c   ONLY these leads, in this order (what
+ *                    scripts/import-prospects.cjs writes to
+ *                    outreach-batches/<date>.json). Without it, the
+ *                    top-scored unsent leads are used.
+ *   ?limit=N         cap (default 30, max 50).
+ *
+ * Suppressed addresses and leads already contacted are always skipped.
  */
 const CONTACTED_STATUSES = ["CONTACTED", "REPLIED", "SIGNUP", "CONVERTED", "IGNORED"];
+const VARIANTS: OutreachVariant[] = ["pro", "voice"];
 
 export async function POST(req: NextRequest) {
   const auth = req.headers.get("authorization");
@@ -30,34 +34,42 @@ export async function POST(req: NextRequest) {
   const url = new URL(req.url);
   const dryRun = url.searchParams.get("dryRun") === "1";
   const limit = Math.min(Number(url.searchParams.get("limit")) || 30, 50);
+  const leadIds = (url.searchParams.get("leadIds") ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   const suppressed = new Set(
     (await prisma.outreachSuppression.findMany({ select: { email: true } })).map((s) => s.email)
   );
 
-  const candidates = await prisma.lead.findMany({
+  const fetched = await prisma.lead.findMany({
     where: {
       publicBusinessEmail: { not: null },
       status: { notIn: CONTACTED_STATUSES as never[] },
+      ...(leadIds.length ? { id: { in: leadIds } } : {}),
     },
     include: { praiseSignals: { orderBy: { foundAt: "desc" }, take: 5 } },
     orderBy: { score: "desc" },
-    take: limit,
+    take: leadIds.length ? leadIds.length : limit,
   });
-  const leads = candidates.filter(
-    (l) => !suppressed.has(l.publicBusinessEmail!.trim().toLowerCase())
-  );
+  if (leadIds.length) fetched.sort((a, b) => leadIds.indexOf(a.id) - leadIds.indexOf(b.id));
+  const leads = fetched
+    .filter((l) => !suppressed.has(l.publicBusinessEmail!.trim().toLowerCase()))
+    .slice(0, limit);
 
   const results: Array<{
     website: string;
     email: string;
+    variant: OutreachVariant;
     subject: string;
     body: string;
     sent: boolean;
     error?: string;
   }> = [];
 
-  for (const lead of leads) {
+  for (const [i, lead] of leads.entries()) {
+    const variant = VARIANTS[i % VARIANTS.length];
     const { subject, body } = await generateOutreachDraft({
       companyName: lead.companyName || lead.website,
       productName: lead.productName,
@@ -65,13 +77,14 @@ export async function POST(req: NextRequest) {
       website: lead.website,
       socialProofReason: lead.socialProofStatus.replace(/_/g, " ").toLowerCase(),
       praiseExcerpts: lead.praiseSignals.map((s) => ({ source: s.source, excerpt: s.excerpt })),
-      variant: "pro",
+      variant,
       extraContext: lead.notes,
+      useClaude: false,
     });
 
     const email = lead.publicBusinessEmail!;
     if (dryRun) {
-      results.push({ website: lead.website, email, subject, body, sent: false });
+      results.push({ website: lead.website, email, variant, subject, body, sent: false });
       continue;
     }
 
@@ -80,12 +93,12 @@ export async function POST(req: NextRequest) {
       senderName: "Neha",
       senderEmail: "neha@testimoni.io",
       leadWebsite: lead.website,
-      variant: "pro",
+      variant,
     });
     const sendResult = await sendEmail({
       to: email,
       subject,
-      text: body,
+      text: `${body}\n\nNot relevant? Reply "stop" and I won't email you again.`,
       html,
       replyTo: "neha@testimoni.io",
       from: "Neha from Testimoni <neha@testimoni.io>",
@@ -94,12 +107,12 @@ export async function POST(req: NextRequest) {
     if (sendResult.ok) {
       await prisma.$transaction([
         prisma.leadOutreachDraft.create({
-          data: { leadId: lead.id, content: `[combo] Subject: ${subject}\n\n${body}` },
+          data: { leadId: lead.id, content: `[${variant}] Subject: ${subject}\n\n${body}` },
         }),
         prisma.lead.update({ where: { id: lead.id }, data: { status: "CONTACTED" } }),
       ]);
     }
-    results.push({ website: lead.website, email, subject, body, sent: sendResult.ok, error: sendResult.error });
+    results.push({ website: lead.website, email, variant, subject, body, sent: sendResult.ok, error: sendResult.error });
   }
 
   return NextResponse.json({ ok: true, dryRun, count: results.length, results });

@@ -121,9 +121,12 @@ export function leadOutreachEmailHtml(data: LeadOutreachEmailData): string {
               ${primaryHtml}
 
               <p style="margin:0 0 4px 0;">— ${escapeHtml(senderFirst)}</p>
-              <p style="margin:0;color:#6b7280;font-size:13px;">
+              <p style="margin:0 0 14px 0;color:#6b7280;font-size:13px;">
                 ${escapeHtml(senderName)} · Testimoni ·
                 <a href="mailto:${escapeHtml(senderEmail)}" style="color:#6b7280;text-decoration:underline;">${escapeHtml(senderEmail)}</a>
+              </p>
+              <p style="margin:0;color:#9ca3af;font-size:12px;">
+                Not relevant? Reply &ldquo;stop&rdquo; and I won&rsquo;t email you again.
               </p>
             </td>
           </tr>
