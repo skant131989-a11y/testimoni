@@ -3,7 +3,7 @@
  *
  *   node scripts/import-prospects.cjs                 # newest CSV in the reports folder
  *   node scripts/import-prospects.cjs --file X.csv    # a specific file
- *   node scripts/import-prospects.cjs --hold-days 14  # change the cool-off window
+ *   node scripts/import-prospects.cjs --hold-days 14  # hold prospects the other app contacted < 14 days ago (default 0 = off)
  *   node scripts/import-prospects.cjs --dry           # report only, write nothing
  *
  * Upserts every row as a Lead (source MANUAL) and splits them into:
@@ -13,7 +13,8 @@
  *   skipped  — already contacted/ignored here, or the address opted out
  * Writes outreach-batches/<date>.json with the eligible lead ids IN ORDER
  * (the send route alternates the two templates down that list).
- * Never sends email.
+ * Eligible leads are queued (status DRAFT_READY); the daily-outreach cron
+ * (8:30 pm IST) sends them. This script itself never sends email.
  */
 const fs = require("fs");
 const path = require("path");
@@ -75,7 +76,7 @@ function registrable(host) {
     if (!csvs.length) throw new Error("No CSV in " + REPORT_DIR);
     file = path.join(REPORT_DIR, csvs[csvs.length - 1]);
   }
-  const holdDays = Number(opt("--hold-days", 10));
+  const holdDays = Number(opt("--hold-days", 0));
   const dry = flag("--dry");
   const rows = parseCsv(fs.readFileSync(file, "utf8"));
   const prisma = new PrismaClient();
@@ -121,10 +122,12 @@ function registrable(host) {
         publicBusinessEmail: existing?.publicBusinessEmail || email,
         score,
         scoreReason,
+        // Eligible leads are QUEUED for the 8:30 pm IST daily sender.
+        status: hold ? "NEW" : "DRAFT_READY",
       };
       const lead = await prisma.lead.upsert({
         where: { website },
-        create: { website, source: "MANUAL", sourceUrl: r.product_url, socialProofStatus: "UNKNOWN", status: "NEW", productName: r.product_name || null, ...data },
+        create: { website, source: "MANUAL", sourceUrl: r.product_url, socialProofStatus: "UNKNOWN", productName: r.product_name || null, ...data },
         update: data,
       });
       id = lead.id;
