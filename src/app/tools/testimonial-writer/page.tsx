@@ -7,14 +7,14 @@ import { PAGE_FAQS, toolBreadcrumbs } from "@/lib/seo-faqs";
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
-  title: "Free testimonial writer — Testimoni",
+  title: "Free Testimonial Writer: Draft & Edit",
   description:
-    "Struggling to write a testimonial? Enter a name, what they did, and how it made you feel. We'll generate 3 versions to choose from. Free, no signup.",
+    "Draft a testimonial from real details about a customer's experience. Choose a tone and length, then review the wording with the customer before publishing. Free to try.",
   alternates: { canonical: "/tools/testimonial-writer" },
   openGraph: {
-    title: "Free testimonial writer — 3 versions in 5 seconds",
+    title: "Free Testimonial Writer: Create a Draft to Review",
     description:
-      "Type what someone did. Get 3 testimonial variations. Free, no signup, ready to copy.",
+      "Turn details about a real customer experience into an editable testimonial draft. Review every claim with the customer before publishing.",
     url: "/tools/testimonial-writer",
   },
   robots: { index: true, follow: true },

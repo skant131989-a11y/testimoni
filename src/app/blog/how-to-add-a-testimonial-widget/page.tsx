@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
 
 export const metadata: Metadata = {
-  title: "How to add a testimonial widget to your website in 5 minutes",
+  title: "How to Add a Testimonial Widget to Your Website",
   description:
-    "A step-by-step guide to adding a testimonial widget to any website — from collecting your first testimonial to embedding a wall of love with one line of code. Works on Framer, Webflow, WordPress, React, and vanilla HTML.",
+    "Learn how to add a testimonial widget to your website: collect and approve customer quotes, choose a layout, and embed it on WordPress, Shopify, Webflow, Framer, React, or HTML.",
   alternates: { canonical: "/blog/how-to-add-a-testimonial-widget" },
   openGraph: {
-    title: "How to add a testimonial widget to your website in 5 minutes",
+    title: "How to Add a Testimonial Widget to Your Website",
     description:
-      "Step-by-step guide: collect testimonials, curate a library, embed a wall of love — with one line of code. Works on any site.",
+      "Collect and approve quotes, choose a testimonial layout, then add the widget to your website.",
     url: "/blog/how-to-add-a-testimonial-widget",
   },
 };
@@ -54,11 +54,10 @@ export default function TestimonialWidgetGuidePage() {
 
             <h2 className="mt-10 text-2xl font-bold">Why you need a testimonial widget</h2>
             <p>
-              Social proof is one of the highest-ROI conversion levers on your
-              site. Prospective customers spend an average of 4-8 seconds
-              deciding whether to trust you. A well-designed testimonial widget
-              — real names, real headshots, real reviews — shortens that
-              decision.
+              A testimonial widget can answer a visitor&apos;s questions near
+              the product, service, or pricing details they are considering.
+              Use genuine customer statements, include attribution only with
+              permission, and choose a layout that is easy to read on mobile.
             </p>
             <p>
               But most founders skip it because the setup is a mess: emailing
@@ -242,6 +241,22 @@ export default function TestimonialWidgetGuidePage() {
               </li>
             </ul>
 
+            <h2 className="mt-10 text-2xl font-bold">Where should you place a testimonial widget?</h2>
+            <p>
+              Put customer evidence close to the decision it supports. A
+              homepage can introduce a short set of broad testimonials; a
+              product or service page can show quotes about that specific offer;
+              and a pricing page can answer concerns about value or onboarding.
+              Keep the section relevant to the page instead of repeating the
+              same quotes everywhere.
+            </p>
+            <p>
+              Check the finished widget at phone width, make sure text and
+              attribution are readable, and test that the embed loads on the
+              published page. Keep the underlying testimonials accurate and
+              honor any customer request to update or remove a quote.
+            </p>
+
             <h2 className="mt-10 text-2xl font-bold">Should you show different widgets on different pages?</h2>
             <p>
               Yes. This is where a good testimonial widget shines. Collect once
@@ -297,9 +312,10 @@ export default function TestimonialWidgetGuidePage() {
 
             <h3 className="mt-6 text-lg font-semibold">Can customers submit video testimonials?</h3>
             <p>
-              Yes on the Pro plan. Free plans currently support text testimonials
-              with photos and star ratings. Video adds ~2x the perceived
-              authenticity but the setup is identical from your side.
+              Testimoni includes one video testimonial on every plan, including
+              Free. Pro unlocks unlimited video testimonials. Check the{" "}
+              <Link href="/pricing" className="text-primary underline">pricing page</Link>
+              {" "}for current plan details.
             </p>
 
             <h3 className="mt-6 text-lg font-semibold">What&apos;s the difference between a testimonial widget and a review widget?</h3>
@@ -313,9 +329,9 @@ export default function TestimonialWidgetGuidePage() {
 
             <h3 className="mt-6 text-lg font-semibold">How much does a testimonial widget cost?</h3>
             <p>
-              Most testimonial widget platforms offer a free plan for early
-              users. Paid plans typically start at $9–$19/month, with premium
-              tiers for teams and higher testimonial counts.{" "}
+              Testimoni has a free plan, and Pro is $19/month. Other tools set
+              their own prices and limits, so compare the current plan details
+              before choosing.{" "}
               <Link href="/pricing" className="text-primary underline">See Testimoni pricing</Link>.
             </p>
           </div>

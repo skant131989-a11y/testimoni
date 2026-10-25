@@ -11,14 +11,14 @@ import { PAGE_FAQS, pageBreadcrumbs } from "@/lib/seo-faqs";
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
-  title: "Senja & Testimonial.to alternatives compared",
+  title: "Testimonial Tool Comparisons: Senja & Testimonial.to",
   description:
-    "Comparing testimonial tools? See how Testimoni stacks up as a Senja alternative and a Testimonial.to alternative — free plans, hosted wall, import options and pricing.",
+    "Compare Testimoni with Senja and Testimonial.to. Review testimonial imports, hosted walls, widget options, free-plan limits, and pricing before choosing a tool.",
   alternates: { canonical: "/vs" },
   openGraph: {
-    title: "Testimonial tool alternatives — Testimoni",
+    title: "Testimonial Tool Comparisons: Senja & Testimonial.to",
     description:
-      "Feature-by-feature comparisons: Testimoni vs Senja and Testimoni vs Testimonial.to.",
+      "Compare testimonial imports, hosted walls, widget options, free plans, and pricing.",
     url: "/vs",
   },
 };
@@ -43,7 +43,7 @@ const CHECKLIST = [
   "Hosted wall page — a public URL you can share, or only an embed",
   "Import options — forms only, or also existing tweets and LinkedIn posts",
   "Embed method — and whether it can conflict with your site's CSS",
-  "Pricing in your currency, including local-currency billing",
+  "Full pricing and plan limits, not just the starting price",
 ];
 
 export default function VsIndexPage() {
@@ -60,7 +60,7 @@ export default function VsIndexPage() {
         <div className="mx-auto max-w-4xl px-4">
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-              Testimonial tool alternatives
+              Compare testimonial tools
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
               Choosing a testimonial tool? Here&apos;s how Testimoni compares with the tools people

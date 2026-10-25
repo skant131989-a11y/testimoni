@@ -29,22 +29,22 @@ export const PAGE_FAQS = {
     {
       question: "Is the testimonial writer really free?",
       answer:
-        "Yes. Type what happened, get 3 testimonial versions instantly — no signup, no card, no watermark on the copy. Sign up if you want to save them to your Testimoni library and embed them on your site.",
+        "Yes. You can generate and copy the first testimonial draft without signing up. A free account unlocks the other versions and lets you save approved testimonials to your Testimoni library.",
     },
     {
-      question: "How does the AI testimonial generator work?",
+      question: "Is this an AI testimonial generator?",
       answer:
-        "You enter a customer's name, what they did with your product, and how it made them feel. We generate three tone-varied testimonial drafts (short, detailed, story-format) you can copy directly into any site or wall.",
+        "No. This tool uses templates, not AI. Enter a person's name and details about their experience, choose a tone and length, then review every claim with them before publishing.",
     },
     {
-      question: "Are the generated testimonials fake?",
+      question: "Can I publish a generated testimonial as-is?",
       answer:
-        "No — they're drafts. You provide the actual facts (who the customer is, what they did, how they felt), and the tool phrases them in different ways. Send the draft to your real customer for approval before publishing anywhere.",
+        "Treat each version as a draft, not a verified customer statement. Check that every detail is accurate, ask the person to review and approve the final wording, and never publish claims they did not make or approve.",
     },
     {
       question: "Can I use these testimonials on my Framer or Webflow site?",
       answer:
-        "Yes. Copy the generated testimonial into any tool. Or sign up for Testimoni (free) to embed a full Wall of Love on your Framer, Webflow, WordPress, Shopify, or React site with one line of JavaScript.",
+        "Yes. After the customer approves the wording, you can copy it to your site. Or use Testimoni's free plan to collect testimonials and embed a Wall of Love on Framer, Webflow, WordPress, Shopify, React, and other sites.",
     },
     {
       question: "What makes a good testimonial?",

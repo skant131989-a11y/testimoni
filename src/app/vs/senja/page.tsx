@@ -11,14 +11,14 @@ import { PAGE_FAQS, vsBreadcrumbs } from "@/lib/seo-faqs";
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
-  title: "Senja review and alternative — free testimonial tool",
+  title: "Senja Review & Alternative",
   description:
-    "What is Senja, and is there a Senja alternative? A plain-English look at Senja's testimonial features, plus Testimoni: paste an X or LinkedIn URL, get an approved testimonial in 30 seconds, free hosted Wall of Love. Pro at $19/month.",
+    "Compare Testimoni and Senja on testimonial imports, hosted walls, widgets, free-plan limits, and pricing. See what each tool offers and when a Senja alternative may fit.",
   alternates: { canonical: "/vs/senja" },
   openGraph: {
-    title: "Testimoni vs Senja — Testimonial widget comparison",
+    title: "Testimoni vs Senja: Testimonial Tool Comparison",
     description:
-      "The Senja alternative for SaaS founders, coaches, and D2C brands. Free hosted wall, auto-add on approve, cheaper Pro.",
+      "Compare testimonial collection, imports, hosted walls, widget options, free plans, and pricing.",
     url: "/vs/senja",
   },
 };
@@ -249,6 +249,11 @@ export default function SenjaVsPage() {
               senja.io
             </a>{" "}
             for the latest.
+            <p className="mt-3">
+              <Link href="/vs" className="text-primary underline">
+                Browse all testimonial tool comparisons
+              </Link>
+            </p>
           </div>
         </div>
       </main>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import {
   Star,
@@ -51,6 +52,21 @@ import { WedgeBanner } from "@/components/wedge-banner";
 import { LinkImportSection } from "@/components/link-import-section";
 import { StartFromScratch } from "@/components/start-from-scratch";
 import { ToolsGridSection } from "@/components/tools-grid-section";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Testimoni | Collect and Display Customer Testimonials",
+  },
+  description:
+    "Collect customer testimonials from forms and public posts, approve each quote, and display them in an embeddable Wall of Love. Start free with no card.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Testimoni | Collect and Display Customer Testimonials",
+    description:
+      "Collect customer testimonials from forms and public posts, approve each quote, and display them in an embeddable Wall of Love. Start free with no card.",
+    url: "/",
+  },
+};
 
 export default function LandingPage() {
   return (

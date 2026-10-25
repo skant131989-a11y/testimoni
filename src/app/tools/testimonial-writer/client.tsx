@@ -131,12 +131,12 @@ export function TestimonialWriterClient() {
             <Sparkles className="h-3.5 w-3.5" /> Free · No signup
           </div>
           <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-            Stuck writing a testimonial?
+            Free testimonial writer
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Tell us a name, what they did, and how it made you feel. We&apos;ll
-            give you 3 versions to choose from — copy the one that sounds like
-            you.
+            Start a testimonial draft with a real customer&apos;s name and what
+            they did. Choose a tone and length, then review every detail with
+            them before you publish it.
           </p>
         </div>
 
@@ -390,6 +390,26 @@ export function TestimonialWriterClient() {
             </>
           }
         />
+
+        <section className="mt-12 rounded-2xl border bg-card p-6">
+          <h2 className="text-xl font-bold">How to use this testimonial writer</h2>
+          <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
+            <li>Enter the person&apos;s name and a factual description of what they did.</li>
+            <li>Choose a tone and length, then generate draft wording to edit.</li>
+            <li>Check every statement and ask the person to approve the final testimonial before publishing.</li>
+          </ol>
+          <p className="mt-4 text-sm text-muted-foreground">
+            These are editable drafts, not verified customer statements. For prompts and examples, read{" "}
+            <Link href="/blog/how-to-write-a-testimonial" className="font-medium text-primary underline">
+              how to write a testimonial
+            </Link>
+            . To collect and display approved quotes, see the{" "}
+            <Link href="/testimonial-widget" className="font-medium text-primary underline">
+              testimonial widget
+            </Link>
+            .
+          </p>
+        </section>
       </main>
 
       <footer className="border-t py-8">

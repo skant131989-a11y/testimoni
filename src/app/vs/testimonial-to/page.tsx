@@ -11,14 +11,14 @@ import { PAGE_FAQS, vsBreadcrumbs } from "@/lib/seo-faqs";
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
-  title: "Testimonial.to review and alternative — free tool",
+  title: "Testimonial.to Review & Alternative",
   description:
-    "What is Testimonial.to, and is there a Testimonial.to alternative? A plain-English look at what it does, plus Testimoni: paste an X or LinkedIn URL, get an approved testimonial in 30 seconds, free hosted Wall of Love. Pro at $19/month.",
+    "Compare Testimoni and Testimonial.to on testimonial imports, hosted walls, widgets, free-plan limits, and pricing. See what each tool offers and when an alternative may fit.",
   alternates: { canonical: "/vs/testimonial-to" },
   openGraph: {
-    title: "Testimoni vs Testimonial.to — Testimonial widget comparison",
+    title: "Testimoni vs Testimonial.to: Testimonial Tool Comparison",
     description:
-      "The Testimonial.to alternative for SaaS founders, coaches, and D2C brands. Free hosted wall, auto-add on approve, cheaper Pro.",
+      "Compare testimonial collection, imports, hosted walls, widget options, free plans, and pricing.",
     url: "/vs/testimonial-to",
   },
 };
@@ -242,6 +242,11 @@ export default function TestimonialToVsPage() {
               testimonial.to
             </a>{" "}
             for the latest.
+            <p className="mt-3">
+              <Link href="/vs" className="text-primary underline">
+                Browse all testimonial tool comparisons
+              </Link>
+            </p>
           </div>
         </div>
       </main>

@@ -12,14 +12,14 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 const SLUG = "how-to-write-a-testimonial";
 
 export const metadata: Metadata = {
-  title: "How to write a testimonial (with examples and a template)",
+  title: "How to Write a Testimonial: Template & Examples",
   description:
-    "How to write a testimonial that builds trust: what to include, a fill-in-the-blank template, and real-structure examples for SaaS, coaches, freelancers and stores. Plus how to get testimonials from customers.",
+    "Learn how to write a clear, credible testimonial with a fill-in template, examples, and tips for asking customers. Keep every claim accurate and approved.",
   alternates: { canonical: `/blog/${SLUG}` },
   openGraph: {
-    title: "How to write a testimonial (with examples and a template)",
+    title: "How to Write a Testimonial: Template & Examples",
     description:
-      "What makes a good testimonial, a simple template, examples, and how to ask customers for one.",
+      "A practical testimonial template, examples, and advice for getting customer approval.",
     url: `/blog/${SLUG}`,
   },
 };

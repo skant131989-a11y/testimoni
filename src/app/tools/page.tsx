@@ -6,14 +6,14 @@ import { ToolsHeader } from "@/components/tools-header";
 import { TrackedLink } from "@/components/tracked-link";
 
 export const metadata: Metadata = {
-  title: "Free testimonial tools — Testimoni",
+  title: "Free Testimonial Tools: Writer, Cards & More",
   description:
-    "Free tools for testimonials: card image generator, praise tweet finder, testimonial writer, and AI screenshot extractor. Most tools no signup needed.",
+    "Write testimonial drafts, create shareable cards, find public praise, and collect customer feedback with free online tools. Some features require a free account.",
   alternates: { canonical: "/tools" },
   openGraph: {
-    title: "Free testimonial tools — Testimoni",
+    title: "Free Testimonial Tools: Writer, Cards & More",
     description:
-      "Card generator, praise-tweet finder, testimonial writer, and AI screenshot extraction. All free.",
+      "Write testimonial drafts, create shareable cards, find public praise, and collect customer feedback with free tools.",
     url: "/tools",
   },
   robots: { index: true, follow: true },
@@ -102,8 +102,9 @@ export default function ToolsPage() {
             Free testimonial tools
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            A small kit of free tools we built alongside the main Testimoni
-            product. Use them without signing up.
+            Free tools to write testimonial drafts, make shareable cards, find
+            public praise, and collect customer feedback. Try selected tools
+            without an account; some features need a free signup.
           </p>
         </div>
 
@@ -138,6 +139,30 @@ export default function ToolsPage() {
           ))}
         </div>
 
+        <section className="mt-14 rounded-2xl border bg-card p-6">
+          <h2 className="text-xl font-bold">Guides for collecting and displaying testimonials</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Need help turning a draft or customer quote into useful social proof? Start with a practical guide.
+          </p>
+          <ul className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+            <li>
+              <Link href="/blog/how-to-write-a-testimonial" className="font-medium text-primary hover:underline">
+                How to write a testimonial: template and examples
+              </Link>
+            </li>
+            <li>
+              <Link href="/blog/how-to-add-a-testimonial-widget" className="font-medium text-primary hover:underline">
+                How to add a testimonial widget to your website
+              </Link>
+            </li>
+            <li>
+              <Link href="/testimonial-widget" className="font-medium text-primary hover:underline">
+                Explore the embeddable testimonial widget
+              </Link>
+            </li>
+          </ul>
+        </section>
+
         {/* Upsell */}
         <div className="mt-16 rounded-2xl border-2 border-primary/30 bg-primary/5 p-8">
           <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
@@ -165,7 +190,7 @@ export default function ToolsPage() {
           <Link href="/" className="hover:text-foreground">
             ← Back to Testimoni
           </Link>
-          <p>All tools free.</p>
+          <p>Free tools; some features require an account.</p>
         </div>
       </footer>
     </div>
