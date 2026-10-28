@@ -48,6 +48,15 @@ interface StructuredDataProps {
   /** Override for the FAQ schema @id. Passing something unique per
    *  page prevents Google from folding all FAQPages into one. */
   faqId?: string;
+  /** Marks the page as an Article (guides, blog posts, comparisons) so
+   *  search and AI engines see authorship and freshness (dateModified). */
+  article?: {
+    headline: string;
+    description: string;
+    path: string;
+    datePublished: string;
+    dateModified: string;
+  };
 }
 
 /**
@@ -64,7 +73,7 @@ interface StructuredDataProps {
  * way to inject structured data. Doesn't need next/script (which restricts
  * `beforeInteractive` to the root layout).
  */
-export function StructuredData({ faqs, breadcrumbs, faqId }: StructuredDataProps = {}) {
+export function StructuredData({ faqs, breadcrumbs, faqId, article }: StructuredDataProps = {}) {
   const activeFaqs = faqs ?? HOME_FAQS;
   const activeFaqId = faqId ?? `${SITE_URL}#faq`;
   const graph: Record<string, unknown>[] = [
@@ -140,6 +149,23 @@ export function StructuredData({ faqs, breadcrumbs, faqId }: StructuredDataProps
       })),
     },
   ];
+
+  if (article) {
+    graph.push({
+      "@type": "Article",
+      "@id": `${SITE_URL}${article.path}#article`,
+      headline: article.headline,
+      description: article.description,
+      url: `${SITE_URL}${article.path}`,
+      mainEntityOfPage: `${SITE_URL}${article.path}`,
+      datePublished: article.datePublished,
+      dateModified: article.dateModified,
+      inLanguage: "en-US",
+      author: { "@id": `${SITE_URL}#organization` },
+      publisher: { "@id": `${SITE_URL}#organization` },
+      about: { "@id": `${SITE_URL}#software` },
+    });
+  }
 
   // Breadcrumbs help Google render `Home › Tools › X` under the SERP
   // link, which improves CTR on deeper pages. Skipped when no crumbs

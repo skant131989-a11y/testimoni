@@ -7,6 +7,7 @@ import { TrackedLink } from "@/components/tracked-link";
 import { StructuredData } from "@/components/seo/structured-data";
 import { PageFAQ } from "@/components/seo/page-faq";
 import { PAGE_FAQS, pageBreadcrumbs } from "@/lib/seo-faqs";
+import { GuideLinks } from "@/components/guides/guide-links";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
@@ -122,6 +123,8 @@ export default function VsIndexPage() {
         subheading="Short answers to the questions we hear most."
         faqs={PAGE_FAQS.vsIndex}
       />
+
+      <GuideLinks />
 
       <footer className="border-t py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">

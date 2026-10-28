@@ -819,6 +819,22 @@ export default function LandingPage() {
             reading the footer sees they can find an industry-specific
             landing page. Bigger than the existing bottom nav, sits
             above it as its own strip. */}
+        <div className="mx-auto max-w-7xl px-4 pt-8">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Use cases &amp; guides
+          </p>
+          <div className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2 md:grid-cols-3">
+            <Link href="/turn-tweets-into-testimonials" className="text-muted-foreground hover:text-foreground">Turn tweets into testimonials</Link>
+            <Link href="/import-linkedin-recommendations" className="text-muted-foreground hover:text-foreground">Collect LinkedIn praise</Link>
+            <Link href="/embed-testimonials-without-screenshots" className="text-muted-foreground hover:text-foreground">Embed testimonials without screenshots</Link>
+            <Link href="/wall-of-love" className="text-muted-foreground hover:text-foreground">Create a Wall of Love</Link>
+            <Link href="/testimonial-widget-for-founders" className="text-muted-foreground hover:text-foreground">Testimonial widget for solo founders</Link>
+            <Link href="/blog/best-testimonial-tools" className="text-muted-foreground hover:text-foreground">Best testimonial tools, compared</Link>
+            <Link href="/senja-alternatives" className="text-muted-foreground hover:text-foreground">Senja alternatives</Link>
+            <Link href="/vs/famewall" className="text-muted-foreground hover:text-foreground">Testimoni vs Famewall</Link>
+            <Link href="/vs/shapo" className="text-muted-foreground hover:text-foreground">Testimoni vs Shapo</Link>
+          </div>
+        </div>
         <div className="mx-auto max-w-7xl px-4 py-8">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             By industry

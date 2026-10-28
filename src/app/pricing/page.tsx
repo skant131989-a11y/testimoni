@@ -8,6 +8,7 @@ import { PricingCta } from "@/components/pricing/pricing-cta";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { PRO_AI_PUBLIC } from "@/lib/feature-flags";
+import { GuideLinks } from "@/components/guides/guide-links";
 // PRO_AI_FEATURES was removed when the tier collapsed back into Pro.
 // Empty stub so the (feature-flag-gated) card compiles if re-enabled.
 const PRO_AI_FEATURES: readonly string[] = [];
@@ -185,6 +186,8 @@ export default function PricingPage() {
       </main>
 
       {/* Footer */}
+      <GuideLinks />
+
       <footer className="border-t py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
           <Link href="/" className="flex items-center gap-2">

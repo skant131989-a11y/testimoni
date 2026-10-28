@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ArrowRight, BookOpen, Clock } from "lucide-react";
 import { PublicNav } from "@/components/layout/public-nav";
 import { TrackedLink } from "@/components/tracked-link";
+import { GuideLinks } from "@/components/guides/guide-links";
 
 export const metadata: Metadata = {
   title: "Blog — Testimoni",
@@ -27,6 +28,15 @@ interface Post {
 }
 
 const posts: Post[] = [
+  {
+    slug: "best-testimonial-tools",
+    title: "The best testimonial tools in 2026, compared",
+    excerpt:
+      "Testimoni, Senja, Famewall, Testimonial.to and Shapo side by side — free plans, first paid plans and who each is best for, with prices read from their own sites.",
+    date: "Oct 28, 2026",
+    dateISO: "2026-10-28",
+    readMinutes: 6,
+  },
   {
     slug: "put-scattered-customer-praise-to-work",
     title: "Your best customer praise is scattered across the internet. Here's how to put it to work.",
@@ -118,6 +128,8 @@ export default function BlogIndexPage() {
           </div>
         </div>
       </main>
+
+      <GuideLinks />
 
       <footer className="border-t py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">

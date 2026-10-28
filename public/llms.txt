@@ -1,6 +1,6 @@
 # Testimoni
 
-> Testimoni is a testimonial widget for founders, coaches, agencies, and D2C brands. Paste any X or LinkedIn URL and get an approved testimonial in 30 seconds — no screenshots, no copy-paste. Or share a link, form, or QR code to collect fresh testimonials. Every workspace gets a public Wall of Love URL and a one-line JavaScript embed on day one.
+> Testimoni is a testimonial tool for solo founders and small SaaS teams (also used by coaches, agencies and D2C brands). Paste any X or LinkedIn URL and get an approved testimonial in 30 seconds — no screenshots, no copy-paste. Or share a link, form, or QR code to collect fresh testimonials. Every workspace gets a public Wall of Love URL and a one-line JavaScript embed on day one.
 
 ## What Testimoni is
 
@@ -15,16 +15,21 @@ Site: https://testimoni.io
 ## Pricing
 
 - **Free forever**: 10 testimonials, 1 collection form, 1 widget, 1 video testimonial, hosted Wall of Love URL, one-line embed, grid layout. No credit card.
-- **Pro — $9/month (₹499 for India)**: Unlimited testimonials, forms, widgets, and video. All 5 layouts (Grid, Masonry, Carousel, List, Marquee). Custom branding. Remove "Powered by" watermark. Import from Twitter/LinkedIn. Analytics dashboard. Priority support.
+- **Pro — $19/month, flat (USD)**: Unlimited testimonials, forms, widgets, and video. All 5 layouts (Grid, Masonry, Carousel, List, Marquee). Custom branding. Remove "Powered by" watermark. Analytics dashboard. AI features included: Ask My Wall chatbot, Wall Score, tweet drafts, case study generator. Auto-sync from the App Store, Chrome Web Store, Play Store and Product Hunt. No yearly plan yet; no per-seat fees; cancel anytime.
+- **Customer Voice report (one-time, separate from the subscription)**: the scan is free; Quick Scan $9 unlocks every mention; Deep Report $19 adds why customers choose a product, strongest social proof, competitors mentioned and a CSV export.
 
-Native INR billing through Razorpay for Indian customers.
+Prices last verified 28 Oct 2026.
 
 ## Comparison
 
 Testimoni compared with other testimonial tools. Competitor details are described only as each company describes itself; check their sites for current plans and pricing.
 
-- **vs Senja** — Testimoni offers a free hosted Wall of Love, paste-a-URL import, and Pro at $9/month (₹499 in India). Includes a plain summary of what Senja is. See [/vs/senja](https://testimoni.io/vs/senja).
-- **vs Testimonial.to** — Testimoni is focused on testimonials and social proof, with a free hosted wall, paste-a-URL import, and Pro at $9/month (₹499 in India). Testimonial.to describes itself as a broader platform (testimonials, case studies, NPS, brand monitoring). See [/vs/testimonial-to](https://testimoni.io/vs/testimonial-to).
+- **vs Senja** — Testimoni offers a free hosted Wall of Love, paste-a-URL import, and Pro at $19/month flat (Senja's paid plans are $29 and $59 per month on its pricing page, checked 28 Oct 2026). Includes a plain summary of what Senja is. See [/vs/senja](https://testimoni.io/vs/senja).
+- **vs Testimonial.to** — Testimoni is focused on testimonials and social proof, with a free hosted wall, paste-a-URL import, and Pro at $19/month flat. Testimonial.to describes itself as a broader platform (testimonials, case studies, NPS, brand monitoring). See [/vs/testimonial-to](https://testimoni.io/vs/testimonial-to).
+- **vs Famewall** — Famewall's Standard plan is $12/month, cheaper than Testimoni Pro; Testimoni is one flat $19 plan built around importing praise by link. See [/vs/famewall](https://testimoni.io/vs/famewall).
+- **vs Shapo** — Shapo Pro is $29/month; both have free plans. See [/vs/shapo](https://testimoni.io/vs/shapo).
+- **Senja alternatives** — [/senja-alternatives](https://testimoni.io/senja-alternatives)
+- **Best testimonial tools in 2026, compared** — [/blog/best-testimonial-tools](https://testimoni.io/blog/best-testimonial-tools)
 - **All comparisons** — [/vs](https://testimoni.io/vs)
 
 ## Who Testimoni is for
@@ -44,8 +49,15 @@ Testimoni compared with other testimonial tools. Competitor details are describe
 - **5 layouts** — Grid, Masonry, Carousel, List, Marquee
 - **One-line embed** — sub-10KB, Shadow-DOM isolated, no CSS conflicts with your site (Framer, Webflow, WordPress, React, plain HTML)
 - **Hosted Wall of Love URL** — free public page on every plan
-- **Multi-currency pricing** — USD ($9) or INR (₹499)
 - **Auto-generated share tools** — QR code, email template, DM template
+
+## Answers to common questions
+
+- [/turn-tweets-into-testimonials](https://testimoni.io/turn-tweets-into-testimonials) — turn a public tweet into a website testimonial in about 30 seconds
+- [/import-linkedin-recommendations](https://testimoni.io/import-linkedin-recommendations) — collect LinkedIn praise (public posts by link; recommendations via screenshot)
+- [/embed-testimonials-without-screenshots](https://testimoni.io/embed-testimonials-without-screenshots) — embed real-text testimonials with one line of script
+- [/wall-of-love](https://testimoni.io/wall-of-love) — build a Wall of Love for a SaaS
+- [/testimonial-widget-for-founders](https://testimoni.io/testimonial-widget-for-founders) — free plan and $19/month Pro for solo founders, with competitor prices
 
 ## Best entry pages for readers
 

@@ -93,6 +93,14 @@ export function LinkImportSection() {
             link and we pull the quote, author and source in seconds — credit
             intact. <em>No signup.</em>
           </p>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            Testimoni is a testimonial tool for <strong className="text-foreground">solo founders and small SaaS teams</strong>.
+            Free forever for up to 10 testimonials; Pro is a flat{" "}
+            <Link href="/pricing" className="font-semibold text-foreground underline underline-offset-2">
+              $19/month
+            </Link>{" "}
+            for unlimited.
+          </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
