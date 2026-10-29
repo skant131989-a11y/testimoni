@@ -17,7 +17,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 
 /**
@@ -325,6 +324,18 @@ export default function LoginPage() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Welcome back</CardTitle>
         <CardDescription>Sign in to your Wall of Love</CardDescription>
+        <p className="text-sm text-muted-foreground">
+          New to Testimoni?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Create a free account
+          </Link>
+          <span className="block text-xs">
+            Continuing with Google creates your account automatically.
+          </span>
+        </p>
       </CardHeader>
       <CardContent>
         {callbackMsg && (
@@ -575,17 +586,6 @@ export default function LoginPage() {
           <span className="font-semibold">Sign in with Google</span>
         </Button>
       </CardContent>
-      <CardFooter>
-        <p className="w-full text-center text-sm text-muted-foreground">
-          New to Testimoni?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-primary underline-offset-4 hover:underline"
-          >
-            Create a free account
-          </Link>
-        </p>
-      </CardFooter>
     </Card>
   );
 }
