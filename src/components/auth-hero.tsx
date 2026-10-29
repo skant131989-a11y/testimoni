@@ -119,7 +119,7 @@ export function AuthHero() {
       <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-600/30 bg-violet-600/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-700">
         <EyebrowIcon className="h-3 w-3" /> {c.eyebrow}
       </span>
-      <h1 className="mt-4 text-3xl font-bold leading-[1.1] tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
+      <h1 className="mt-4 text-3xl font-bold leading-[1.1] tracking-tight text-slate-900 md:text-4xl lg:text-5xl [@media(max-height:760px)]:lg:text-4xl">
         {c.headline}
       </h1>
       <p className="mt-4 max-w-md text-base text-muted-foreground md:text-lg">
@@ -127,7 +127,7 @@ export function AuthHero() {
       </p>
 
       {/* Trust chips — quick eye-candy hits */}
-      <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+      <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
         {c.trust.map((t) => (
           <li key={t} className="inline-flex items-center gap-1.5">
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
@@ -138,15 +138,17 @@ export function AuthHero() {
 
       {/* Dogfooded testimonial cards — 3 real seed founders. Hidden on
           small screens so the form stays above-the-fold on mobile. */}
-      <div className="mt-10 hidden md:block">
+      {/* Cards are shown by available height so the panel never outgrows the
+          screen: 1 card from 700px tall, 2 from 800px, 3 from 940px. */}
+      <div className="mt-6 hidden md:[@media(min-height:700px)]:block">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           Loved by founders shipping today
         </p>
-        <div className="mt-4 space-y-4">
+        <div className="mt-3 space-y-3">
           {TESTIMONIAL_CARDS.map((t, i) => (
             <div
               key={i}
-              className={`relative w-full max-w-md ${t.rotate} ${t.marginClass} rounded-2xl border border-violet-200/60 bg-white/85 p-4 shadow-lg shadow-violet-500/10 backdrop-blur transition-transform hover:rotate-0 hover:shadow-xl`}
+              className={`relative w-full max-w-md ${i === 1 ? "hidden [@media(min-height:800px)]:block" : i === 2 ? "hidden [@media(min-height:940px)]:block" : ""} ${t.rotate} ${t.marginClass} rounded-2xl border border-violet-200/60 bg-white/85 p-4 shadow-lg shadow-violet-500/10 backdrop-blur transition-transform hover:rotate-0 hover:shadow-xl`}
             >
               <div className="flex items-center gap-2 text-[10px] font-semibold text-violet-700">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />

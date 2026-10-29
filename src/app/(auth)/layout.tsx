@@ -22,15 +22,15 @@ import { AuthHero } from "@/components/auth-hero";
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="flex min-h-screen flex-col md:h-screen md:flex-row md:overflow-hidden">
       {/* Left — hero (order-1 on mobile so it renders above the form,
           but as a shorter banner) */}
-      <div className="relative order-1 flex flex-col overflow-hidden bg-gradient-to-br from-violet-100 via-purple-50 to-fuchsia-50/40 md:order-none md:min-h-screen md:w-1/2 md:flex-1">
+      <div className="relative order-1 flex flex-col overflow-hidden bg-gradient-to-br from-violet-100 via-purple-50 to-fuchsia-50/40 md:order-none md:h-screen md:w-1/2 md:flex-1">
         {/* Ambient blobs — same treatment as home hero */}
         <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-violet-400/25 blur-3xl" />
         <div className="pointer-events-none absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-fuchsia-400/20 blur-3xl" />
 
-        <div className="relative flex flex-1 flex-col p-6 md:p-10 lg:p-16">
+        <div className="relative flex min-h-0 flex-1 flex-col p-6 md:p-8 lg:p-12">
           {/* Brand mark — links back home */}
           <Link
             href="/"
@@ -47,7 +47,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <span className="text-lg font-bold">Testimoni</span>
           </Link>
 
-          <div className="flex flex-1 items-center justify-center py-8 md:py-16">
+          <div className="flex min-h-0 flex-1 items-center justify-center py-8 md:py-4">
             <AuthHero />
           </div>
 
@@ -65,8 +65,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* Right — form column */}
-      <div className="order-2 flex flex-1 items-center justify-center bg-white px-4 py-10 md:min-h-screen md:w-1/2 md:py-12">
-        <div className="w-full max-w-md">{children}</div>
+      {/* Fixed to the viewport height on desktop; if the form is ever taller
+          than the screen only THIS column scrolls (m-auto centres it when it
+          fits, and lets it scroll from the top when it does not). */}
+      <div className="order-2 flex flex-1 bg-white px-4 py-10 md:h-screen md:w-1/2 md:overflow-y-auto md:py-8">
+        <div className="m-auto w-full max-w-md">{children}</div>
       </div>
     </div>
   );

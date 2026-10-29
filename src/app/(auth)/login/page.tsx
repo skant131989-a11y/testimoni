@@ -45,7 +45,13 @@ function classifyAuthError(msg: string): string {
     m.includes("rate limit")
   )
     return "rate_limited";
-  if (m.includes("user not found") || m.includes("no user")) return "user_not_found";
+  if (
+    m.includes("user not found") ||
+    m.includes("no user") ||
+    m.includes("signups not allowed") ||
+    m.includes("otp_disabled")
+  )
+    return "user_not_found";
   if (m.includes("network") || m.includes("fetch failed")) return "network";
   if (m.includes("locked")) return "account_locked";
   return "other";
@@ -96,7 +102,7 @@ export default function LoginPage() {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const FREE_FAILED_ATTEMPTS = 2;
   const alwaysGate = process.env.NEXT_PUBLIC_SUPABASE_CAPTCHA === "1";
-  const [useCode, setUseCode] = useState(false);
+  const [noAccount, setNoAccount] = useState(false);
   const [pending, setPending] = useState<{ email: string; mode: "login" | "signup" } | null>(null);
 
   const nextParam = searchParams.get("next");
@@ -224,7 +230,9 @@ export default function LoginPage() {
     }
   }
 
-  async function requestLoginCode(addr: string): Promise<{ ok: true } | { ok: false; message: string }> {
+  async function requestLoginCode(
+    addr: string
+  ): Promise<{ ok: true } | { ok: false; message: string; noAccount?: boolean }> {
     const check = await gate.verify("login_code");
     if (!check.ok) return { ok: false, message: check.message };
     try {
@@ -241,11 +249,14 @@ export default function LoginPage() {
       if (check.captchaToken) gate.reset();
       if (authError) {
         const reason = classifyAuthError(authError.message);
-        // "No account for that email" must look the same as success, or
-        // this form lets anyone probe which emails are registered.
-        if (reason === "rate_limited" || reason === "network") {
-          return { ok: false, message: authError.message };
+        // Supabase refuses (and sends NO email) when there is no account.
+        // Say so plainly instead of showing a "check your email" screen
+        // for a code that will never arrive; the Turnstile gate above
+        // keeps this from being a cheap way to probe emails in bulk.
+        if (reason === "user_not_found") {
+          return { ok: false, message: "We couldn't find an account for that email.", noAccount: true };
         }
+        return { ok: false, message: authError.message };
       }
       return { ok: true };
     } catch {
@@ -253,17 +264,22 @@ export default function LoginPage() {
     }
   }
 
-  async function handleSendCode(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function sendCodeNow() {
     setError(null);
-    if (!email) return;
+    setNoAccount(false);
+    if (!email) {
+      setError("Enter your email above, then tap this again.");
+      document.getElementById("email")?.focus();
+      return;
+    }
     setIsLoading(true);
     track("login_started", { method: "email_code" }, { instant: true });
     const sent = await requestLoginCode(email);
     setIsLoading(false);
     if (!sent.ok) {
       setError(sent.message);
-      track("login_failed", { method: "email_code", error: sent.message });
+      setNoAccount(!!sent.noAccount);
+      track("login_failed", { method: "email_code", error: sent.message, no_account: !!sent.noAccount });
       return;
     }
     track("login_code_requested", {});
@@ -448,7 +464,7 @@ export default function LoginPage() {
 
         {/* Email + password — primary form (visible first). Google
             fallback lives below the divider. */}
-        <form onSubmit={useCode ? handleSendCode : handleEmailLogin} className="space-y-4">
+        <form onSubmit={handleEmailLogin} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -462,7 +478,6 @@ export default function LoginPage() {
               autoComplete="email"
             />
           </div>
-          {!useCode && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
@@ -483,7 +498,6 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
           </div>
-          )}
 
           {/* Honeypot — display:none (not off-screen positioning) is
               what actually keeps browser-native autofill / password
@@ -513,28 +527,37 @@ export default function LoginPage() {
           {error && (
             <p className="text-sm text-destructive" role="alert">
               {error}
+              {noAccount && (
+                <>
+                  {" "}
+                  <Link
+                    href={`/signup?email=${encodeURIComponent(email)}`}
+                    className="font-medium underline underline-offset-2"
+                  >
+                    Create a free account
+                  </Link>
+                </>
+              )}
             </p>
           )}
           <Button
             type="submit"
             className="w-full"
             size="lg"
-            disabled={isLoading || isGoogleLoading || !email || (!useCode && !password)}
+            disabled={isLoading || isGoogleLoading || !email || !password}
           >
             {(isLoading || gate.verifying) && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            {gate.verifying ? "Verifying…" : useCode ? "Email me a code" : "Sign in"}
+            {gate.verifying ? "Verifying…" : "Sign in"}
           </Button>
           <button
             type="button"
-            onClick={() => {
-              setUseCode((v) => !v);
-              setError(null);
-            }}
-            className="w-full text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+            onClick={sendCodeNow}
+            disabled={isLoading || isGoogleLoading}
+            className="w-full text-center text-sm font-medium text-primary underline-offset-4 hover:underline disabled:opacity-60"
           >
-            {useCode ? "Use my password instead" : "Email me a sign-in code instead"}
+            Email me a sign-in code instead
           </button>
         </form>
 
