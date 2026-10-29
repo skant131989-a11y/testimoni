@@ -37,6 +37,9 @@ import { track, identify, resetAnalytics } from "@/lib/analytics";
  *     before the redirect (identify(), track("signup_completed")).
  */
 
+/** Must match Supabase Auth > Email > "Email OTP Length" (6 or 8). */
+export const OTP_LENGTH: 6 | 8 = process.env.NEXT_PUBLIC_OTP_LENGTH === "6" ? 6 : 8;
+
 interface OtpCodeInputProps {
   email: string;
   redirectTo: string;
@@ -52,6 +55,13 @@ interface OtpCodeInputProps {
    *  setting — default is 6, some projects run 8. Accepts 6 or 8
    *  and the input auto-submits when the buffer hits this length. */
   codeLength?: 6 | 8;
+  /** "signup" confirms a password signup; "email" signs in with an
+   *  emailed code (magic-link / login-by-code). */
+  otpType?: "email" | "signup";
+  /** Hide the "Or type the code" box header (used on the dedicated
+   *  verify-email screen where the code is the main action). */
+  hideHeader?: boolean;
+  autoFocus?: boolean;
 }
 
 export function OtpCodeInput({
@@ -61,7 +71,10 @@ export function OtpCodeInput({
   method,
   surface,
   onBeforeRedirect,
-  codeLength = 8,
+  codeLength = OTP_LENGTH,
+  otpType = "email",
+  hideHeader = false,
+  autoFocus = true,
 }: OtpCodeInputProps) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -72,8 +85,8 @@ export function OtpCodeInput({
   // inbox but they land here first when they read the email
   // and want to type the code back.
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (autoFocus) inputRef.current?.focus();
+  }, [autoFocus]);
 
   async function verify(token: string) {
     if (token.length !== codeLength || verifying) return;
@@ -84,7 +97,7 @@ export function OtpCodeInput({
       const { data, error: authError } = await supabase.auth.verifyOtp({
         email,
         token,
-        type: "email",
+        type: otpType,
       });
       if (authError || !data.session) {
         const message = authError?.message ?? "Couldn't verify that code.";
@@ -113,15 +126,19 @@ export function OtpCodeInput({
 
   return (
     <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <KeyRound className="h-4 w-4 text-primary" />
-        <p className="text-sm font-semibold">Or type the {codeLength}-digit code</p>
-      </div>
-      <p className="mb-3 text-xs text-muted-foreground">
-        The email contains a code you can type here instead of clicking the link
-        — helpful if the link opens in the wrong browser or gets flagged by a
-        scanner.
-      </p>
+      {!hideHeader && (
+        <>
+          <div className="mb-3 flex items-center gap-2">
+            <KeyRound className="h-4 w-4 text-primary" />
+            <p className="text-sm font-semibold">Or type the {codeLength}-digit code</p>
+          </div>
+          <p className="mb-3 text-xs text-muted-foreground">
+            The email contains a code you can type here instead of clicking the link
+            — helpful if the link opens in the wrong browser or gets flagged by a
+            scanner.
+          </p>
+        </>
+      )}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -155,7 +172,7 @@ export function OtpCodeInput({
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying
             </>
           ) : (
-            "Sign in"
+            otpType === "signup" ? "Verify" : "Sign in"
           )}
         </Button>
       </form>

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
 import { webmailForEmail } from "@/lib/email-provider";
 import { OtpCodeInput } from "@/components/otp-code-input";
+import { useTurnstileGate } from "@/components/auth/use-turnstile-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +41,9 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
+  // Sending a sign-in email must be bot-gated (fail-closed Turnstile),
+  // or this card is a free email-bomb / account-creation endpoint.
+  const gate = useTurnstileGate(`inline:${source}`);
 
   const webmail = magicSent ? webmailForEmail(email) : null;
 
@@ -48,15 +52,23 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
     setError(null);
     if (!email) return;
     setLoading(true);
+    const check = await gate.verify("inline_signup");
+    if (!check.ok) {
+      setError(check.message);
+      setLoading(false);
+      return;
+    }
     track("signup_started", { method: "magic_link", source }, { instant: true });
     try {
       const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithOtp({
         email,
         options: {
+          ...(check.captchaToken ? { captchaToken: check.captchaToken } : {}),
           emailRedirectTo: `${window.location.origin}/callback?next=${encodeURIComponent(`/dashboard/welcome?src=${source}`)}`,
         },
       });
+      if (check.captchaToken) gate.reset();
       if (authError) {
         setError(authError.message);
         track("signup_failed", { method: "magic_link", source, error: authError.message });
@@ -104,9 +116,9 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
           <div>
             <h3 className="text-base font-semibold">Check your inbox</h3>
             <p className="mt-1 text-xs text-muted-foreground">
-              We sent a sign-in link to{" "}
+              We sent a sign-in link and a code to{" "}
               <span className="font-medium text-foreground">{email}</span>.
-              Click it and you&rsquo;re in.
+              Click the link or type the code below.
             </p>
           </div>
           {webmail && (
@@ -197,6 +209,7 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
             <p className="text-center text-[11px] text-muted-foreground">
               No password to remember. Also works if you already have an account.
             </p>
+            {gate.widget}
           </form>
 
           <div className="relative my-4">

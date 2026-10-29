@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -9,7 +9,8 @@ import { track, identify, resetAnalytics } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Turnstile } from "@/components/turnstile";
+import { useTurnstileGate } from "@/components/auth/use-turnstile-gate";
+import { VerifyEmailScreen } from "@/components/auth/verify-email-screen";
 import {
   Card,
   CardHeader,
@@ -84,63 +85,23 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [botTrap, setBotTrap] = useState("");
   const [mountedAt] = useState(() => Date.now());
-  // ── Anti-bot, as of 2026-09-27 ────────────────────────────────────
-  // Same policy as signup/page.tsx — see the fuller note on
-  // verifyTurnstile there. Honeypot and the mount-timestamp check are
-  // telemetry only. Turnstile blocks only on a real Cloudflare
-  // `verify_failed` verdict; a missing token (widget never resolved —
-  // ad blocker, blocked network, etc.) fails open.
-  //
-  // Unlike signup, login also gets FREE_FAILED_ATTEMPTS free passes:
-  // nobody solves a security check to log in on a normal first try —
-  // only credential-guessing (repeated wrong passwords) looks like a
-  // bot here, so Turnstile only engages once a real Supabase
-  // authError has happened this many times.
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
-  const turnstileConfigured = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-  const [verifyingTurnstile, setVerifyingTurnstile] = useState(false);
+  // ── Anti-bot ──────────────────────────────────────────────────────
+  // Turnstile now FAILS CLOSED (use-turnstile-gate.tsx). Password login
+  // still gets FREE_FAILED_ATTEMPTS free passes — nobody solves a check
+  // on a normal first try; repeated wrong passwords look like credential
+  // stuffing, so the gate engages after that. Requesting an emailed code
+  // always needs the gate (it sends an email, so it can be abused).
+  // When Supabase's own CAPTCHA is on (NEXT_PUBLIC_SUPABASE_CAPTCHA=1)
+  // every auth call needs a token, so the gate is always engaged.
+  const gate = useTurnstileGate("login");
   const [failedAttempts, setFailedAttempts] = useState(0);
   const FREE_FAILED_ATTEMPTS = 2;
-  const tokenWaitersRef = useRef<((token: string | null) => void)[]>([]);
-  const TURNSTILE_WAIT_MS = 8_000;
+  const alwaysGate = process.env.NEXT_PUBLIC_SUPABASE_CAPTCHA === "1";
+  const [useCode, setUseCode] = useState(false);
+  const [pending, setPending] = useState<{ email: string; mode: "login" | "signup" } | null>(null);
 
-  async function verifyTurnstile(action: string): Promise<boolean> {
-    if (!turnstileConfigured) return true;
-    let token = turnstileToken;
-    if (!token) {
-      setVerifyingTurnstile(true);
-      token = await new Promise<string | null>((resolve) => {
-        tokenWaitersRef.current.push(resolve);
-        setTimeout(() => resolve(null), TURNSTILE_WAIT_MS);
-      });
-      setVerifyingTurnstile(false);
-    }
-    if (!token) {
-      track("turnstile_blocked", { action, reason: "no_token", enforced: false });
-      return true;
-    }
-    setTurnstileToken(null);
-    setTurnstileResetKey((k) => k + 1);
-    try {
-      const res = await fetch("/api/verify-turnstile", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ token, action }),
-      });
-      const data = await res.json();
-      if (res.ok && data.ok) return true;
-      if (data.error === "verify_failed") {
-        track("turnstile_blocked", { action, reason: "verify_failed", codes: data.codes, enforced: true });
-        setError("Security check failed. Please try again in a moment.");
-        return false;
-      }
-      track("turnstile_blocked", { action, reason: data.error || "unknown", enforced: false });
-      return true;
-    } catch {
-      return true;
-    }
-  }
+  const nextParam = searchParams.get("next");
+  const nextPath = nextParam?.startsWith("/") ? nextParam : "/dashboard";
 
   // Some auth callback errors arrive as fragment (?…#error=…) since
   // Supabase pushes to a hash on the OAuth return. Read both.
@@ -181,8 +142,14 @@ export default function LoginPage() {
     // Skip the check entirely for the first couple of attempts — see
     // the note above. Only blocks (once engaged) on a real Cloudflare
     // "verify_failed" verdict.
-    if (failedAttempts >= FREE_FAILED_ATTEMPTS) {
-      if (!(await verifyTurnstile("login_email"))) return;
+    let captchaToken: string | undefined;
+    if (alwaysGate || failedAttempts >= FREE_FAILED_ATTEMPTS) {
+      const check = await gate.verify("login_email");
+      if (!check.ok) {
+        setError(check.message);
+        return;
+      }
+      captchaToken = check.captchaToken;
     }
 
     setIsLoading(true);
@@ -190,18 +157,31 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient();
-      const { data, error: authError } = await supabase.auth.signInWithPassword(
-        { email, password },
-      );
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: captchaToken ? { captchaToken } : undefined,
+      });
+      if (captchaToken) gate.reset();
 
       if (authError && !data.user) {
         const reason = classifyAuthError(authError.message);
+        if (reason === "email_not_confirmed") {
+          // Account exists but the address was never verified: send a
+          // fresh confirmation code and show the verify screen.
+          const sent = await sendConfirmationCode(email);
+          if (sent.ok) {
+            track("login_unconfirmed_code_sent", {});
+            setPending({ email, mode: "signup" });
+          } else {
+            setError(sent.message);
+          }
+          return;
+        }
         setError(
           reason === "invalid_credentials"
-            ? "Wrong email or password. Try again or use Google sign-in."
-            : reason === "email_not_confirmed"
-              ? "Your email isn't confirmed. Sign in with Google instead."
-              : authError.message,
+            ? "Wrong email or password. Try again, or email yourself a sign-in code below."
+            : authError.message,
         );
         track("login_failed", {
           method: "email_password",
@@ -217,16 +197,78 @@ export default function LoginPage() {
         identify(data.user.id, { email });
       }
       track("login_completed", { method: "email_password" }, { instant: true });
-      const nextParam = searchParams.get("next");
-      const next = nextParam?.startsWith("/") ? nextParam : "/dashboard";
       requestAnimationFrame(() => {
-        window.location.assign(next);
+        window.location.assign(nextPath);
       });
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function sendConfirmationCode(addr: string): Promise<{ ok: true } | { ok: false; message: string }> {
+    const check = await gate.verify("login_confirm_resend");
+    if (!check.ok) return { ok: false, message: check.message };
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.resend({
+        type: "signup",
+        email: addr,
+        options: check.captchaToken ? { captchaToken: check.captchaToken } : undefined,
+      });
+      if (check.captchaToken) gate.reset();
+      if (authError) return { ok: false, message: authError.message };
+      return { ok: true };
+    } catch {
+      return { ok: false, message: "Couldn't send the code. Please try again." };
+    }
+  }
+
+  async function requestLoginCode(addr: string): Promise<{ ok: true } | { ok: false; message: string }> {
+    const check = await gate.verify("login_code");
+    if (!check.ok) return { ok: false, message: check.message };
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithOtp({
+        email: addr,
+        options: {
+          // Login only — never creates an account (signups go through
+          // /signup with its own checks).
+          shouldCreateUser: false,
+          ...(check.captchaToken ? { captchaToken: check.captchaToken } : {}),
+        },
+      });
+      if (check.captchaToken) gate.reset();
+      if (authError) {
+        const reason = classifyAuthError(authError.message);
+        // "No account for that email" must look the same as success, or
+        // this form lets anyone probe which emails are registered.
+        if (reason === "rate_limited" || reason === "network") {
+          return { ok: false, message: authError.message };
+        }
+      }
+      return { ok: true };
+    } catch {
+      return { ok: false, message: "Couldn't send the code. Please try again." };
+    }
+  }
+
+  async function handleSendCode(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    if (!email) return;
+    setIsLoading(true);
+    track("login_started", { method: "email_code" }, { instant: true });
+    const sent = await requestLoginCode(email);
+    setIsLoading(false);
+    if (!sent.ok) {
+      setError(sent.message);
+      track("login_failed", { method: "email_code", error: sent.message });
+      return;
+    }
+    track("login_code_requested", {});
+    setPending({ email, mode: "login" });
   }
 
   async function handleGoogleLogin() {
@@ -238,12 +280,10 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient();
-      const nextParam = searchParams.get("next");
-      const next = nextParam?.startsWith("/") ? nextParam : "/dashboard";
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/callback?next=${encodeURIComponent(next)}`,
+          redirectTo: `${window.location.origin}/callback?next=${encodeURIComponent(nextPath)}`,
         },
       });
       if (authError) {
@@ -254,6 +294,30 @@ export default function LoginPage() {
       setError("An unexpected error occurred. Please try again.");
       setIsGoogleLoading(false);
     }
+  }
+
+  if (pending) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <VerifyEmailScreen
+            email={pending.email}
+            mode={pending.mode}
+            redirectTo={pending.mode === "signup" ? "/dashboard/welcome" : nextPath}
+            surface="login"
+            onResend={async () => {
+              const r = pending.mode === "signup" ? await sendConfirmationCode(pending.email) : await requestLoginCode(pending.email);
+              return r.ok ? {} : { error: r.message };
+            }}
+            onChangeEmail={() => {
+              setPending(null);
+              setError(null);
+            }}
+          />
+          {gate.widget}
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -373,7 +437,7 @@ export default function LoginPage() {
 
         {/* Email + password — primary form (visible first). Google
             fallback lives below the divider. */}
-        <form onSubmit={handleEmailLogin} className="space-y-4">
+        <form onSubmit={useCode ? handleSendCode : handleEmailLogin} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -387,6 +451,7 @@ export default function LoginPage() {
               autoComplete="email"
             />
           </div>
+          {!useCode && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
@@ -407,6 +472,7 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
           </div>
+          )}
 
           {/* Honeypot — display:none (not off-screen positioning) is
               what actually keeps browser-native autofill / password
@@ -442,44 +508,26 @@ export default function LoginPage() {
             type="submit"
             className="w-full"
             size="lg"
-            disabled={isLoading || isGoogleLoading || !email || !password}
+            disabled={isLoading || isGoogleLoading || !email || (!useCode && !password)}
           >
-            {(isLoading || verifyingTurnstile) && (
+            {(isLoading || gate.verifying) && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            {verifyingTurnstile ? "Verifying…" : "Sign in"}
+            {gate.verifying ? "Verifying…" : useCode ? "Email me a code" : "Sign in"}
           </Button>
+          <button
+            type="button"
+            onClick={() => {
+              setUseCode((v) => !v);
+              setError(null);
+            }}
+            className="w-full text-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {useCode ? "Use my password instead" : "Email me a sign-in code instead"}
+          </button>
         </form>
 
-        {/* Turnstile — blocks only on a real Cloudflare verify_failed
-            verdict (see verifyTurnstile above). Mounted immediately on
-            page load rather than gated on the user touching the email
-            form, so it has the most possible lead time to produce a
-            token in the background before anyone submits. Still
-            invisible for Google-only visitors (interaction-only
-            appearance). */}
-        {turnstileConfigured && (
-          <div className="mt-4 flex justify-center">
-            <Turnstile
-              onToken={(t) => {
-                setTurnstileToken(t);
-                const waiters = tokenWaitersRef.current;
-                tokenWaitersRef.current = [];
-                waiters.forEach((w) => w(t));
-              }}
-              onExpire={() => setTurnstileToken(null)}
-              onUnavailable={(reason) => {
-                track("turnstile_unavailable", { page: "login", reason });
-                const waiters = tokenWaitersRef.current;
-                tokenWaitersRef.current = [];
-                waiters.forEach((w) => w(null));
-              }}
-              resetSignal={turnstileResetKey}
-              appearance="interaction-only"
-              size="normal"
-            />
-          </div>
-        )}
+        {gate.widget}
 
         {/* Divider */}
         <div className="relative my-6">

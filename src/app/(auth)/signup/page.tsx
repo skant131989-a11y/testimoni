@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
@@ -10,7 +10,8 @@ import { isGmailDotStuffing } from "@/lib/bot-email";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Turnstile } from "@/components/turnstile";
+import { useTurnstileGate } from "@/components/auth/use-turnstile-gate";
+import { VerifyEmailScreen } from "@/components/auth/verify-email-screen";
 import {
   Card,
   CardHeader,
@@ -28,19 +29,17 @@ import {
  * it depended on Resend/email delivery, which was killing conversion
  * during the bot-driven email quota exhaustion.
  *
- * Email verification is expected to be DISABLED in Supabase Auth
- * settings (Authentication → Providers → Email → toggle off
- * "Confirm email"). With that off, signUp returns a valid session
- * immediately and we can drop the user straight into /dashboard/welcome.
+ * Email verification is ON (Supabase Auth → Providers → Email → "Confirm
+ * email"). signUp returns no session; we show the "Check your email"
+ * screen and the user enters the emailed code to activate the account.
+ * That proves they own the address — bots were creating accounts with
+ * other people's real emails (and triggering our welcome email to them).
  *
  * ── Anti-bot ─────────────────────────────────────────────────────
- * As of 2026-09-27: the honeypot and the mount-timestamp check are
- * telemetry only — never block. Turnstile is telemetry-only for every
- * outcome *except* a real negative verdict from Cloudflare
- * (`verify_failed`) — see the note above `verifyTurnstile` for why
- * that one line is drawn there. As of 2026-09-29, Gmail dot-stuffing
- * (see bot-email.ts) is also a real, hard block — confirmed against
- * production data with zero false positives.
+ * Turnstile now FAILS CLOSED (see use-turnstile-gate.tsx): no token, a
+ * bad verdict or an unreachable verifier all stop the signup. Gmail
+ * dot-stuffing (bot-email.ts) is also a hard block. Honeypot and the
+ * mount-timestamp check remain telemetry only.
  */
 
 export default function SignupPage() {
@@ -53,78 +52,8 @@ export default function SignupPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [botTrap, setBotTrap] = useState("");
   const [mountedAt] = useState(() => Date.now());
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
-  const turnstileConfigured = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-  const [verifyingTurnstile, setVerifyingTurnstile] = useState(false);
-  // Resolved by the Turnstile onToken/onUnavailable callbacks below —
-  // lets verifyTurnstile await a token that arrives shortly after
-  // submit instead of only ever seeing whatever token existed at the
-  // exact moment of the click.
-  const tokenWaitersRef = useRef<((token: string | null) => void)[]>([]);
-  const TURNSTILE_WAIT_MS = 8_000;
-
-  /**
-   * Real users were getting bounced by every layer of this check:
-   * the widget's own no-token race (loading right as an autofilled
-   * form submitted), and — per PostHog on 2026-09-27 — a chunk of
-   * real visitors whose Turnstile check silently times out, most
-   * likely an ad blocker or privacy extension blocking Cloudflare's
-   * background verification calls specifically (the widget script
-   * itself still loads fine). Neither of those is a bot signal, it's
-   * "we couldn't get an answer" — so we no longer block on them.
-   *
-   * The one signal that IS trustworthy is a `verify_failed` response:
-   * Cloudflare actually ran the check and came back with a real
-   * negative verdict. That's the only outcome this function blocks
-   * on. Everything else (no token in time, our own endpoint
-   * unreachable/misconfigured/rate-limited) fails open.
-   */
-  async function verifyTurnstile(action: string): Promise<boolean> {
-    if (!turnstileConfigured) return true;
-    let token = turnstileToken;
-    if (!token) {
-      setVerifyingTurnstile(true);
-      token = await new Promise<string | null>((resolve) => {
-        tokenWaitersRef.current.push(resolve);
-        setTimeout(() => resolve(null), TURNSTILE_WAIT_MS);
-      });
-      setVerifyingTurnstile(false);
-    }
-    if (!token) {
-      // Widget never produced a token — inconclusive, not a bot
-      // signal. See the note above.
-      track("turnstile_blocked", { action, reason: "no_token", enforced: false });
-      return true;
-    }
-    setTurnstileToken(null);
-    setTurnstileResetKey((k) => k + 1); // arm the widget for a fresh token next time
-    try {
-      const res = await fetch("/api/verify-turnstile", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ token, action }),
-      });
-      const data = await res.json();
-      if (res.ok && data.ok) return true;
-      if (data.error === "verify_failed") {
-        // Cloudflare actually judged this token invalid — the one
-        // real block left in this flow.
-        track("turnstile_blocked", { action, reason: "verify_failed", codes: data.codes, enforced: true });
-        setError("Security check failed. Please try again in a moment.");
-        return false;
-      }
-      // Any other failure (rate_limited, invalid_body, our own
-      // endpoint unreachable) is our infrastructure, not a verdict on
-      // this visitor — fail open.
-      track("turnstile_blocked", { action, reason: data.error || "unknown", enforced: false });
-      return true;
-    } catch {
-      // Network fluke reaching our own /api/verify-turnstile — fail
-      // open, same reasoning.
-      return true;
-    }
-  }
+  const gate = useTurnstileGate("signup");
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   async function handleEmailSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -152,9 +81,11 @@ export default function SignupPage() {
       setError("Please sign up with your regular email address.");
       return;
     }
-    // Only blocks on a real Cloudflare "verify_failed" verdict — see
-    // the note above verifyTurnstile.
-    if (!(await verifyTurnstile("signup_email"))) return;
+    const check = await gate.verify("signup_email");
+    if (!check.ok) {
+      setError(check.message);
+      return;
+    }
 
     setIsEmailLoading(true);
     track(
@@ -168,7 +99,9 @@ export default function SignupPage() {
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: check.captchaToken ? { captchaToken: check.captchaToken } : undefined,
       });
+      if (check.captchaToken) gate.reset();
 
       if (authError) {
         // Nicer copy for the most common friendly-fire errors.
@@ -191,20 +124,26 @@ export default function SignupPage() {
         return;
       }
 
+      // Confirm-email is ON: no session yet. (If Supabase returns a user
+      // with no identities, that address is already registered — it
+      // hides that from bots by returning a fake user.)
+      if (!data.session) {
+        if (data.user && data.user.identities && data.user.identities.length === 0) {
+          setError("That email is already registered. Try signing in instead.");
+          track("signup_failed", { method: "email_password", error: "already_registered" });
+          return;
+        }
+        track("signup_verification_shown", { method: "email_password" });
+        setPendingEmail(email);
+        return;
+      }
+
+      // Confirm-email is OFF (e.g. local dev): signed in immediately.
       if (data.user?.id) {
         resetAnalytics();
         identify(data.user.id, { email });
       }
-      track(
-        "signup_completed",
-        { method: "email_password" },
-        { instant: true },
-      );
-
-      // Verification is off → signUp returns a session. Redirect to
-      // welcome. If verification were still on, data.session would
-      // be null and we'd need to show a "check your inbox" panel;
-      // we've stopped supporting that path here.
+      track("signup_completed", { method: "email_password" }, { instant: true });
       requestAnimationFrame(() => {
         window.location.assign("/dashboard/welcome");
       });
@@ -242,6 +181,44 @@ export default function SignupPage() {
       setError("An unexpected error occurred. Please try again.");
       setIsGoogleLoading(false);
     }
+  }
+
+  async function resendSignupCode(): Promise<{ error?: string }> {
+    const check = await gate.verify("signup_resend");
+    if (!check.ok) return { error: check.message };
+    try {
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.resend({
+        type: "signup",
+        email: pendingEmail ?? email,
+        options: check.captchaToken ? { captchaToken: check.captchaToken } : undefined,
+      });
+      if (check.captchaToken) gate.reset();
+      return authError ? { error: authError.message } : {};
+    } catch {
+      return { error: "Couldn't resend the code. Please try again." };
+    }
+  }
+
+  if (pendingEmail) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <VerifyEmailScreen
+            email={pendingEmail}
+            mode="signup"
+            redirectTo="/dashboard/welcome"
+            surface="signup"
+            onResend={resendSignupCode}
+            onChangeEmail={() => {
+              setPendingEmail(null);
+              setPassword("");
+            }}
+          />
+          {gate.widget}
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -328,42 +305,14 @@ export default function SignupPage() {
             size="lg"
             disabled={isEmailLoading || isGoogleLoading || !email || !password}
           >
-            {(isEmailLoading || verifyingTurnstile) && (
+            {(isEmailLoading || gate.verifying) && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            {verifyingTurnstile ? "Verifying…" : "Create my account"}
+            {gate.verifying ? "Verifying…" : "Create my account"}
           </Button>
         </form>
 
-        {/* Turnstile — blocks only on a real Cloudflare verify_failed
-            verdict (see verifyTurnstile above). Mounted immediately on
-            page load rather than gated on the user touching the email
-            form, so it has the most possible lead time to produce a
-            token in the background before anyone submits. Still
-            invisible for Google-only visitors (interaction-only
-            appearance). */}
-        {turnstileConfigured && (
-          <div className="mt-4 flex justify-center">
-            <Turnstile
-              onToken={(t) => {
-                setTurnstileToken(t);
-                const waiters = tokenWaitersRef.current;
-                tokenWaitersRef.current = [];
-                waiters.forEach((w) => w(t));
-              }}
-              onExpire={() => setTurnstileToken(null)}
-              onUnavailable={(reason) => {
-                track("turnstile_unavailable", { page: "signup", reason });
-                const waiters = tokenWaitersRef.current;
-                tokenWaitersRef.current = [];
-                waiters.forEach((w) => w(null));
-              }}
-              resetSignal={turnstileResetKey}
-              appearance="interaction-only"
-              size="normal"
-            />
-          </div>
-        )}
+        {gate.widget}
 
         {/* Divider */}
         <div className="relative my-6">
