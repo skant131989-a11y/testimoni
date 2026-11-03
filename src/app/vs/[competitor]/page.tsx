@@ -13,7 +13,7 @@ import { COMPETITORS, FACTS_VERIFIED_ON, TESTIMONI } from "@/lib/competitors";
  * their own hand-written pages (static routes win over this dynamic
  * one); this covers the rest of the competitors in lib/competitors.ts.
  */
-const SLUGS = ["famewall", "shapo"] as const;
+const SLUGS = ["famewall", "shapo", "trustmary", "vocal-video"] as const;
 
 export function generateStaticParams() {
   return SLUGS.map((competitor) => ({ competitor }));
@@ -24,6 +24,8 @@ function content(slug: string) {
   const c = COMPETITORS[slug];
   if (!c || !SLUGS.includes(slug as (typeof SLUGS)[number])) return null;
   const cheaper = c.firstPaidUsd < TESTIMONI.firstPaidUsd;
+  // each tool's facts carry the date they were read; the older ones share FACTS_VERIFIED_ON
+  const on = c.verified?.label ?? FACTS_VERIFIED_ON;
   const answer = cheaper
     ? `Testimoni and ${c.name} both have free plans. ${c.name}'s first paid plan is cheaper (${c.firstPaidLabel} vs Testimoni Pro at $19/month flat). Testimoni is built around importing praise that already exists on X and LinkedIn by link, with one flat plan; choose ${c.name} if its lower entry price and its plan limits suit you.`
     : `Testimoni and ${c.name} both have free plans. Testimoni's Pro is $19/month flat vs ${c.firstPaidLabel} at ${c.name}. Testimoni is built around importing praise that already exists on X and LinkedIn by link, with one flat plan and no tiers.`;
@@ -31,8 +33,8 @@ function content(slug: string) {
     {
       question: `Is Testimoni cheaper than ${c.name}?`,
       answer: cheaper
-        ? `Not at the first paid tier: ${c.name}'s ${c.firstPaidLabel} is below Testimoni Pro's $19/month. Testimoni has a single flat paid plan with unlimited testimonials, all five layouts and no watermark. Prices read from ${c.name}'s site on ${FACTS_VERIFIED_ON}.`
-        : `At the first paid tier, yes: Testimoni Pro is $19/month vs ${c.firstPaidLabel} at ${c.name}. Prices read from ${c.name}'s site on ${FACTS_VERIFIED_ON}.`,
+        ? `Not at the first paid tier: ${c.name}'s ${c.firstPaidLabel} is below Testimoni Pro's $19/month. Testimoni has a single flat paid plan with unlimited testimonials, all five layouts and no watermark. Prices read from ${c.name}'s site on ${on}.`
+        : `At the first paid tier, yes: Testimoni Pro is $19/month vs ${c.firstPaidLabel} at ${c.name}. Prices read from ${c.name}'s site on ${on}.`,
     },
     {
       question: `What does ${c.name}'s free plan include?`,
@@ -77,7 +79,7 @@ export default async function VsPage({ params }: { params: Promise<{ competitor:
         faqs={faqs}
         faqId={`https://testimoni.io/vs/${competitor}#faq`}
         breadcrumbs={vsBreadcrumbs(c.name, competitor)}
-        article={{ headline: `Testimoni vs ${c.name}: pricing and features compared`, description: answer, path: `/vs/${competitor}`, datePublished: "2026-10-28", dateModified: "2026-10-28" }}
+        article={{ headline: `Testimoni vs ${c.name}: pricing and features compared`, description: answer, path: `/vs/${competitor}`, datePublished: c.verified?.iso ?? "2026-10-28", dateModified: c.verified?.iso ?? "2026-10-28" }}
       />
       <PublicNav />
       <main className="flex-1 py-16">
@@ -112,7 +114,7 @@ export default async function VsPage({ params }: { params: Promise<{ competitor:
               <a href={c.pricingUrl} target="_blank" rel="noopener noreferrer" className="underline">
                 {c.pricingUrl.replace("https://", "")}
               </a>{" "}
-              on {FACTS_VERIFIED_ON}. Plans change — check their site.
+              on {c.verified?.label ?? FACTS_VERIFIED_ON}. Plans change — check their site.
             </p>
           </div>
 

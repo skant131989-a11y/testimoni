@@ -1,4 +1,4 @@
-import { ALL_TOOLS, FACTS_VERIFIED_ON } from "@/lib/competitors";
+import { ALL_TOOLS, FACTS_NOTE } from "@/lib/competitors";
 
 /**
  * Question-led "answer pages". Each opens with the answer (what AI
@@ -31,7 +31,7 @@ const priceTable: GuideSection = {
   table: {
     headers: ["Tool", "Free plan", "First paid plan"],
     rows: ALL_TOOLS.map((t) => [t.name, t.freePlan, t.firstPaidLabel]),
-    note: `Read from each tool's own pricing page on ${FACTS_VERIFIED_ON}. Plans change — check their sites before you buy. Famewall's $12/month Standard plan is the lowest-priced paid plan in this list.`,
+    note: `Read from each tool's own pricing page on ${FACTS_NOTE}. Plans change — check their sites before you buy. Famewall's $12/month Standard plan is the lowest-priced paid plan in this list.`,
   },
 };
 
@@ -63,12 +63,53 @@ export const GUIDES: Guide[] = [
           "Paste links from LinkedIn, Reddit, Hacker News and Product Hunt the same way. Praise that lives in DMs, Slack or WhatsApp? Upload a screenshot and Testimoni's AI pulls out the quote as text.",
         ],
       },
+      {
+        heading: "What you get when you import a tweet",
+        bullets: [
+          "The quote as real text, so search engines, AI assistants and screen readers can read it.",
+          "The author's name and profile photo, so the testimonial is attributed to a real person.",
+          "The source link of the original post, which Testimoni keeps so the testimonial can be verified.",
+          "An approval step, so you decide what goes on your wall.",
+        ],
+      },
+      {
+        heading: "Where to find the praise you already have",
+        paragraphs: [
+          "Most small products have more praise than they realise. Search X for your product name and for your domain, then check your LinkedIn notifications, your Product Hunt launch thread and any Reddit or Hacker News threads that mention you. Testimoni's free Customer Voice scan looks across X, Reddit and LinkedIn for what people say about you, so you can find posts worth importing.",
+        ],
+      },
+      {
+        heading: "A few good habits",
+        bullets: [
+          "Pick specific quotes over generic ones. \"Cut our onboarding from two days to two hours\" persuades more than \"great product\".",
+          "Mix sources. A wall with posts from X, LinkedIn and a form looks more credible than one source repeated.",
+          "Tell the author. A short reply or message saying you would like to feature their post is courteous, and it often earns a second testimonial.",
+          "Put proof next to the decision: near your sign-up button and on your pricing page, not only on a separate page.",
+        ],
+      },
+      {
+        heading: "Free or Pro for this",
+        paragraphs: [
+          "The free plan imports tweets by URL and keeps up to 10 testimonials, with a hosted Wall of Love and a grid layout. Pro is $19/month flat: unlimited testimonials, all five layouts, no watermark and unlimited tweet drafts (the free plan gives 5 a month).",
+        ],
+      },
+      priceTable,
     ],
     faqs: [
       {
         question: "Is there a free way to turn tweets into testimonials?",
         answer:
           "Yes. Testimoni's free plan imports tweets by URL and keeps up to 10 testimonials, with a public Wall of Love.",
+      },
+      {
+        question: "Can I import a tweet that someone else wrote about my product?",
+        answer:
+          "Yes. Paste the link to any public post that praises your product and Testimoni imports the quote, name and photo. Only publish praise that is about your product, keep the author's name with it, and where you can, let them know.",
+      },
+      {
+        question: "Does Testimoni keep the link to the original tweet?",
+        answer:
+          "Yes. Each imported testimonial keeps the source link of the original post, and the Wall Score counts verified links back to the original post when it rates your wall.",
       },
       {
         question: "Does it work on WordPress, Webflow or Framer?",
@@ -185,11 +226,50 @@ export const GUIDES: Guide[] = [
           "Testimoni's Wall Score rates your wall from 0 to 100 on volume, diversity of sources, recency, video, verified links back to the original post, and ratings, and tells you what to add next.",
         ],
       },
+      {
+        heading: "What a Wall of Love is",
+        paragraphs: [
+          "A Wall of Love is one page, or one section of your site, that gathers real praise from your customers in one place: tweets, LinkedIn posts, reviews, short quotes and videos, each with the person's name and photo. It works because visitors trust what other people say about you more than what you say about yourself.",
+        ],
+      },
+      {
+        heading: "What to put on it",
+        bullets: [
+          "Specific quotes about a result or a feeling, not just \"great product\".",
+          "A mix of sources: X, LinkedIn, Product Hunt and a collection form, so it does not look like one friend repeated.",
+          "Names and photos, so each quote belongs to a real person.",
+          "Recent praise. A wall that stopped updating a year ago looks abandoned.",
+          "A short video or two if you have them, since they stand out among text.",
+        ],
+      },
+      {
+        heading: "Where to show it",
+        paragraphs: [
+          "Use both. Share the hosted page when someone asks for proof, and embed the same wall on your homepage and pricing page, next to the sign-up button, where visitors are deciding. The embed is one line of script and works on WordPress, Webflow, Framer and React sites; the widget uses Shadow DOM so it does not clash with your site's CSS.",
+        ],
+      },
+      {
+        heading: "Free or Pro for a Wall of Love",
+        paragraphs: [
+          "The free plan gives you up to 10 testimonials, one collection form, one widget, a hosted Wall of Love and one video, with the Grid layout and a small watermark. Pro is $19/month flat: unlimited testimonials, widgets, forms and videos, all five layouts, no watermark, plus Ask My Wall and the Wall Score audit.",
+        ],
+      },
+      priceTable,
     ],
     faqs: [
       {
         question: "Do I need a developer?",
         answer: "No. The hosted page needs nothing, and the embed is one line.",
+      },
+      {
+        question: "Is a Wall of Love free?",
+        answer:
+          "You can build one free with Testimoni: the free plan includes a hosted Wall of Love page for up to 10 testimonials. Pro removes the limit and the watermark.",
+      },
+      {
+        question: "How many testimonials do I need on a Wall of Love?",
+        answer:
+          "There is no magic number. A handful of specific, recent quotes from different people and sources is more convincing than dozens of vague ones, and the Wall Score tells you what is missing.",
       },
       {
         question: "Can visitors ask questions about the reviews?",

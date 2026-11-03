@@ -126,7 +126,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${SITE_URL}/turn-tweets-into-testimonials`,
-      lastModified: new Date("2026-10-28"),
+      lastModified: new Date("2026-11-03"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
@@ -144,7 +144,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${SITE_URL}/wall-of-love`,
-      lastModified: new Date("2026-10-28"),
+      lastModified: new Date("2026-11-03"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
@@ -156,7 +156,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${SITE_URL}/senja-alternatives`,
-      lastModified: new Date("2026-10-28"),
+      lastModified: new Date("2026-11-03"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
@@ -173,8 +173,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/vs/trustmary`,
+      lastModified: new Date("2026-11-03"),
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/vs/vocal-video`,
+      lastModified: new Date("2026-11-03"),
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/blog/best-testimonial-tools`,
-      lastModified: new Date("2026-10-28"),
+      lastModified: new Date("2026-11-03"),
       changeFrequency: "monthly",
       priority: 0.85,
     },

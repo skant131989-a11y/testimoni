@@ -21,6 +21,8 @@ export interface Tool {
   otherPaid: string;
   strengths: string[];
   chooseIf: string[];
+  /** Set when this tool's facts were read on a later date than FACTS_VERIFIED_ON. */
+  verified?: { label: string; iso: string };
 }
 
 export const TESTIMONI: Tool = {
@@ -134,6 +136,64 @@ export const COMPETITORS: Record<string, Tool> = {
       "You want lots of widget styles or need to show Google reviews alongside testimonials",
     ],
   },
+  trustmary: {
+    slug: "trustmary",
+    name: "Trustmary",
+    url: "https://trustmary.com",
+    pricingUrl: "https://trustmary.com/pricing/",
+    summary:
+      "A review and feedback platform for collecting reviews, testimonials and survey responses (including NPS and CSAT) and showing them in widgets on your website.",
+    freePlan:
+      "Solo plan, free with no credit card: 5 survey responses and 200 widget views a month, review import, reviews on your website and a review page",
+    firstPaidUsd: 388,
+    firstPaidLabel:
+      "Starter, $388/month billed annually (shown for 10 survey responses and 5,000 widget views a month)",
+    otherPaid:
+      "Business (no price shown), an AI Visibility option, and add-ons billed annually, such as removing Trustmary branding (+$19/month)",
+    strengths: [
+      "A free Solo plan that includes review import and a review page",
+      "Reviews, survey feedback, NPS and CSAT in one platform",
+      "Lists integrations with HubSpot, Pipedrive, Google Sheets, Zapier and Make",
+      "Review Schema.org markup on the Starter plan",
+    ],
+    chooseIf: [
+      "You need reviews, surveys and NPS or CSAT feedback in one platform and can budget for the Starter plan",
+      "You need a native HubSpot or Pipedrive integration (a paid add-on)",
+    ],
+    verified: { label: "3 Nov 2026", iso: "2026-11-03" },
+  },
+  "vocal-video": {
+    slug: "vocal-video",
+    name: "Vocal Video",
+    url: "https://vocalvideo.com",
+    pricingUrl: "https://vocalvideo.com/pricing",
+    summary:
+      "A platform for collecting video testimonials remotely: customers record from a link in their browser, and AI turns the footage into edited, branded videos you can share in galleries and walls of love.",
+    freePlan:
+      "Free forever: publish 5 videos (720p, Vocal Video watermark, no downloads), 1 active collection campaign with up to 3 questions, 50 video requests and 20 minutes of video processing a month",
+    firstPaidUsd: 99,
+    firstPaidLabel: "Essential, $99/month billed yearly ($1,188 a year)",
+    otherPaid: "Pro, $149/month billed yearly ($1,788 a year); Enterprise",
+    strengths: [
+      "Built for video: respondents record in their browser from a link, with no download",
+      "AI edits the raw footage into branded videos with subtitles and music",
+      "From the Essential plan: 1080p, no watermark, downloads and integrations with 6,000+ apps",
+    ],
+    chooseIf: [
+      "Video testimonials are your main goal and you want them edited for you",
+      "You can budget $99/month or more, billed yearly",
+    ],
+    verified: { label: "3 Nov 2026", iso: "2026-11-03" },
+  },
 };
 
 export const ALL_TOOLS: Tool[] = [TESTIMONI, ...Object.values(COMPETITORS)];
+
+/**
+ * The date the facts were read, for pages that cover several tools. The first tools were read on FACTS_VERIFIED_ON and the
+ * newer ones later, so the note says both instead of claiming everything was re-checked on the same day.
+ */
+const NEWER = Object.values(COMPETITORS).filter((t) => t.verified);
+export const FACTS_NOTE = NEWER.length
+  ? `${FACTS_VERIFIED_ON} (${NEWER.map((t) => t.name).join(" and ")}: ${NEWER[0].verified!.label})`
+  : FACTS_VERIFIED_ON;

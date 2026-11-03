@@ -4,12 +4,12 @@ import { ArrowRight, Clock } from "lucide-react";
 import { PublicNav } from "@/components/layout/public-nav";
 import { TrackedLink } from "@/components/tracked-link";
 import { StructuredData } from "@/components/seo/structured-data";
-import { ALL_TOOLS, FACTS_VERIFIED_ON } from "@/lib/competitors";
+import { ALL_TOOLS, FACTS_NOTE } from "@/lib/competitors";
 
 const PATH = "/blog/best-testimonial-tools";
 const TITLE = "The best testimonial tools in 2026, compared";
 const ANSWER =
-  "The best testimonial tool depends on what you need: Testimoni for turning praise that already exists on X, LinkedIn and screenshots into testimonials ($19/month Pro, free for 10); Senja and Testimonial.to for fuller collection platforms; Famewall for the lowest-priced paid plan; Shapo for many widget styles; Trustindex or EmbedSocial if you mainly want to show Google and other review-site reviews.";
+  "The best testimonial tool depends on what you need: Testimoni for turning praise that already exists on X, LinkedIn and screenshots into testimonials ($19/month Pro, free for 10); Senja and Testimonial.to for fuller collection platforms; Famewall for the lowest-priced paid plan; Shapo for many widget styles; Trustmary if you want reviews, surveys and NPS in one platform; Vocal Video if video testimonials are the goal; Trustindex or EmbedSocial if you mainly want to show Google and other review-site reviews.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -24,12 +24,24 @@ const BEST_FOR: Record<string, string> = {
   famewall: "Budget-conscious teams and multiple walls",
   "testimonial-to": "Video and text testimonials, with surveys and monitoring on higher tiers",
   shapo: "Many widget styles, including Google reviews widgets",
+  trustmary: "Reviews, surveys and NPS or CSAT feedback in one platform for a company",
+  "vocal-video": "Video testimonials recorded from a link and edited by AI",
 };
 
 const FAQS = [
   {
     question: "What is the cheapest testimonial tool?",
-    answer: `Several have free plans. Among the paid plans we checked on ${FACTS_VERIFIED_ON}, Famewall's Standard plan is the cheapest at $12/month; Testimoni's Pro is a flat $19/month for unlimited testimonials, Testimonial.to's Starter is $25/month, and Senja's Starter and Shapo's Pro are $29/month.`,
+    answer: `Several have free plans. Among the paid plans we checked (${FACTS_NOTE}), Famewall's Standard plan is the cheapest at $12/month; Testimoni's Pro is a flat $19/month for unlimited testimonials, Testimonial.to's Starter is $25/month, and Senja's Starter and Shapo's Pro are $29/month. Vocal Video's Essential is $99/month billed yearly, and Trustmary's Starter is shown at $388/month billed annually.`,
+  },
+  {
+    question: "Which testimonial tool is best for video testimonials?",
+    answer:
+      "Vocal Video is built around video: respondents record in their browser from a link and AI edits the footage into branded videos. Its free plan publishes 5 videos with a Vocal Video watermark, and paid plans start at $99/month billed yearly. Senja and Testimonial.to also collect video alongside text. Testimoni collects text, ratings and short video through forms, and is strongest when your praise already exists on X or LinkedIn.",
+  },
+  {
+    question: "Which testimonial tools have a free plan?",
+    answer:
+      "All the tools compared here do: Testimoni (10 testimonials), Senja (15), Famewall (10), Testimonial.to (10 text and 2 video), Shapo (15), Trustmary's Solo plan (5 survey responses and 200 widget views a month) and Vocal Video (5 published videos, with a watermark). Limits differ, so check which one would stop you from going live.",
   },
   {
     question: "Which testimonial tool imports tweets?",
@@ -49,7 +61,7 @@ export default function BestTestimonialToolsPage() {
       <StructuredData
         faqs={FAQS}
         faqId={`https://testimoni.io${PATH}#faq`}
-        article={{ headline: TITLE, description: ANSWER, path: PATH, datePublished: "2026-10-28", dateModified: "2026-10-28" }}
+        article={{ headline: TITLE, description: ANSWER, path: PATH, datePublished: "2026-10-28", dateModified: "2026-11-03" }}
         breadcrumbs={[
           { name: "Home", url: "https://testimoni.io" },
           { name: "Blog", url: "https://testimoni.io/blog" },
@@ -63,6 +75,10 @@ export default function BestTestimonialToolsPage() {
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <time dateTime="2026-10-28">Oct 28, 2026</time>
             <span>·</span>
+            <span>
+              Updated <time dateTime="2026-11-03">Nov 3, 2026</time>
+            </span>
+            <span>·</span>
             <span className="inline-flex items-center gap-1">
               <Clock className="h-3 w-3" /> 6 min read
             </span>
@@ -74,7 +90,7 @@ export default function BestTestimonialToolsPage() {
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
             Disclosure: we make Testimoni, so weigh our own entry accordingly. Prices and limits for the other
-            tools were read from their own pricing pages on {FACTS_VERIFIED_ON} — check their sites before you
+            tools were read from their own pricing pages on {FACTS_NOTE} — check their sites before you
             buy.
           </p>
 

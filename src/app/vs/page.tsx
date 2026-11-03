@@ -12,12 +12,12 @@ import { GuideLinks } from "@/components/guides/guide-links";
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
 export const metadata: Metadata = {
-  title: "Testimonial Tool Comparisons: Senja & Testimonial.to",
+  title: "Testimonial Tool Comparisons: Senja, Testimonial.to, Trustmary & more",
   description:
-    "Compare Testimoni with Senja and Testimonial.to. Review testimonial imports, hosted walls, widget options, free-plan limits, and pricing before choosing a tool.",
+    "Compare Testimoni with Senja, Testimonial.to, Famewall, Shapo, Trustmary and Vocal Video. Review testimonial imports, hosted walls, widget options, free-plan limits, and pricing before choosing a tool.",
   alternates: { canonical: "/vs" },
   openGraph: {
-    title: "Testimonial Tool Comparisons: Senja & Testimonial.to",
+    title: "Testimonial Tool Comparisons: Senja, Testimonial.to, Trustmary & more",
     description:
       "Compare testimonial imports, hosted walls, widget options, free plans, and pricing.",
     url: "/vs",
@@ -36,6 +36,26 @@ const COMPARISONS = [
     title: "Testimoni vs Testimonial.to",
     blurb:
       "Looking for a Testimonial.to alternative? Text and video testimonials, one-line embed, and a hosted Wall of Love.",
+  },
+  {
+    href: "/vs/famewall",
+    title: "Testimoni vs Famewall",
+    blurb: "Famewall has the lowest-priced paid plan here. Compare free-plan limits, walls and collection pages with Testimoni's flat $19/month Pro.",
+  },
+  {
+    href: "/vs/shapo",
+    title: "Testimoni vs Shapo",
+    blurb: "Shapo offers many widget styles and 15 free testimonials. See how its free plan and Pro compare with Testimoni's.",
+  },
+  {
+    href: "/vs/trustmary",
+    title: "Testimoni vs Trustmary",
+    blurb: "Trustmary is a review and feedback platform with a free Solo plan. See what it includes, what it costs, and when Testimoni is the simpler fit.",
+  },
+  {
+    href: "/vs/vocal-video",
+    title: "Testimoni vs Vocal Video",
+    blurb: "Vocal Video is built for video testimonials. See its free plan and paid plans next to Testimoni's.",
   },
 ];
 
