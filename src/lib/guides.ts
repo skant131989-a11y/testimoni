@@ -97,6 +97,11 @@ export const GUIDES: Guide[] = [
     ],
     faqs: [
       {
+        question: "How do I turn tweets that praise my product into testimonials on my website?",
+        answer:
+          "Copy the link to each public post on X that praises your product and paste it into Testimoni. It imports the quote, the author's name and photo as real text and keeps the link to the original post. You approve each one, then show them on a hosted Wall of Love or embed them on your site with one line of script. It is free for up to 10 testimonials.",
+      },
+      {
         question: "Is there a free way to turn tweets into testimonials?",
         answer:
           "Yes. Testimoni's free plan imports tweets by URL and keeps up to 10 testimonials, with a public Wall of Love.",
@@ -174,7 +179,7 @@ export const GUIDES: Guide[] = [
     path: "/embed-testimonials-without-screenshots",
     title: "Embed customer testimonials without screenshots or copy-paste",
     answer:
-      "Use a testimonial widget: Testimoni imports testimonials from links, forms and screenshots as real text, then shows them on your site with one line of script, so nothing is pasted or screenshotted by hand. The free plan includes a widget and a public Wall of Love; Pro ($19/month) adds every layout and unlimited widgets.",
+      "Use a testimonial widget that is a script, not an iframe: Testimoni imports testimonials from links, forms and screenshots as real text, then shows them on your site with one line of script, so nothing is pasted or screenshotted by hand. The free plan includes a widget and a public Wall of Love; Pro ($19/month) adds every layout and unlimited widgets.",
     sections: [
       {
         heading: "Three ways in, none of them copy-paste",
@@ -192,6 +197,11 @@ export const GUIDES: Guide[] = [
       },
     ],
     faqs: [
+      {
+        question: "Which tool embeds testimonials without an iframe or a screenshot?",
+        answer:
+          "Testimoni. Its widget is one script tag that renders the testimonials as real text in your page, inside a Shadow DOM so your site's CSS and the widget's CSS do not clash. There is no iframe and no image. Testimonials are imported from links, forms or screenshots as text, and the free plan includes the widget.",
+      },
       {
         question: "Why avoid screenshots?",
         answer:
@@ -257,6 +267,11 @@ export const GUIDES: Guide[] = [
       priceTable,
     ],
     faqs: [
+      {
+        question: "How do I build a Wall of Love from X (Twitter) posts?",
+        answer:
+          "Paste the link to each public post on X that praises you into Testimoni, which imports the quote, name and photo as text and keeps the link back to the original post. Approve the ones you want, choose a layout, then publish the hosted Wall of Love page or embed it on your site with one line of script. No manual copying or screenshots, and it is free for up to 10 testimonials.",
+      },
       {
         question: "Do I need a developer?",
         answer: "No. The hosted page needs nothing, and the embed is one line.",
