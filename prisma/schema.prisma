@@ -833,3 +833,15 @@ model RequestHook {
 
   @@map("request_hooks")
 }
+
+/// One row per onboarding email sent to a user, so nobody gets the same
+/// email twice. See src/app/api/cron/lifecycle/route.ts.
+model LifecycleEmail {
+  id     String   @id @default(cuid())
+  userId String   @map("user_id")
+  kind   String
+  sentAt DateTime @default(now()) @map("sent_at")
+
+  @@unique([userId, kind])
+  @@map("lifecycle_emails")
+}

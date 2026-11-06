@@ -19,6 +19,10 @@
       "schedule": "45 3 * * *"
     },
     {
+      "path": "/api/cron/lifecycle",
+      "schedule": "0 4 * * *"
+    },
+    {
       "path": "/api/cron/expire-grants",
       "schedule": "15 1 * * *"
     },
