@@ -29,6 +29,8 @@ export function PublicMentionsBanner() {
   const pathname = usePathname() ?? "";
   const loggedIn = useIsLoggedIn();
   if (!loggedIn) return null;
+  // The home page already asks for the website in its hero, so skip it there.
+  if (pathname === "/") return null;
   if (EXCLUDED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p.endsWith("/") ? p : `${p}/`))) {
     return null;
   }
