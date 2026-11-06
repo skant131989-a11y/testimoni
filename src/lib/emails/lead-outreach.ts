@@ -14,6 +14,7 @@
  */
 
 import { withUtm } from "./utm";
+import { outreachUnsubscribeUrl } from "@/lib/leads/outreach-unsubscribe";
 
 export interface LeadOutreachEmailData {
   /** Plain-text body, one or more paragraphs separated by blank
@@ -24,6 +25,7 @@ export interface LeadOutreachEmailData {
   /** The lead's own domain, used to pre-fill the Customer Voice link
    *  so it's a one-click "see what we found about you" scan. */
   leadWebsite: string;
+  recipientEmail: string;
   /** pro: signup (Pro $19/mo) is the big button, Customer Voice a
    *  smaller P.S. link. voice: swapped — Customer Voice is the big
    *  button, Pro the smaller link. Must match whatever variant
@@ -49,20 +51,21 @@ function escapeHtml(s: string): string {
 }
 
 export function leadOutreachEmailHtml(data: LeadOutreachEmailData): string {
-  const { bodyText, senderName, senderEmail, leadWebsite, variant } = data;
+  const { bodyText, senderName, senderEmail, leadWebsite, recipientEmail, variant } = data;
   const senderFirst = senderName.split(" ")[0];
   const campaign = `growth_engine_outreach_${variant}`;
 
-  const signupUrl = withUtm(`${APP_URL}/signup`, {
+  const homeUrl = withUtm(`${APP_URL}/`, {
     source: "email",
     medium: "email",
     campaign,
-    content: "signup_cta",
+    content: "home_cta",
   });
   const customerVoiceUrl = withUtm(
     `${APP_URL}/tools/customer-voice?url=${encodeURIComponent(leadWebsite)}&from=lead_email`,
     { source: "email", medium: "email", campaign, content: "customer_voice_link" }
   );
+  const unsubscribeUrl = outreachUnsubscribeUrl(recipientEmail);
 
   const paragraphsHtml = bodyText
     .split(/\n{2,}/)
@@ -83,12 +86,12 @@ export function leadOutreachEmailHtml(data: LeadOutreachEmailData): string {
                 </tr>
               </table>
               <p style="margin:0 0 20px 0;font-size:13px;">
-                <a href="${signupUrl}" target="_blank" style="color:#5b21b6;text-decoration:underline;">Or start a free Wall of Love &mdash; Pro is $19/mo &rarr;</a>
+                <a href="${homeUrl}" target="_blank" style="color:#5b21b6;text-decoration:underline;">Or start a free Wall of Love &mdash; Pro is $19/mo &rarr;</a>
               </p>`
       : `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 10px 0;">
                 <tr>
                   <td style="background-color:#5b21b6;border-radius:8px;">
-                    <a href="${signupUrl}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                    <a href="${homeUrl}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
                       Start free &mdash; Pro is $19/mo &rarr;
                     </a>
                   </td>
@@ -126,7 +129,7 @@ export function leadOutreachEmailHtml(data: LeadOutreachEmailData): string {
                 <a href="mailto:${escapeHtml(senderEmail)}" style="color:#6b7280;text-decoration:underline;">${escapeHtml(senderEmail)}</a>
               </p>
               <p style="margin:0;color:#9ca3af;font-size:12px;">
-                Not relevant? Reply &ldquo;stop&rdquo; and I won&rsquo;t email you again.
+                Not relevant? <a href="${escapeHtml(unsubscribeUrl)}" style="color:#6b7280;text-decoration:underline;">Unsubscribe here</a>, or reply &ldquo;stop&rdquo; and I won&rsquo;t email you again.
               </p>
             </td>
           </tr>

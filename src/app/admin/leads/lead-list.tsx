@@ -424,6 +424,7 @@ function LeadCardView({
                   senderName: "Neha",
                   senderEmail: "neha@testimoni.io",
                   leadWebsite: lead.website,
+                  recipientEmail: preview.to || "",
                   variant,
                 })}
                 className="mt-2 h-96 w-full rounded border bg-white"

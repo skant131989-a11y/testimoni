@@ -4,6 +4,9 @@
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
+    },
+    "src/app/api/cron/daily-outreach/route.ts": {
+      "maxDuration": 60
     }
   },
   "crons": [
@@ -14,6 +17,10 @@
     {
       "path": "/api/cron/expire-grants",
       "schedule": "15 1 * * *"
+    },
+    {
+      "path": "/api/cron/daily-outreach",
+      "schedule": "30 14 * * *"
     },
     {
       "path": "/api/cron/weekly-mentions",

@@ -48,6 +48,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     senderName: "Neha",
     senderEmail: "neha@testimoni.io",
     leadWebsite: lead.website,
+    recipientEmail: parsed.to,
     variant: parsed.variant,
   });
 

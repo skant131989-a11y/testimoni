@@ -1,8 +1,9 @@
 import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
 
 /**
- * Generates ONE outreach draft for a human to review, edit, and
- * manually send — never sent automatically (spec sections 7 & 11).
+ * Generates deterministic outreach copy for a founder. Admin drafts
+ * remain editable; queued leads may be sent by the guarded daily sender
+ * after prospect import.
  * Grounded strictly in the real evidence passed in: real praise
  * excerpts with real sources, the real social-proof verdict for
  * their site. The prompt explicitly forbids inventing anything not

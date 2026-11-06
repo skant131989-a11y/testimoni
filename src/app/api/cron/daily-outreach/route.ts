@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { runOutreachBatch } from "@/lib/leads/send-batch";
+import { canCreateOutreachUnsubscribeToken } from "@/lib/leads/outreach-unsubscribe";
 
 /**
- * GET /api/cron/daily-outreach — 8:30 pm IST every day (15:00 UTC, see
+ * GET /api/cron/daily-outreach — 8:00 pm IST every day (14:30 UTC, see
  * vercel.json). Sends the next batch of QUEUED leads (status
  * DRAFT_READY — scripts/import-prospects.cjs queues the eligible ones
  * each morning), alternating the Pro-first and Customer Voice-first
@@ -32,7 +33,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const enabled = process.env.DAILY_OUTREACH_ENABLED === "1";
+  const configured = Boolean(process.env.RESEND_API_KEY) && canCreateOutreachUnsubscribeToken();
+  const enabled = process.env.DAILY_OUTREACH_ENABLED === "1" && configured;
   const dryRun = !enabled || new URL(req.url).searchParams.get("dryRun") === "1";
   const dailyLimit = Math.min(Number(process.env.DAILY_OUTREACH_LIMIT) || 15, 50);
 
@@ -63,7 +65,9 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     sending: !dryRun,
-    note: enabled ? undefined : "DAILY_OUTREACH_ENABLED is not 1 — dry run only, nothing sent",
+    note: enabled ? undefined : process.env.DAILY_OUTREACH_ENABLED !== "1"
+      ? "DAILY_OUTREACH_ENABLED is not 1 — dry run only, nothing sent"
+      : "Email provider or unsubscribe signing secret is missing — dry run only, nothing sent",
     dailyLimit,
     sentToday,
     processed: results.length,

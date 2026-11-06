@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { generateOutreachDraft, type OutreachVariant } from "@/lib/leads/outreach";
 import { leadOutreachEmailHtml } from "@/lib/emails/lead-outreach";
 import { sendEmail } from "@/lib/emails/send";
+import { outreachUnsubscribeUrl } from "@/lib/leads/outreach-unsubscribe";
 
 /**
  * Shared sender for outreach batches (manual batch route + the daily
@@ -50,17 +51,18 @@ export async function runOutreachBatch(leads: BatchLead[], opts: { dryRun: boole
     const html = leadOutreachEmailHtml({
       bodyText: body,
       senderName: "Neha",
-      senderEmail: "neha@testimoni.io",
+      senderEmail: "hello@testimoni.io",
       leadWebsite: lead.website,
+      recipientEmail: email,
       variant,
     });
     const sendResult = await sendEmail({
       to: email,
       subject,
-      text: `${body}\n\nNot relevant? Reply "stop" and I won't email you again.`,
+      text: `${body}\n\nNot relevant? Unsubscribe: ${outreachUnsubscribeUrl(email)}. You can also reply "stop" and I won't email you again.`,
       html,
-      replyTo: "neha@testimoni.io",
-      from: "Neha from Testimoni <neha@testimoni.io>",
+      replyTo: "hello@testimoni.io",
+      from: "Neha from Testimoni <hello@testimoni.io>",
     });
 
     if (sendResult.ok) {
