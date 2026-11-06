@@ -141,7 +141,7 @@ export default function SignupPage() {
       // Confirm-email is OFF (e.g. local dev): signed in immediately.
       if (data.user?.id) {
         resetAnalytics();
-        identify(data.user.id, { email });
+        identify(data.user.id);
       }
       track("signup_completed", { method: "email_password" }, { instant: true });
       requestAnimationFrame(() => {

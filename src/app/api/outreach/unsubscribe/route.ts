@@ -11,7 +11,16 @@ function page(title: string, message: string, email?: string, token?: string) {
   const form = email && token
     ? `<form method="post" action="/api/outreach/unsubscribe"><input type="hidden" name="email" value="${escapeHtml(email)}"><input type="hidden" name="token" value="${escapeHtml(token)}"><button type="submit" style="background:#5b21b6;color:white;border:0;border-radius:8px;padding:12px 18px;font-weight:700;cursor:pointer">Unsubscribe</button></form>`
     : "";
-  return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(title)} · Testimoni</title><body style="font:16px/1.6 system-ui,sans-serif;max-width:560px;margin:15vh auto;padding:24px;color:#1f2937"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p>${form}<p style="margin-top:28px;color:#6b7280">Testimoni · hello@testimoni.io</p></body></html>`, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+  return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(title)} · Testimoni</title><body style="font:16px/1.6 system-ui,sans-serif;max-width:560px;margin:15vh auto;padding:24px;color:#1f2937"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p>${form}<p style="margin-top:28px;color:#6b7280">Testimoni · hello@testimoni.io</p></body></html>`, {
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+      // The URL carries the address and a signed token: keep it out of
+      // referrers and search indexes.
+      "Referrer-Policy": "no-referrer",
+      "X-Robots-Tag": "noindex, nofollow",
+    },
+  });
 }
 
 function validInput(email: string, token: string) {

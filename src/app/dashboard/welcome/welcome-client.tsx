@@ -112,7 +112,7 @@ export function WelcomeClient({
   useEffect(() => {
     if (!isNewSignup || completionFiredRef.current) return;
     completionFiredRef.current = true;
-    if (userId) identify(userId, { email: userEmail ?? undefined });
+    if (userId) identify(userId);
     track("signup_completed", { method: signupMethod, source: "welcome_landing" });
   }, [isNewSignup, signupMethod, userId, userEmail]);
 

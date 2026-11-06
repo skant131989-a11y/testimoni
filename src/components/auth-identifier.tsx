@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { identify, resetAnalytics } from "@/lib/analytics";
+import { identify, resetAnalytics, clearLegacyPersonPii } from "@/lib/analytics";
 
 /**
  * Rendered from the dashboard root layout. Ensures the current
@@ -32,15 +31,11 @@ export function AuthIdentifier({ userId }: { userId: string | null }) {
     if (lastIdentified.current && lastIdentified.current !== userId) {
       resetAnalytics();
     }
-    // Grab the current user's email for identify traits — cheap since
-    // Supabase caches this in memory after any prior getUser call.
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.id === userId) {
-        identify(userId, { email: data.user.email ?? undefined });
-        lastIdentified.current = userId;
-      }
-    });
+    // The id comes from the server layout, so no extra Supabase call is
+    // needed. Only the id is sent: no email, no name.
+    identify(userId);
+    clearLegacyPersonPii();
+    lastIdentified.current = userId;
   }, [userId]);
 
   return null;

@@ -199,7 +199,7 @@ export default function LoginPage() {
 
       if (data.user?.id) {
         resetAnalytics();
-        identify(data.user.id, { email });
+        identify(data.user.id);
       }
       track("login_completed", { method: "email_password" }, { instant: true });
       requestAnimationFrame(() => {

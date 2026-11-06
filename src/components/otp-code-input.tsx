@@ -110,7 +110,7 @@ export function OtpCodeInput({
       // account-switch) so PostHog aliases events to the fresh distinct_id.
       if (data.user?.id) {
         resetAnalytics();
-        identify(data.user.id, { email });
+        identify(data.user.id);
         onBeforeRedirect?.(data.user.id);
       }
       track(successEvent, { method: `${method}_otp` }, { instant: true });

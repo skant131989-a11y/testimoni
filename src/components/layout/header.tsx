@@ -63,7 +63,7 @@ export function Header({
       <div className="relative" ref={menuRef}>
         <Button
           variant="ghost"
-          className="flex items-center gap-2"
+          className="ph-no-capture flex items-center gap-2"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {userAvatarUrl && !avatarError ? (
@@ -90,7 +90,7 @@ export function Header({
         </Button>
 
         {menuOpen && (
-          <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-md border bg-background shadow-lg">
+          <div className="ph-no-capture absolute right-0 top-full z-50 mt-1 w-56 rounded-md border bg-background shadow-lg">
             <div className="border-b px-4 py-3">
               <p className="text-sm font-medium">{userName || "User"}</p>
               <p className="text-xs text-muted-foreground">{userEmail}</p>

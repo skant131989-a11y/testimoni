@@ -2,6 +2,75 @@ import posthog from "posthog-js";
 
 let ready = false;
 
+/**
+ * No personal data goes to PostHog. Users are known only by their opaque
+ * Supabase id. Two layers keep emails (and the signed tokens that ride
+ * along in links) out:
+ *   1. identify() never sends an email or name as a person property.
+ *   2. scrubEvent() runs on EVERY event just before it leaves the
+ *      browser (posthog's before_send): it blanks anything that looks
+ *      like an email in any property, including autocaptured element
+ *      text, URLs and referrers, and redacts sensitive URL parameters.
+ */
+const EMAIL_RE = /[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+const SENSITIVE_PARAMS = [
+  "email",
+  "e",
+  "to",
+  "mail",
+  "user_email",
+  "token",
+  "code",
+  "access_token",
+  "refresh_token",
+  "otp",
+];
+const PII_KEYS = /^(e-?mail|user_?email|name|full_?name|first_?name|last_?name|phone)$/i;
+
+function scrubString(value: string): string {
+  let s = value;
+  if (/^https?:\/\//i.test(s)) {
+    try {
+      const u = new URL(s);
+      let changed = false;
+      for (const k of SENSITIVE_PARAMS) {
+        if (u.searchParams.has(k)) {
+          u.searchParams.set(k, "redacted");
+          changed = true;
+        }
+      }
+      if (changed) s = u.toString();
+    } catch {}
+  }
+  return s.replace(EMAIL_RE, "[email]");
+}
+
+function scrubValue(value: unknown, depth = 0): unknown {
+  if (typeof value === "string") return scrubString(value);
+  if (Array.isArray(value)) return value.map((v) => scrubValue(v, depth + 1));
+  if (value && typeof value === "object" && depth < 5) {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (PII_KEYS.test(k)) continue;
+      out[k] = scrubValue(v, depth + 1);
+    }
+    return out;
+  }
+  return value;
+}
+
+// posthog-js passes a capture result; keep the type loose on purpose.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function scrubEvent(event: any): any {
+  if (!event) return event;
+  try {
+    if (event.properties) event.properties = scrubValue(event.properties);
+    if (event.$set) event.$set = scrubValue(event.$set);
+    if (event.$set_once) event.$set_once = scrubValue(event.$set_once);
+  } catch {}
+  return event;
+}
+
 // Dev-only trace: NEXT_PUBLIC_ vars are inlined at build time, so
 // process.env.NODE_ENV works client-side.
 const DEBUG = process.env.NODE_ENV === "development";
@@ -144,6 +213,8 @@ export function initAnalytics() {
       },
       disable_session_recording: true,
       disable_surveys: true,
+      // Last stop before an event leaves the browser. See scrubEvent().
+      before_send: scrubEvent,
       loaded: () => {
         if (DEBUG) console.log("[analytics] posthog loaded");
         // Landed on a public page while PostHog still holds an
@@ -247,7 +318,11 @@ function getAnonymousDistinctId(): string {
   }
 }
 
-/** Associate the current anonymous visitor with a known user id. */
+/**
+ * Associate the current anonymous visitor with a known user id. Only
+ * the opaque id is used as identity; email, name and similar traits are
+ * dropped here so they can never become person properties.
+ */
 export function identify(userId: string, traits?: Record<string, unknown>) {
   if (DEBUG) console.log(`[analytics] identify(${userId}) ready=${ready}`, traits);
   if (!ready) return;
@@ -261,7 +336,23 @@ export function identify(userId: string, traits?: Record<string, unknown>) {
     return;
   }
   try {
-    posthog.identify(userId, traits);
+    const safe = traits ? (scrubValue(traits) as Record<string, unknown>) : undefined;
+    posthog.identify(userId, safe && Object.keys(safe).length > 0 ? safe : undefined);
+  } catch {}
+}
+
+/**
+ * One-time cleanup for people identified before this change: removes the
+ * email/name person properties PostHog already holds for them. Runs once
+ * per browser; harmless if there is nothing to remove.
+ */
+export function clearLegacyPersonPii() {
+  if (!ready || isPublicPath()) return;
+  try {
+    const flag = "testimoni_ph_pii_cleared_v1";
+    if (localStorage.getItem(flag)) return;
+    posthog.capture("$set", { $unset: ["email", "name", "first_name", "last_name"] });
+    localStorage.setItem(flag, "1");
   } catch {}
 }
 
