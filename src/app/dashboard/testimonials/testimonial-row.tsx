@@ -23,7 +23,8 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { track } from "@/lib/analytics";
-import type { TestimonialStatus, TestimonialSource } from "@prisma/client";
+import type { TestimonialStatus, TestimonialSource, ConsentStatus } from "@prisma/client";
+import { CONSENT_SOURCES, permissionMessage } from "@/lib/permission-message";
 import { AvatarImage } from "@/components/avatar-image";
 
 const sourceColors: Record<TestimonialSource, string> = {
@@ -53,10 +54,17 @@ export interface TestimonialRowData {
   videoUrl: string | null;
   source: TestimonialSource;
   status: TestimonialStatus;
+  consentStatus: ConsentStatus;
   createdAt: string;
 }
 
-export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowData }) {
+export function TestimonialRow({
+  testimonial,
+  workspaceName = "",
+}: {
+  testimonial: TestimonialRowData;
+  workspaceName?: string;
+}) {
   const router = useRouter();
   const [t, setT] = useState(testimonial);
   const [editing, setEditing] = useState(false);
@@ -67,6 +75,26 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
   const [editTitle, setEditTitle] = useState(t.customerTitle ?? "");
   const [editRating, setEditRating] = useState<number>(t.rating ?? 5);
   const [videoUploading, setVideoUploading] = useState(false);
+  const [askCopied, setAskCopied] = useState(false);
+
+  async function setConsent(next: ConsentStatus) {
+    const previous = t.consentStatus;
+    setT({ ...t, consentStatus: next });
+    const res = await fetch(`/api/testimonials/${t.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ consentStatus: next }),
+    });
+    if (!res.ok) setT((cur) => ({ ...cur, consentStatus: previous }));
+    else track("consent_status_set", { status: next, source: t.source });
+  }
+
+  async function copyAsk() {
+    await navigator.clipboard.writeText(permissionMessage({ source: t.source, workspaceName }));
+    setAskCopied(true);
+    track("consent_ask_copied", { source: t.source });
+    setTimeout(() => setAskCopied(false), 2000);
+  }
   const videoInputRef = useRef<HTMLInputElement>(null);
   // 4-second "Wall updated" flash shown after edit save — subtle
   // reinforcement that the change is now live on the public wall.
@@ -265,6 +293,29 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
                   )}
                 />
               ))}
+            </div>
+          )}
+
+          {!editing && CONSENT_SOURCES.has(t.source) && (
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-muted-foreground">Permission to feature:</span>
+              <select
+                value={t.consentStatus}
+                onChange={(e) => setConsent(e.target.value as ConsentStatus)}
+                className={cn(
+                  "rounded-md border bg-background px-2 py-1 text-xs",
+                  t.consentStatus === "GRANTED" && "border-emerald-300 text-emerald-700",
+                  t.consentStatus === "DECLINED" && "border-red-300 text-red-700"
+                )}
+              >
+                <option value="NONE">Not asked yet</option>
+                <option value="ASKED">Asked</option>
+                <option value="GRANTED">Granted</option>
+                <option value="DECLINED">Declined</option>
+              </select>
+              <button type="button" onClick={copyAsk} className="text-primary hover:underline">
+                {askCopied ? "Copied" : "Copy the message to ask"}
+              </button>
             </div>
           )}
 

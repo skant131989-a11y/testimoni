@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Copy, Check, Code, ExternalLink, Sparkles, Star } from "lucide-react";
 import { ShareWall } from "@/components/share-wall";
 import { WatermarkNudge } from "@/components/upgrade/watermark-nudge";
+import { SeoMarkupCard } from "@/components/dashboard/seo-markup-card";
 
 export default function EmbedPage() {
   const params = useParams();
@@ -64,6 +65,8 @@ export default function EmbedPage() {
       </div>
 
       <WatermarkNudge where="embed" />
+
+      <SeoMarkupCard widgetId={widgetId} />
 
       <div className="space-y-4">
         {/* Hosted Wall — no-code, share as link */}

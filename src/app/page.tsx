@@ -99,6 +99,7 @@ const FEATURE_GROUPS: {
     items: [
       { text: "Forms with text, star ratings and video", tag: "1 free, unlimited on Pro" },
       { text: "Share by link, email, WhatsApp, DM, QR code or embed" },
+      { text: "Ask customers by email, or automatically from a webhook, with a reminder", tag: "10/mo free" },
       { text: "Paste a link or drop a screenshot to add one yourself" },
       { text: "Import reviews from app stores and Product Hunt" },
     ],
@@ -121,6 +122,7 @@ const FEATURE_GROUPS: {
       { text: "One line of code for any site, styles isolated" },
       { text: "Grid free; masonry, carousel, list and marquee", tag: "Pro" },
       { text: "Your branding, no watermark, Trust Score badge", tag: "Pro" },
+      { text: "Review markup so Google and AI can read your wall" },
     ],
   },
   {

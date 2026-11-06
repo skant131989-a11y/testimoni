@@ -14,6 +14,8 @@ export async function GET(
       workspace: {
         select: {
           slug: true,
+          name: true,
+          websiteUrl: true,
           subscription: { select: { plan: true } },
         },
       },
@@ -74,6 +76,8 @@ export async function GET(
     },
     testimonials,
     showWatermark,
+    // Used by the embed script for schema.org review markup.
+    workspace: { name: widget.workspace.name, url: widget.workspace.websiteUrl },
   });
 
   // Set CDN cache headers

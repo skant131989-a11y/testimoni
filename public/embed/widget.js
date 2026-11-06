@@ -366,6 +366,7 @@ window.Testimoni = FW;
       .then(function (r) { return r.json(); })
       .then(function (data) {
         renderWidget(wrapper, data);
+        injectReviewSchema(widgetId, data);
         // Track impression
         navigator.sendBeacon && navigator.sendBeacon(
           baseUrl + "/api/widget/" + widgetId + "?impression=1"
@@ -376,6 +377,47 @@ window.Testimoni = FW;
       });
   });
 })();
+
+// schema.org review markup, so search engines (and AI tools that run
+// JavaScript) can read what customers said. Mirrors src/lib/review-schema.ts.
+function injectReviewSchema(widgetId, data) {
+  try {
+    var id = "fw-ld-" + widgetId;
+    if (document.getElementById(id)) return;
+    var name = data.workspace && data.workspace.name;
+    var list = (data.testimonials || []).filter(function (t) { return t.content && String(t.content).trim(); });
+    if (!name || !list.length) return;
+    var schema = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: name,
+      review: list.slice(0, 20).map(function (t) {
+        var r = { "@type": "Review", author: { "@type": "Person", name: t.customerName }, reviewBody: t.content };
+        if (t.rating > 0) r.reviewRating = { "@type": "Rating", ratingValue: t.rating, bestRating: 5 };
+        if (t.createdAt) r.datePublished = String(t.createdAt).slice(0, 10);
+        return r;
+      })
+    };
+    if (data.workspace.url) schema.url = data.workspace.url;
+    var rated = list.filter(function (t) { return t.rating > 0; });
+    if (rated.length) {
+      var sum = 0;
+      rated.forEach(function (t) { sum += t.rating; });
+      schema.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: Math.round(sum / rated.length * 10) / 10,
+        reviewCount: rated.length,
+        bestRating: 5,
+        worstRating: 1
+      };
+    }
+    var el = document.createElement("script");
+    el.type = "application/ld+json";
+    el.id = id;
+    el.text = JSON.stringify(schema);
+    document.head.appendChild(el);
+  } catch (e) {}
+}
 
 function renderWidget(container, data) {
   var widget = data.widget;

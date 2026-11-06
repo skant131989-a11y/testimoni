@@ -24,6 +24,8 @@ export const PLAN_LIMITS = {
     // closest real quotes instead. Pro is unlimited.
     askMyWall: true,
     askMyWallAnswersPerMonth: 30,
+    // Testimonial request emails (dashboard or webhook) per month.
+    requestsPerMonth: 10,
     // Wall Score tracking & weekly email — Pro AI only.
     wallScoreTracking: false,
   },
@@ -44,6 +46,7 @@ export const PLAN_LIMITS = {
     maxTweetDraftsPerMonth: Infinity,
     askMyWall: true,
     askMyWallAnswersPerMonth: Infinity,
+    requestsPerMonth: 500,
     wallScoreTracking: true,
   },
   // Retained in PLAN_LIMITS + Prisma PlanType because deleting an
@@ -63,6 +66,7 @@ export const PLAN_LIMITS = {
     maxTweetDraftsPerMonth: Infinity,
     askMyWall: true,
     askMyWallAnswersPerMonth: Infinity,
+    requestsPerMonth: 500,
     wallScoreTracking: true,
   },
 } as const;

@@ -53,6 +53,9 @@ model Workspace {
   mentionScan     WorkspaceMentionScan?
 
   @@index([publicListing])
+  testimonialRequests TestimonialRequest[]
+  requestHook         RequestHook?
+
   @@map("workspaces")
 }
 
@@ -109,6 +112,11 @@ model Testimonial {
   // so the UI can show "imported from App Store on 2026-09-09".
   reviewSourceId   String?       @map("review_source_id")
   reviewSource     ReviewSource? @relation(fields: [reviewSourceId], references: [id], onDelete: SetNull)
+
+  // Permission to feature a public post (X, LinkedIn, Reddit...): asked,
+  // granted or declined, and when it last changed.
+  consentStatus ConsentStatus @default(NONE) @map("consent_status")
+  consentAt     DateTime?     @map("consent_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -775,4 +783,53 @@ model FindProofCache {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("find_proof_cache")
+}
+
+enum ConsentStatus {
+  NONE
+  ASKED
+  GRANTED
+  DECLINED
+}
+
+enum RequestStatus {
+  QUEUED
+  SENT
+  SUBMITTED
+  UNSUBSCRIBED
+  FAILED
+}
+
+/// A testimonial request emailed to one customer (from the dashboard or a
+/// webhook). A reminder goes out once, about 5 days after the first email,
+/// unless they already submitted or opted out.
+model TestimonialRequest {
+  id             String        @id @default(cuid())
+  workspaceId    String        @map("workspace_id")
+  email          String
+  name           String?
+  source         String        @default("manual")
+  status         RequestStatus @default(QUEUED)
+  sendAt         DateTime      @default(now()) @map("send_at")
+  sentAt         DateTime?     @map("sent_at")
+  reminderSentAt DateTime?     @map("reminder_sent_at")
+  token          String        @unique @default(cuid())
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@index([status, sendAt])
+  @@map("testimonial_requests")
+}
+
+/// Secret in the URL of a workspace's "send a testimonial request" webhook.
+model RequestHook {
+  workspaceId String   @id @map("workspace_id")
+  secret      String   @unique
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("request_hooks")
 }

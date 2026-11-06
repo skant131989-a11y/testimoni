@@ -188,9 +188,16 @@ export default async function TestimonialsPage({
               videoUrl: testimonial.videoUrl,
               source: testimonial.source,
               status: testimonial.status,
+              consentStatus: testimonial.consentStatus,
               createdAt: testimonial.createdAt.toISOString(),
             };
-            return <TestimonialRow key={testimonial.id} testimonial={row} />;
+            return (
+              <TestimonialRow
+                key={testimonial.id}
+                testimonial={row}
+                workspaceName={dbUser.workspaceMembers[0].workspace.name}
+              />
+            );
           })}
         </div>
       )}

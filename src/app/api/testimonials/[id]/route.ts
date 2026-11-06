@@ -46,6 +46,7 @@ export async function PATCH(
     where: { id },
     data: {
       ...parsed.data,
+      ...(parsed.data.consentStatus ? { consentAt: new Date() } : {}),
       ...(clearingVideo ? { videoStorageKey: null, videoDurationSeconds: null } : {}),
     },
   });

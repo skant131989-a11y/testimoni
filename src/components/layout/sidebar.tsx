@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
+  Mail,
   Code2,
   Inbox,
   Send,
@@ -44,6 +45,7 @@ const navItems: {
   { href: "/dashboard/testimonials", label: "Testimonials", icon: QuoteOpen },
   { href: "/dashboard/widgets", label: "Widgets", icon: Code2 },
   { href: "/dashboard/collect", label: "Collect", icon: Send },
+  { href: "/dashboard/requests", label: "Requests", icon: Mail, freeTag: "10/mo" },
   { href: "/dashboard/import", label: "Import", icon: Import },
   { href: "/dashboard/sources", label: "Review sources", icon: RefreshCw },
   { href: "/dashboard/wall-score", label: "Wall Score", icon: Gauge, freeTag: "1 free" },

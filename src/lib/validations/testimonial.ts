@@ -31,6 +31,7 @@ export const updateTestimonialSchema = z.object({
     .optional(),
   sourceUrl: z.string().url().max(2048).optional().nullable(),
   status: z.enum(["PENDING", "APPROVED", "ARCHIVED"]).optional(),
+  consentStatus: z.enum(["NONE", "ASKED", "GRANTED", "DECLINED"]).optional(),
   tags: z.array(z.string().max(50)).max(20).optional(),
   videoUrl: z.string().url().max(2048).optional().nullable(),
   imageUrls: z.array(z.string().url().max(2048)).max(10).optional(),

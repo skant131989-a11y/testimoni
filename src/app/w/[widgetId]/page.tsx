@@ -13,6 +13,7 @@ import { InlineSignup } from "@/components/inline-signup";
 import { WallShareButtons } from "@/components/wall-share-buttons";
 import { absoluteUrl } from "@/lib/utils";
 import { AvatarImage } from "@/components/avatar-image";
+import { buildReviewSchema, schemaToScriptJson } from "@/lib/review-schema";
 
 interface WallPageProps {
   params: Promise<{ widgetId: string }>;
@@ -349,9 +350,16 @@ export default async function HostedWallPage({
 
   const workspaceName = widget.workspace.name;
   const wallUrl = absoluteUrl(`/w/${widgetId}`);
+  const reviewSchema = buildReviewSchema({ name: workspaceName, url: wallUrl, testimonials });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/60 via-background to-background">
+      {reviewSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: schemaToScriptJson(reviewSchema) }}
+        />
+      )}
       {/* Hero — leads with aggregate proof, not a generic label */}
       <header className="mx-auto max-w-5xl px-4 pt-12 pb-10 md:pt-16">
         <div className="flex flex-col items-center gap-3 text-center">
