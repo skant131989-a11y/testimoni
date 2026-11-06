@@ -78,6 +78,7 @@ function registrable(host) {
   }
   const holdDays = Number(opt("--hold-days", 0));
   const dry = flag("--dry");
+const summaryOnly = flag("--summary");
   const rows = parseCsv(fs.readFileSync(file, "utf8"));
   const prisma = new PrismaClient();
   const suppressed = new Set((await prisma.outreachSuppression.findMany({ select: { email: true } })).map((s) => s.email));
@@ -122,8 +123,9 @@ function registrable(host) {
         publicBusinessEmail: existing?.publicBusinessEmail || email,
         score,
         scoreReason,
-        // Eligible leads are QUEUED for the 8:30 pm IST daily sender.
-        status: hold ? "NEW" : "DRAFT_READY",
+        // Imported prospects are NOT queued here any more: audit-and-queue.cjs
+        // checks each site and queues only the good ones for the daily sender.
+        status: "NEW",
       };
       const lead = await prisma.lead.upsert({
         where: { website },
@@ -142,13 +144,21 @@ function registrable(host) {
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, `${runDate}.json`), JSON.stringify(out, null, 2));
   }
-  console.log(`\n${dry ? "[DRY RUN] " : ""}${path.basename(file)}: ${rows.length} rows`);
-  console.log(`  eligible: ${eligible.length}   held: ${held.length}   skipped: ${skipped.length}`);
-  console.log("\nELIGIBLE (send order — templates alternate Pro / Customer Voice):");
-  eligible.forEach((e, i) => console.log(`  ${String(i + 1).padStart(2)}. [${i % 2 === 0 ? "pro  " : "voice"}] ${e.product} — ${e.email}`));
-  console.log("\nHELD:");
-  held.forEach((h) => console.log(`  - ${h.product} <${h.email}>: ${h.reason}`));
-  if (skipped.length) { console.log("\nSKIPPED:"); skipped.forEach((s) => console.log(`  - ${s.lead}: ${s.reason}`)); }
-  if (!dry) console.log(`\nlead ids written to outreach-batches/${runDate}.json`);
+  if (summaryOnly) {
+    console.log(JSON.stringify({ runDate, rows: rows.length, eligible: eligible.length, held: held.length, skipped: skipped.length, batch: `outreach-batches/${runDate}.json` }));
+  } else {
+    console.log(`\n${dry ? "[DRY RUN] " : ""}${path.basename(file)}: ${rows.length} rows`);
+    console.log(`  eligible: ${eligible.length}   held: ${held.length}   skipped: ${skipped.length}`);
+    console.log("\nELIGIBLE (send order — templates alternate Pro / Customer Voice):");
+    eligible.forEach((e, i) => console.log(`  ${String(i + 1).padStart(2)}. [${i % 2 === 0 ? "pro  " : "voice"}] ${e.product} — ${e.email}`));
+    console.log("\nHELD:");
+    held.forEach((h) => console.log(`  - ${h.product} <${h.email}>: ${h.reason}`));
+    if (skipped.length) { console.log("\nSKIPPED:"); skipped.forEach((s) => console.log(`  - ${s.lead}: ${s.reason}`)); }
+    if (!dry) console.log(`\nlead ids written to outreach-batches/${runDate}.json`);
+  }
   await prisma.$disconnect();
+  if (!dry) {
+    console.log("\nrunning the quality gate (audit-and-queue)…");
+    require("child_process").spawnSync(process.execPath, [path.join(__dirname, "audit-and-queue.cjs")], { stdio: "inherit" });
+  }
 })().catch((e) => { console.error(e.message); process.exit(1); });
