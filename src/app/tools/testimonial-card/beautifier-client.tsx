@@ -415,7 +415,7 @@ export function BeautifierClient() {
             ctaLabel="Unlock free"
             description={
               <>
-                Signup unlocks: <span className="font-semibold text-foreground">no watermark</span>, <span className="font-semibold text-foreground">2 Pro themes</span>, and the full Testimoni product — collect, host, and embed testimonials on your site. Free plan includes 10 testimonials.
+                Signup unlocks: <span className="font-semibold text-foreground">no watermark</span>, <span className="font-semibold text-foreground">2 Pro themes</span>, and the full Testimoni product — collect, host, and embed testimonials on your site. Free plan includes 15 testimonials.
               </>
             }
           />

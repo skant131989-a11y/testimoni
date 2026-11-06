@@ -110,7 +110,7 @@ export function SiteFooter() {
             </Link>
             <p className="mt-3 text-sm text-muted-foreground">
               Turn the praise customers already posted into testimonials on
-              your site. Free for 10 testimonials; Pro is a flat $19/month.
+              your site. Free for 15 testimonials; Pro is a flat $19/month.
             </p>
           </div>
           <Link

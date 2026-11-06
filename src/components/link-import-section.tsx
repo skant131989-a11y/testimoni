@@ -95,7 +95,7 @@ export function LinkImportSection() {
           </p>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Testimoni is a testimonial tool for <strong className="text-foreground">solo founders and small SaaS teams</strong>.
-            Free forever for up to 10 testimonials; Pro is a flat{" "}
+            Free forever for up to 15 testimonials; Pro is a flat{" "}
             <Link href="/pricing" className="font-semibold text-foreground underline underline-offset-2">
               $19/month
             </Link>{" "}
@@ -131,7 +131,7 @@ export function LinkImportSection() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <p className="text-xs text-muted-foreground">
-              10 testimonials free, forever. Every quote stays linked to the
+              15 testimonials free, forever. Every quote stays linked to the
               original post.
             </p>
           </div>

@@ -763,7 +763,7 @@ function ResultView({
             ? "You're signed in — save these straight to your wall, no signup needed."
             : ctaHasQuotes
               ? "Sign up free — we'll turn these into an embeddable widget you can drop on your site with one line of code."
-              : "Sign up free — 10 testimonials, 1 wall, one line of embed. No credit card."}
+              : "Sign up free — 15 testimonials, 1 wall, one line of embed. No credit card."}
         </p>
         {loggedIn ? (
           <SaveToMyWall

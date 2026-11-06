@@ -10,7 +10,7 @@ import { COMPETITORS, FACTS_NOTE, TESTIMONI } from "@/lib/competitors";
 const PATH = "/senja-alternatives";
 const TITLE = "Senja alternatives: 6 testimonial tools compared";
 const ANSWER =
-  "The main Senja alternatives are Testimoni (free for 10 testimonials, then a flat $19/month), Famewall (from $12/month), Testimonial.to (from $25/month) and Shapo ($29/month). Senja's paid plans are $29 and $59 a month, so each of these costs less at the first paid tier or about the same. Trustmary (a review and feedback platform) and Vocal Video (built for video) are also options, but both cost more than Senja at their first paid tier.";
+  "The main Senja alternatives are Testimoni (free for 15 testimonials, then a flat $19/month), Famewall (from $12/month), Testimonial.to (from $25/month) and Shapo ($29/month). Senja's paid plans are $29 and $59 a month, so each of these costs less at the first paid tier or about the same. Trustmary (a review and feedback platform) and Vocal Video (built for video) are also options, but both cost more than Senja at their first paid tier.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -30,7 +30,7 @@ const WHY: Record<string, string> = {
 const PRICIER = [COMPETITORS.trustmary, COMPETITORS["vocal-video"]];
 const HOW_TO_CHOOSE = [
   "Stay with Senja if you want the broadest feature set and $29 to $59 a month is fine.",
-  "Choose Testimoni if your praise already lives on X or LinkedIn and you want one flat price ($19/month after 10 free testimonials).",
+  "Choose Testimoni if your praise already lives on X or LinkedIn and you want one flat price ($19/month after 15 free testimonials).",
   "Choose Famewall if the cheapest paid plan matters most ($12/month).",
   "Choose Testimonial.to if you want unlimited X and LinkedIn imports on the free plan, with surveys and monitoring on higher tiers.",
   "Choose Shapo if you want many widget styles, or Google reviews next to testimonials.",
@@ -40,7 +40,7 @@ const HOW_TO_CHOOSE = [
 const FAQS = [
   {
     question: "What are Senja alternatives with a free plan?",
-    answer: `Testimoni (10 testimonials, flat $19/month after that), Famewall (10), Testimonial.to (10 text and 2 video) and Shapo (15) all have free plans, as do Trustmary (Solo: 5 survey responses and 200 widget views a month) and Vocal Video (5 published videos, with a watermark). Senja's own free plan allows 15 testimonials. Limits read from each pricing page (${FACTS_NOTE}).`,
+    answer: `Testimoni (15 testimonials, flat $19/month after that), Famewall (10), Testimonial.to (10 text and 2 video) and Shapo (15) all have free plans, as do Trustmary (Solo: 5 survey responses and 200 widget views a month) and Vocal Video (5 published videos, with a watermark). Senja's own free plan allows 15 testimonials. Limits read from each pricing page (${FACTS_NOTE}).`,
   },
   {
     question: "What is the best free alternative to Senja?",

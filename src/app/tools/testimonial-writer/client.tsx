@@ -387,7 +387,7 @@ export function TestimonialWriterClient() {
             <>
               Testimoni sends a form your customers can fill in 30 seconds —
               no login. Approve, and it&apos;s on your Wall of Love with one
-              click. Free plan includes 10 testimonials.
+              click. Free plan includes 15 testimonials.
             </>
           }
         />

@@ -329,7 +329,7 @@ export function ReviewSourcesClient({ initialSources, isPro, platforms }: Props)
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Free plan: paste any review URL, click Import, reviews
-                land in your pending queue. Cap: 10 testimonials total.
+                land in your pending queue. Cap: 15 testimonials total.
                 Pro plan unlocks auto-sync every 24h + auto-approve +
                 unlimited testimonials.
               </p>

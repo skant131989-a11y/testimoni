@@ -35,19 +35,20 @@ export const TESTIMONI: Tool = {
   summary:
     "A testimonial tool for solo founders and small SaaS teams: paste a tweet or LinkedIn post URL and get an attributed testimonial, then show it as a hosted Wall of Love or a one-line embed.",
   freeItems: [
-    "10 testimonials",
+    "15 testimonials",
     "10 praise scans a month (3 a day with no account)",
     "Link import from X, LinkedIn, Reddit, Hacker News and Product Hunt",
     "3 AI screenshot extractions",
-    "1 collection form with text, star ratings and 1 video",
+    "1 collection form with text, star ratings and 2 videos",
     "1 widget with a one-line embed",
     "Hosted Wall of Love page",
+    "Ask My Wall chatbot: 30 answers a month",
     "1 Wall Score audit and 5 tweet drafts a month",
     "Free tools with no signup (card maker, writer, star badge)",
     "Small “Powered by” badge",
   ],
   freePlan:
-    "10 testimonials; 10 praise scans a month (3 a day with no account); link import from X, LinkedIn, Reddit, Hacker News and Product Hunt; 3 AI screenshot extractions; 1 collection form with text, star ratings and 1 video; 1 widget with a one-line embed; a hosted Wall of Love page; 1 Wall Score audit and 5 tweet drafts a month; free tools with no signup; a small “Powered by” badge",
+    "15 testimonials; 10 praise scans a month (3 a day with no account); link import from X, LinkedIn, Reddit, Hacker News and Product Hunt; 3 AI screenshot extractions; 1 collection form with text, star ratings and 2 videos; 1 widget with a one-line embed; a hosted Wall of Love page; an Ask My Wall chatbot with 30 answers a month; 1 Wall Score audit and 5 tweet drafts a month; free tools with no signup; a small “Powered by” badge",
   firstPaidUsd: 19,
   firstPaidLabel: "Pro, $19/month flat",
   otherPaid: "One paid plan — no tiers",

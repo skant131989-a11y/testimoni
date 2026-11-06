@@ -174,7 +174,7 @@ export default function ToolsPage() {
               <p className="mt-2 text-muted-foreground">
                 Testimoni collects testimonials from customers, hosts them at
                 a shareable URL, and embeds on your site with one line of
-                code. Free plan includes 10 testimonials, 1 form, hosted wall.
+                code. Free plan includes 15 testimonials, 1 form, hosted wall.
               </p>
             </div>
             <TrackedLink cta="tools_index_signup" surface="tools_index" href="/signup">

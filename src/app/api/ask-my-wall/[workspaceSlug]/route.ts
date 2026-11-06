@@ -7,6 +7,7 @@ import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
 import { groqChat, hasGroq, GROQ_CHAT_MODEL } from "@/lib/groq";
 import { buildSystemPrompt, retrieve } from "@/lib/ask-my-wall";
 import { checkAndIncrement } from "@/lib/ask-rate-limit";
+import { askSubject, reserveMonthly } from "@/lib/scan-limits";
 
 const BODY = z.object({
   question: z.string().min(2).max(500),
@@ -21,6 +22,11 @@ const BODY = z.object({
  *
  * Returns { answer, references: [ { author, quote, url? } ] }
  * so the widget can render source badges under the answer.
+ *
+ * Plans: Pro is unlimited. Free gets a monthly allowance (see
+ * PLAN_LIMITS.FREE.askMyWallAnswersPerMonth) and NEVER uses Claude:
+ * answers come from Groq, and if Groq is unavailable the visitor gets
+ * the closest real quotes instead of a generated sentence.
  */
 export async function POST(
   req: NextRequest,
@@ -57,7 +63,7 @@ export async function POST(
     );
   }
 
-  let body;
+  let body: z.infer<typeof BODY>;
   try {
     body = BODY.parse(await req.json());
   } catch {
@@ -77,41 +83,69 @@ export async function POST(
     });
   }
 
+  // Free workspaces have a monthly answer allowance. Counted only when
+  // there is something to answer from.
+  const isFree = plan === "FREE";
+  if (isFree) {
+    const slot = await reserveMonthly(askSubject(workspace.id), limits.askMyWallAnswersPerMonth);
+    if (!slot.ok) {
+      return json(
+        {
+          error: "quota",
+          message: "This chat has reached its monthly limit. Please check back soon.",
+        },
+        429
+      );
+    }
+  }
+
   const retrieved = retrieve(testimonials, body.question, 6);
   const systemPrompt = buildSystemPrompt(workspace.name, retrieved);
 
-  // Prefer Groq (free) when the key is available; fall back to
-  // Claude Haiku. Both models handle this workload well; the
-  // system prompt is provider-agnostic.
-  let answer: string;
+  // Groq first (free). Claude Haiku is only for Pro, and only when Groq
+  // is missing or fails. Free workspaces never reach Claude.
+  async function askGroq(): Promise<string> {
+    const { text } = await groqChat({
+      model: GROQ_CHAT_MODEL,
+      max_tokens: 400,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: body.question },
+      ],
+    });
+    return text;
+  }
+  async function askClaude(): Promise<string> {
+    const anthropic = getAnthropic();
+    const response = await anthropic.messages.create({
+      model: CHAT_MODEL,
+      max_tokens: 400,
+      system: systemPrompt,
+      messages: [{ role: "user", content: body.question }],
+    });
+    const block = response.content[0];
+    return block.type === "text" ? block.text : "";
+  }
+
+  let answer = "";
   try {
-    if (hasGroq()) {
-      const { text } = await groqChat({
-        model: GROQ_CHAT_MODEL,
-        max_tokens: 400,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: body.question },
-        ],
-      });
-      answer = text || "Sorry, I couldn't come up with an answer for that.";
-    } else {
-      const anthropic = getAnthropic();
-      const response = await anthropic.messages.create({
-        model: CHAT_MODEL,
-        max_tokens: 400,
-        system: systemPrompt,
-        messages: [{ role: "user", content: body.question }],
-      });
-      const block = response.content[0];
-      answer =
-        block.type === "text"
-          ? block.text
-          : "Sorry, I couldn't come up with an answer for that.";
-    }
+    if (hasGroq()) answer = await askGroq();
+    else if (!isFree) answer = await askClaude();
   } catch (err) {
-    console.error("[ask-my-wall] LLM call failed:", err);
-    answer = "Sorry — the wall's chatbot is briefly offline. Try again in a moment.";
+    console.error("[ask-my-wall] primary LLM call failed:", err);
+    if (!isFree && hasGroq() && process.env.ANTHROPIC_API_KEY) {
+      try {
+        answer = await askClaude();
+      } catch (err2) {
+        console.error("[ask-my-wall] Claude fallback failed:", err2);
+      }
+    }
+  }
+
+  if (!answer) {
+    answer = isFree
+      ? closestQuotesAnswer(retrieved)
+      : "Sorry — the wall's chatbot is briefly offline. Try again in a moment.";
   }
 
   return json({
@@ -123,6 +157,18 @@ export async function POST(
     })),
     remaining,
   });
+}
+
+/** No LLM available: show the closest real quotes, word for word. */
+function closestQuotesAnswer(
+  retrieved: ReturnType<typeof retrieve>
+): string {
+  const top = retrieved.slice(0, 2);
+  if (top.length === 0) return "I couldn't find a customer testimonial about that yet.";
+  return (
+    "Here is what customers have said:\n" +
+    top.map((r) => `“${r.content.slice(0, 220)}” — ${r.author}`).join("\n")
+  );
 }
 
 export async function OPTIONS() {

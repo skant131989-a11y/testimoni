@@ -17,7 +17,7 @@ const PRO_AI_FEATURES: readonly string[] = [];
 export const metadata: Metadata = {
   title: "Pricing — Paste-a-tweet + Wall of Love included, free forever",
   description:
-    "Free plan includes paste-a-tweet import, Screenshot → testimonial (AI), a hosted Wall of Love URL, 10 testimonials (any format), 1 video testimonial, and one-line embed — no credit card. Pro at $19/month for unlimited testimonials, forms, widgets, video, and batch screenshot upload.",
+    "Free plan includes paste-a-tweet import, Screenshot → testimonial (AI), a hosted Wall of Love URL, 15 testimonials (any format), 2 video testimonials, and one-line embed — no credit card. Pro at $19/month for unlimited testimonials, forms, widgets, video, and batch screenshot upload.",
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: "Testimoni Pricing — Free forever with paste-a-tweet + Wall of Love",
@@ -132,7 +132,7 @@ export default function PricingPage() {
               {[
                 {
                   q: "Can I try before upgrading?",
-                  a: "Yes! The free plan is fully functional with 10 testimonials and 1 widget. No credit card required.",
+                  a: "Yes! The free plan is fully functional with 15 testimonials and 1 widget. No credit card required.",
                 },
                 {
                   q: "Can I show different testimonials on different pages?",
@@ -140,7 +140,7 @@ export default function PricingPage() {
                 },
                 {
                   q: "How many forms and widgets can I have?",
-                  a: "Free plan: 1 form, 1 widget, 10 testimonials. Pro: unlimited forms and widgets. Most Pro customers run 1-3 forms (one per collection channel) and 2-5 widgets (one per page they want testimonials on).",
+                  a: "Free plan: 1 form, 1 widget, 15 testimonials. Pro: unlimited forms and widgets. Most Pro customers run 1-3 forms (one per collection channel) and 2-5 widgets (one per page they want testimonials on).",
                 },
                 {
                   q: "Can I cancel anytime?",
@@ -175,7 +175,7 @@ export default function PricingPage() {
                   Free forever plan · no credit card
                 </h2>
                 <p className="mt-2 text-muted-foreground">
-                  10 testimonials, 1 collection form, 1 widget, a public
+                  15 testimonials, 1 collection form, 1 widget, a public
                   Wall of Love URL, and one-line embed. Upgrade to Pro when
                   you need unlimited or the fancy layouts.
                 </p>

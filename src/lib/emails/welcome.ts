@@ -194,7 +194,7 @@ export function welcomeEmailHtml(data: WelcomeEmailData): string {
                 <tr>
                   <td style="padding:16px 20px;">
                     <p style="margin:0 0 4px 0;font-size:14px;font-weight:700;color:#5b21b6;">
-                      🎥 1 free video testimonial on every plan
+                      🎥 2 free video testimonials on every plan
                     </p>
                     <p style="margin:0;font-size:13px;line-height:1.5;color:#4b5563;">
                       Upload an MP4/MOV or ask a customer to record from their phone. Video converts ~2× better than text. Upgrade to Pro for unlimited.

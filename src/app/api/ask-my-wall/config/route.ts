@@ -7,7 +7,8 @@ import { PLAN_LIMITS } from "@/lib/constants";
 /**
  * POST /api/ask-my-wall/config
  *
- * Enables Ask My Wall for the caller's workspace. Pro-only. On
+ * Enables Ask My Wall for the caller's workspace (Free with a monthly
+ * answer cap, Pro unlimited; see PLAN_LIMITS). On
  * first hit, creates the AskMyWallConfig row so the public
  * endpoint starts serving.
  */

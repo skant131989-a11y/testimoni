@@ -53,7 +53,7 @@ export function StartFromScratch() {
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <p className="text-xs text-muted-foreground">
-                Free forever · 10 testimonials · 1 wall · No credit card
+                Free forever · 15 testimonials · 1 wall · No credit card
               </p>
             </div>
           </div>

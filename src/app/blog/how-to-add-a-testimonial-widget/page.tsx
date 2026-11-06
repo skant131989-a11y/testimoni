@@ -280,7 +280,7 @@ export default function TestimonialWidgetGuidePage() {
               </div>
               <h2 className="mt-4 text-2xl font-bold">Try Testimoni free</h2>
               <p className="mt-2 text-muted-foreground">
-                Free forever plan: 10 testimonials, 1 form, 1 widget. Set up in 5 minutes. No credit card.
+                Free forever plan: 15 testimonials, 1 form, 1 widget. Set up in 5 minutes. No credit card.
               </p>
               <Button size="lg" asChild className="mt-6">
                 <Link href="/signup">
@@ -313,7 +313,7 @@ export default function TestimonialWidgetGuidePage() {
 
             <h3 className="mt-6 text-lg font-semibold">Can customers submit video testimonials?</h3>
             <p>
-              Testimoni includes one video testimonial on every plan, including
+              Testimoni includes two video testimonials on every plan, including
               Free. Pro unlocks unlimited video testimonials. Check the{" "}
               <Link href="/pricing" className="text-primary underline">pricing page</Link>
               {" "}for current plan details.

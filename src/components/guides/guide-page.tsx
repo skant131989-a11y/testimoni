@@ -107,7 +107,7 @@ export function GuidePage({ slug }: { slug: string }) {
           <div className="mt-12 rounded-2xl bg-primary/5 p-8 text-center">
             <h2 className="text-2xl font-bold">Try it free</h2>
             <p className="mt-2 text-muted-foreground">
-              Free for 10 testimonials. Pro is a flat $19/month. No credit card to start.
+              Free for 15 testimonials. Pro is a flat $19/month. No credit card to start.
             </p>
             <TrackedLink
               cta={`guide_${g.slug}_signup`}

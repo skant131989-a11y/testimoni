@@ -125,7 +125,7 @@ const features: Array<{
   { icon: Link2, title: "Drop the link", desc: "Paste any tweet, LinkedIn post, Reddit comment, blog URL — we pull the quote and author. Credit stays with the original.", category: "intake" },
   { icon: Camera, title: "Screenshot → testimonial (AI)", desc: "Drop a screenshot of any praise — DM, tweet, Slack, WhatsApp, email, App Store review. Claude Vision extracts the quote, author, and source.", category: "intake" },
   { icon: Send, title: "5 collection channels", desc: "Share your form via link, embed script, iframe, email template, or QR code. All submissions land in one inbox.", category: "intake" },
-  { icon: Video, title: "Video testimonials", desc: "1 free video on every plan, unlimited on Pro. Upload MP4 or MOV. Plays inline on your wall — converts ~2× better than text.", category: "intake" },
+  { icon: Video, title: "Video testimonials", desc: "2 free videos on every plan, unlimited on Pro. Upload MP4 or MOV. Plays inline on your wall — converts ~2× better than text.", category: "intake" },
   { icon: Inbox, title: "One-click approval", desc: "Review submissions in a single inbox. Approve, reject, or edit inline. Optimistic UI — no refresh.", category: "curate" },
   { icon: Palette, title: "Full theme control", desc: "Colors, fonts, spacing, border radius. Match your brand exactly, save theme presets across workspaces.", category: "display" },
   { icon: LayoutGrid, title: "5 layouts", desc: "Grid, Masonry, Carousel, List, and Marquee. Pick different layouts for different pages, all from one library.", category: "display" },
@@ -134,9 +134,9 @@ const features: Array<{
   { icon: MonitorSmartphone, title: "Public Wall of Love URL", desc: "Every workspace gets /w/[id] — a public hosted wall for Instagram bios, email signatures, QR codes. Free forever.", category: "display" },
   { icon: Star, title: "Live Star Badge", desc: "One-line embed for a live G2-style star badge that reflects your real testimonial rating.", category: "display" },
   { icon: Gauge, title: "Wall Score (AI, Pro)", desc: "0–100 audit across 6 dimensions — volume, diversity, video, recency, verification, ratings. Trend graph included.", category: "plan" },
-  { icon: MessageSquare, title: "Ask My Wall (AI, Pro)", desc: "AI chatbot for your site that answers visitor questions using only your real testimonials. Never invents.", category: "plan" },
+  { icon: MessageSquare, title: "Ask My Wall (AI)", desc: "AI chatbot for your site that answers visitor questions using only your real testimonials. Never invents. 30 answers a month free, unlimited on Pro.", category: "plan" },
   { icon: Zap, title: "Tweet drafts (AI)", desc: "Every approved testimonial → 3 tweet-length drafts (quote, reaction, callout). One-click compose to X or LinkedIn.", category: "plan" },
-  { icon: Heart, title: "Free forever plan", desc: "10 testimonials, 1 widget, grid layout, a hosted wall, and the 8 free tools. No credit card, no expiry.", category: "plan" },
+  { icon: Heart, title: "Free forever plan", desc: "15 testimonials, 1 widget, grid layout, a hosted wall, and the 8 free tools. No credit card, no expiry.", category: "plan" },
 ];
 
 // ── Page ────────────────────────────────────────────────────────
@@ -415,7 +415,7 @@ export default function FeaturesPage() {
                   Try every feature — free forever.
                 </h2>
                 <p className="mt-2 text-muted-foreground">
-                  30-second setup. 10 testimonials + hosted wall + all 8 tools
+                  30-second setup. 15 testimonials + hosted wall + all 8 tools
                   on the free tier. Upgrade only when you outgrow it.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">

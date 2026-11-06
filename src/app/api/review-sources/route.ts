@@ -16,7 +16,7 @@ import { parseAnySourceUrl, availablePlatforms } from "@/lib/review-sources/regi
  *
  * Connecting is FREE on every plan — a Free user can paste an
  * App Store / Play Store / Product Hunt / Chrome Web Store URL
- * and pull the reviews once. The plan cap (Free = 10 testimonials
+ * and pull the reviews once. The plan cap (Free = 15 testimonials
  * total) is what gates volume, not the feature itself. autoApprove
  * stays Pro-only: on Free, imported reviews land in the pending
  * queue for manual review. Auto-sync (scheduled background pulls)

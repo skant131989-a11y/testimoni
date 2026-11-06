@@ -129,7 +129,7 @@ export default function FoundersPage() {
             <div className="not-prose mt-12 rounded-2xl bg-primary/5 p-8 text-center">
               <h2 className="text-2xl font-bold">Try Testimoni free</h2>
               <p className="mt-2 text-muted-foreground">
-                Free forever plan: 10 testimonials, 1 form, 1 widget. Set up in
+                Free forever plan: 15 testimonials, 1 form, 1 widget. Set up in
                 30 seconds. No credit card.
               </p>
               <Button size="lg" asChild className="mt-6">

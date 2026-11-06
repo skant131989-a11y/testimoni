@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Plan check — Free gets 1 video, Pro gets unlimited. Count only
+  // Plan check — Free gets 2 videos, Pro gets unlimited. Count only
   // videos already stored in Supabase Storage (has videoStorageKey);
   // external videoUrl-only rows are legacy imports and don't touch
   // our storage quota.

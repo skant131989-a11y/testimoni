@@ -36,7 +36,7 @@ const COPY_BY_ROUTE: Record<string, Copy> = {
       </>
     ),
     sub: "Collect testimonials, auto-import praise from every platform, and drop a beautiful wall on your site — free forever on the starter tier.",
-    trust: ["10 testimonials free", "No credit card", "Live in ~30 seconds"],
+    trust: ["15 testimonials free", "No credit card", "Live in ~30 seconds"],
   },
   login: {
     eyebrow: "Welcome back",

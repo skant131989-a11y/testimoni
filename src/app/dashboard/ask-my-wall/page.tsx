@@ -7,6 +7,8 @@ import {
 } from "@/lib/session";
 import { getEffectivePlan } from "@/lib/plan";
 import { AskMyWallClient } from "./client";
+import { PLAN_LIMITS } from "@/lib/constants";
+import { askSubject, getMonthlyUsage } from "@/lib/scan-limits";
 
 export const metadata: Metadata = {
   title: "Ask My Wall — Testimoni",
@@ -35,6 +37,12 @@ export default async function AskMyWallPage() {
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
+  // Free workspaces get a monthly allowance of chatbot answers.
+  const answersLimit = PLAN_LIMITS[plan].askMyWallAnswersPerMonth;
+  const answersUsed = Number.isFinite(answersLimit)
+    ? await getMonthlyUsage(askSubject(membership.workspaceId))
+    : 0;
+
   return (
     <AskMyWallClient
       initialActive={config?.isActive ?? false}
@@ -42,6 +50,8 @@ export default async function AskMyWallPage() {
       plan={plan}
       testimonialCount={testimonialCount}
       baseUrl={baseUrl}
+      answersUsed={answersUsed}
+      answersLimit={Number.isFinite(answersLimit) ? answersLimit : null}
     />
   );
 }

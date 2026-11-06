@@ -1065,7 +1065,7 @@ export default function ImportClient({ isPro }: ImportClientProps) {
           <CardHeader>
             <CardTitle>Upload a video testimonial</CardTitle>
             <CardDescription>
-              Attach an MP4 or MOV (up to 50MB). Free plan includes 1 video;
+              Attach an MP4 or MOV (up to 50MB). Free plan includes 2 videos;
               Pro is unlimited.
             </CardDescription>
           </CardHeader>

@@ -41,7 +41,7 @@ export const GUIDES: Guide[] = [
     path: "/turn-tweets-into-testimonials",
     title: "Turn tweets into testimonials for your website",
     answer:
-      "Testimoni turns a tweet into a website testimonial in about 30 seconds: paste the link to a public post on X, and it pulls the quote, name and photo into your Wall of Love or any widget. It is free for up to 10 testimonials, and Pro is $19/month for unlimited.",
+      "Testimoni turns a tweet into a website testimonial in about 30 seconds: paste the link to a public post on X, and it pulls the quote, name and photo into your Wall of Love or any widget. It is free for up to 15 testimonials, and Pro is $19/month for unlimited.",
     sections: [
       {
         heading: "How it works",
@@ -90,7 +90,7 @@ export const GUIDES: Guide[] = [
       {
         heading: "Free or Pro for this",
         paragraphs: [
-          "The free plan imports tweets by URL and keeps up to 10 testimonials, with a hosted Wall of Love and a grid layout. Pro is $19/month flat: unlimited testimonials, all five layouts, no watermark and unlimited tweet drafts (the free plan gives 5 a month).",
+          "The free plan imports tweets by URL and keeps up to 15 testimonials, with a hosted Wall of Love and a grid layout. Pro is $19/month flat: unlimited testimonials, all five layouts, no watermark and unlimited tweet drafts (the free plan gives 5 a month).",
         ],
       },
       priceTable,
@@ -99,12 +99,12 @@ export const GUIDES: Guide[] = [
       {
         question: "How do I turn tweets that praise my product into testimonials on my website?",
         answer:
-          "Copy the link to each public post on X that praises your product and paste it into Testimoni. It imports the quote, the author's name and photo as real text and keeps the link to the original post. You approve each one, then show them on a hosted Wall of Love or embed them on your site with one line of script. It is free for up to 10 testimonials.",
+          "Copy the link to each public post on X that praises your product and paste it into Testimoni. It imports the quote, the author's name and photo as real text and keeps the link to the original post. You approve each one, then show them on a hosted Wall of Love or embed them on your site with one line of script. It is free for up to 15 testimonials.",
       },
       {
         question: "Is there a free way to turn tweets into testimonials?",
         answer:
-          "Yes. Testimoni's free plan imports tweets by URL and keeps up to 10 testimonials, with a public Wall of Love.",
+          "Yes. Testimoni's free plan imports tweets by URL and keeps up to 15 testimonials, with a public Wall of Love.",
       },
       {
         question: "Can I import a tweet that someone else wrote about my product?",
@@ -134,7 +134,7 @@ export const GUIDES: Guide[] = [
     path: "/import-linkedin-recommendations",
     title: "Collect LinkedIn praise and show it on your website",
     answer:
-      "To show LinkedIn praise on your site, paste the link to a public LinkedIn post into Testimoni: it imports the quote, name and photo as a testimonial you can display in a widget or Wall of Love. Free for up to 10 testimonials; Pro is $19/month.",
+      "To show LinkedIn praise on your site, paste the link to a public LinkedIn post into Testimoni: it imports the quote, name and photo as a testimonial you can display in a widget or Wall of Love. Free for up to 15 testimonials; Pro is $19/month.",
     sections: [
       {
         heading: "Steps",
@@ -261,7 +261,7 @@ export const GUIDES: Guide[] = [
       {
         heading: "Free or Pro for a Wall of Love",
         paragraphs: [
-          "The free plan gives you up to 10 testimonials, one collection form, one widget, a hosted Wall of Love and one video, with the Grid layout and a small watermark. Pro is $19/month flat: unlimited testimonials, widgets, forms and videos, all five layouts, no watermark, plus Ask My Wall and the Wall Score audit.",
+          "The free plan gives you up to 15 testimonials, one collection form, one widget, a hosted Wall of Love and two videos, with the Grid layout and a small watermark. Pro is $19/month flat: unlimited testimonials, widgets, forms and videos, all five layouts, no watermark, plus Ask My Wall and the Wall Score audit.",
         ],
       },
       priceTable,
@@ -270,7 +270,7 @@ export const GUIDES: Guide[] = [
       {
         question: "How do I build a Wall of Love from X (Twitter) posts?",
         answer:
-          "Paste the link to each public post on X that praises you into Testimoni, which imports the quote, name and photo as text and keeps the link back to the original post. Approve the ones you want, choose a layout, then publish the hosted Wall of Love page or embed it on your site with one line of script. No manual copying or screenshots, and it is free for up to 10 testimonials.",
+          "Paste the link to each public post on X that praises you into Testimoni, which imports the quote, name and photo as text and keeps the link back to the original post. Approve the ones you want, choose a layout, then publish the hosted Wall of Love page or embed it on your site with one line of script. No manual copying or screenshots, and it is free for up to 15 testimonials.",
       },
       {
         question: "Do I need a developer?",
@@ -279,7 +279,7 @@ export const GUIDES: Guide[] = [
       {
         question: "Is a Wall of Love free?",
         answer:
-          "You can build one free with Testimoni: the free plan includes a hosted Wall of Love page for up to 10 testimonials. Pro removes the limit and the watermark.",
+          "You can build one free with Testimoni: the free plan includes a hosted Wall of Love page for up to 15 testimonials. Pro removes the limit and the watermark.",
       },
       {
         question: "How many testimonials do I need on a Wall of Love?",
@@ -289,7 +289,7 @@ export const GUIDES: Guide[] = [
       {
         question: "Can visitors ask questions about the reviews?",
         answer:
-          'Yes, on Pro: "Ask My Wall" answers visitors from your testimonials and names the customers it quotes.',
+          'Yes: "Ask My Wall" answers visitors from your testimonials and names the customers it quotes. The free plan includes 30 answers a month; Pro has no limit.',
       },
     ],
     related: ["/turn-tweets-into-testimonials", "/embed-testimonials-without-screenshots", "/blog/best-testimonial-tools"],
@@ -299,14 +299,14 @@ export const GUIDES: Guide[] = [
     path: "/testimonial-widget-for-founders",
     title: "Testimonial widget for solo founders on a budget",
     answer:
-      "Testimoni is free for your first 10 testimonials, with a widget, a collection form, one video testimonial and a public Wall of Love. When you need more, Pro is $19/month for unlimited testimonials, widgets, videos and every layout.",
+      "Testimoni is free for your first 15 testimonials, with a widget, a collection form, two video testimonials and a public Wall of Love. When you need more, Pro is $19/month for unlimited testimonials, widgets, videos and every layout.",
     sections: [
       {
         heading: "What you get free",
         bullets: [
-          "Up to 10 testimonials",
+          "Up to 15 testimonials",
           "1 collection form and 1 widget (Grid layout)",
-          "1 video testimonial",
+          "2 video testimonials",
           "Import from X, LinkedIn, Reddit, Hacker News and Product Hunt",
           "3 screenshot-to-testimonial extractions",
           "A public Wall of Love page",
@@ -330,7 +330,7 @@ export const GUIDES: Guide[] = [
       {
         question: "Is there a free testimonial widget?",
         answer:
-          "Yes. Testimoni's free plan includes one widget and a Wall of Love, for up to 10 testimonials.",
+          "Yes. Testimoni's free plan includes one widget and a Wall of Love, for up to 15 testimonials.",
       },
       {
         question: "Is there a yearly plan?",

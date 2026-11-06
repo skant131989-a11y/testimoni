@@ -1244,7 +1244,7 @@ export default function DemoClient() {
                 seconds.
               </p>
               <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
-                <li>✓ 10 testimonials, 1 form, 1 widget on the Free plan</li>
+                <li>✓ 15 testimonials, 1 form, 1 widget on the Free plan</li>
                 <li>✓ Public Wall of Love URL — shareable anywhere</li>
                 <li>✓ One-line embed for any site</li>
               </ul>

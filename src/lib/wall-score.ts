@@ -68,7 +68,7 @@ export function computeWallScore(
   const freshPct = total > 0 ? fresh / total : 0;
   const recency = Math.round(freshPct * 15);
 
-  // Video — 15pts if >=1 video, scale down
+  // Video — 15pts if >=2 videos, scale down
   const videoCount = approved.filter(
     (t) => t.videoUrl || t.videoStorageKey
   ).length;

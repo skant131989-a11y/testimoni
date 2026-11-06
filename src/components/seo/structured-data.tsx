@@ -17,7 +17,7 @@ const HOME_FAQS: FAQ[] = [
   {
     question: "How many forms and widgets can I create?",
     answer:
-      "Free plan: 1 collection form, 1 widget, 10 testimonials. Pro plan: unlimited forms and widgets, unlimited testimonials, all layouts.",
+      "Free plan: 1 collection form, 1 widget, 15 testimonials. Pro plan: unlimited forms and widgets, unlimited testimonials, all layouts.",
   },
   {
     question: "How do customers find the testimonial form?",
@@ -27,7 +27,7 @@ const HOME_FAQS: FAQ[] = [
   {
     question: "Is there a free plan?",
     answer:
-      "Yes. The free plan includes 10 testimonials, 1 collection form, 1 widget, and grid layout. No credit card required. Upgrade to Pro at $19/month for unlimited everything.",
+      "Yes. The free plan includes 15 testimonials, 1 collection form, 1 widget, and grid layout. No credit card required. Upgrade to Pro at $19/month for unlimited everything.",
   },
   {
     question: "Does Testimoni work with Framer, Webflow, Bubble, WordPress, or Shopify?",
@@ -95,7 +95,7 @@ export function StructuredData({ faqs, breadcrumbs, faqId, article }: Structured
           price: "0",
           priceCurrency: "USD",
           description:
-            "10 testimonials, 1 collection form, 1 widget, grid layout, with watermark.",
+            "15 testimonials, 1 collection form, 1 widget, grid layout, with watermark.",
         },
         {
           "@type": "Offer",

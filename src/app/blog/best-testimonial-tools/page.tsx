@@ -42,7 +42,7 @@ const FAQS = [
   {
     question: "Which testimonial tools have a free plan?",
     answer:
-      "All the tools compared here do: Testimoni (10 testimonials), Senja (15), Famewall (10), Testimonial.to (10 text and 2 video), Shapo (15), Trustmary's Solo plan (5 survey responses and 200 widget views a month) and Vocal Video (5 published videos, with a watermark). Limits differ, so check which one would stop you from going live.",
+      "All the tools compared here do: Testimoni (15 testimonials), Senja (15), Famewall (10), Testimonial.to (10 text and 2 video), Shapo (15), Trustmary's Solo plan (5 survey responses and 200 widget views a month) and Vocal Video (5 published videos, with a watermark). Limits differ, so check which one would stop you from going live.",
   },
   {
     question: "Which testimonial tool imports tweets?",
@@ -52,7 +52,7 @@ const FAQS = [
   {
     question: "Which testimonial tool is best for solo founders?",
     answer:
-      "Solo founders usually want a free plan that goes live fast and a low price when they outgrow it. Testimoni (free for 10 testimonials, then $19/month) and Famewall (free for 10, then $12/month) are the lowest-priced options we checked; Senja and Shapo give 15 free testimonials.",
+      "Solo founders usually want a free plan that goes live fast and a low price when they outgrow it. Testimoni (free for 15 testimonials, then $19/month) and Famewall (free for 10, then $12/month) are the lowest-priced options we checked; Senja and Shapo give 15 free testimonials.",
   },
 ];
 
@@ -199,7 +199,7 @@ export default function BestTestimonialToolsPage() {
 
           <div className="mt-12 rounded-2xl bg-primary/5 p-8 text-center">
             <h2 className="text-2xl font-bold">Try Testimoni free</h2>
-            <p className="mt-2 text-muted-foreground">Free for 10 testimonials. Pro is a flat $19/month.</p>
+            <p className="mt-2 text-muted-foreground">Free for 15 testimonials. Pro is a flat $19/month.</p>
             <TrackedLink
               cta="best_tools_signup"
               surface="blog_post"

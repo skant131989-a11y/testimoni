@@ -39,7 +39,7 @@ const HOOK_BY_AUDIENCE: Record<PitchAudience, { hook: string; body: string; bull
       "One-line embed for your site — Framer, Webflow, WordPress, React, or plain HTML. Sub-10KB widget, no CSS conflicts.",
       "<strong>Video testimonials</strong> — 1 free on every plan; customers record from their phone. Converts ~2× better than text alone.",
     ],
-    cta: "Free plan is enough for the whole flow — 10 testimonials, unlimited wall views, no credit card. If it doesn't save you an hour this week I'd genuinely like to know why.",
+    cta: "Free plan is enough for the whole flow — 15 testimonials, unlimited wall views, no credit card. If it doesn't save you an hour this week I'd genuinely like to know why.",
   },
   sales: {
     hook: "Sales asks for testimonials all the time. Here's a way to have them ready before anyone asks.",

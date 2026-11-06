@@ -248,3 +248,45 @@ export async function getAccountScanUsage(
     return { used: 0, limit };
   }
 }
+
+// ── Monthly counters for other features (Ask My Wall on Free) ────
+
+/** Counter subject for a workspace's Ask My Wall answers. */
+export const askSubject = (workspaceId: string) => `ask:${workspaceId}`;
+
+/** Take one from a monthly allowance. Fails open if the database is down. */
+export async function reserveMonthly(
+  subject: string,
+  limit: number
+): Promise<{ ok: boolean; used: number }> {
+  const period = periodFor("month");
+  try {
+    const where = { subject_period: { subject, period } };
+    const row = await prisma.scanUsage.upsert({
+      where,
+      create: { subject, period, count: 1 },
+      update: { count: { increment: 1 } },
+      select: { count: true },
+    });
+    if (row.count > limit) {
+      await prisma.scanUsage.update({ where, data: { count: { decrement: 1 } } });
+      return { ok: false, used: limit };
+    }
+    return { ok: true, used: row.count };
+  } catch (err) {
+    console.warn("[scan-limits] monthly reserve failed, allowing:", err);
+    return { ok: true, used: 0 };
+  }
+}
+
+export async function getMonthlyUsage(subject: string): Promise<number> {
+  try {
+    const row = await prisma.scanUsage.findUnique({
+      where: { subject_period: { subject, period: periodFor("month") } },
+      select: { count: true },
+    });
+    return row?.count ?? 0;
+  } catch {
+    return 0;
+  }
+}

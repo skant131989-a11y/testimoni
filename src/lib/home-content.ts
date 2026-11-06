@@ -13,7 +13,7 @@ export const HOME_FAQ: { question: string; answer: string }[] = [
   {
     question: "Can I collect testimonials with a form, including video?",
     answer:
-      "Yes. Create a collection form that takes text, star ratings and video, then share it by link, email, WhatsApp, DM or QR code, or embed it on your own site. Submissions land in your inbox and you approve each one. The free plan includes 1 form and 1 video testimonial; Pro is unlimited.",
+      "Yes. Create a collection form that takes text, star ratings and video, then share it by link, email, WhatsApp, DM or QR code, or embed it on your own site. Submissions land in your inbox and you approve each one. The free plan includes 1 form and 2 video testimonials; Pro is unlimited.",
   },
   {
     question: "How does Find my praise work?",
@@ -23,7 +23,7 @@ export const HOME_FAQ: { question: string; answer: string }[] = [
   {
     question: "Is it really free?",
     answer:
-      "Scanning is free with no signup: 3 scans a day, or 10 a month once you create a free account, with a Claude backup search for up to 3 quotes when a scan finds nothing. The free plan holds 10 testimonials, 1 collection form, 1 widget and a hosted Wall of Love page, with no credit card.",
+      "Scanning is free with no signup: 3 scans a day, or 10 a month once you create a free account, with a Claude backup search for up to 3 quotes when a scan finds nothing. The free plan holds 15 testimonials, 1 collection form, 1 widget and a hosted Wall of Love page, with no credit card.",
   },
   {
     question: "What if nobody has posted about me yet?",

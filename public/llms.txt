@@ -14,7 +14,7 @@ Site: https://testimoni.io
 
 ## Pricing
 
-- **Free forever**: 10 testimonials, 1 collection form, 1 widget, 1 video testimonial, hosted Wall of Love URL, one-line embed, grid layout. No credit card.
+- **Free forever**: 15 testimonials, 1 collection form, 1 widget, 2 video testimonials, hosted Wall of Love URL, one-line embed, grid layout. No credit card.
 - **Pro — $19/month, flat (USD)**: Unlimited testimonials, forms, widgets, and video. All 5 layouts (Grid, Masonry, Carousel, List, Marquee). Custom branding. Remove "Powered by" watermark. Analytics dashboard. AI features included: Ask My Wall chatbot, Wall Score, tweet drafts, case study generator. Auto-sync from the App Store, Chrome Web Store, Play Store and Product Hunt. No yearly plan yet; no per-seat fees; cancel anytime.
 - **Customer Voice report (one-time, separate from the subscription)**: the scan is free; Quick Scan $9 unlocks every mention; Deep Report $19 adds why customers choose a product, strongest social proof, competitors mentioned and a CSV export.
 

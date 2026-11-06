@@ -25,7 +25,7 @@
  */
 
 export const FREE_FEATURES = [
-  "10 testimonials",
+  "15 testimonials",
   "10 praise scans a month (3 a day without an account)",
   "3 Claude backup searches a month when a scan finds nothing",
   "3 free screenshot extractions (AI)",
@@ -33,7 +33,8 @@ export const FREE_FEATURES = [
   "5 Testimonial → Tweet drafts / month",
   "URL import — X, LinkedIn, Reddit, HN, Product Hunt",
   "1 collection form + 1 widget",
-  "1 video testimonial (MP4/MOV, up to 50MB)",
+  "2 video testimonials (MP4/MOV, up to 50MB each)",
+  "Ask My Wall chatbot: 30 answers a month",
   "Public Wall of Love URL",
   "Grid layout + one-line script embed",
   "Analytics summary: totals and your last 3 days",
@@ -46,7 +47,7 @@ export const PRO_FEATURES = [
   "Weekly automatic re-scan, with an email when new praise appears",
   "Unlimited screenshot AI + batch upload",
   "Unlimited Testimonial → Tweet drafts (one-click to X + LinkedIn compose)",
-  "Ask My Wall — embeddable AI chatbot that answers visitors from your testimonials",
+  "Ask My Wall — embeddable AI chatbot with unlimited answers, quoting your testimonials",
   "Wall Score — unlimited audits + weekly emailed report + trend graph",
   "Deep AI recommendations — specific customer prompts per weakness",
   "AI Case Study Generator (drafts from any customer's testimonials)",

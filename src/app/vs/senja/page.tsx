@@ -204,7 +204,7 @@ export default function SenjaVsPage() {
                 <li>• You want testimonials you import to go live on your wall straight away, while form submissions wait for your approval so nothing unvetted goes public</li>
                 <li>• You want to pull praise in from where it already lives — X and LinkedIn URLs, App Store, Google Play, Chrome Web Store, Shopify and Product Hunt reviews, even screenshots of DMs and emails</li>
                 <li>• You want to see what people already say about you before you ask — the free Customer Voice scan finds public mentions and sorts praise from complaints and feature requests</li>
-                <li>• You want an AI chatbot on your site that answers visitor questions using only your real testimonials (Ask My Wall, Pro)</li>
+                <li>• You want an AI chatbot on your site that answers visitor questions using only your real testimonials (Ask My Wall: 30 answers a month free, unlimited on Pro)</li>
                 <li>• You want a Pro plan at a flat $19/mo</li>
                 <li>• You&apos;re new and value fast, minimal UI over a mature product</li>
               </ul>
@@ -224,7 +224,7 @@ export default function SenjaVsPage() {
               Try Testimoni free — 30-second setup
             </h2>
             <p className="mt-2 text-muted-foreground">
-              10 testimonials, 1 form, 1 widget, hosted Wall of Love. No credit card.
+              15 testimonials, 1 form, 1 widget, hosted Wall of Love. No credit card.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Button size="lg" asChild>

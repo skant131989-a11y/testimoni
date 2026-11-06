@@ -121,7 +121,7 @@ export default function VsIndexPage() {
           <div className="mt-16 rounded-2xl bg-primary/5 p-8 text-center">
             <h2 className="text-2xl font-bold">Try Testimoni free — 30-second setup</h2>
             <p className="mt-2 text-muted-foreground">
-              10 testimonials, 1 form, 1 widget, hosted Wall of Love. No credit card.
+              15 testimonials, 1 form, 1 widget, hosted Wall of Love. No credit card.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Button size="lg" asChild>

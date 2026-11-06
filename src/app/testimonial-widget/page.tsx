@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Testimonial widget for your website — Testimoni",
     description:
-      "One-line embed, 5 layouts, no CSS conflicts. Free plan: 10 testimonials, 1 widget, hosted Wall of Love.",
+      "One-line embed, 5 layouts, no CSS conflicts. Free plan: 15 testimonials, 1 widget, hosted Wall of Love.",
     url: "/testimonial-widget",
   },
 };
@@ -71,7 +71,7 @@ export default function TestimonialWidgetPage() {
               </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              Free plan · 10 testimonials · 1 widget · No credit card
+              Free plan · 15 testimonials · 1 widget · No credit card
             </p>
           </div>
 
@@ -108,7 +108,7 @@ export default function TestimonialWidgetPage() {
               <Video className="h-5 w-5 text-primary" />
               <p className="mt-3 text-sm font-bold">Text and video</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Every plan includes 1 video testimonial; Pro unlocks unlimited video.
+                Every plan includes 2 video testimonials; Pro unlocks unlimited video.
               </p>
             </div>
           </section>
@@ -155,7 +155,7 @@ export default function TestimonialWidgetPage() {
           <section className="mt-16 rounded-2xl border-2 border-primary/30 bg-primary/5 p-6">
             <h2 className="text-2xl font-bold">Free to start</h2>
             <p className="mt-2 text-muted-foreground">
-              The free plan includes 10 testimonials, 1 collection form, 1 widget, a hosted Wall of
+              The free plan includes 15 testimonials, 1 collection form, 1 widget, a hosted Wall of
               Love page and the one-line embed. Pro is $19/month.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">

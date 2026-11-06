@@ -14,9 +14,20 @@ type Props = {
   plan: PlanType;
   testimonialCount: number;
   baseUrl: string;
+  /** Free workspaces: answers used this month and the monthly allowance. */
+  answersUsed?: number;
+  answersLimit?: number | null;
 };
 
-export function AskMyWallClient({ initialActive, workspaceSlug, plan, testimonialCount, baseUrl }: Props) {
+export function AskMyWallClient({
+  initialActive,
+  workspaceSlug,
+  plan,
+  testimonialCount,
+  baseUrl,
+  answersUsed = 0,
+  answersLimit = null,
+}: Props) {
   const [active, setActive] = useState(initialActive);
   const [pending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
@@ -58,10 +69,11 @@ export function AskMyWallClient({ initialActive, workspaceSlug, plan, testimonia
         An AI chatbot bubble you embed on your site. Visitors ask questions; it answers using your real testimonials — never invents.
       </p>
 
-      {plan === "FREE" ? (
-        <UpgradeGate />
-      ) : (
+      {(
         <>
+          {plan === "FREE" && answersLimit !== null && (
+            <AnswerMeter used={answersUsed} limit={answersLimit} />
+          )}
           {error && (
             <div className="mt-6 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm">
               <p className="text-destructive">{error}</p>
@@ -129,15 +141,43 @@ export function AskMyWallClient({ initialActive, workspaceSlug, plan, testimonia
   );
 }
 
-function UpgradeGate() {
+function AnswerMeter({ used, limit }: { used: number; limit: number }) {
+  const pct = Math.min(100, Math.round((used / limit) * 100));
+  const out = used >= limit;
+  return (
+    <>
+      <div className="mt-6 rounded-2xl border bg-card p-5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium">Free plan: {limit} answers a month</p>
+          <p className="text-sm text-muted-foreground">
+            {Math.min(used, limit)} of {limit} used
+          </p>
+        </div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-primary/15">
+          <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Resets on the 1st. Pro has no limit.
+        </p>
+      </div>
+      {(out || pct >= 80) && <UpgradeGate exhausted={out} />}
+    </>
+  );
+}
+
+function UpgradeGate({ exhausted = false }: { exhausted?: boolean }) {
   return (
     <div className="mt-6 rounded-2xl border-2 border-primary/30 bg-primary/5 p-6">
       <div className="flex items-center gap-2">
         <Sparkles className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">Pro feature</h2>
+        <h2 className="text-lg font-semibold">
+          {exhausted ? "You've used this month's free answers" : "Almost at this month's free answers"}
+        </h2>
       </div>
       <p className="mt-2 text-sm text-muted-foreground">
-        Ask My Wall answers visitor questions using your real customer testimonials — grounded, cited, never made-up. Included in Pro at $19/mo.
+        {exhausted
+          ? "Visitors see a short \u201ccheck back soon\u201d message until the 1st. Pro has no limit on answers, for $19/mo."
+          : "Pro has no limit on answers, so your chatbot never goes quiet. $19/mo."}
       </p>
 
       <div className="mt-5 rounded-xl border bg-background p-4">

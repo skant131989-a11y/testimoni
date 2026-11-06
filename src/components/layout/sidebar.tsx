@@ -48,7 +48,7 @@ const navItems: {
   { href: "/dashboard/sources", label: "Review sources", icon: RefreshCw },
   { href: "/dashboard/wall-score", label: "Wall Score", icon: Gauge, freeTag: "1 free" },
   { href: "/dashboard/tweet-drafts", label: "Tweet drafts", icon: Send, freeTag: "5/mo" },
-  { href: "/dashboard/ask-my-wall", label: "Ask My Wall", icon: MessageSquare, freeTag: "Pro" },
+  { href: "/dashboard/ask-my-wall", label: "Ask My Wall", icon: MessageSquare, freeTag: "30/mo" },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
@@ -293,7 +293,7 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
           const max = PLAN_LIMITS.FREE.maxTestimonials;
           const pct = Math.min(100, Math.round((used / max) * 100));
           const heading =
-            used >= max ? "Free limit reached" : used >= 8 ? "Almost at your free limit" : "Upgrade to Pro";
+            used >= max ? "Free limit reached" : used >= max - 2 ? "Almost at your free limit" : "Upgrade to Pro";
           return (
             <div className="m-3 rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 p-4">
               <div className="flex items-center gap-2">

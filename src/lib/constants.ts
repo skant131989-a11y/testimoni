@@ -1,15 +1,14 @@
 export const PLAN_LIMITS = {
   FREE: {
-    maxTestimonials: 10,
+    maxTestimonials: 15,
     maxWidgets: 1,
     maxForms: 1,
-    // How many videos a Free workspace can host at once. Set to 1 so
-    // Free users experience the full "upload -> plays on wall ->
-    // embed" flow (that's what converts), but can't burn our
-    // Supabase Free-tier storage quota with dozens of large clips.
-    // Delete their video to upload a new one, or upgrade to Pro for
-    // unlimited.
-    maxVideos: 1,
+    // How many videos a Free workspace can host at once. Two lets Free
+    // users experience the full "upload -> plays on wall -> embed"
+    // flow (that's what converts) without burning our Supabase
+    // storage quota on dozens of large clips. Delete one to upload a
+    // new one, or upgrade to Pro for unlimited.
+    maxVideos: 2,
     layouts: ["GRID"] as const,
     video: true,
     watermark: true,
@@ -20,8 +19,11 @@ export const PLAN_LIMITS = {
     maxWallScoreAudits: 1,
     // Testimonial → Tweet drafts per calendar month.
     maxTweetDraftsPerMonth: 5,
-    // Ask My Wall chatbot — Pro AI tier only feature; false here.
-    askMyWall: false,
+    // Ask My Wall chatbot: a capped taste on Free. Answers come from
+    // Groq only (never Claude); if Groq is down the visitor gets the
+    // closest real quotes instead. Pro is unlimited.
+    askMyWall: true,
+    askMyWallAnswersPerMonth: 30,
     // Wall Score tracking & weekly email — Pro AI only.
     wallScoreTracking: false,
   },
@@ -41,6 +43,7 @@ export const PLAN_LIMITS = {
     maxWallScoreAudits: Infinity,
     maxTweetDraftsPerMonth: Infinity,
     askMyWall: true,
+    askMyWallAnswersPerMonth: Infinity,
     wallScoreTracking: true,
   },
   // Retained in PLAN_LIMITS + Prisma PlanType because deleting an
@@ -59,6 +62,7 @@ export const PLAN_LIMITS = {
     maxWallScoreAudits: Infinity,
     maxTweetDraftsPerMonth: Infinity,
     askMyWall: true,
+    askMyWallAnswersPerMonth: Infinity,
     wallScoreTracking: true,
   },
 } as const;

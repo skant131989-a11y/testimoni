@@ -37,7 +37,7 @@ import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
 
 const TITLE = "Testimoni | Collect and find customer testimonials, show them anywhere";
 const DESCRIPTION =
-  "Collect testimonials with forms (text, star ratings, video) or find real customer posts on X, LinkedIn and Reddit by pasting your website. Approve with a click, then show them on a hosted wall or with one line of code. Free for 10 testimonials; Pro is a flat $19 a month.";
+  "Collect testimonials with forms (text, star ratings, video) or find real customer posts on X, LinkedIn and Reddit by pasting your website. Approve with a click, then show them on a hosted wall or with one line of code. Free for 15 testimonials; Pro is a flat $19 a month.";
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -131,7 +131,7 @@ const FEATURE_GROUPS: {
       { text: "Find my praise: scan the web for real posts about you" },
       { text: "Customer Voice: praise, complaints and requests, free summary" },
       { text: "Wall Score: audit your wall from 0 to 100", tag: "1 free, unlimited on Pro" },
-      { text: "Ask My Wall: a chatbot that quotes your real customers", tag: "Pro" },
+      { text: "Ask My Wall: a chatbot that quotes your real customers", tag: "30 answers free, unlimited on Pro" },
       { text: "Tweet drafts from any quote", tag: "5 a month free" },
       { text: "Case study generator and weekly new-praise email", tag: "Pro" },
     ],
@@ -239,7 +239,7 @@ export default function LandingPage() {
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> 3 free scans a day
                 </li>
                 <li className="inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Free for 10 testimonials
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Free for 15 testimonials
                 </li>
                 <li className="inline-flex items-center gap-1">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Pro is a flat $19/month
@@ -539,9 +539,10 @@ export default function LandingPage() {
               })}
             </div>
             <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-muted-foreground">
-              On raw testimonial count, Senja&rsquo;s free plan (15) is ahead of ours (10). Where we
-              go further is everything around the count: scanning for praise, AI screenshot
-              extraction, Wall Score, tweet drafts and free tools.
+              Our free plan now holds 15 testimonials: level with Senja, and ahead of Testimonial.to&rsquo;s
+              10 text plus 2 video. Where we go further is everything around the count: scanning for
+              praise, AI screenshot extraction, an Ask My Wall chatbot, Wall Score, tweet drafts and
+              free tools.
             </p>
             <p className="mt-3 text-center text-xs text-muted-foreground">
               Prices and free plans read from each tool&rsquo;s own pricing page on {FACTS_VERIFIED_ON}.{" "}

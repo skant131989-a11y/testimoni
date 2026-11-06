@@ -187,7 +187,7 @@ export default async function DashboardLayout({
 
   const workspace = dbUser.workspaceMembers[0].workspace;
   const plan = getEffectivePlan(workspace.slug, workspace.subscription?.plan);
-  // Free accounts see "7 of 10 testimonials used" in the sidebar card.
+  // Free accounts see "7 of 15 testimonials used" in the sidebar card.
   const testimonialCount =
     plan === "FREE"
       ? await prisma.testimonial.count({ where: { workspaceId: workspace.id } })

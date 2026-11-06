@@ -284,7 +284,7 @@ export default async function SettingsPage() {
               </p>
               <p className="text-sm text-muted-foreground">
                 {plan === "FREE"
-                  ? "10 testimonials, 1 widget, basic features"
+                  ? "15 testimonials, 1 widget, basic features"
                   : "Unlimited testimonials, widgets, and premium features"}
               </p>
             </div>

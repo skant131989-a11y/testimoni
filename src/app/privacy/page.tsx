@@ -87,7 +87,7 @@ export default function PrivacyPage() {
               <li>Their name (required).</li>
               <li>Their email address (optional).</li>
               <li>Their testimonial content, star rating, and any optional job title.</li>
-              <li>Any images or videos they attach (1 free video per workspace; unlimited on Pro).</li>
+              <li>Any images or videos they attach (2 free videos per workspace; unlimited on Pro).</li>
               <li>The submission timestamp.</li>
             </ul>
             <p>

@@ -100,7 +100,7 @@ export const PAGE_FAQS = {
     {
       question: "Can I turn a found tweet into an embeddable testimonial?",
       answer:
-        "Yes. Click any tweet in the results, sign up for a free Testimoni workspace (10 testimonials on the free plan), and it's saved — plus you get a one-line embed to drop on your site.",
+        "Yes. Click any tweet in the results, sign up for a free Testimoni workspace (15 testimonials on the free plan), and it's saved — plus you get a one-line embed to drop on your site.",
     },
     {
       question: "What's the difference between this and Twitter's built-in embed?",
@@ -202,7 +202,7 @@ export const PAGE_FAQS = {
     {
       question: "Is Testimoni actually free forever, unlike Senja?",
       answer:
-        "Both have free plans. Testimoni's free plan: 10 testimonials, 1 form, 1 widget, hosted Wall of Love URL, one-line embed, and the paste-a-tweet flow. See senja.io for what their free plan currently includes.",
+        "Both have free plans. Testimoni's free plan: 15 testimonials, 1 form, 1 widget, hosted Wall of Love URL, one-line embed, and the paste-a-tweet flow. See senja.io for what their free plan currently includes.",
     },
     {
       question: "Can I migrate from Senja to Testimoni?",
@@ -217,7 +217,7 @@ export const PAGE_FAQS = {
     {
       question: "Does Testimoni have video testimonials like Senja?",
       answer:
-        "Yes. Every Testimoni plan (including Free) includes 1 video testimonial, and Pro unlocks unlimited video. Senja also collects video and text testimonials.",
+        "Yes. Every Testimoni plan (including Free) includes 2 video testimonials, and Pro unlocks unlimited video. Senja also collects video and text testimonials.",
     },
   ],
 
@@ -235,7 +235,7 @@ export const PAGE_FAQS = {
     {
       question: "What does Testimoni's free plan include?",
       answer:
-        "10 testimonials, 1 collection form, 1 widget, a hosted Wall of Love URL, the one-line embed, and 1 video testimonial. Compare that with Testimonial.to's current free plan on their site.",
+        "15 testimonials, 1 collection form, 1 widget, a hosted Wall of Love URL, the one-line embed, and 2 video testimonials. Compare that with Testimonial.to's current free plan on their site.",
     },
     {
       question: "Can I embed Testimoni on Framer or Webflow like Testimonial.to?",
@@ -245,7 +245,7 @@ export const PAGE_FAQS = {
     {
       question: "Which is better for solo founders on a budget?",
       answer:
-        "Testimoni's free plan covers what a solo founder needs at launch (10 testimonials, hosted wall, embed), and Pro is $19/month if you outgrow it. Compare against Testimonial.to's current plans and pick the one that fits your budget and use case.",
+        "Testimoni's free plan covers what a solo founder needs at launch (15 testimonials, hosted wall, embed), and Pro is $19/month if you outgrow it. Compare against Testimonial.to's current plans and pick the one that fits your budget and use case.",
     },
   ],
 
@@ -263,7 +263,7 @@ export const PAGE_FAQS = {
     {
       question: "Is the testimonial widget free?",
       answer:
-        "Yes. The free plan includes 10 testimonials, 1 collection form, 1 widget, a hosted Wall of Love page and the one-line embed, with no credit card. Pro is $19/month for higher limits.",
+        "Yes. The free plan includes 15 testimonials, 1 collection form, 1 widget, a hosted Wall of Love page and the one-line embed, with no credit card. Pro is $19/month for higher limits.",
     },
     {
       question: "Will the widget break my site's design?",
@@ -278,7 +278,7 @@ export const PAGE_FAQS = {
     {
       question: "Can the widget show video testimonials?",
       answer:
-        "Yes. Every plan, including Free, includes 1 video testimonial; Pro unlocks unlimited video.",
+        "Yes. Every plan, including Free, includes 2 video testimonials; Pro unlocks unlimited video.",
     },
   ],
 

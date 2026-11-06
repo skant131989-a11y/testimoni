@@ -55,7 +55,7 @@ function buildNicheFaqs(audience: string) {
   return [
     {
       question: `Is Testimoni free for ${audience}?`,
-      answer: `Yes. The free forever plan includes 10 testimonials, 1 collection form, 1 widget, and a hosted Wall of Love URL — no credit card. Pro is $19/month for unlimited testimonials, forms, widgets, and video testimonials.`,
+      answer: `Yes. The free forever plan includes 15 testimonials, 1 collection form, 1 widget, and a hosted Wall of Love URL — no credit card. Pro is $19/month for unlimited testimonials, forms, widgets, and video testimonials.`,
     },
     {
       question: `How do ${audience} collect testimonials with Testimoni?`,
@@ -67,7 +67,7 @@ function buildNicheFaqs(audience: string) {
     },
     {
       question: `Does Testimoni support video testimonials for ${audience}?`,
-      answer: `Yes. Every plan includes 1 free video testimonial. Pro unlocks unlimited video testimonials with hosted playback, no extra storage cost.`,
+      answer: `Yes. Every plan includes 2 free video testimonials. Pro unlocks unlimited video testimonials with hosted playback, no extra storage cost.`,
     },
     {
       question: `How long does setup take for ${audience}?`,
@@ -355,7 +355,7 @@ export default async function NichePage({ params }: PageProps) {
                 Free forever plan. No credit card. Set up in 30 seconds.
               </p>
               <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
-                <li>✓ 10 testimonials, 1 form, 1 widget on the Free plan</li>
+                <li>✓ 15 testimonials, 1 form, 1 widget on the Free plan</li>
                 <li>✓ Public Wall of Love URL — shareable anywhere</li>
                 <li>✓ One-line embed for any site</li>
               </ul>

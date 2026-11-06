@@ -232,7 +232,7 @@ export default function SignupPage() {
         <CardDescription>
           {isImportFlow
             ? "The tweet you just imported is waiting. Sign up and we'll drop it on your wall."
-            : "Free forever · No credit card · 10 testimonials on the free plan"}
+            : "Free forever · No credit card · 15 testimonials on the free plan"}
         </CardDescription>
       </CardHeader>
       <CardContent>

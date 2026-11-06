@@ -21,7 +21,7 @@ interface LimitsInfo {
   maxForms: number;
 }
 
-const FREE_LIMITS: LimitsInfo = { maxTestimonials: 10, maxWidgets: 1, maxForms: 1 };
+const FREE_LIMITS: LimitsInfo = { maxTestimonials: 15, maxWidgets: 1, maxForms: 1 };
 const PRO_LIMITS: LimitsInfo = {
   maxTestimonials: Infinity,
   maxWidgets: Infinity,

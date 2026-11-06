@@ -129,7 +129,7 @@ export default function ScatteredPraisePost() {
                 <p className="text-sm font-semibold text-muted-foreground">Free forever</p>
                 <p className="mt-1 text-3xl font-bold">$0</p>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  10 testimonials, 1 collection form, 1 widget, a hosted Wall of Love page and the
+                  15 testimonials, 1 collection form, 1 widget, a hosted Wall of Love page and the
                   one-line embed. No credit card.
                 </p>
               </div>
