@@ -384,10 +384,10 @@ export default function LandingPage() {
                         {items.map((it) => (
                           <li key={it.text} className="flex items-start gap-2">
                             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                            <span>
+                            <span className="min-w-0 break-words">
                               {it.text}
                               {it.tag && (
-                                <span className="ml-1.5 whitespace-nowrap rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
+                                <span className="mt-1 block w-fit max-w-full rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
                                   {it.tag}
                                 </span>
                               )}
