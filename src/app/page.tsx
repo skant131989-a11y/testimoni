@@ -526,13 +526,25 @@ export default function LandingPage() {
                     <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       Free plan
                     </p>
-                    <p className="mt-1 text-sm text-foreground/80">{t.freePlan}</p>
+                    <ul className="mt-2 space-y-1.5 text-sm text-foreground/80">
+                      {(t.freeItems ?? t.freePlan.split(", ")).map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <span>{item.charAt(0).toUpperCase() + item.slice(1)}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 );
               })}
             </div>
-            <p className="mt-6 text-center text-xs text-muted-foreground">
-              Prices read from each tool&rsquo;s own pricing page on {FACTS_VERIFIED_ON}.{" "}
+            <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-muted-foreground">
+              On raw testimonial count, Senja&rsquo;s free plan (15) is ahead of ours (10). Where we
+              go further is everything around the count: scanning for praise, AI screenshot
+              extraction, Wall Score, tweet drafts and free tools.
+            </p>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              Prices and free plans read from each tool&rsquo;s own pricing page on {FACTS_VERIFIED_ON}.{" "}
               <Link href="/vs/senja" className="underline underline-offset-2 hover:text-foreground">vs Senja</Link>
               {" · "}
               <Link href="/vs/testimonial-to" className="underline underline-offset-2 hover:text-foreground">vs Testimonial.to</Link>
