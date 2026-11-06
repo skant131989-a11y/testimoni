@@ -5,6 +5,7 @@ import { PublicNav } from "@/components/layout/public-nav";
 import { TrackedLink } from "@/components/tracked-link";
 import { StructuredData } from "@/components/seo/structured-data";
 import { ALL_TOOLS, FACTS_NOTE } from "@/lib/competitors";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 const PATH = "/blog/best-testimonial-tools";
 const TITLE = "The best testimonial tools in 2026, compared";
@@ -211,11 +212,7 @@ export default function BestTestimonialToolsPage() {
         </article>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2026 Testimoni. All rights reserved.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

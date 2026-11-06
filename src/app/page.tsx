@@ -52,6 +52,7 @@ import { WedgeBanner } from "@/components/wedge-banner";
 import { LinkImportSection } from "@/components/link-import-section";
 import { StartFromScratch } from "@/components/start-from-scratch";
 import { ToolsGridSection } from "@/components/tools-grid-section";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
   title: {
@@ -814,86 +815,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t">
-        {/* By industry — surfaces the /for/[niche] pages so someone
-            reading the footer sees they can find an industry-specific
-            landing page. Bigger than the existing bottom nav, sits
-            above it as its own strip. */}
-        <div className="mx-auto max-w-7xl px-4 pt-8">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Use cases &amp; guides
-          </p>
-          <div className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2 md:grid-cols-3">
-            <Link href="/turn-tweets-into-testimonials" className="text-muted-foreground hover:text-foreground">Turn tweets into testimonials</Link>
-            <Link href="/import-linkedin-recommendations" className="text-muted-foreground hover:text-foreground">Collect LinkedIn praise</Link>
-            <Link href="/embed-testimonials-without-screenshots" className="text-muted-foreground hover:text-foreground">Embed testimonials without screenshots</Link>
-            <Link href="/wall-of-love" className="text-muted-foreground hover:text-foreground">Create a Wall of Love</Link>
-            <Link href="/testimonial-widget-for-founders" className="text-muted-foreground hover:text-foreground">Testimonial widget for solo founders</Link>
-            <Link href="/blog/best-testimonial-tools" className="text-muted-foreground hover:text-foreground">Best testimonial tools, compared</Link>
-            <Link href="/senja-alternatives" className="text-muted-foreground hover:text-foreground">Senja alternatives</Link>
-            <Link href="/vs/famewall" className="text-muted-foreground hover:text-foreground">Testimoni vs Famewall</Link>
-            <Link href="/vs/shapo" className="text-muted-foreground hover:text-foreground">Testimoni vs Shapo</Link>
-          </div>
-        </div>
-        <div className="mx-auto max-w-7xl px-4 py-8">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            By industry
-          </p>
-          <div className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2 md:grid-cols-4">
-            <Link href="/for/saas" className="text-muted-foreground hover:text-foreground">SaaS founders</Link>
-            <Link href="/for/course-creators" className="text-muted-foreground hover:text-foreground">Course creators</Link>
-            <Link href="/for/shopify" className="text-muted-foreground hover:text-foreground">Shopify / D2C</Link>
-            <Link href="/for/freelancers" className="text-muted-foreground hover:text-foreground">Freelancers</Link>
-            <Link href="/for/agencies" className="text-muted-foreground hover:text-foreground">Agencies</Link>
-            <Link href="/for/photographers" className="text-muted-foreground hover:text-foreground">Photographers</Link>
-            <Link href="/for/real-estate-agents" className="text-muted-foreground hover:text-foreground">Real estate agents</Link>
-            <Link href="/for/wedding-vendors" className="text-muted-foreground hover:text-foreground">Wedding vendors</Link>
-          </div>
-        </div>
-        <div className="border-t py-8">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/icon.png"
-              alt="Testimoni logo"
-              width={24}
-              height={24}
-              className="rounded-full"
-            />
-            <span className="font-semibold">Testimoni</span>
-          </div>
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
-            <Link href="/demo" className="text-muted-foreground hover:text-foreground">Demo</Link>
-            <Link href="/tools" className="text-muted-foreground hover:text-foreground">Free Tools</Link>
-            <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
-            <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
-            <Link href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy</Link>
-            <Link href="/terms" className="text-muted-foreground hover:text-foreground">Terms</Link>
-            <a
-              href="https://x.com/usetestimoni"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Testimoni on X (Twitter)"
-            >
-              X
-            </a>
-            <a
-              href="https://www.linkedin.com/company/144771086"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="Testimoni on LinkedIn"
-            >
-              LinkedIn
-            </a>
-          </nav>
-          <p className="text-sm text-muted-foreground">
-            &copy; 2026 Testimoni. All rights reserved.
-          </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
       <StickyMobileCta source="home" />
 
       {/* Ask My Wall — LIVE chatbot on the home page. The same

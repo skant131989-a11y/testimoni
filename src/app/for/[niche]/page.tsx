@@ -15,6 +15,7 @@ import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
 import { StructuredData } from "@/components/seo/structured-data";
 import { ExitIntent } from "@/components/exit-intent";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 interface PageProps {
   params: Promise<{ niche: string }>;
@@ -388,14 +389,7 @@ export default async function NichePage({ params }: PageProps) {
       </section>
 
       {/* Standard footer */}
-      <footer className="border-t py-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground">
-            ← Back to Testimoni
-          </Link>
-          <p>© 2026 Testimoni. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter />
 
       <ExitIntent
         surface={`for_${niche.slug}`}

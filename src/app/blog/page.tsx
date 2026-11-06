@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, Clock } from "lucide-react";
 import { PublicNav } from "@/components/layout/public-nav";
 import { TrackedLink } from "@/components/tracked-link";
 import { GuideLinks } from "@/components/guides/guide-links";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
   title: "Blog — Testimoni",
@@ -131,11 +132,7 @@ export default function BlogIndexPage() {
 
       <GuideLinks />
 
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2026 Testimoni. All rights reserved.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

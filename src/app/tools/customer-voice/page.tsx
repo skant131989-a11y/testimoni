@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PublicNav } from "@/components/layout/public-nav";
 import { CustomerVoiceClient } from "./client";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
   title: "Find what customers really say — Testimoni",
@@ -23,14 +24,7 @@ export default function CustomerVoicePage() {
       <main className="flex-1">
         <CustomerVoiceClient />
       </main>
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2026 Testimoni · Miss something?{" "}
-          <a href="/contact" className="underline">
-            hello@testimoni.io
-          </a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

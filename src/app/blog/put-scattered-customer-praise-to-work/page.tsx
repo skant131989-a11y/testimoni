@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ArrowRight, Clock, Sparkles } from "lucide-react";
 import { PublicNav } from "@/components/layout/public-nav";
 import { TrackedLink } from "@/components/tracked-link";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 const SLUG = "put-scattered-customer-praise-to-work";
 const TITLE = "Your best customer praise is scattered across the internet. Here's how to put it to work.";
@@ -185,11 +186,7 @@ export default function ScatteredPraisePost() {
         </article>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2026 Testimoni. All rights reserved.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

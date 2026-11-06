@@ -32,6 +32,7 @@ import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { TrackedLink } from "@/components/tracked-link";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
   title: "Features — Testimoni · Every way to build a Wall of Love",
@@ -436,15 +437,7 @@ export default function FeaturesPage() {
         </div>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground">
-            &larr; Back to home
-          </Link>
-          <span className="mx-3">·</span>
-          &copy; 2026 Testimoni. All rights reserved.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

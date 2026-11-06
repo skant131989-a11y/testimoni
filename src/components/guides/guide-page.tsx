@@ -6,6 +6,7 @@ import { TrackedLink } from "@/components/tracked-link";
 import { StructuredData } from "@/components/seo/structured-data";
 import { pageBreadcrumbs } from "@/lib/seo-faqs";
 import { GUIDES, GUIDE_LINKS, type Guide } from "@/lib/guides";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 const SITE_URL = "https://testimoni.io";
 
@@ -140,11 +141,7 @@ export function GuidePage({ slug }: { slug: string }) {
         </article>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2026 Testimoni. All rights reserved.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

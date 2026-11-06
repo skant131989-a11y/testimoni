@@ -8,6 +8,7 @@ import { StructuredData } from "@/components/seo/structured-data";
 import { PageFAQ } from "@/components/seo/page-faq";
 import { PAGE_FAQS, pageBreadcrumbs } from "@/lib/seo-faqs";
 import { GuideLinks } from "@/components/guides/guide-links";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
@@ -146,11 +147,7 @@ export default function VsIndexPage() {
 
       <GuideLinks />
 
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2026 Testimoni. All rights reserved.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

@@ -35,6 +35,7 @@ import {
   Palette,
   Loader2,
 } from "lucide-react";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 interface Testimonial {
   customerName: string;
@@ -1275,28 +1276,7 @@ export default function DemoClient() {
         </div>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/icon.png"
-              alt="Testimoni logo"
-              width={24}
-              height={24}
-              className="rounded-full"
-            />
-            <span className="font-semibold">Testimoni</span>
-          </Link>
-          <nav className="flex items-center gap-5 text-sm">
-            <Link href="/w/demo" className="text-muted-foreground hover:text-foreground">Sample Wall</Link>
-            <Link href="/demo" className="text-muted-foreground hover:text-foreground">Demo</Link>
-            <Link href="/tools" className="text-muted-foreground hover:text-foreground">Free Tools</Link>
-            <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
-            <Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link>
-          </nav>
-          <p className="text-sm text-muted-foreground">&copy; 2026 Testimoni.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

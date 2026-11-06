@@ -18,6 +18,7 @@ import { BatchImportPanel } from "@/components/batch-import-panel";
 import { createClient } from "@/lib/supabase/client";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 /**
  * Praise Tweet Finder — search-URL builder.
@@ -455,14 +456,7 @@ export function PraiseTweetFinderClient() {
         </div>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground">
-            ← Back to Testimoni
-          </Link>
-          <p>Free tool. No signup needed to search.</p>
-        </div>
-      </footer>
+      <SiteFooter />
 
       {/* Exit-intent signup nudge — only for anonymous visitors.
           Logged-in users don't need a "sign up!" pop-up when they

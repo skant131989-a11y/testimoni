@@ -23,6 +23,7 @@ import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
 import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
 import { EmailMeThis } from "@/components/email-me-this";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 const CHANNELS = [
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
@@ -331,14 +332,7 @@ export function AskTemplatesClient() {
         />
       </main>
 
-      <footer className="border-t py-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground">
-            ← Back to Testimoni
-          </Link>
-          <p>Free tool. No signup needed.</p>
-        </div>
-      </footer>
+      <SiteFooter />
 
       <ExitIntent surface="tools_ask_templates" />
     </div>

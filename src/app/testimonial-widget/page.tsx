@@ -7,6 +7,7 @@ import { TrackedLink } from "@/components/tracked-link";
 import { StructuredData } from "@/components/seo/structured-data";
 import { PageFAQ } from "@/components/seo/page-faq";
 import { PAGE_FAQS, pageBreadcrumbs } from "@/lib/seo-faqs";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
@@ -194,11 +195,7 @@ export default function TestimonialWidgetPage() {
         faqs={PAGE_FAQS.testimonialWidget}
       />
 
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2026 Testimoni. All rights reserved.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PublicNav } from "@/components/layout/public-nav";
 import { FindMyProofClient } from "./client";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
   title: "Find my customer proof — Testimoni",
@@ -35,14 +36,7 @@ export default function FindMyProofPage() {
       <main className="flex-1">
         <FindMyProofClient />
       </main>
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2026 Testimoni · An experiment. Tell us what you found:{" "}
-          <a href="/contact" className="underline">
-            hello@testimoni.io
-          </a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Sparkles, Image as ImageIcon, Search, PenLine, ArrowRight, MessageCircl
 import { Button } from "@/components/ui/button";
 import { ToolsHeader } from "@/components/tools-header";
 import { TrackedLink } from "@/components/tracked-link";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
   title: "Free Testimonial Tools: Writer, Cards & More",
@@ -185,14 +186,7 @@ export default function ToolsPage() {
         </div>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground">
-            ← Back to Testimoni
-          </Link>
-          <p>Free tools; some features require an account.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { TrackedLink } from "@/components/tracked-link";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { StructuredData } from "@/components/seo/structured-data";
 import { listFounderDirectory } from "@/lib/founder-directory";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
@@ -194,11 +195,7 @@ export default async function FoundersPage() {
         </div>
       </main>
 
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          &copy; 2026 Testimoni. All rights reserved.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
