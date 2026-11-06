@@ -27,6 +27,7 @@
 export const FREE_FEATURES = [
   "10 testimonials",
   "10 praise scans a month (3 a day without an account)",
+  "3 Claude backup searches a month when a scan finds nothing",
   "3 free screenshot extractions (AI)",
   "1 Wall Score audit (with shareable score card)",
   "5 Testimonial → Tweet drafts / month",
@@ -40,7 +41,7 @@ export const FREE_FEATURES = [
 
 export const PRO_FEATURES = [
   "Unlimited testimonials",
-  "30 deeper praise scans a month: wider search, checked by Claude",
+  "30 deeper praise scans a month, with a Claude backup search whenever one finds nothing",
   "Weekly automatic re-scan, with an email when new praise appears",
   "Unlimited screenshot AI + batch upload",
   "Unlimited Testimonial → Tweet drafts (one-click to X + LinkedIn compose)",

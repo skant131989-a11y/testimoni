@@ -157,3 +157,77 @@ export function limitMessage(actor: ScanActor): string {
   }
   return "You've used your 30 scans for this month. They reset on the 1st.";
 }
+
+// ── Claude backup search ─────────────────────────────────────────
+// When a scan finds nothing, accounts can get one Claude web search as
+// a last resort. It costs real money, so it is capped per account
+// (Free only) and globally per day.
+
+export const RESCUE = {
+  freePerMonth: 3,
+  globalPerDay: 30,
+  maxQuotes: { free: 3, pro: 10 },
+} as const;
+
+async function bump(subject: string, period: string, limit: number): Promise<boolean> {
+  const where = { subject_period: { subject, period } };
+  const row = await prisma.scanUsage.upsert({
+    where,
+    create: { subject, period, count: 1 },
+    update: { count: { increment: 1 } },
+    select: { count: true },
+  });
+  if (row.count > limit) {
+    await prisma.scanUsage.update({ where, data: { count: { decrement: 1 } } });
+    return false;
+  }
+  return true;
+}
+
+async function unbump(subject: string, period: string): Promise<void> {
+  await prisma.scanUsage.updateMany({
+    where: { subject, period, count: { gt: 0 } },
+    data: { count: { decrement: 1 } },
+  });
+}
+
+function rescueKeys(actor: ScanActor) {
+  const day = periodFor("day");
+  return {
+    globalSubject: "rescue:global",
+    globalPeriod: day,
+    userSubject: `rescue:${actor.subject}`,
+    userPeriod: actor.period,
+  };
+}
+
+/** Take one Claude backup search, if both the account and the day allow. */
+export async function reserveRescue(
+  actor: ScanActor
+): Promise<"ok" | "user_limit" | "global_limit" | "unavailable"> {
+  const k = rescueKeys(actor);
+  try {
+    if (!(await bump(k.globalSubject, k.globalPeriod, RESCUE.globalPerDay))) return "global_limit";
+    if (actor.tier === "free") {
+      if (!(await bump(k.userSubject, k.userPeriod, RESCUE.freePerMonth))) {
+        await unbump(k.globalSubject, k.globalPeriod);
+        return "user_limit";
+      }
+    }
+    return "ok";
+  } catch (err) {
+    console.warn("[scan-limits] rescue reserve failed, skipping Claude:", err);
+    return "unavailable";
+  }
+}
+
+/** Give a backup search back (Claude errored before returning anything). */
+export async function refundRescue(actor: ScanActor): Promise<void> {
+  const k = rescueKeys(actor);
+  try {
+    await unbump(k.globalSubject, k.globalPeriod);
+    if (actor.tier === "free") await unbump(k.userSubject, k.userPeriod);
+  } catch {
+    // best effort
+  }
+}

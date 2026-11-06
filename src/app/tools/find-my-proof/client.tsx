@@ -41,6 +41,8 @@ interface Quote {
   source: string;
   sourceUrl?: string;
   score: number;
+  /** Found by Claude's backup web search rather than the standard scan. */
+  deep?: boolean;
 }
 
 interface Usage {
@@ -59,6 +61,8 @@ interface Result {
   cached?: boolean;
   provider?: string;
   usage?: Usage;
+  /** What to tell the visitor when nothing was found. */
+  deepSearch?: "none" | "login" | "used";
 }
 
 // Stage messages shown during the API call. Each one dwells long
@@ -594,6 +598,33 @@ function ResultView({
                 existing customers — most walls start empty and grow from there.
               </li>
             </ul>
+            {result.deepSearch === "login" && (
+              <div className="mx-auto mt-5 max-w-md rounded-xl border-2 border-primary/30 bg-primary/5 p-4 text-left">
+                <p className="font-semibold">Want us to dig deeper?</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Log in or sign up free and we&rsquo;ll run a deeper search for up to 3 quotes.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link href="/signup?src=find_my_proof_deep">
+                    <Button size="sm">Sign up free</Button>
+                  </Link>
+                  <Link
+                    href={`/login?next=${encodeURIComponent(`/tools/find-my-proof?url=${searchedUrl}`)}`}
+                  >
+                    <Button size="sm" variant="outline">Log in</Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+            {result.deepSearch === "used" && (
+              <p className="mx-auto mt-5 max-w-md rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
+                You&rsquo;ve used your 3 deep searches for this month. Pro runs a deeper search
+                on every empty scan.{" "}
+                <Link href="/pricing" className="font-semibold text-primary hover:underline">
+                  See Pro
+                </Link>
+              </p>
+            )}
           </>
         )}
       </div>
@@ -633,6 +664,14 @@ function ResultView({
                     <PlatformIcon name={q.source} />
                     <span>{q.source}</span>
                   </div>
+                  {q.deep && (
+                    <span
+                      title="Found by a deeper web search. Check the source link before you use it."
+                      className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800"
+                    >
+                      Deep search · check source
+                    </span>
+                  )}
                 </div>
                 {q.sourceUrl && (
                   <a
@@ -762,7 +801,7 @@ function ResultView({
             {result.provider === "own"
               ? "Testimoni's own wall"
               : result.provider === "tavily+claude"
-                ? "Deep scan · Pro"
+                ? "Deep search"
                 : "Standard scan"}
           </span>
         )}

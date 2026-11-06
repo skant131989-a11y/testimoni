@@ -9,8 +9,11 @@ import {
   resolveScanActor,
   reserveScan,
   refundScan,
+  reserveRescue,
+  refundRescue,
   peekScanUsage,
   limitMessage,
+  RESCUE,
 } from "@/lib/scan-limits";
 import { getCachedScan, saveCachedScan } from "@/lib/find-proof-cache";
 
@@ -27,11 +30,15 @@ import { getCachedScan, saveCachedScan } from "@/lib/find-proof-cache";
  *   2. Otherwise take one scan from the caller's allowance
  *      (lib/scan-limits.ts): 3 a day without an account, 10 a month on
  *      Free, 30 a month on Pro.
- *   3. Tavily finds the real posts. Free scans read them with Groq.
- *      Pro scans search more widely and read them with Claude Haiku.
+ *   3. Tavily finds the real posts and Groq reads them. Pro scans
+ *      search more widely (one search per platform).
  *   4. Every quote must appear word for word in the search results or
- *      it is dropped. Claude is only ever used on Pro; a Pro scan falls
- *      back to Groq if Claude fails.
+ *      it is dropped.
+ *   5. Last resort only: if that finds nothing and the caller has an
+ *      account, Claude runs its own web search (Free: up to 3 quotes,
+ *      3 times a month; Pro: up to 10). Each of those quotes must link
+ *      to a page Claude's search actually returned. Visitors are asked
+ *      to log in for it instead. Capped per day across everyone.
  */
 
 const BODY = z.object({
@@ -67,6 +74,17 @@ const RESULT_SHAPE = z.object({
 
 type Result = z.infer<typeof RESULT_SHAPE>;
 type Snippet = { title: string; url: string; content: string };
+type OutQuote = z.infer<typeof QuoteSchema> & { deep?: boolean };
+
+// Compare URLs ignoring query string, fragment and trailing slash.
+function canonUrl(u: string): string {
+  try {
+    const x = new URL(u);
+    return `${x.hostname.replace(/^www\./, "")}${x.pathname.replace(/\/+$/, "")}`.toLowerCase();
+  } catch {
+    return u.toLowerCase();
+  }
+}
 
 function normalizeUrl(input: string): string | null {
   try {
@@ -190,16 +208,18 @@ export async function POST(req: NextRequest) {
   if (!customReferences) {
     const saved = await getCachedScan<Result & { provider?: string }>(normalized, cacheTier);
     if (saved) {
+      const empty = !saved.topQuotes || saved.topQuotes.length === 0;
       return NextResponse.json({
         ...saved,
         cached: true,
+        deepSearch: empty && actor.tier === "visitor" ? "login" : "none",
         usage: await peekScanUsage(actor),
       });
     }
   }
 
-  const haveClaude = isPro && !!process.env.ANTHROPIC_API_KEY;
-  if (!hasTavily() || (!process.env.GROQ_API_KEY && !haveClaude)) {
+  const canRescue = actor.tier !== "visitor" && !!process.env.ANTHROPIC_API_KEY;
+  if (!hasTavily() || !process.env.GROQ_API_KEY) {
     return NextResponse.json(
       { error: "Search is temporarily unavailable — please try again later." },
       { status: 503 }
@@ -355,20 +375,77 @@ OUTPUT — return ONLY this JSON (no fences, no prose):
 
 topQuotes: 0-${isPro ? 15 : 10} items. Empty array is a valid, honest answer for small/new brands.`;
 
-  async function readWithClaude(system: string, user: string): Promise<string> {
+  /**
+   * Last resort: let Claude search the web itself. Claude's own results
+   * aren't available to check quotes word for word, so instead every
+   * quote must link to a page its search actually returned.
+   */
+  async function rescueWithClaude(maxQuotes: number): Promise<OutQuote[]> {
     const anthropic = getAnthropic();
-    const response = await anthropic.messages.create({
+    const system = `You are Testimoni's customer-proof discovery engine. Search the public web for POSITIVE customer mentions of the product at ${normalized} (brand likely "${brand}"): praise on X, LinkedIn, Reddit, Product Hunt, Hacker News, app stores, review sites and blogs.
+
+RULES
+- Only POSITIVE mentions that are clearly about this product (check the hostname, handles and context; skip homonyms).
+- Copy quotes exactly as written on the page. Do NOT invent authors, roles or quotes. Keep @handles as handles; if no name is visible use "Anonymous".
+- sourceUrl must be the exact page the quote came from.
+- Return at most ${maxQuotes} quotes. If you find none, return an empty topQuotes array.
+
+OUTPUT — ONLY this JSON, no fences, no commentary:
+{"brand":"${brand}","totalMentions":N,"platforms":[{"name":"X","count":N}],"topQuotes":[{"content":"...","author":"...","role":"...","source":"X|LinkedIn|Reddit|Product Hunt|Hacker News|App Store|Blog|G2|Trustpilot","sourceUrl":"...","score":N}]}`;
+    const response = (await anthropic.messages.create({
       model: CHAT_MODEL,
-      max_tokens: 3000,
-      temperature: 0,
+      max_tokens: 2000,
       system,
-      messages: [{ role: "user", content: user }],
-    });
-    let out = "";
+      tools: [
+        {
+          type: "web_search_20260209",
+          name: "web_search",
+          max_uses: 3,
+          allowed_callers: ["direct"],
+        },
+      ],
+      messages: [
+        {
+          role: "user",
+          content: `Find customer proof for the brand "${brand}" (website: ${normalized}). Search now and return the JSON.`,
+        },
+      ],
+    } as unknown as Parameters<typeof anthropic.messages.create>[0])) as unknown as {
+      content: Array<{
+        type: string;
+        text?: string;
+        content?: unknown;
+        citations?: Array<{ url?: string }>;
+      }>;
+    };
+
+    const returned = new Set<string>();
+    let text = "";
     for (const block of response.content) {
-      if (block.type === "text") out = block.text;
+      if (block.type === "text" && typeof block.text === "string") {
+        text = block.text;
+        for (const c of block.citations ?? []) if (c.url) returned.add(canonUrl(c.url));
+      }
+      if (block.type === "web_search_tool_result" && Array.isArray(block.content)) {
+        for (const r of block.content as Array<{ url?: string }>) {
+          if (r.url) returned.add(canonUrl(r.url));
+        }
+      }
     }
-    return out;
+    if (!text) return [];
+
+    const checked = RESULT_SHAPE.safeParse(JSON.parse(extractJson(text)));
+    if (!checked.success) return [];
+    return checked.data.topQuotes
+      .filter(
+        (q) =>
+          !!q.sourceUrl &&
+          returned.has(canonUrl(q.sourceUrl)) &&
+          !CODE_ARTIFACT.test(q.content) &&
+          !CODE_ARTIFACT.test(q.author)
+      )
+      .slice(0, maxQuotes)
+      .map((q) => ({ ...q, deep: true }));
   }
 
   async function readWithGroq(system: string, user: string): Promise<string> {
@@ -384,7 +461,7 @@ topQuotes: 0-${isPro ? 15 : 10} items. Empty array is a valid, honest answer for
     return text;
   }
 
-  let provider = isPro ? "tavily+claude" : "tavily";
+  const provider = "tavily";
   let raw = "";
   let snippets: Snippet[] = [];
 
@@ -407,17 +484,7 @@ ${context}
 
 Return the JSON now.`;
 
-      if (haveClaude) {
-        try {
-          raw = await readWithClaude(synthesisSystem, userPrompt);
-        } catch (err) {
-          console.warn("[find-proof] Claude failed, falling back to Groq:", err);
-          provider = "tavily";
-          raw = process.env.GROQ_API_KEY ? await readWithGroq(synthesisSystem, userPrompt) : "";
-        }
-      } else {
-        raw = await readWithGroq(synthesisSystem, userPrompt);
-      }
+      raw = await readWithGroq(synthesisSystem, userPrompt);
     }
   } catch (err) {
     console.error("[find-proof] search failed:", err);
@@ -466,7 +533,7 @@ Return the JSON now.`;
 
   const byPlatform = new Map<string, number>();
   for (const q of kept) byPlatform.set(q.source, (byPlatform.get(q.source) ?? 0) + 1);
-  const result: Result & { provider: string } = {
+  const result: Omit<Result, "topQuotes"> & { topQuotes: OutQuote[]; provider: string } = {
     brand: validated.data.brand,
     totalMentions: Math.max(validated.data.totalMentions, kept.length),
     platforms: [...byPlatform.entries()].map(([name, count]) => ({ name, count })),
@@ -474,7 +541,41 @@ Return the JSON now.`;
     provider,
   };
 
-  if (!customReferences) await saveCachedScan(normalized, cacheTier, result);
+  // Nothing found: visitors are invited to log in for a deeper search;
+  // accounts get one Claude backup search if the limits allow.
+  let deepSearch: "none" | "login" | "used" = "none";
+  if (kept.length === 0) {
+    if (actor.tier === "visitor") {
+      deepSearch = "login";
+    } else if (canRescue) {
+      const slot = await reserveRescue(actor);
+      if (slot === "user_limit") {
+        deepSearch = "used";
+      } else if (slot === "ok") {
+        try {
+          const maxQuotes = isPro ? RESCUE.maxQuotes.pro : RESCUE.maxQuotes.free;
+          const found = await rescueWithClaude(maxQuotes);
+          if (found.length > 0) {
+            const byDeep = new Map<string, number>();
+            for (const q of found) byDeep.set(q.source, (byDeep.get(q.source) ?? 0) + 1);
+            result.topQuotes = found;
+            result.totalMentions = found.length;
+            result.platforms = [...byDeep.entries()].map(([name, count]) => ({ name, count }));
+            result.provider = "tavily+claude";
+          }
+        } catch (err) {
+          console.warn("[find-proof] Claude backup search failed:", err);
+          await refundRescue(actor);
+        }
+      }
+    }
+  }
 
-  return NextResponse.json({ ...result, usage: reservation.usage });
+  // A visitor's empty result isn't saved: an account asking about the
+  // same site later should still get the backup search.
+  if (!customReferences && deepSearch !== "login") {
+    await saveCachedScan(normalized, cacheTier, result);
+  }
+
+  return NextResponse.json({ ...result, deepSearch, usage: reservation.usage });
 }

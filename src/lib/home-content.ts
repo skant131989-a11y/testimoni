@@ -18,7 +18,7 @@ export const HOME_FAQ: { question: string; answer: string }[] = [
   {
     question: "Is it really free?",
     answer:
-      "Scanning is free with no signup: 3 scans a day, or 10 a month once you create a free account. The free plan holds 10 testimonials, 1 collection form, 1 widget and a hosted Wall of Love page, with no credit card.",
+      "Scanning is free with no signup: 3 scans a day, or 10 a month once you create a free account, with a Claude backup search for up to 3 quotes when a scan finds nothing. The free plan holds 10 testimonials, 1 collection form, 1 widget and a hosted Wall of Love page, with no credit card.",
   },
   {
     question: "What if nobody has posted about me yet?",
@@ -38,7 +38,7 @@ export const HOME_FAQ: { question: string; answer: string }[] = [
   {
     question: "What does Pro add?",
     answer:
-      "30 deeper scans a month (a wider search, checked by Claude), a weekly automatic re-scan that emails you new praise, unlimited testimonials, forms, widgets and video, all five layouts, no watermark, Ask My Wall, Wall Score and tweet drafts. It is a flat $19 a month, with no tiers.",
+      "30 deeper scans a month (a wider search, with a Claude backup search whenever a scan finds nothing), a weekly automatic re-scan that emails you new praise, unlimited testimonials, forms, widgets and video, all five layouts, no watermark, Ask My Wall, Wall Score and tweet drafts. It is a flat $19 a month, with no tiers.",
   },
   {
     question: "How is Testimoni different from Senja and Testimonial.to?",
