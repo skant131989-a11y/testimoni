@@ -11,6 +11,11 @@ const testimonialTo = COMPETITORS["testimonial-to"];
 
 export const HOME_FAQ: { question: string; answer: string }[] = [
   {
+    question: "Can I collect testimonials with a form, including video?",
+    answer:
+      "Yes. Create a collection form that takes text, star ratings and video, then share it by link, email, WhatsApp, DM or QR code, or embed it on your own site. Submissions land in your inbox and you approve each one. The free plan includes 1 form and 1 video testimonial; Pro is unlimited.",
+  },
+  {
     question: "How does Find my praise work?",
     answer:
       "Paste your website. Testimoni searches public posts on X, LinkedIn, Reddit, Hacker News, Product Hunt and app stores that mention your product, shows you what it found, and you choose which ones to add. Nothing goes on your wall until you approve it.",

@@ -4,18 +4,15 @@ import Script from "next/script";
 import type { Metadata } from "next";
 import {
   ArrowRight,
-  BarChart3,
-  Bot,
   CheckCircle2,
-  Code2,
   ExternalLink,
-  Film,
-  Mail,
-  MousePointerClick,
-  RefreshCw,
+  FileText,
+  Inbox,
+  LayoutGrid,
   Search,
-  Send,
+  Sparkles,
   Star,
+  Upload,
 } from "lucide-react";
 import { PublicNavAuth, PublicNavAuthMobile } from "@/components/layout/public-nav-auth";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -38,9 +35,9 @@ import { FadeIn } from "@/components/fade-in";
 import { ExitIntent } from "@/components/exit-intent";
 import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
 
-const TITLE = "Testimoni | Find the praise you already earned and show it on your site";
+const TITLE = "Testimoni | Collect and find customer testimonials, show them anywhere";
 const DESCRIPTION =
-  "Paste your website and Testimoni finds real customer posts on X, LinkedIn, Reddit and more, then turns the ones you pick into testimonials on a hosted wall or one-line embed. Free for 10 testimonials; Pro is a flat $19 a month.";
+  "Collect testimonials with forms (text, star ratings, video) or find real customer posts on X, LinkedIn and Reddit by pasting your website. Approve with a click, then show them on a hosted wall or with one line of code. Free for 10 testimonials; Pro is a flat $19 a month.";
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -49,63 +46,95 @@ export const metadata: Metadata = {
   openGraph: { title: TITLE, description: DESCRIPTION, url: "/" },
 };
 
-const STEPS = [
+const WAYS = [
   {
-    n: 1,
+    Icon: FileText,
+    title: "Ask your customers",
+    body: "Share a form that takes text, star ratings and video.",
+    points: [
+      "Send it by link, email, WhatsApp, DM or QR code",
+      "Or embed the form on your own site",
+      "Approve each one from your inbox",
+    ],
+    cta: "Create a collection form",
+    href: "/signup?src=home_ways_ask",
+  },
+  {
     Icon: Search,
-    title: "Find",
-    body: "Paste your website. We search X, LinkedIn, Reddit, Product Hunt and app stores for real posts about you. Or paste one link, or drop a screenshot.",
+    title: "Find what's already out there",
+    body: "Paste your website. We search X, LinkedIn, Reddit, Product Hunt and app stores for real posts about you.",
+    points: [
+      "Every quote keeps its author and source link",
+      "Free to try, no signup",
+      "Pro re-scans weekly and emails new praise",
+    ],
+    cta: "Find my praise",
+    href: "/tools/find-my-proof",
   },
   {
-    n: 2,
-    Icon: MousePointerClick,
-    title: "Approve",
-    body: "Keep the ones you like with a click. Each quote keeps its author and a link to the original post.",
-  },
-  {
-    n: 3,
-    Icon: Code2,
-    title: "Show",
-    body: "Share a hosted Wall of Love link, or paste one line of code on Framer, Webflow, WordPress, Shopify or your own site.",
+    Icon: Upload,
+    title: "Add what you already have",
+    body: "Paste a link, drop a screenshot, or pull in store reviews.",
+    points: [
+      "Tweets, LinkedIn posts, Reddit comments and any public URL",
+      "AI reads screenshots of DMs, emails and reviews",
+      "App Store, Google Play, Chrome Web Store and Product Hunt reviews",
+    ],
+    cta: "Try it below",
+    href: "#try",
   },
 ];
 
-const ALWAYS_ON = [
+// What's included, grouped the way people shop for these tools. Tags
+// only where a plan really limits the feature (see lib/plan-features.ts).
+const FEATURE_GROUPS: {
+  Icon: typeof FileText;
+  title: string;
+  note?: string;
+  items: { text: string; tag?: string }[];
+}[] = [
   {
-    Icon: Mail,
-    title: "Weekly new-praise email",
-    body: "We re-scan for you each week and email what people said since last time.",
-    plan: "Pro",
+    Icon: FileText,
+    title: "Collect",
+    items: [
+      { text: "Forms with text, star ratings and video", tag: "1 free, unlimited on Pro" },
+      { text: "Share by link, email, WhatsApp, DM, QR code or embed" },
+      { text: "Paste a link or drop a screenshot to add one yourself" },
+      { text: "Import reviews from app stores and Product Hunt" },
+    ],
   },
   {
-    Icon: RefreshCw,
-    title: "Review sync",
-    body: "Bring in reviews from the App Store, Google Play, Chrome Web Store and Product Hunt.",
-    plan: null,
+    Icon: Inbox,
+    title: "Manage",
+    items: [
+      { text: "One inbox: approve or reject with a click" },
+      { text: "Edit the wording, name and title before you publish" },
+      { text: "Choose what each widget shows", tag: "Pro" },
+      { text: "Analytics on your wall", tag: "Pro" },
+    ],
   },
   {
-    Icon: Bot,
-    title: "Ask My Wall",
-    body: "A chatbot for your site that answers visitors using your real customers, cited by name.",
-    plan: "Pro",
+    Icon: LayoutGrid,
+    title: "Show",
+    items: [
+      { text: "A hosted Wall of Love page, free" },
+      { text: "One line of code for any site, styles isolated" },
+      { text: "Grid free; masonry, carousel, list and marquee", tag: "Pro" },
+      { text: "Your branding, no watermark, Trust Score badge", tag: "Pro" },
+    ],
   },
   {
-    Icon: BarChart3,
-    title: "Wall Score",
-    body: "Audit your wall from 0 to 100 and see what to add next. One audit free.",
-    plan: "Unlimited on Pro",
-  },
-  {
-    Icon: Send,
-    title: "Tweet drafts",
-    body: "Turn any quote into three ready-to-post drafts. Five a month free.",
-    plan: "Unlimited on Pro",
-  },
-  {
-    Icon: Film,
-    title: "Video testimonials",
-    body: "Collect and play videos right on your wall. One free.",
-    plan: "Unlimited on Pro",
+    Icon: Sparkles,
+    title: "Beyond collecting",
+    note: "Tools for finding and using praise",
+    items: [
+      { text: "Find my praise: scan the web for real posts about you" },
+      { text: "Customer Voice: praise, complaints and requests, free summary" },
+      { text: "Wall Score: audit your wall from 0 to 100", tag: "1 free, unlimited on Pro" },
+      { text: "Ask My Wall: a chatbot that quotes your real customers", tag: "Pro" },
+      { text: "Tweet drafts from any quote", tag: "5 a month free" },
+      { text: "Case study generator and weekly new-praise email", tag: "Pro" },
+    ],
   },
 ];
 
@@ -130,7 +159,7 @@ export default function LandingPage() {
       <div className="hidden md:block">
         <LaunchBar
           id="ask-my-wall-2026-09"
-          href="#always-on"
+          href="#features"
           message="Ask My Wall is live — an AI chatbot that only quotes real customers."
           cta="See it"
         />
@@ -153,6 +182,9 @@ export default function LandingPage() {
           <nav className="hidden items-center gap-6 md:flex">
             <TrackedLink cta="nav_how" surface="home_nav" href="#how" className="text-sm text-muted-foreground hover:text-foreground">
               How it works
+            </TrackedLink>
+            <TrackedLink cta="nav_features" surface="home_nav" href="#features" className="text-sm text-muted-foreground hover:text-foreground">
+              Features
             </TrackedLink>
             <TrackedLink cta="nav_pricing" surface="home_nav" href="#pricing" className="text-sm text-muted-foreground hover:text-foreground">
               Pricing
@@ -178,18 +210,29 @@ export default function LandingPage() {
                 <Star className="h-3 w-3" /> Free to try · No signup
               </span>
               <h1 className="mt-4 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.4rem]">
-                Find the praise you already earned.{" "}
+                Collect testimonials.{" "}
                 <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-                  Put it on your site.
+                  Find the ones you already have.
                 </span>
               </h1>
               <p className="mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
-                Paste your website. Testimoni searches X, LinkedIn, Reddit, Product Hunt and app
-                stores for real customer posts, then turns the ones you pick into testimonials,
-                credit intact.
+                Send a form, or paste your website and we&rsquo;ll find real posts about you on X,
+                LinkedIn, Reddit and more. Approve with a click, then show them on a hosted wall
+                or with one line of code.
               </p>
               <div className="mt-6 max-w-xl">
                 <FindProofForm placement="hero" />
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+                <span className="text-muted-foreground">Rather ask your customers directly?</span>
+                <TrackedLink
+                  cta="hero_collect_form"
+                  surface="home"
+                  href="/signup?src=home_hero_form"
+                  className="inline-flex items-center gap-1.5 rounded-lg border-2 border-primary/30 bg-background px-4 py-2 font-semibold text-primary transition hover:bg-primary/5"
+                >
+                  Create a collection form <ArrowRight className="h-4 w-4" />
+                </TrackedLink>
               </div>
               <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
                 <li className="inline-flex items-center gap-1">
@@ -229,43 +272,53 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 3 — How it works */}
+        {/* 3 — Three ways to get testimonials */}
         <section id="how" className="scroll-mt-20 py-16 md:py-20">
           <div className="mx-auto max-w-6xl px-4">
             <div className="mx-auto max-w-2xl text-center">
               <p className="text-xs font-semibold uppercase tracking-widest text-primary">How it works</p>
               <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-                From a URL to a live wall in about a minute
+                Three ways to get customer testimonials
               </h2>
+              <p className="mt-3 text-muted-foreground">
+                Use one or all three. Then approve each testimonial in one click and show it on a
+                hosted Wall of Love or with one line of code.
+              </p>
             </div>
             <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {STEPS.map(({ n, Icon, title, body }) => (
-                <FadeIn key={n} delay={n * 80}>
-                  <div className="h-full rounded-2xl border bg-card p-6">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                        {n}
-                      </span>
+              {WAYS.map(({ Icon, title, body, points, cta, href }, i) => (
+                <FadeIn key={title} delay={i * 80}>
+                  <div className="flex h-full flex-col rounded-2xl border bg-card p-6">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
                       <Icon className="h-5 w-5 text-primary" />
-                    </div>
+                    </span>
                     <h3 className="mt-4 text-lg font-semibold">{title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+                    <ul className="mt-4 flex-1 space-y-2 text-sm">
+                      {points.map((p) => (
+                        <li key={p} className="flex items-start gap-2">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <span>{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <TrackedLink
+                      cta={`ways_${i}`}
+                      surface="home"
+                      href={href}
+                      className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                    >
+                      {cta} <ArrowRight className="h-4 w-4" />
+                    </TrackedLink>
                   </div>
                 </FadeIn>
               ))}
             </div>
-            <p className="mt-6 text-center text-sm text-muted-foreground">
-              No public praise yet?{" "}
-              <Link href="/signup?src=home_form_path" className="font-semibold text-primary hover:underline">
-                Send a collection form to your happiest customers
-              </Link>
-              .
-            </p>
           </div>
         </section>
 
         {/* 4 — Add one yourself (live demos) */}
-        <section className="border-y bg-gradient-to-br from-violet-50/60 via-background to-primary/[0.03] py-16 md:py-20">
+        <section id="try" className="scroll-mt-20 border-y bg-gradient-to-br from-violet-50/60 via-background to-primary/[0.03] py-16 md:py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 md:grid-cols-[1fr_1.1fr]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-primary">Try it now</p>
@@ -293,37 +346,57 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 5 — Always on */}
-        <section id="always-on" className="scroll-mt-20 py-16 md:py-20">
+        {/* 5 — Everything in one place */}
+        <section id="features" className="scroll-mt-20 py-16 md:py-20">
           <div className="mx-auto max-w-6xl px-4">
             <div className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Always on</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Features</p>
               <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-                New praise keeps arriving. Testimoni keeps up.
+                Everything you need to collect, manage and show testimonials
               </h2>
               <p className="mt-3 text-muted-foreground">
-                Your wall should not go stale the week after you build it.
+                And tools for the part most testimonial tools skip: finding praise that already
+                exists and putting it to work.
               </p>
             </div>
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {ALWAYS_ON.map(({ Icon, title, body, plan }, i) => (
-                <FadeIn key={title} delay={i * 60}>
-                  <div className="h-full rounded-2xl border bg-card p-6 transition hover:border-primary/50 hover:shadow-md">
-                    <div className="flex items-center justify-between">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                        <Icon className="h-5 w-5 text-primary" />
-                      </span>
-                      {plan && (
-                        <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-semibold text-violet-700">
-                          {plan}
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {FEATURE_GROUPS.map(({ Icon, title, note, items }, i) => {
+                const extra = title === "Beyond collecting";
+                return (
+                  <FadeIn key={title} delay={i * 60}>
+                    <div
+                      className={`h-full rounded-2xl border bg-card p-6 ${
+                        extra ? "border-2 border-primary shadow-lg shadow-primary/10" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                          <Icon className="h-5 w-5 text-primary" />
                         </span>
-                      )}
+                        <div>
+                          <h3 className="font-semibold">{title}</h3>
+                          {note && <p className="text-xs text-muted-foreground">{note}</p>}
+                        </div>
+                      </div>
+                      <ul className="mt-5 space-y-3 text-sm">
+                        {items.map((it) => (
+                          <li key={it.text} className="flex items-start gap-2">
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <span>
+                              {it.text}
+                              {it.tag && (
+                                <span className="ml-1.5 whitespace-nowrap rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
+                                  {it.tag}
+                                </span>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <h3 className="mt-4 font-semibold">{title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
-                  </div>
-                </FadeIn>
-              ))}
+                  </FadeIn>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -591,8 +664,8 @@ export default function LandingPage() {
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
               Or{" "}
-              <Link href="/signup?src=home_final" className="font-semibold text-foreground underline underline-offset-2">
-                start with a blank wall
+              <Link href="/signup?src=home_final_form" className="font-semibold text-foreground underline underline-offset-2">
+                create a collection form and ask your customers
               </Link>
               .
             </p>
