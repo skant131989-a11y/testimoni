@@ -57,10 +57,14 @@ export const TESTIMONI: Tool = {
     "Hosted Wall of Love URL on the free plan",
     "One flat $19/month plan: unlimited testimonials, all five layouts, no watermark, AI features included",
     "Free Customer Voice scan of what people say about you on X, Reddit and LinkedIn",
+    "A generous free plan: 15 testimonials (2 can be video), 10 praise scans a month and a capped Ask My Wall chatbot",
+    "Request emails by hand or from a webhook, with a reminder, plus consent tracking for imported public posts",
+    "Review markup (schema.org) so Google and AI assistants can read your wall",
   ],
   chooseIf: [
     "You want the quickest way to turn praise that already exists on X or LinkedIn into testimonials",
     "You want one simple price rather than tiers",
+    "You want to ask customers automatically from a webhook and keep a record of permission for public posts",
     "You're a solo founder or small SaaS team",
   ],
 };

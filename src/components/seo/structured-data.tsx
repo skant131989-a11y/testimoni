@@ -190,7 +190,9 @@ export function StructuredData({ faqs, breadcrumbs, faqId, article }: Structured
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      // "<" is escaped so a "</script>" inside any text (FAQ answers that show
+      // embed code) cannot end the tag early and cut the JSON off.
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
     />
   );
 }

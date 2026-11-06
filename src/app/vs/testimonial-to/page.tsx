@@ -8,6 +8,7 @@ import { StructuredData } from "@/components/seo/structured-data";
 import { PageFAQ } from "@/components/seo/page-faq";
 import { PAGE_FAQS, vsBreadcrumbs } from "@/lib/seo-faqs";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { COMPETITORS } from "@/lib/competitors";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
@@ -33,32 +34,46 @@ interface Row {
 
 const SEE_SITE = "See their site";
 
+// Testimoni column = our own facts. Testimonial.to's free-plan and price cells
+// are what its own pricing page said on FACTS_VERIFIED_ON (see
+// lib/competitors.ts); anything we can't point to there says "See their site".
+const ttPlan = COMPETITORS["testimonial-to"];
 const rows: Row[] = [
-  // Testimoni column = our own facts. Competitor cells say "See their
-  // site" unless the company states it itself — plans and features
-  // change, and we don't want to assert numbers we can't verify.
-  { feature: "Free plan testimonials", testimoni: "10", theirs: SEE_SITE },
+  { feature: "Free plan testimonials", testimoni: "15 (2 can be video)", theirs: "10 text + 2 video in total" },
   { feature: "Free plan collection forms", testimoni: "1", theirs: SEE_SITE },
-  { feature: "Free plan widgets", testimoni: "1", theirs: SEE_SITE },
-  {
-    feature: "Hosted Wall of Love page on free plan",
-    testimoni: true,
-    theirs: SEE_SITE,
-    highlight: true,
-  },
+  { feature: "Free plan widgets", testimoni: "1", theirs: "Wall of Love widgets included" },
+  { feature: "Hosted Wall of Love page on free plan", testimoni: true, theirs: "Public testimonial page" },
   {
     feature: "Auto-add testimonials to widget on approve",
     testimoni: true,
     theirs: SEE_SITE,
-    highlight: true,
   },
   {
     feature: "Import existing praise (social posts, app stores, screenshots)",
     testimoni: true,
+    theirs: "Unlimited X and LinkedIn imports",
+  },
+  {
+    feature: "Paid plans start at",
+    testimoni: "$19/mo, one flat plan",
+    theirs: ttPlan.firstPaidLabel,
+    highlight: true,
+  },
+  { feature: "Video testimonials", testimoni: true, theirs: true },
+  {
+    feature: "Free scan that finds praise already online (Find my praise)",
+    testimoni: "10 a month",
+    theirs: SEE_SITE,
+    highlight: true,
+  },
+  { feature: "Ask My Wall chatbot that quotes your customers", testimoni: "30 answers a month free", theirs: SEE_SITE },
+  {
+    feature: "Request emails from the dashboard or a webhook",
+    testimoni: "10 a month free, with a reminder",
     theirs: SEE_SITE,
   },
-  { feature: "Pro starting price", testimoni: "$19/mo", theirs: SEE_SITE, highlight: true },
-  { feature: "Video testimonials", testimoni: true, theirs: true },
+  { feature: "Consent tracking for imported public posts", testimoni: true, theirs: SEE_SITE },
+  { feature: "Review markup so Google and AI can read your wall", testimoni: true, theirs: SEE_SITE },
   {
     feature: "5 layouts (Grid, Masonry, Carousel, List, Marquee)",
     testimoni: true,
