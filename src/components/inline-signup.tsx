@@ -43,7 +43,9 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
   const [magicSent, setMagicSent] = useState(false);
   // Sending a sign-in email must be bot-gated (fail-closed Turnstile),
   // or this card is a free email-bomb / account-creation endpoint.
-  const gate = useTurnstileGate(`inline:${source}`);
+  // Lazy: the card sits on marketing pages most visitors only read, so
+  // Cloudflare's script loads when they touch the email box instead.
+  const gate = useTurnstileGate(`inline:${source}`, { lazy: true });
 
   const webmail = magicSent ? webmailForEmail(email) : null;
 
@@ -182,6 +184,7 @@ export function InlineSignup({ source, idPrefix = "inline" }: InlineSignupProps)
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onFocus={gate.arm}
                 required
                 disabled={loading || googleLoading}
                 className="mt-1"

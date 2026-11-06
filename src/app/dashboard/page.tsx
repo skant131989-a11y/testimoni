@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MilestoneNudge } from "@/components/milestone-nudge";
-import { VideoFreeBanner } from "@/components/video-free-banner";
 import { FormUrlCard } from "@/components/form-url-card";
 import { TrackedLink } from "@/components/tracked-link";
 import { PageLoadPerf } from "@/components/page-load-perf";
@@ -109,45 +108,42 @@ export default async function DashboardPage() {
   const defaultForm = membership.workspace.forms[0] ?? null;
   const subscription = membership.workspace.subscription;
 
-  // Batch every dashboard read into a single $transaction so Prisma
-  // pipelines them as ONE round-trip. Was 10 queries; now 6 —
-  // defaultWidget, defaultForm, and subscription are all pulled
-  // from the React.cache()-memoized getDbUserWithWorkspace() call
-  // above (which the layout already paid for this render).
+  // All six counters in ONE statement = ONE database round-trip.
+  // The old $transaction([...]) sent BEGIN + 6 queries + COMMIT one
+  // after another (8 round-trips), which is what made this page slow
+  // whenever the database was far from the function.
   //
-  // NOTE: recentTestimonials.findMany is deliberately NOT in this
-  // batch — it lives in the <Suspense>-wrapped RecentTestimonialsCard
-  // component below and streams in independently.
-  const [
-    totalTestimonials,
-    approvedTestimonials,
-    activeWidgets,
-    pendingSubmissions,
-    totalImpressions,
-    videoCount,
-  ] = await prisma.$transaction([
-    prisma.testimonial.count({ where: { workspaceId } }),
-    prisma.testimonial.count({
-      where: { workspaceId, status: "APPROVED" },
-    }),
-    prisma.widget.count({ where: { workspaceId, isActive: true } }),
-    prisma.submission.count({
-      where: {
-        form: { workspaceId },
-        status: "NEW",
-      },
-    }),
-    prisma.widgetAnalytics.aggregate({
-      where: { widget: { workspaceId } },
-      _sum: { impressions: true },
-    }),
-    prisma.testimonial.count({
-      where: { workspaceId, videoStorageKey: { not: null } },
-    }),
-  ]);
+  // NOTE: recentTestimonials.findMany is deliberately NOT in here —
+  // it lives in the <Suspense>-wrapped RecentTestimonialsCard below
+  // and streams in independently.
+  const [stats] = await prisma.$queryRaw<
+    {
+      total: number;
+      approved: number;
+      widgets: number;
+      pending: number;
+      impressions: number;
+      videos: number;
+    }[]
+  >`
+    SELECT
+      (SELECT count(*) FROM testimonials WHERE workspace_id = ${workspaceId})::int AS total,
+      (SELECT count(*) FROM testimonials WHERE workspace_id = ${workspaceId} AND status = 'APPROVED')::int AS approved,
+      (SELECT count(*) FROM widgets WHERE workspace_id = ${workspaceId} AND is_active = true)::int AS widgets,
+      (SELECT count(*) FROM submissions s JOIN collection_forms f ON f.id = s.form_id
+         WHERE f.workspace_id = ${workspaceId} AND s.status = 'NEW')::int AS pending,
+      (SELECT COALESCE(sum(a.impressions), 0) FROM widget_analytics a JOIN widgets w ON w.id = a.widget_id
+         WHERE w.workspace_id = ${workspaceId})::int AS impressions,
+      (SELECT count(*) FROM testimonials WHERE workspace_id = ${workspaceId} AND video_storage_key IS NOT NULL)::int AS videos
+  `;
+  const totalTestimonials = stats?.total ?? 0;
+  const approvedTestimonials = stats?.approved ?? 0;
+  const activeWidgets = stats?.widgets ?? 0;
+  const pendingSubmissions = stats?.pending ?? 0;
+  const videoCount = stats?.videos ?? 0;
   const limits = getEffectiveLimits(workspaceSlug, subscription?.plan);
 
-  const impressionsTotal = totalImpressions._sum.impressions ?? 0;
+  const impressionsTotal = stats?.impressions ?? 0;
   const wallUrl = defaultWidget
     ? `${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}/w/${defaultWidget.id}`
     : null;
@@ -251,6 +247,35 @@ export default async function DashboardPage() {
           card should lead the dashboard, above everything else. Kept
           dismissible; localStorage remembers the choice. */}
       <FindMyProofCard surface="dashboard" dismissible />
+
+      {/* One clear next step for the user's current state (approve the
+          inbox, add the first testimonial, share the form, embed the
+          wall…). Without it a new user lands on stat cards and a row of
+          buttons and has to guess what matters. */}
+      <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+            Next step
+          </p>
+          <p className="mt-0.5 font-semibold">{nba.title}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{nba.desc}</p>
+        </div>
+        <Button asChild className="shrink-0">
+          {nba.external ? (
+            <a href={nba.href} target="_blank" rel="noopener noreferrer">
+              {nba.label} <ArrowRight className="ml-1.5 h-4 w-4" />
+            </a>
+          ) : (
+            <TrackedLink
+              cta={`nba_${nba.kind}`}
+              surface="dashboard"
+              href={nba.href}
+            >
+              {nba.label} <ArrowRight className="ml-1.5 h-4 w-4" />
+            </TrackedLink>
+          )}
+        </Button>
+      </div>
 
       {/* Milestone celebration — fires ONLY when approvedTestimonials
           hits an exact milestone (1, 5, 10, 25, 50, 100). This is the

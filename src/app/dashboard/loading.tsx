@@ -123,7 +123,7 @@ export default function DashboardLoading() {
           </div>
         ))}
       </div>
-      <StuckReloader scope="dashboard" timeoutMs={8000} />
+      <StuckReloader scope="dashboard" timeoutMs={25000} />
     </div>
   );
 }

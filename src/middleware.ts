@@ -47,6 +47,30 @@ function isBotUA(ua: string): boolean {
   return BOT_UA_PATTERNS.some((re) => re.test(ua));
 }
 
+/**
+ * Routes that need the Supabase session refreshed/validated by
+ * middleware: the app itself, admin, the auth flow and every API route
+ * (they call supabase.auth.getUser() on the server).
+ */
+const SESSION_PREFIXES = [
+  "/dashboard",
+  "/admin",
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+  "/callback",
+  "/auth",
+  "/api",
+  "/internal",
+];
+
+function needsSession(pathname: string): boolean {
+  return SESSION_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
+}
+
 function matchesSensitivePath(pathname: string): boolean {
   if (BOT_SENSITIVE_PATHS.includes(pathname)) return true;
   return BOT_SENSITIVE_APIS.some((prefix) => pathname.startsWith(prefix));
@@ -73,15 +97,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const isPublicPage =
-    pathname === "/" ||
-    pathname === "/pricing" ||
-    pathname === "/features" ||
-    pathname === "/demo" ||
-    pathname === "/contact" ||
-    pathname.startsWith("/collect/");
-
-  if (isPublicPage) {
+  // Only these areas read the Supabase session on the server. Every
+  // other page (home, pricing, /tools, /for, /vs, /blog, /w, /collect,
+  // legal, SEO landers…) is public and never looks at it. Calling
+  // supabase.auth.getUser() for those is a network round-trip to
+  // Supabase on every page view, which showed up as slow first paint
+  // for visitors, so skip it.
+  if (!needsSession(pathname)) {
     return NextResponse.next();
   }
 

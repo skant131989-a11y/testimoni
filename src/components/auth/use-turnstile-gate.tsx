@@ -25,26 +25,41 @@ import { track } from "@/lib/analytics";
 export const BLOCKER_HELP =
   "We couldn't complete the security check. Turn off any ad or privacy blocker for this page and try again, or continue with Google.";
 
-const WAIT_MS = 8_000;
+// Real visitors on slow mobile networks can need more than a few
+// seconds for Cloudflare's script + challenge. Too short a wait here
+// turns a slow connection into a hard "blocked".
+const WAIT_MS = 12_000;
 
 export type GateResult =
   | { ok: true; captchaToken?: string }
   | { ok: false; message: string };
 
-export function useTurnstileGate(page: string): {
+export function useTurnstileGate(
+  page: string,
+  opts: {
+    /** Don't load Turnstile until `arm()` is called (or the first
+     *  `verify()`). For cards embedded on marketing pages, so a plain
+     *  page view doesn't download Cloudflare's script and iframe. */
+    lazy?: boolean;
+  } = {}
+): {
   widget: ReactNode;
   configured: boolean;
   verifying: boolean;
   verify: (action: string) => Promise<GateResult>;
   /** Call after a Supabase call that consumed a captchaToken. */
   reset: () => void;
+  /** Start loading the widget now (no-op unless `lazy`). */
+  arm: () => void;
 } {
   const configured = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const supabaseCaptcha = process.env.NEXT_PUBLIC_SUPABASE_CAPTCHA === "1";
   const [token, setToken] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const [verifying, setVerifying] = useState(false);
+  const [armed, setArmed] = useState(!opts.lazy);
   const waiters = useRef<((t: string | null) => void)[]>([]);
+  const arm = useCallback(() => setArmed(true), []);
 
   const flush = (t: string | null) => {
     const w = waiters.current;
@@ -69,6 +84,7 @@ export function useTurnstileGate(page: string): {
 
       let t = token;
       if (!t) {
+        setArmed(true);
         setVerifying(true);
         t = await new Promise<string | null>((resolve) => {
           waiters.current.push(resolve);
@@ -112,7 +128,7 @@ export function useTurnstileGate(page: string): {
     [configured, token, supabaseCaptcha, page, reset]
   );
 
-  const widget: ReactNode = configured ? (
+  const widget: ReactNode = configured && armed ? (
     <div className="mt-4 flex justify-center">
       <Turnstile
         onToken={(t) => {
@@ -131,5 +147,5 @@ export function useTurnstileGate(page: string): {
     </div>
   ) : null;
 
-  return { widget, configured, verifying, verify, reset };
+  return { widget, configured, verifying, verify, reset, arm };
 }
