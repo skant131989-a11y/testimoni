@@ -290,3 +290,28 @@ export async function getMonthlyUsage(subject: string): Promise<number> {
     return 0;
   }
 }
+
+/** Take one from a daily allowance (UTC day). Fails open if the database is down. */
+export async function reserveDaily(
+  subject: string,
+  limit: number
+): Promise<{ ok: boolean; used: number }> {
+  const period = periodFor("day");
+  try {
+    const where = { subject_period: { subject, period } };
+    const row = await prisma.scanUsage.upsert({
+      where,
+      create: { subject, period, count: 1 },
+      update: { count: { increment: 1 } },
+      select: { count: true },
+    });
+    if (row.count > limit) {
+      await prisma.scanUsage.update({ where, data: { count: { decrement: 1 } } });
+      return { ok: false, used: limit };
+    }
+    return { ok: true, used: row.count };
+  } catch (err) {
+    console.warn("[scan-limits] daily reserve failed, allowing:", err);
+    return { ok: true, used: 0 };
+  }
+}

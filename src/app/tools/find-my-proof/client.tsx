@@ -28,6 +28,7 @@ import {
   addPendingTestimonial,
   addPendingTestimonials,
 } from "@/lib/pending-testimonials";
+import { ToolShare } from "@/components/tool-share";
 
 interface Platform {
   name: string;
@@ -731,6 +732,19 @@ function ResultView({
           on whether we found quotes. When empty, it's the primary
           action. When we found some, it's a "know something we don't?"
           nudge. */}
+      <div className="mt-6 rounded-2xl border bg-card p-5">
+        <p className="font-semibold">Know a founder who'd want this?</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          It takes about a minute and they don&rsquo;t need an account to see what we find.
+        </p>
+        <ToolShare
+          tool="find-my-proof"
+          path="/tools/find-my-proof"
+          title="Share Find my praise"
+          text="Paste your website and this free tool finds real customer posts about your product:"
+        />
+      </div>
+
       {result.usage?.tier === "free" && result.provider !== "own" && (
         <div className="mt-6 flex flex-col items-start justify-between gap-3 rounded-2xl border-2 border-primary/25 bg-primary/5 p-5 sm:flex-row sm:items-center">
           <div>

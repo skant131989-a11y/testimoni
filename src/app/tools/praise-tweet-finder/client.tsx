@@ -19,6 +19,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ExitIntent } from "@/components/exit-intent";
 import { ToolsHeader } from "@/components/tools-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { ToolSignupUpsell } from "@/components/tool-signup-upsell";
 
 /**
  * Praise Tweet Finder — search-URL builder.
@@ -455,6 +456,22 @@ export function PraiseTweetFinderClient() {
           )}
         </div>
       </main>
+
+      <div className="mx-auto max-w-5xl px-4 pb-16">
+        <ToolSignupUpsell
+          tool="praise-tweet-finder"
+          badge="Skip the manual search"
+          headline="Let us do the searching for you"
+          description={
+            <>
+              This tool opens an X search you still have to read through. <strong>Find my praise</strong> scans X, LinkedIn,
+              Reddit and Product Hunt for you, then adds the posts you pick to a free Wall of Love. No card, 15
+              testimonials free.
+            </>
+          }
+          ctaLabel="Find my praise"
+        />
+      </div>
 
       <SiteFooter />
 

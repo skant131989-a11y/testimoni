@@ -3,6 +3,35 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TrackedLink } from "@/components/tracked-link";
+import { ToolShare } from "@/components/tool-share";
+
+/** Where each tool lives and what people say when they share it. */
+const SHARE: Record<string, { path: string; text: string }> = {
+  "ask-templates": {
+    path: "/tools/ask-templates",
+    text: "Free message templates that get customers to leave a testimonial (WhatsApp, email, DM):",
+  },
+  "linkedin-recommendation": {
+    path: "/tools/linkedin-recommendation",
+    text: "A free tool that drafts a LinkedIn recommendation in a minute:",
+  },
+  "star-badge": {
+    path: "/tools/star-badge",
+    text: "A free star-rating badge generator for your website:",
+  },
+  "testimonial-card": {
+    path: "/tools/testimonial-card",
+    text: "Turn any customer quote into a shareable image, free and no signup:",
+  },
+  writer: {
+    path: "/tools/testimonial-writer",
+    text: "Need a testimonial from a customer? This free tool helps them write one in a minute:",
+  },
+  "praise-tweet-finder": {
+    path: "/tools/praise-tweet-finder",
+    text: "Find the tweets praising your product with this free tool:",
+  },
+};
 
 /**
  * Shared signup upsell block used at the bottom of every /tools/* page.
@@ -65,6 +94,11 @@ export function ToolSignupUpsell({
           </Button>
         </TrackedLink>
       </div>
+      <ToolShare
+        tool={tool}
+        path={(SHARE[tool] ?? { path: "/tools" }).path}
+        text={(SHARE[tool] ?? { text: "Free tools for collecting and showing customer testimonials:" }).text}
+      />
     </div>
   );
 }

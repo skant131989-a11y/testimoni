@@ -64,6 +64,7 @@ export function TestimonialWriterClient() {
   const [variants, setVariants] = useState<Variant[] | null>(null);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
 
   async function generate() {
     if (!reviewingName.trim() || !didWhat.trim()) return;
@@ -82,6 +83,11 @@ export function TestimonialWriterClient() {
         return;
       }
       setVariants(data.variants);
+      setNote(
+        data.limited
+          ? "You've used today's free AI drafts, so these are fill-in drafts. Log in free for more."
+          : null
+      );
       track("writer_variants_shown", { count: data.variants?.length ?? 0 });
     } catch {
       setError("Network error. Try again.");
@@ -255,6 +261,15 @@ export function TestimonialWriterClient() {
         </div>
 
         {/* Results */}
+        {note && (
+          <p className="mb-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+            {note}{" "}
+            <a href="/signup?tool=writer&unlock=ai-drafts" className="font-semibold underline">
+              Log in or sign up
+            </a>
+          </p>
+        )}
+
         {variants && (
           <div className="mt-10 space-y-4">
             <div className="flex items-center justify-between">
