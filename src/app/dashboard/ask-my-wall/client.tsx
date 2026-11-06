@@ -157,7 +157,7 @@ function AnswerMeter({ used, limit }: { used: number; limit: number }) {
           <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Resets on the 1st. Pro has no limit.
+          Free answers quote your closest testimonials. Pro writes full answers with AI and has no limit. Resets on the 1st.
         </p>
       </div>
       {(out || pct >= 80) && <UpgradeGate exhausted={out} />}

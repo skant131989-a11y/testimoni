@@ -5,7 +5,7 @@ import { getEffectivePlan } from "@/lib/plan";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
 import { groqChat, hasGroq, GROQ_CHAT_MODEL } from "@/lib/groq";
-import { buildSystemPrompt, retrieve } from "@/lib/ask-my-wall";
+import { buildSystemPrompt, localAnswer, retrieve } from "@/lib/ask-my-wall";
 import { checkAndIncrement } from "@/lib/ask-rate-limit";
 import { askSubject, reserveMonthly } from "@/lib/scan-limits";
 
@@ -23,10 +23,10 @@ const BODY = z.object({
  * Returns { answer, references: [ { author, quote, url? } ] }
  * so the widget can render source badges under the answer.
  *
- * Plans: Pro is unlimited. Free gets a monthly allowance (see
- * PLAN_LIMITS.FREE.askMyWallAnswersPerMonth) and NEVER uses Claude:
- * answers come from Groq, and if Groq is unavailable the visitor gets
- * the closest real quotes instead of a generated sentence.
+ * Plans: Pro is unlimited and gets AI-written answers (Groq first,
+ * Claude Haiku if Groq fails). Free gets a monthly allowance (see
+ * PLAN_LIMITS.FREE.askMyWallAnswersPerMonth) and uses no AI at all: the
+ * answer is built locally from the closest real quotes (localAnswer).
  */
 export async function POST(
   req: NextRequest,
@@ -102,8 +102,8 @@ export async function POST(
   const retrieved = retrieve(testimonials, body.question, 6);
   const systemPrompt = buildSystemPrompt(workspace.name, retrieved);
 
-  // Groq first (free). Claude Haiku is only for Pro, and only when Groq
-  // is missing or fails. Free workspaces never reach Claude.
+  // Pro: AI-written answer (Groq first, Claude Haiku if Groq fails).
+  // Free: no AI call; the answer is built locally from the quotes.
   async function askGroq(): Promise<string> {
     const { text } = await groqChat({
       model: GROQ_CHAT_MODEL,
@@ -128,25 +128,21 @@ export async function POST(
   }
 
   let answer = "";
-  try {
-    if (hasGroq()) answer = await askGroq();
-    else if (!isFree) answer = await askClaude();
-  } catch (err) {
-    console.error("[ask-my-wall] primary LLM call failed:", err);
-    if (!isFree && hasGroq() && process.env.ANTHROPIC_API_KEY) {
-      try {
-        answer = await askClaude();
-      } catch (err2) {
-        console.error("[ask-my-wall] Claude fallback failed:", err2);
+  if (!isFree) {
+    try {
+      answer = hasGroq() ? await askGroq() : await askClaude();
+    } catch (err) {
+      console.error("[ask-my-wall] primary LLM call failed:", err);
+      if (hasGroq() && process.env.ANTHROPIC_API_KEY) {
+        try {
+          answer = await askClaude();
+        } catch (err2) {
+          console.error("[ask-my-wall] Claude fallback failed:", err2);
+        }
       }
     }
   }
-
-  if (!answer) {
-    answer = isFree
-      ? closestQuotesAnswer(retrieved)
-      : "Sorry — the wall's chatbot is briefly offline. Try again in a moment.";
-  }
+  if (!answer) answer = localAnswer(body.question, retrieved);
 
   return json({
     answer,
@@ -157,18 +153,6 @@ export async function POST(
     })),
     remaining,
   });
-}
-
-/** No LLM available: show the closest real quotes, word for word. */
-function closestQuotesAnswer(
-  retrieved: ReturnType<typeof retrieve>
-): string {
-  const top = retrieved.slice(0, 2);
-  if (top.length === 0) return "I couldn't find a customer testimonial about that yet.";
-  return (
-    "Here is what customers have said:\n" +
-    top.map((r) => `“${r.content.slice(0, 220)}” — ${r.author}`).join("\n")
-  );
 }
 
 export async function OPTIONS() {
