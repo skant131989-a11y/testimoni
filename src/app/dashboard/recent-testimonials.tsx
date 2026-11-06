@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DashboardEmptyState } from "@/components/dashboard-empty-state";
+import { AvatarImage } from "@/components/avatar-image";
 
 /**
  * Recent Testimonials card — extracted from dashboard/page.tsx and
@@ -59,18 +60,7 @@ export async function RecentTestimonialsCard({
                 key={testimonial.id}
                 className="flex items-start gap-4 rounded-lg border p-4"
               >
-                {testimonial.customerAvatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={testimonial.customerAvatar}
-                    alt={testimonial.customerName}
-                    className="h-10 w-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                    {testimonial.customerName.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <AvatarImage src={testimonial.customerAvatar} name={testimonial.customerName} size={40} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">

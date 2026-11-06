@@ -419,6 +419,7 @@ function renderWidget(container, data) {
   }
 
   container.innerHTML = html;
+  wireAvatarFallback(container);
 
   if (layout === "CAROUSEL") initCarousel(container);
   if (layout === "MARQUEE") initMarquee(container);
@@ -446,6 +447,32 @@ function firstLetter(name) {
   return c.toUpperCase();
 }
 
+// Profile photos taken from other sites expire or block hotlinking. When
+// one fails to load, swap in the letter circle (same color the wall page
+// uses) instead of leaving a broken image.
+function wireAvatarFallback(root) {
+  function swap(img) {
+    if (!img || img.getAttribute("data-fw-failed")) return;
+    img.setAttribute("data-fw-failed", "1");
+    var name = img.getAttribute("data-name") || "";
+    var letter = firstLetter(name);
+    if (!letter) { img.style.display = "none"; return; }
+    var span = document.createElement("span");
+    span.className = "fw-letter";
+    span.style.background = pickLetterColor(name);
+    span.textContent = letter;
+    if (img.parentNode) img.parentNode.replaceChild(span, img);
+  }
+  root.addEventListener("error", function (e) {
+    var el = e.target;
+    if (el && el.classList && el.classList.contains("fw-avatar")) swap(el);
+  }, true);
+  var imgs = root.querySelectorAll("img.fw-avatar");
+  for (var i = 0; i < imgs.length; i++) {
+    if (imgs[i].complete && imgs[i].naturalWidth === 0) swap(imgs[i]);
+  }
+}
+
 function renderCard(t, widget) {
   var html = '<div class="fw-card">';
   html += '<div class="fw-card-body">';
@@ -458,7 +485,7 @@ function renderCard(t, widget) {
   html += '<div class="fw-author">';
   if (widget.showAvatar !== false) {
     if (t.customerAvatar) {
-      html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" />';
+      html += '<img class="fw-avatar" src="' + escapeHtml(t.customerAvatar) + '" alt="" referrerpolicy="no-referrer" data-name="' + escapeHtml(t.customerName || "") + '" />';
     } else {
       var letter = firstLetter(t.customerName || "");
       if (letter) {

@@ -15,6 +15,7 @@ import { LetterAvatar } from "@/components/letter-avatar";
 import { StructuredData } from "@/components/seo/structured-data";
 import { getFounderProfile } from "@/lib/founder-directory";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { AvatarImage } from "@/components/avatar-image";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
 
@@ -177,22 +178,7 @@ export default async function FounderProfilePage({ params }: Props) {
                       &ldquo;{t.content}&rdquo;
                     </p>
                     <div className="mt-4 flex items-center gap-2 border-t pt-3">
-                      {t.customerAvatar ? (
-                        <Image
-                          src={t.customerAvatar}
-                          alt={t.customerName}
-                          width={28}
-                          height={28}
-                          className="h-7 w-7 rounded-full object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <LetterAvatar
-                          name={t.customerName}
-                          size={28}
-                          fontSize={11}
-                        />
-                      )}
+                      <AvatarImage src={t.customerAvatar} name={t.customerName} size={28} fontSize={11} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-semibold">
                           {t.customerName}

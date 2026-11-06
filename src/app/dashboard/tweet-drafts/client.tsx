@@ -17,6 +17,7 @@ import {
 import { track } from "@/lib/analytics";
 import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import type { PlanType } from "@/lib/constants";
+import { AvatarImage } from "@/components/avatar-image";
 
 type Testimonial = {
   id: string;
@@ -145,14 +146,7 @@ export function TweetDraftsClient({ testimonials, plan, socialAccounts, autoPost
           {testimonials.map((t) => (
             <li key={t.id} className="rounded-xl border bg-card p-5">
               <div className="flex items-start gap-3">
-                {t.customerAvatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={t.customerAvatar} alt="" className="h-10 w-10 rounded-full" />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-sm font-medium">
-                    {t.customerName.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <AvatarImage src={t.customerAvatar} name={t.customerName} size={40} />
                 <div className="flex-1">
                   <div className="flex items-baseline justify-between gap-3">
                     <p className="font-medium text-sm">

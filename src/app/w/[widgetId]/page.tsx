@@ -12,6 +12,7 @@ import { PageEngagement } from "@/components/page-engagement";
 import { InlineSignup } from "@/components/inline-signup";
 import { WallShareButtons } from "@/components/wall-share-buttons";
 import { absoluteUrl } from "@/lib/utils";
+import { AvatarImage } from "@/components/avatar-image";
 
 interface WallPageProps {
   params: Promise<{ widgetId: string }>;
@@ -269,21 +270,12 @@ function AuthorStrip({
   showAvatar: boolean;
   avatarSize?: number;
 }) {
-  const px = `h-${avatarSize === 56 ? "14" : "10"} w-${avatarSize === 56 ? "14" : "10"}`;
   return (
     <div className="mt-auto flex items-center justify-between gap-3 pt-1">
       <div className="flex min-w-0 items-center gap-3">
-        {showAvatar &&
-          (t.customerAvatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={t.customerAvatar}
-              alt=""
-              className={`${px} shrink-0 rounded-full object-cover`}
-            />
-          ) : (
-            <LetterAvatar name={t.customerName} size={avatarSize} />
-          ))}
+        {showAvatar && (
+          <AvatarImage src={t.customerAvatar} name={t.customerName} size={avatarSize} />
+        )}
         <div className="min-w-0">
           <p
             className={`font-bold text-foreground ${avatarSize === 56 ? "text-base" : "text-sm"}`}

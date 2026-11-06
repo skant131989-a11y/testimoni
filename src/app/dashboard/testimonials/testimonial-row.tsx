@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { track } from "@/lib/analytics";
 import type { TestimonialStatus, TestimonialSource } from "@prisma/client";
+import { AvatarImage } from "@/components/avatar-image";
 
 const sourceColors: Record<TestimonialSource, string> = {
   MANUAL: "bg-gray-100 text-gray-700",
@@ -222,16 +223,7 @@ export function TestimonialRow({ testimonial }: { testimonial: TestimonialRowDat
       )}
       <CardContent className="flex items-start gap-4 p-4">
         {/* Avatar */}
-        {t.customerAvatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={t.customerAvatar}
-            alt=""
-            className="h-10 w-10 shrink-0 rounded-full object-cover"
-          />
-        ) : (
-          <LetterAvatar name={t.customerName} size={40} />
-        )}
+        <AvatarImage src={t.customerAvatar} name={t.customerName} size={40} />
 
         {/* Content */}
         <div className="min-w-0 flex-1">
