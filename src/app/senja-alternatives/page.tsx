@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicNav } from "@/components/layout/public-nav";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { TrackedLink } from "@/components/tracked-link";
 import { StructuredData } from "@/components/seo/structured-data";
 import { pageBreadcrumbs } from "@/lib/seo-faqs";
@@ -165,6 +166,7 @@ export default function SenjaAlternativesPage() {
           </TrackedLink>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { PublicNav } from "@/components/layout/public-nav";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { TrackedLink } from "@/components/tracked-link";
 import { StructuredData } from "@/components/seo/structured-data";
 import { vsBreadcrumbs } from "@/lib/seo-faqs";
@@ -165,6 +166,7 @@ export default async function VsPage({ params }: { params: Promise<{ competitor:
           </div>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

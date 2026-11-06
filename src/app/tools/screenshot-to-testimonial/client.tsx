@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolsHeader } from "@/components/tools-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { ScreenshotDemo } from "@/components/screenshot-demo";
 import { compressImageToDataUrl } from "@/lib/image-compress";
 import { track } from "@/lib/analytics";
@@ -292,6 +293,7 @@ export function ScreenshotToTestimonialClient() {
           — the free way to collect, curate, and embed customer proof.
         </p>
       </div>
+      <SiteFooter />
     </div>
   );
 }
