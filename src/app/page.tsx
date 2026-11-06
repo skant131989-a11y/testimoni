@@ -12,7 +12,6 @@ import {
   Film,
   Mail,
   MousePointerClick,
-  Quote,
   RefreshCw,
   Search,
   Send,
@@ -25,10 +24,10 @@ import { ProPrice, FreePrice } from "@/components/pricing/price-display";
 import { PricingCta } from "@/components/pricing/pricing-cta";
 import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { COMPETITORS, FACTS_VERIFIED_ON, TESTIMONI } from "@/lib/competitors";
-import { HOME_PRAISE } from "@/lib/home-praise";
 import { HOME_FAQ, SOURCES } from "@/lib/home-content";
 import { FindProofForm } from "@/components/home/find-proof-form";
 import { HeroPreview } from "@/components/home/hero-preview";
+import { LiveWall } from "@/components/home/live-wall";
 import { HeroDualDemo } from "@/components/hero-dual-demo";
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
@@ -116,7 +115,8 @@ const PRO_TOP = PRO_FEATURES.filter(
 ).slice(0, 9);
 
 const COMPARE = [TESTIMONI, COMPETITORS.senja, COMPETITORS["testimonial-to"]];
-const PROOF = HOME_PRAISE.slice(0, 6);
+// Our own public wall (real posts from X), embedded live in the proof section.
+const WALL_ID = "cmtedlomj0009w0btzyi3yweh";
 
 export default function LandingPage() {
   return (
@@ -382,7 +382,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 7 — Proof: real, source-linked quotes */}
+        {/* 7 — Proof: our own wall, running live with the embed above */}
         <section className="py-16 md:py-20">
           <div className="mx-auto max-w-6xl px-4">
             <div className="mx-auto max-w-2xl text-center">
@@ -391,32 +391,25 @@ export default function LandingPage() {
                 Real posts from real people
               </h2>
               <p className="mt-3 text-muted-foreground">
-                Every quote links to where it was posted.
+                This is our own wall, embedded on this page with the one line of code above. Each
+                quote came from a post on X and keeps its link.
               </p>
             </div>
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {PROOF.map((p) => (
-                <a
-                  key={p.sourceUrl}
-                  href={p.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex flex-col justify-between rounded-2xl border bg-card p-6 transition hover:border-primary/50 hover:shadow-md"
-                >
-                  <div>
-                    <Quote className="h-5 w-5 text-primary/60" />
-                    <p className="mt-3 text-sm leading-relaxed text-foreground/90 line-clamp-6">
-                      {p.content}
-                    </p>
-                  </div>
-                  <p className="mt-4 flex items-center justify-between text-sm">
-                    <span className="font-semibold">{p.customerName}</span>
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground group-hover:text-primary">
-                      View post <ExternalLink className="h-3 w-3" />
-                    </span>
-                  </p>
-                </a>
-              ))}
+            <div className="relative mt-10 overflow-hidden rounded-2xl border bg-card p-3 shadow-sm sm:p-5">
+              <div className="max-h-[640px] overflow-hidden">
+                <LiveWall widgetId={WALL_ID} />
+              </div>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card to-transparent" />
+            </div>
+            <div className="mt-5 text-center">
+              <TrackedLink
+                cta="proof_open_wall"
+                surface="home"
+                href={`/w/${WALL_ID}?showcase=1`}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+              >
+                See the full wall <ExternalLink className="h-3.5 w-3.5" />
+              </TrackedLink>
             </div>
           </div>
         </section>
