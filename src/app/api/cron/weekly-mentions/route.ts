@@ -12,7 +12,7 @@ import type { ScanResult } from "@/lib/scan-report";
 /**
  * GET /api/cron/weekly-mentions — Mondays ~9am Pacific (see vercel.json).
  *
- * Re-scans each workspace's own product (Tavily + Groq only — this
+ * Re-scans the product of each PRO workspace (Tavily + Groq only — this
  * route never touches the Anthropic API) and emails the owner when
  * there is more public praise than they were last told about.
  *
@@ -39,10 +39,23 @@ export async function GET(req: NextRequest) {
     process.env.WEEKLY_MENTIONS_ENABLED === "1" && new URL(req.url).searchParams.get("dryRun") !== "1";
 
   const staleBefore = new Date(Date.now() - STALE_MS);
+  // Automatic weekly re-scans are a Pro feature (Free scans on demand
+  // at /tools/find-my-proof). Founder/demo workspaces in
+  // PRO_OVERRIDE_WORKSPACES count as Pro, same as everywhere else.
+  const overrideSlugs = (process.env.PRO_OVERRIDE_WORKSPACES || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
   const rows = await prisma.workspaceMentionScan.findMany({
     where: {
       normalizedUrl: { not: "" },
       OR: [{ scannedAt: null }, { scannedAt: { lt: staleBefore } }],
+      workspace: {
+        OR: [
+          { subscription: { is: { plan: { in: ["PRO", "PRO_AI"] } } } },
+          ...(overrideSlugs.length > 0 ? [{ slug: { in: overrideSlugs } }] : []),
+        ],
+      },
     },
     orderBy: { scannedAt: { sort: "asc", nulls: "first" } },
     take: 30,

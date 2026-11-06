@@ -751,3 +751,28 @@ enum LeadScanRunStatus {
   COMPLETED
   FAILED
 }
+
+/// How many Find my praise scans a visitor (by hashed IP, per day) or an
+/// account (per month) has used. Row per (subject, period). Cache hits and
+/// failed scans don't count; see src/lib/scan-limits.ts.
+model ScanUsage {
+  id        String   @id @default(cuid())
+  subject   String
+  period    String
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([subject, period])
+  @@map("scan_usage")
+}
+
+/// Saved Find my praise results, one per website and tier ("<url>|basic"
+/// or "<url>|pro"), so a repeat scan of the same site doesn't call Tavily
+/// and Groq/Claude again. Checked before any limit is counted.
+model FindProofCache {
+  key       String   @id
+  result    Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("find_proof_cache")
+}

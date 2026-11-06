@@ -43,13 +43,22 @@ interface Quote {
   score: number;
 }
 
+interface Usage {
+  tier: "visitor" | "free" | "pro";
+  used: number;
+  limit: number;
+  scope: "day" | "month";
+  remaining: number;
+}
+
 interface Result {
   brand: string;
   totalMentions: number;
   platforms: Platform[];
   topQuotes: Quote[];
   cached?: boolean;
-  provider?: "tavily" | "groq" | "claude" | "own";
+  provider?: string;
+  usage?: Usage;
 }
 
 // Stage messages shown during the API call. Each one dwells long
@@ -108,6 +117,7 @@ export function FindMyProofClient() {
   );
   const [stage, setStage] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [limitHit, setLimitHit] = useState<(Usage & { message: string }) | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [twitterHandles, setTwitterHandles] = useState("");
@@ -156,6 +166,7 @@ export function FindMyProofClient() {
     setStatus("searching");
     setStage(0);
     setError(null);
+    setLimitHit(null);
     setResult(null);
     // Split comma-separated handles and strip whitespace + leading @.
     const handleList = twitterHandles
@@ -179,8 +190,13 @@ export function FindMyProofClient() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Something went wrong. Try again.");
         setStatus("error");
+        if (data.code === "scan_limit" && data.usage) {
+          setLimitHit({ ...data.usage, message: data.error });
+          track("find_proof_limit_hit", { tier: data.usage.tier });
+          return;
+        }
+        setError(data.error || "Something went wrong. Try again.");
         track("find_proof_failed", { url: trimmed, reason: data.error });
         return;
       }
@@ -279,7 +295,7 @@ export function FindMyProofClient() {
               </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              Free while we experiment · No signup · Takes about 20 seconds
+              3 free scans a day · No signup · Takes about 20 seconds
             </p>
 
             {/* Advanced references — hidden by default. If the user
@@ -368,6 +384,8 @@ export function FindMyProofClient() {
               {error}
             </div>
           )}
+
+          {limitHit && <ScanLimitNotice info={limitHit} />}
 
           {/* Examples */}
           <div className="mt-12">
@@ -741,14 +759,17 @@ function ResultView({
         — we&rsquo;ll tune the search.
         {result.provider && (
           <span className="ml-2 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider">
-            via{" "}
-            {result.provider === "tavily"
-              ? "Tavily+Groq (free)"
-              : result.provider === "groq"
-                ? "Groq (free)"
-                : result.provider === "own"
-                  ? "Testimoni's own wall"
-                  : "Claude"}
+            {result.provider === "own"
+              ? "Testimoni's own wall"
+              : result.provider === "tavily+claude"
+                ? "Deep scan · Pro"
+                : "Standard scan"}
+          </span>
+        )}
+        {result.usage && result.provider !== "own" && (
+          <span className="ml-1 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider">
+            {result.usage.remaining} of {result.usage.limit} scans left{" "}
+            {result.usage.scope === "day" ? "today" : "this month"}
           </span>
         )}
         {result.cached && (
@@ -757,6 +778,40 @@ function ResultView({
           </span>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Scan limit notice ───────────────────────────────────────────
+// Shown when the allowance is used up. Visitors are asked to sign up
+// (10 a month); free accounts are offered Pro (30 deeper scans).
+
+function ScanLimitNotice({ info }: { info: Usage & { message: string } }) {
+  return (
+    <div className="mx-auto mt-6 max-w-xl rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 text-left">
+      <p className="font-semibold">{info.message}</p>
+      {info.tier === "visitor" && (
+        <>
+          <p className="mt-1 text-sm text-muted-foreground">
+            A free account gets 10 scans a month and keeps everything you find.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/signup?src=find_my_proof_limit">
+              <Button>Sign up free</Button>
+            </Link>
+            <Link href="/login?next=/tools/find-my-proof">
+              <Button variant="outline">Log in</Button>
+            </Link>
+          </div>
+        </>
+      )}
+      {info.tier === "free" && (
+        <div className="mt-4">
+          <Link href="/pricing">
+            <Button>See Pro, $19/month</Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

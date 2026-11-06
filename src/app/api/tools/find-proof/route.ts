@@ -1,54 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAnthropic, CHAT_MODEL } from "@/lib/anthropic";
-import { groqChat, GROQ_COMPOUND_MODEL, GROQ_CHAT_MODEL } from "@/lib/groq";
+import { groqChat, GROQ_CHAT_MODEL } from "@/lib/groq";
 import { tavilySearch, hasTavily } from "@/lib/tavily";
 import { detectHandlesFromUrl } from "@/lib/handle-detect";
 import { isOwnBrandUrl, getOwnBrandQuotes } from "@/lib/own-brand-proof";
+import {
+  resolveScanActor,
+  reserveScan,
+  refundScan,
+  peekScanUsage,
+  limitMessage,
+} from "@/lib/scan-limits";
+import { getCachedScan, saveCachedScan } from "@/lib/find-proof-cache";
 
 /**
  * POST /api/tools/find-proof
  *
- * Given a website URL, ask Claude to search the public web for
- * customer testimonials + praise across X, LinkedIn, Reddit,
- * Product Hunt, HN, App Store, Play Store, and general reviews.
- * Returns a structured summary:
+ * Given a website URL, search the public web for real customer praise
+ * (X, LinkedIn, Reddit, Product Hunt, Hacker News, app stores, review
+ * sites, blogs) and return the quotes it found, each with its source.
  *
- *   { brand, totalMentions, platforms: [{ name, count }],
- *     topQuotes: [{ content, author, role, source, sourceUrl, score }] }
- *
- * ── Why Claude for this (vs SerpAPI / hand-rolled scraping) ────
- * Claude's web_search tool is server-side — one API call, no
- * separate search vendor, no browser-driver flakiness. Claude
- * plans the queries, reads results, and synthesizes. Same tool
- * we already use for Ask My Wall, so no new integration
- * surface to maintain.
- *
- * Cost: one call is roughly 6-15K tokens through Opus 5 — a few
- * cents. Cache by URL in memory (5-minute TTL) so we don't
- * re-search when someone refreshes.
- *
- * ── Reliability notes ─────────────────────────────────────────
- * - Claude sometimes fabricates author names or roles when the
- *   underlying search snippet was terse. The system prompt is
- *   strict about "only include what's actually in the source"
- *   but expect ~10% noise. Fine for a "wow" surface; not fine
- *   for something users pay for yet.
- * - No mentions found is a real, expected outcome for unknown
- *   brands. We surface it cleanly rather than pretend.
+ * ── How a scan runs ────────────────────────────────────────────
+ *   1. Saved result for this site? Return it. No search, no allowance
+ *      used (see lib/find-proof-cache.ts).
+ *   2. Otherwise take one scan from the caller's allowance
+ *      (lib/scan-limits.ts): 3 a day without an account, 10 a month on
+ *      Free, 30 a month on Pro.
+ *   3. Tavily finds the real posts. Free scans read them with Groq.
+ *      Pro scans search more widely and read them with Claude Haiku.
+ *   4. Every quote must appear word for word in the search results or
+ *      it is dropped. Claude is only ever used on Pro; a Pro scan falls
+ *      back to Groq if Claude fails.
  */
 
 const BODY = z.object({
   url: z.string().min(4).max(500),
-  provider: z.enum(["tavily", "groq", "claude"]).optional(),
-  // Optional user-provided references — power-user mode. If any
-  // of these are set, they take priority over the homepage scrape.
-  // twitterHandles: e.g. ["@usetestimoni", "@neha"] — with or
-  //   without @, comma-separated on the client, split into array.
-  // linkedinUrl: full URL like "https://linkedin.com/company/xyz"
-  //   or just "linkedin.com/company/xyz" or a slug.
-  // extra: free-text hint — hashtags, alt names, product tagline.
-  //   Passed straight to the LLM as extra recognition context.
+  // Optional user-provided references: power-user mode. If any of
+  // these are set the result is specific to this request, so it
+  // bypasses the shared cache.
   twitterHandles: z.array(z.string().max(40)).max(10).optional(),
   linkedinUrl: z.string().max(200).optional(),
   extra: z.string().max(500).optional(),
@@ -76,33 +66,7 @@ const RESULT_SHAPE = z.object({
 });
 
 type Result = z.infer<typeof RESULT_SHAPE>;
-
-// In-memory 24-hour cache keyed on normalized URL. Same URL across
-// a day = 1 API charge total. Trims to 500 entries LRU-style.
-const CACHE = new Map<string, { at: number; result: Result }>();
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-const CACHE_MAX = 500;
-
-// Per-IP daily rate limit + global daily spend cap. Both reset at
-// midnight (server time). If we exceed the daily cap, the endpoint
-// returns 429 with a friendly "come back tomorrow" message.
-const IP_LIMIT_PER_DAY = 3;
-const DAILY_CALL_CAP = 3; // hard cap on paid Anthropic calls per day (~$0.12 max)
-const ipHits = new Map<string, { day: string; count: number }>();
-let globalDay = "";
-let globalCount = 0;
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function ipFrom(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
+type Snippet = { title: string; url: string; content: string };
 
 function normalizeUrl(input: string): string | null {
   try {
@@ -122,6 +86,58 @@ function brandFromUrl(url: string): string {
   return stem.charAt(0).toUpperCase() + stem.slice(1);
 }
 
+/** Pull the first balanced {...} object out of a model reply. */
+function extractJson(raw: string): string {
+  const stripped = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "");
+  const start = stripped.indexOf("{");
+  if (start === -1) return stripped;
+  let depth = 0;
+  let inStr = false;
+  let esc = false;
+  for (let i = start; i < stripped.length; i++) {
+    const c = stripped[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === "\\") esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') inStr = true;
+    else if (c === "{") depth++;
+    else if (c === "}") {
+      depth--;
+      if (depth === 0) return stripped.slice(start, i + 1);
+    }
+  }
+  return stripped;
+}
+
+// Case, quote style, emoji and punctuation differences don't matter
+// when checking a quote against the search results.
+function normalizeText(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[^\p{L}\p{N} ]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** A quote is genuine only if its text appears in the search results. */
+function isVerbatim(content: string, haystack: string): boolean {
+  const parts = content
+    .split(/…|\.{3}/)
+    .map(normalizeText)
+    .filter((p) => p.length >= 12);
+  return parts.length > 0 && parts.every((p) => haystack.includes(p));
+}
+
+const CODE_ARTIFACT = /\$\{|\bpick\(|\brandom\(|<%|%>|\[\s*['"][^'"]+['"]\s*,/;
+
 export async function POST(req: NextRequest) {
   let body: z.infer<typeof BODY>;
   try {
@@ -138,16 +154,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Cache hit?
-  const cached = CACHE.get(normalized);
-  if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
-    return NextResponse.json({ ...cached.result, cached: true });
-  }
+  const actor = await resolveScanActor(req);
+  const isPro = actor.tier === "pro";
+  const cacheTier = isPro ? "pro" : "basic";
 
   // Our own domain: search finds almost nothing for a young brand, so
   // return the real, sourced testimonials from our own wall instead
   // (see lib/own-brand-proof.ts — only ones with a source link).
-  // Zero API cost. Falls through to normal search if there are none.
+  // Zero API cost and no allowance used.
   if (isOwnBrandUrl(normalized)) {
     const quotes = await getOwnBrandQuotes();
     if (quotes.length > 0) {
@@ -161,167 +175,71 @@ export async function POST(req: NextRequest) {
         platforms: [...byPlatform.entries()].map(([name, count]) => ({ name, count })),
         topQuotes: quotes,
         provider: "own",
+        usage: await peekScanUsage(actor),
       });
     }
   }
 
-  // Pick provider. Preference order:
-  //   1. Explicit body.provider wins.
-  //   2. Tavily (free, 1K/mo) if TAVILY_API_KEY + GROQ_API_KEY.
-  //   3. Claude (paid, capped) — final fallback.
-  //   Note: Groq compound is available but usually 413s on free
-  //   tier, so we don't auto-default to it.
-  const provider: "tavily" | "groq" | "claude" =
-    body.provider ??
-    (hasTavily() && process.env.GROQ_API_KEY ? "tavily" : "claude");
-
-  // ── Cost guards (Claude path only) ─────────────────────────
-  // Groq compound is free during beta; no per-IP or global cap.
-  const ip = ipFrom(req);
-  const day = today();
-  if (provider === "claude") {
-    const hit = ipHits.get(ip);
-    if (hit && hit.day === day && hit.count >= IP_LIMIT_PER_DAY) {
-      return NextResponse.json(
-        {
-          error: `You've used your ${IP_LIMIT_PER_DAY} free searches for today. Sign up to keep exploring — it's free.`,
-        },
-        { status: 429 }
-      );
-    }
-    if (globalDay !== day) {
-      globalDay = day;
-      globalCount = 0;
-    }
-    if (globalCount >= DAILY_CALL_CAP) {
-      return NextResponse.json(
-        {
-          error:
-            "We've hit today's search limit — come back tomorrow. (This is an experiment; we cap spend to keep it free.)",
-        },
-        { status: 429 }
-      );
-    }
-  }
-
-  const brand = brandFromUrl(normalized);
-
-  // Two prompt variants:
-  //  - fullPrompt: rich rubric, used by Claude (has plenty of context)
-  //  - leanPrompt: 60% shorter, used by Groq (compound model's context
-  //    budget is tight — the web search results themselves eat ~15K
-  //    tokens, and the free tier caps at 30K TPM, so the system
-  //    prompt has to be small or we 413/429).
-  const leanPrompt = `Find POSITIVE customer mentions of "${brand}" (${normalized}) across X, Reddit, LinkedIn, Product Hunt, Hacker News, App Store, G2, Trustpilot, and blogs. Only real quotes — never invent authors, roles, or content.
-
-Return ONLY this JSON (no prose, no fences):
-{"brand":"${brand}","totalMentions":N,"platforms":[{"name":"X","count":N}],"topQuotes":[{"content":"...","author":"name or @handle","role":"optional","source":"X|Reddit|LinkedIn|Product Hunt|Hacker News|App Store|Blog|G2|Trustpilot","sourceUrl":"https://...","score":1-100}]}
-
-Aim for 3-8 topQuotes. If none exist, return "topQuotes":[]. Score by specificity + author credibility + recency.`;
-
-  const fullPrompt = `You are Testimoni's customer-proof discovery engine.
-
-TASK
-Given a company's website (${normalized}, brand name likely "${brand}"), search the public web for POSITIVE customer mentions, testimonials, reviews, and praise. Look across:
-
-  - X (Twitter)         — praise tweets, replies, quote tweets
-  - LinkedIn            — posts, comments recommending the product
-  - Reddit              — subreddit comments, thread replies
-  - Product Hunt        — comments on their launch
-  - Hacker News         — thread comments
-  - App Store / Play    — user reviews (if it's an app)
-  - Trustpilot / G2     — review sites
-  - Personal blogs      — write-ups mentioning the product
-
-RULES
-- Only include POSITIVE mentions. Skip complaints, questions, and clearly neutral mentions.
-- Be GENEROUS with small / new / niche brands — if the mention plausibly refers to ${brand} based on context (surrounding words, URLs, hashtags), include it.
-- Do NOT invent author names, roles, or quotes. If a name is a handle (like @nikhil), keep the handle.
-- Score each quote 1-100 by: specificity (+30), verifiable identity (+25), emotional strength (+20), platform credibility (+15), recency (+10).
-
-OUTPUT — ONLY this JSON, no fences, no commentary:
-{"brand":"${brand}","totalMentions":N,"platforms":[{"name":"X","count":N}],"topQuotes":[{"content":"...","author":"...","role":"...","source":"X|LinkedIn|Reddit|Product Hunt|Hacker News|App Store|Blog|G2|Trustpilot","sourceUrl":"...","score":N}]}
-
-Return 3-10 topQuotes. If none, empty array.`;
-
-  let raw = "";
-  let effectiveProvider: "tavily" | "groq" | "claude" = provider;
-
-  async function callClaude(): Promise<string> {
-    const anthropic = getAnthropic();
-    const response = (await anthropic.messages.create({
-      model: CHAT_MODEL,
-      max_tokens: 1500,
-      system: fullPrompt,
-      tools: [
-        {
-          type: "web_search_20260209",
-          name: "web_search",
-          max_uses: 3,
-          allowed_callers: ["direct"],
-        },
-      ],
-      messages: [
-        {
-          role: "user",
-          content: `Find customer proof for the brand "${brand}" (website: ${normalized}). Search now and return the JSON.`,
-        },
-      ],
-    } as unknown as Parameters<typeof anthropic.messages.create>[0])) as unknown as {
-      content: Array<{ type: string; text?: string }>;
-    };
-    let out = "";
-    for (const block of response.content) {
-      if (block.type === "text" && typeof block.text === "string") out = block.text;
-    }
-    return out;
-  }
-
-  // Tavily + Groq path — free.
-  // Search matrix:
-  //   1. Broad query — reviews/blogs about the domain
-  //   2. Social-domain query — X/Reddit/PH/HN/LinkedIn constrained
-  //   3. Handle query (only if we have handles) — targets @mentions
-  // Handle discovery: user-supplied fields win. If user gave
-  // nothing, we scrape the pasted URL's homepage HTML.
-  const normalizedUrl = normalized;
-
-  // Resolve handles once so we can pass them into the LLM prompt
-  // regardless of provider. Cheap, ~500ms budget, silent-fail.
+  // Saved result? Free for everyone: no search and no allowance used.
   const userTwitter = (body.twitterHandles ?? [])
     .map((h) => h.trim().replace(/^@/, ""))
     .filter(Boolean);
   const userLinkedin = body.linkedinUrl?.trim();
-  const userProvidedAny = userTwitter.length > 0 || !!userLinkedin;
+  const customReferences = userTwitter.length > 0 || !!userLinkedin || !!body.extra?.trim();
 
-  const scraped = userProvidedAny
-    ? { twitter: [], linkedin: [], github: [] }
-    : await detectHandlesFromUrl(normalizedUrl);
+  if (!customReferences) {
+    const saved = await getCachedScan<Result & { provider?: string }>(normalized, cacheTier);
+    if (saved) {
+      return NextResponse.json({
+        ...saved,
+        cached: true,
+        usage: await peekScanUsage(actor),
+      });
+    }
+  }
 
+  const haveClaude = isPro && !!process.env.ANTHROPIC_API_KEY;
+  if (!hasTavily() || (!process.env.GROQ_API_KEY && !haveClaude)) {
+    return NextResponse.json(
+      { error: "Search is temporarily unavailable — please try again later." },
+      { status: 503 }
+    );
+  }
+
+  // A real scan is about to run: take one from the allowance.
+  const reservation = await reserveScan(actor);
+  if (!reservation.ok) {
+    return NextResponse.json(
+      {
+        error: limitMessage(actor),
+        code: "scan_limit",
+        usage: reservation.usage,
+      },
+      { status: 429 }
+    );
+  }
+
+  const brand = brandFromUrl(normalized);
+  const host = new URL(normalized).hostname.replace(/^www\./, "");
+
+  // Handle discovery: user-supplied fields win. If the user gave
+  // nothing, scrape the pasted URL's homepage (cheap, silent-fail).
+  const scraped = customReferences
+    ? { twitter: [] as string[], linkedin: [] as string[], github: [] as string[] }
+    : await detectHandlesFromUrl(normalized);
   const twitterHandles = userTwitter.length > 0 ? userTwitter : scraped.twitter;
   const linkedinRefs: string[] = [];
   if (userLinkedin) linkedinRefs.push(userLinkedin);
   linkedinRefs.push(...scraped.linkedin);
 
-  async function callTavilyGroq(): Promise<string> {
-    const host = new URL(normalizedUrl).hostname.replace(/^www\./, "");
+  async function gatherSnippets(deep: boolean): Promise<Snippet[]> {
     const broadQuery = `"${host}" OR "${brand}.com" review "love using" OR "recommend" OR "best tool"`;
     const socialQuery = `"${host}" OR "${brand}"`;
-
-    // If we have Twitter handles, build a handle-focused query.
-    // Quoting each handle forces a phrase match on X.
     const handleQuery =
-      twitterHandles.length > 0
-        ? twitterHandles.map((h) => `"@${h}"`).join(" OR ")
-        : null;
+      twitterHandles.length > 0 ? twitterHandles.map((h) => `"@${h}"`).join(" OR ") : null;
 
-    // Fan out searches — up to 3 in parallel.
-    const searches: Promise<{ results: Array<{ title: string; url: string; content: string; }> }>[] = [
-      tavilySearch({
-        query: broadQuery,
-        searchDepth: "advanced",
-        maxResults: 8,
-      }),
+    const searches = [
+      tavilySearch({ query: broadQuery, searchDepth: "advanced", maxResults: 8 }),
       tavilySearch({
         query: socialQuery,
         searchDepth: "advanced",
@@ -346,25 +264,44 @@ Return 3-10 topQuotes. If none, empty array.`;
         })
       );
     }
+    if (deep) {
+      // Pro: one focused search per platform group, so busy platforms
+      // don't crowd out the others.
+      const perPlatform: string[][] = [
+        ["x.com", "twitter.com"],
+        ["reddit.com"],
+        ["linkedin.com"],
+        ["producthunt.com", "news.ycombinator.com"],
+      ];
+      for (const domains of perPlatform) {
+        searches.push(
+          tavilySearch({
+            query: socialQuery,
+            searchDepth: "advanced",
+            maxResults: 10,
+            includeDomains: domains,
+          })
+        );
+      }
+    }
+
     const responses = await Promise.all(searches);
-    const allResults = responses.flatMap((r) => r.results);
-
-    // Dedupe by URL.
     const seen = new Set<string>();
-    const combined = allResults.filter((r) => {
-      if (seen.has(r.url)) return false;
-      seen.add(r.url);
-      return true;
-    });
+    const combined = responses
+      .flatMap((r) => r.results)
+      .filter((r) => {
+        if (seen.has(r.url)) return false;
+        seen.add(r.url);
+        return true;
+      });
 
-    // Homonym filter — a result survives if it mentions the
-    // hostname, one of the known handles, or (for long-stem
-    // brands) the stem itself.
-    const stemSafe = brand.toLowerCase().length >= 6;
+    // Homonym filter — a result survives if it mentions the hostname,
+    // one of the known handles, or (for long-stem brands) the stem.
+    const stemSafe = brand.length >= 6;
     const needle = host.toLowerCase();
     const stemNeedle = brand.toLowerCase();
     const handleNeedles = twitterHandles.map((h) => h.toLowerCase());
-    const merged = combined
+    return combined
       .filter((r) => {
         const hay = `${r.url} ${r.title} ${r.content}`.toLowerCase();
         if (hay.includes(needle)) return true;
@@ -372,40 +309,23 @@ Return 3-10 topQuotes. If none, empty array.`;
         if (stemSafe && hay.includes(stemNeedle)) return true;
         return false;
       })
-      .slice(0, 15);
+      .slice(0, deep ? 30 : 15);
+  }
 
-    if (merged.length === 0) {
-      return JSON.stringify({
-        brand,
-        totalMentions: 0,
-        platforms: [],
-        topQuotes: [],
-      });
-    }
-
-    const context = merged
-      .map(
-        (r, i) =>
-          `[${i + 1}] ${r.title}\nURL: ${r.url}\nSNIPPET: ${r.content.slice(0, 500).replace(/\s+/g, " ")}`
-      )
-      .join("\n\n");
-
-    const synthesisSystem = `You extract POSITIVE customer quotes about a SPECIFIC product from real web search results and return them as strict JSON. Never invent, paraphrase, or synthesize — quotes must appear verbatim in the provided SNIPPETS.
+  const synthesisSystem = `You extract POSITIVE customer quotes about a SPECIFIC product from real web search results and return them as strict JSON. Never invent, paraphrase, or synthesize — quotes must appear verbatim in the provided SNIPPETS.
 
 TARGET PRODUCT
   Brand name: ${brand}
-  Website:    ${normalizedUrl}
-  Hostname:   ${new URL(normalizedUrl).hostname.replace(/^www\./, "")}${
-    twitterHandles.length > 0
-      ? `\n  X/Twitter: ${twitterHandles.map((h) => `@${h}`).join(", ")}`
-      : ""
+  Website:    ${normalized}
+  Hostname:   ${host}${
+    twitterHandles.length > 0 ? `\n  X/Twitter: ${twitterHandles.map((h) => `@${h}`).join(", ")}` : ""
   }${linkedinRefs.length > 0 ? `\n  LinkedIn:  ${linkedinRefs.join(", ")}` : ""}${
     body.extra ? `\n  Extra:     ${body.extra}` : ""
   }
 
 HOMONYM CHECK — CRITICAL
 Some brand names are common words or clash with unrelated products/concepts. Before including a quote:
-  1. The snippet must clearly be about the software/company at ${normalizedUrl}, NOT a legal term, a common noun, or a similarly-named unrelated product.
+  1. The snippet must clearly be about the software/company at ${normalized}, NOT a legal term, a common noun, or a similarly-named unrelated product.
   2. Signals it IS the right product: mentions the hostname, references product features/pricing, links to the site, is in a review site's dedicated page for it.
   3. Signals it is NOT: talks about the word in a generic/dictionary sense; mentions a similarly-named product from a different vertical; is a news article about an unrelated topic that happens to contain the word.
 When in doubt, SKIP the snippet.
@@ -433,137 +353,89 @@ HARD RULES
 OUTPUT — return ONLY this JSON (no fences, no prose):
 {"brand":"${brand}","totalMentions":N,"platforms":[{"name":"X","count":N}],"topQuotes":[{"content":"...","author":"...","role":"...","source":"...","sourceUrl":"...","score":N}]}
 
-topQuotes: 0-10 items. Empty array is a valid, honest answer for small/new brands.`;
+topQuotes: 0-${isPro ? 15 : 10} items. Empty array is a valid, honest answer for small/new brands.`;
 
-    const userPrompt = `Extract positive customer proof for the brand "${brand}" from these ${merged.length} real search snippets. VERBATIM ONLY. If a snippet has no clear positive verbatim line, skip it.
+  async function readWithClaude(system: string, user: string): Promise<string> {
+    const anthropic = getAnthropic();
+    const response = await anthropic.messages.create({
+      model: CHAT_MODEL,
+      max_tokens: 3000,
+      temperature: 0,
+      system,
+      messages: [{ role: "user", content: user }],
+    });
+    let out = "";
+    for (const block of response.content) {
+      if (block.type === "text") out = block.text;
+    }
+    return out;
+  }
 
-SEARCH RESULTS:
-${context}
-
-Return the JSON now.`;
-
+  async function readWithGroq(system: string, user: string): Promise<string> {
     const { text } = await groqChat({
       model: GROQ_CHAT_MODEL,
       max_tokens: 2000,
       messages: [
-        { role: "system", content: synthesisSystem },
-        { role: "user", content: userPrompt },
+        { role: "system", content: system },
+        { role: "user", content: user },
       ],
       temperature: 0,
     });
     return text;
   }
 
+  let provider = isPro ? "tavily+claude" : "tavily";
+  let raw = "";
+  let snippets: Snippet[] = [];
+
   try {
-    if (provider === "tavily") {
-      try {
-        raw = await callTavilyGroq();
-      } catch (tavilyErr) {
-        // Fall back to Claude on ANY error — including dev. Users
-        // never see empty results if the paid path still has room.
-        console.warn(
-          "[find-proof] Tavily+Groq failed, falling back to Claude:",
-          tavilyErr,
-        );
-        if (globalDay !== day) {
-          globalDay = day;
-          globalCount = 0;
-        }
-        if (globalCount >= DAILY_CALL_CAP) {
-          throw tavilyErr;
-        }
-        raw = await callClaude();
-        effectiveProvider = "claude";
-      }
-    } else if (provider === "groq") {
-      try {
-        const { text } = await groqChat({
-          model: GROQ_COMPOUND_MODEL,
-          max_tokens: 1500,
-          messages: [
-            { role: "system", content: leanPrompt },
-            {
-              role: "user",
-              content: `Search the web for "${brand}" (${normalized}) and return ONLY the JSON.`,
-            },
-          ],
-        });
-        raw = text;
-      } catch (groqErr) {
-        console.warn("[find-proof] Groq failed, falling back to Claude:", groqErr);
-        if (globalDay !== day) {
-          globalDay = day;
-          globalCount = 0;
-        }
-        if (globalCount >= DAILY_CALL_CAP) {
-          throw groqErr;
-        }
-        raw = await callClaude();
-        effectiveProvider = "claude";
-      }
+    snippets = await gatherSnippets(isPro);
+
+    if (snippets.length === 0) {
+      raw = JSON.stringify({ brand, totalMentions: 0, platforms: [], topQuotes: [] });
     } else {
-      raw = await callClaude();
+      const context = snippets
+        .map(
+          (r, i) =>
+            `[${i + 1}] ${r.title}\nURL: ${r.url}\nSNIPPET: ${r.content.slice(0, 500).replace(/\s+/g, " ")}`
+        )
+        .join("\n\n");
+      const userPrompt = `Extract positive customer proof for the brand "${brand}" from these ${snippets.length} real search snippets. VERBATIM ONLY. If a snippet has no clear positive verbatim line, skip it.
+
+SEARCH RESULTS:
+${context}
+
+Return the JSON now.`;
+
+      if (haveClaude) {
+        try {
+          raw = await readWithClaude(synthesisSystem, userPrompt);
+        } catch (err) {
+          console.warn("[find-proof] Claude failed, falling back to Groq:", err);
+          provider = "tavily";
+          raw = process.env.GROQ_API_KEY ? await readWithGroq(synthesisSystem, userPrompt) : "";
+        }
+      } else {
+        raw = await readWithGroq(synthesisSystem, userPrompt);
+      }
     }
   } catch (err) {
-    console.error(`[find-proof] ${provider} call failed:`, err);
+    console.error("[find-proof] search failed:", err);
+    await refundScan(actor);
     return NextResponse.json(
-      { error: "Search failed — please try again in a moment.", provider },
+      { error: "Search failed — please try again in a moment." },
       { status: 502 }
     );
-  }
-
-  if (!raw) {
-    return NextResponse.json(
-      { error: "The search didn't return any content — please try again.", provider: effectiveProvider },
-      { status: 502 }
-    );
-  }
-
-  // Strip any accidental markdown fences AND extract a
-  // balanced-braces JSON object. Prior versions used
-  // firstBrace..lastBrace, which broke when the model
-  // emitted a trailing extra `}` (Qwen does this
-  // occasionally). Walk brace depth forward to find the
-  // true close.
-  const stripped = raw
-    .trim()
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```$/i, "");
-  let jsonText = stripped;
-  const start = stripped.indexOf("{");
-  if (start !== -1) {
-    let depth = 0;
-    let end = -1;
-    let inStr = false;
-    let esc = false;
-    for (let i = start; i < stripped.length; i++) {
-      const c = stripped[i];
-      if (inStr) {
-        if (esc) esc = false;
-        else if (c === "\\") esc = true;
-        else if (c === '"') inStr = false;
-        continue;
-      }
-      if (c === '"') inStr = true;
-      else if (c === "{") depth++;
-      else if (c === "}") {
-        depth--;
-        if (depth === 0) {
-          end = i;
-          break;
-        }
-      }
-    }
-    if (end !== -1) jsonText = stripped.slice(start, end + 1);
   }
 
   let parsed: unknown;
   try {
-    parsed = JSON.parse(jsonText);
+    parsed = JSON.parse(extractJson(raw));
   } catch {
-    console.warn("[find-proof] Model output wasn't valid JSON:", jsonText.slice(0, 300));
+    console.warn("[find-proof] Model output wasn't valid JSON:", raw.slice(0, 300));
+    await refundScan(actor);
     return NextResponse.json(
-      { error: "The search results came back garbled — please try again.", provider: effectiveProvider },
+      { error: "The search results came back garbled — please try again." },
       { status: 502 }
     );
   }
@@ -571,97 +443,38 @@ Return the JSON now.`;
   const validated = RESULT_SHAPE.safeParse(parsed);
   if (!validated.success) {
     console.warn("[find-proof] Model output didn't match shape:", validated.error.message);
+    await refundScan(actor);
     return NextResponse.json(
-      { error: "The search results came back in an unexpected shape.", provider: effectiveProvider },
+      { error: "The search results came back in an unexpected shape." },
       { status: 502 }
     );
   }
 
-  // Defense against LLM hallucination — drop any quote that
-  // contains obvious code / template-literal artifacts. Qwen
-  // has been observed leaking JavaScript syntax like
-  // "${pick(['a','b'])}" into quote content.
-  const CODE_ARTIFACT = /\$\{|\bpick\(|\brandom\(|<%|%>|\[\s*['"][^'"]+['"]\s*,/;
-  const cleaned = {
-    ...validated.data,
-    topQuotes: validated.data.topQuotes.filter(
-      (q) => !CODE_ARTIFACT.test(q.content) && !CODE_ARTIFACT.test(q.author)
-    ),
-  };
-  const dropped = validated.data.topQuotes.length - cleaned.topQuotes.length;
+  // Keep only quotes that really appear in the search results, and drop
+  // any with code artifacts a model sometimes leaks into its output.
+  const haystack = normalizeText(snippets.map((s) => `${s.title} ${s.content}`).join(" "));
+  const kept = validated.data.topQuotes.filter(
+    (q) =>
+      !CODE_ARTIFACT.test(q.content) &&
+      !CODE_ARTIFACT.test(q.author) &&
+      isVerbatim(q.content, haystack)
+  );
+  const dropped = validated.data.topQuotes.length - kept.length;
   if (dropped > 0) {
-    console.warn(`[find-proof] Dropped ${dropped} quote(s) containing code artifacts`);
+    console.warn(`[find-proof] Dropped ${dropped} quote(s) not found verbatim in the results`);
   }
 
-  // Zero-quote fallback — if Tavily+Groq ran but the homonym filter
-  // or LLM strictness killed every result, try Claude web-search
-  // (still respecting the daily cap). Users almost never want an
-  // empty result if we can afford another shot.
-  if (
-    cleaned.topQuotes.length === 0 &&
-    effectiveProvider === "tavily" &&
-    globalCount < DAILY_CALL_CAP
-  ) {
-    console.warn(
-      "[find-proof] Zero quotes from Tavily+Groq — retrying with Claude web-search",
-    );
-    try {
-      if (globalDay !== day) {
-        globalDay = day;
-        globalCount = 0;
-      }
-      const claudeRaw = await callClaude();
-      if (claudeRaw) {
-        const stripped2 = claudeRaw
-          .trim()
-          .replace(/^```(?:json)?\s*/i, "")
-          .replace(/\s*```$/i, "");
-        const s = stripped2.indexOf("{");
-        const e = stripped2.lastIndexOf("}");
-        if (s !== -1 && e > s) {
-          const claudeParsed = RESULT_SHAPE.safeParse(
-            JSON.parse(stripped2.slice(s, e + 1)),
-          );
-          if (claudeParsed.success && claudeParsed.data.topQuotes.length > 0) {
-            const claudeCleaned = {
-              ...claudeParsed.data,
-              topQuotes: claudeParsed.data.topQuotes.filter(
-                (q) =>
-                  !CODE_ARTIFACT.test(q.content) &&
-                  !CODE_ARTIFACT.test(q.author),
-              ),
-            };
-            if (claudeCleaned.topQuotes.length > 0) {
-              cleaned.brand = claudeCleaned.brand;
-              cleaned.totalMentions = claudeCleaned.totalMentions;
-              cleaned.platforms = claudeCleaned.platforms;
-              cleaned.topQuotes = claudeCleaned.topQuotes;
-              effectiveProvider = "claude";
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.warn("[find-proof] Claude fallback also errored:", err);
-      // Fall through with the empty Tavily+Groq result.
-    }
-  }
+  const byPlatform = new Map<string, number>();
+  for (const q of kept) byPlatform.set(q.source, (byPlatform.get(q.source) ?? 0) + 1);
+  const result: Result & { provider: string } = {
+    brand: validated.data.brand,
+    totalMentions: Math.max(validated.data.totalMentions, kept.length),
+    platforms: [...byPlatform.entries()].map(([name, count]) => ({ name, count })),
+    topQuotes: kept,
+    provider,
+  };
 
-  // LRU-ish cache write.
-  if (CACHE.size >= CACHE_MAX) {
-    const oldest = CACHE.keys().next().value;
-    if (oldest) CACHE.delete(oldest);
-  }
-  CACHE.set(normalized, { at: Date.now(), result: cleaned });
+  if (!customReferences) await saveCachedScan(normalized, cacheTier, result);
 
-  // Bump cost-guard counters only when Claude actually served the
-  // request (either as the primary provider, or as the Groq-fallback).
-  if (effectiveProvider === "claude") {
-    const hitNow = ipHits.get(ip);
-    if (hitNow && hitNow.day === day) hitNow.count += 1;
-    else ipHits.set(ip, { day, count: 1 });
-    globalCount += 1;
-  }
-
-  return NextResponse.json({ ...cleaned, provider: effectiveProvider });
+  return NextResponse.json({ ...result, usage: reservation.usage });
 }

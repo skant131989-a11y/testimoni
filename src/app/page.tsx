@@ -74,8 +74,8 @@ const ALWAYS_ON = [
   {
     Icon: Mail,
     title: "Weekly new-praise email",
-    body: "We re-check each week and email you what people said since last time.",
-    plan: null,
+    body: "We re-scan for you each week and email what people said since last time.",
+    plan: "Pro",
   },
   {
     Icon: RefreshCw,
@@ -112,7 +112,7 @@ const ALWAYS_ON = [
 const FREE_TOP = FREE_FEATURES.slice(0, 7);
 const PRO_TOP = PRO_FEATURES.filter(
   (f) => !f.startsWith("URL import") && !f.startsWith("Deep AI")
-).slice(0, 9);
+).slice(0, 10);
 
 const COMPARE = [TESTIMONI, COMPETITORS.senja, COMPETITORS["testimonial-to"]];
 // Our own public wall (real posts from X), embedded live in the proof section.
@@ -192,6 +192,9 @@ export default function LandingPage() {
                 <FindProofForm placement="hero" />
               </div>
               <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+                <li className="inline-flex items-center gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> 3 free scans a day
+                </li>
                 <li className="inline-flex items-center gap-1">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Free for 10 testimonials
                 </li>
