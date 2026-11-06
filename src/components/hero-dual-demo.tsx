@@ -43,8 +43,9 @@ const TABS: { id: Tab; Icon: typeof Link2; short: string; long: string }[] = [
   { id: "app_store", Icon: Store, short: "App Store", long: "App Store" },
 ];
 
-export function HeroDualDemo() {
+export function HeroDualDemo({ hide = [] }: { hide?: Tab[] } = {}) {
   const [tab, setTab] = useState<Tab>("tweet");
+  const visibleTabs = TABS.filter((t) => !hide.includes(t.id));
 
   function selectTab(next: Tab) {
     if (next === tab) return;
@@ -80,9 +81,10 @@ export function HeroDualDemo() {
       <div
         role="tablist"
         aria-label="Choose demo"
-        className="mb-4 grid grid-cols-4 gap-1 rounded-full border-2 border-primary/20 bg-primary/[0.03] p-1"
+        className="mb-4 grid gap-1 rounded-full border-2 border-primary/20 bg-primary/[0.03] p-1"
+        style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, minmax(0, 1fr))` }}
       >
-        {TABS.map(({ id, Icon, short, long }) => (
+        {visibleTabs.map(({ id, Icon, short, long }) => (
           <button
             key={id}
             role="tab"
