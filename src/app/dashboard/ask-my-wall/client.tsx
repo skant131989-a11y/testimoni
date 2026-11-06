@@ -139,6 +139,24 @@ function UpgradeGate() {
       <p className="mt-2 text-sm text-muted-foreground">
         Ask My Wall answers visitor questions using your real customer testimonials — grounded, cited, never made-up. Included in Pro at $19/mo.
       </p>
+
+      <div className="mt-5 rounded-xl border bg-background p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Example conversation
+        </p>
+        <div className="mt-3 space-y-2 text-sm">
+          <div className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-primary-foreground">
+            How long does setup take?
+          </div>
+          <div className="w-fit max-w-[90%] rounded-2xl rounded-bl-sm border bg-muted/40 px-3 py-2">
+            Customers say it is quick: &ldquo;Setup took ten minutes,&rdquo; says Alex P., one of the people on this wall.
+          </div>
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          It only uses your approved testimonials and always names who said it.
+        </p>
+      </div>
+
       <Link href="/pricing" className="mt-4 inline-block">
         <Button variant="link" className="h-auto p-0 text-sm">See what&rsquo;s in Pro →</Button>
       </Link>

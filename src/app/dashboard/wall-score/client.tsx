@@ -7,6 +7,7 @@ import { Gauge, TrendingUp, TrendingDown, Sparkles, Loader2, AlertCircle, CheckC
 import { track } from "@/lib/analytics";
 import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import type { PlanType } from "@/lib/constants";
+import { LockedPreview } from "@/components/upgrade/upgrade-nudge";
 
 type Audit = {
   id: string;
@@ -141,20 +142,25 @@ export function WallScoreClient({ initialAudits, totalAudits, plan, workspaceNam
           <h2 className="text-lg font-semibold">Recommendations</h2>
           <p className="text-sm text-muted-foreground">Fix these to lift your score.</p>
           <ul className="mt-4 space-y-4">
-            {latest.recommendations.map((r, i) => (
-              <li key={i} className="rounded-lg border bg-background p-4">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 rounded-full bg-primary/10 p-1.5">
-                    <AlertCircle className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">{r.issue}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{r.suggestion}</p>
-                  </div>
-                </div>
-              </li>
+            {(plan === "FREE" ? latest.recommendations.slice(0, 1) : latest.recommendations).map((r, i) => (
+              <RecItem key={i} issue={r.issue} suggestion={r.suggestion} />
             ))}
           </ul>
+          {plan === "FREE" && latest.recommendations.length > 1 && (
+            <div className="mt-4">
+              <LockedPreview
+                surface="wall_score_recommendations"
+                title={`${latest.recommendations.length - 1} more specific fix${latest.recommendations.length - 1 === 1 ? "" : "es"} for your wall`}
+                description="See exactly what to add or change to lift each weak spot."
+              >
+                <ul className="space-y-4">
+                  {latest.recommendations.slice(1).map((r, i) => (
+                    <RecItem key={i} issue={r.issue} suggestion={r.suggestion} />
+                  ))}
+                </ul>
+              </LockedPreview>
+            </div>
+          )}
         </div>
       )}
 
@@ -284,5 +290,21 @@ function TrendGraph({ audits }: { audits: Audit[] }) {
         ))}
       </svg>
     </div>
+  );
+}
+
+function RecItem({ issue, suggestion }: { issue: string; suggestion: string }) {
+  return (
+    <li className="rounded-lg border bg-background p-4">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 rounded-full bg-primary/10 p-1.5">
+          <AlertCircle className="h-4 w-4 text-primary" />
+        </div>
+        <div className="flex-1">
+          <p className="font-medium">{issue}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{suggestion}</p>
+        </div>
+      </div>
+    </li>
   );
 }

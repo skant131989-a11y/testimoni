@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Copy, Check, Code, ExternalLink, Sparkles, Star } from "lucide-react";
 import { ShareWall } from "@/components/share-wall";
+import { WatermarkNudge } from "@/components/upgrade/watermark-nudge";
 
 export default function EmbedPage() {
   const params = useParams();
@@ -61,6 +62,8 @@ export default function EmbedPage() {
           Add this widget to your website using one of the methods below
         </p>
       </div>
+
+      <WatermarkNudge where="embed" />
 
       <div className="space-y-4">
         {/* Hosted Wall — no-code, share as link */}

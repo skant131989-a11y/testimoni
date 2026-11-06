@@ -187,6 +187,11 @@ export default async function DashboardLayout({
 
   const workspace = dbUser.workspaceMembers[0].workspace;
   const plan = getEffectivePlan(workspace.slug, workspace.subscription?.plan);
+  // Free accounts see "7 of 10 testimonials used" in the sidebar card.
+  const testimonialCount =
+    plan === "FREE"
+      ? await prisma.testimonial.count({ where: { workspaceId: workspace.id } })
+      : undefined;
 
   // Background sync: pull the latest avatar_url from Supabase auth
   // (populated by Google / GitHub OAuth) whenever it drifts from
@@ -250,7 +255,12 @@ export default async function DashboardLayout({
           page) for every dashboard route. See DashboardPageTracker
           for details — pathname-keyed so counters reset per route. */}
       <DashboardPageTracker />
-      <Sidebar workspaceName={workspace.name} plan={plan} wallUrl={wallUrl} />
+      <Sidebar
+        workspaceName={workspace.name}
+        plan={plan}
+        wallUrl={wallUrl}
+        testimonialCount={testimonialCount}
+      />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
           userName={dbUser.name}

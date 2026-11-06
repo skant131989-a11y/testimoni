@@ -731,6 +731,24 @@ function ResultView({
           on whether we found quotes. When empty, it's the primary
           action. When we found some, it's a "know something we don't?"
           nudge. */}
+      {result.usage?.tier === "free" && result.provider !== "own" && (
+        <div className="mt-6 flex flex-col items-start justify-between gap-3 rounded-2xl border-2 border-primary/25 bg-primary/5 p-5 sm:flex-row sm:items-center">
+          <div>
+            <p className="font-semibold">Want this to run by itself?</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Pro re-checks every week and emails you new posts, with a deeper search and 30 scans a month.
+            </p>
+          </div>
+          <Link
+            href="/pricing?src=find_proof_result"
+            onClick={() => track("upgrade_nudge_clicked", { surface: "find_proof_result" })}
+            className="shrink-0"
+          >
+            <Button>See Pro, $19/mo</Button>
+          </Link>
+        </div>
+      )}
+
       <ImportPanel hasQuotes={hasQuotes} onAdd={addQuote} />
 
       {/* CTA */}

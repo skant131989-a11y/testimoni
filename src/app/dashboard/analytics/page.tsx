@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, Eye, TrendingUp } from "lucide-react";
+import { getEffectivePlan } from "@/lib/plan";
+import { LockedPreview, UpgradeNudge } from "@/components/upgrade/upgrade-nudge";
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
@@ -11,11 +13,12 @@ export default async function AnalyticsPage() {
 
   const dbUser = await prisma.user.findUnique({
     where: { supabaseId: user.id },
-    include: { workspaceMembers: { include: { workspace: true } } },
+    include: { workspaceMembers: { include: { workspace: { include: { subscription: true } } } } },
   });
 
   if (!dbUser || !dbUser.workspaceMembers[0]) redirect("/login");
   const workspace = dbUser.workspaceMembers[0].workspace;
+  const isFree = getEffectivePlan(workspace.slug, workspace.subscription?.plan) === "FREE";
 
   const [widgets, totalImpressions, recentAnalytics] = await Promise.all([
     prisma.widget.findMany({
@@ -35,6 +38,9 @@ export default async function AnalyticsPage() {
   ]);
 
   const totalViews = totalImpressions._sum.impressions || 0;
+  const rows = recentAnalytics.slice(0, 10);
+  const shownRows = isFree ? rows.slice(0, 3) : rows;
+  const lockedRows = isFree ? rows.slice(3) : [];
 
   return (
     <div className="space-y-6">
@@ -90,27 +96,51 @@ export default async function AnalyticsPage() {
             </p>
           ) : (
             <div className="space-y-2">
-              {recentAnalytics.slice(0, 10).map((entry) => (
-                <div
-                  key={entry.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div>
-                    <p className="font-medium">{entry.widget.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(entry.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{entry.impressions}</p>
-                    <p className="text-xs text-muted-foreground">impressions</p>
-                  </div>
-                </div>
+              {shownRows.map((entry) => (
+                <ActivityRow key={entry.id} entry={entry} />
               ))}
+              {lockedRows.length > 0 && (
+                <LockedPreview
+                  surface="analytics_history"
+                  title="Daily history for every widget"
+                  description="See which days and which widgets get the views. Free shows your last 3 days."
+                >
+                  <div className="space-y-2">
+                    {lockedRows.map((entry) => (
+                      <ActivityRow key={entry.id} entry={entry} />
+                    ))}
+                  </div>
+                </LockedPreview>
+              )}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {isFree && lockedRows.length === 0 && (
+        <UpgradeNudge surface="analytics_history" title="See your full daily history with Pro">
+          Pro keeps daily impressions for every widget, so you can see which pages your wall helps.
+        </UpgradeNudge>
+      )}
+    </div>
+  );
+}
+
+function ActivityRow({
+  entry,
+}: {
+  entry: { id: string; date: Date; impressions: number; widget: { name: string } };
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-lg border p-3">
+      <div>
+        <p className="font-medium">{entry.widget.name}</p>
+        <p className="text-sm text-muted-foreground">{new Date(entry.date).toLocaleDateString()}</p>
+      </div>
+      <div className="text-right">
+        <p className="font-semibold">{entry.impressions}</p>
+        <p className="text-xs text-muted-foreground">impressions</p>
+      </div>
     </div>
   );
 }

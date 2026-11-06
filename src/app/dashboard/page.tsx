@@ -28,12 +28,15 @@ import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
 import { FindMyProofCard } from "@/components/dashboard/find-my-proof-card";
 import { RotatingTip } from "@/components/dashboard/rotating-tip";
-import { getEffectiveLimits } from "@/lib/plan";
+import { getEffectiveLimits, getEffectivePlan } from "@/lib/plan";
 import { getDbUserWithWorkspace, loadDbUserWithWorkspaceFresh } from "@/lib/session";
 import {
   RecentTestimonialsCard,
   RecentTestimonialsSkeleton,
 } from "./recent-testimonials";
+import { FreeLimitBanner } from "@/components/upgrade/free-limit-banner";
+import { ScanAllowance } from "@/components/upgrade/scan-allowance";
+import { getAccountScanUsage } from "@/lib/scan-limits";
 
 interface StatsCardProps {
   title: string;
@@ -107,6 +110,10 @@ export default async function DashboardPage() {
   const defaultWidget = membership.workspace.widgets[0] ?? null;
   const defaultForm = membership.workspace.forms[0] ?? null;
   const subscription = membership.workspace.subscription;
+  const plan = getEffectivePlan(workspaceSlug, subscription?.plan);
+  const isPro = plan !== "FREE";
+  // Started now so it runs alongside the stats query below.
+  const scanUsagePromise = getAccountScanUsage(dbUser.id, isPro ? "pro" : "free");
 
   // All six counters in ONE statement = ONE database round-trip.
   // The old $transaction([...]) sent BEGIN + 6 queries + COMMIT one
@@ -142,6 +149,7 @@ export default async function DashboardPage() {
   const pendingSubmissions = stats?.pending ?? 0;
   const videoCount = stats?.videos ?? 0;
   const limits = getEffectiveLimits(workspaceSlug, subscription?.plan);
+  const scanUsage = await scanUsagePromise;
 
   const impressionsTotal = stats?.impressions ?? 0;
   const wallUrl = defaultWidget
@@ -247,6 +255,10 @@ export default async function DashboardPage() {
           card should lead the dashboard, above everything else. Kept
           dismissible; localStorage remembers the choice. */}
       <FindMyProofCard surface="dashboard" dismissible />
+      <ScanAllowance used={scanUsage.used} limit={scanUsage.limit} isPro={isPro} />
+
+      {/* Free accounts near or at the 10-testimonial limit. */}
+      {!isPro && <FreeLimitBanner count={totalTestimonials} max={limits.maxTestimonials} />}
 
       {/* One clear next step for the user's current state (approve the
           inbox, add the first testimonial, share the form, embed the

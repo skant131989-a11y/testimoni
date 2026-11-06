@@ -36,6 +36,7 @@ export const FREE_FEATURES = [
   "1 video testimonial (MP4/MOV, up to 50MB)",
   "Public Wall of Love URL",
   "Grid layout + one-line script embed",
+  "Analytics summary: totals and your last 3 days",
   "Email support",
 ] as const;
 
@@ -58,6 +59,6 @@ export const PRO_FEATURES = [
   "Custom branding + colors",
   "Remove 'Powered by' watermark",
   "Curate different testimonials per widget",
-  "Analytics dashboard",
+  "Analytics with daily history for every widget",
   "Priority support",
 ] as const;

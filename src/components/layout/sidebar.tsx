@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Code2,
@@ -27,7 +27,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { UpgradeProButton } from "@/components/upgrade-pro-button";
-import type { PlanType } from "@/lib/constants";
+import { PLAN_LIMITS, type PlanType } from "@/lib/constants";
+import { COMPETITORS } from "@/lib/competitors";
 import { QuoteOpen } from "@/components/icons/quote-open";
 import { track } from "@/lib/analytics";
 
@@ -35,6 +36,8 @@ const navItems: {
   href: string;
   label: string;
   icon: React.ElementType;
+  /** Small tag shown to Free accounts: what the free plan includes. */
+  freeTag?: string;
 }[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/inbox", label: "Inbox", icon: Inbox },
@@ -43,9 +46,9 @@ const navItems: {
   { href: "/dashboard/collect", label: "Collect", icon: Send },
   { href: "/dashboard/import", label: "Import", icon: Import },
   { href: "/dashboard/sources", label: "Review sources", icon: RefreshCw },
-  { href: "/dashboard/wall-score", label: "Wall Score", icon: Gauge },
-  { href: "/dashboard/tweet-drafts", label: "Tweet drafts", icon: Send },
-  { href: "/dashboard/ask-my-wall", label: "Ask My Wall", icon: MessageSquare },
+  { href: "/dashboard/wall-score", label: "Wall Score", icon: Gauge, freeTag: "1 free" },
+  { href: "/dashboard/tweet-drafts", label: "Tweet drafts", icon: Send, freeTag: "5/mo" },
+  { href: "/dashboard/ask-my-wall", label: "Ask My Wall", icon: MessageSquare, freeTag: "Pro" },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
@@ -58,12 +61,27 @@ interface SidebarProps {
    *  link is hidden. Absolute URL preferred so Copy gets the full
    *  shareable link. */
   wallUrl: string | null;
+  /** Testimonials in the workspace (Free accounts only). */
+  testimonialCount?: number;
 }
 
-export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
+export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [wallCopied, setWallCopied] = useState(false);
+  const [count, setCount] = useState<number | undefined>(testimonialCount);
+
+  // The sidebar stays mounted while pages change, so refresh the count
+  // on each navigation (Free accounts only).
+  useEffect(() => {
+    if (plan !== "FREE") return;
+    fetch("/api/billing/subscription")
+      .then((r) => r.json())
+      .then((d) => {
+        if (typeof d?.usage?.testimonials === "number") setCount(d.usage.testimonials);
+      })
+      .catch(() => {});
+  }, [pathname, plan]);
 
   async function copyWallUrl() {
     if (!wallUrl) return;
@@ -234,6 +252,18 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
                 {!collapsed && (
                   <span className="flex-1">{item.label}</span>
                 )}
+                {!collapsed && plan === "FREE" && item.freeTag && (
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                      item.freeTag === "Pro"
+                        ? "bg-violet-600 text-white"
+                        : "bg-violet-100 text-violet-700"
+                    )}
+                  >
+                    {item.freeTag}
+                  </span>
+                )}
                 {/* Small "NEW" pill — moved from Import to
                     Review Sources since that's the newest thing
                     users should discover. Rendered in the collapsed
@@ -258,23 +288,45 @@ export function Sidebar({ workspaceName, plan, wallUrl }: SidebarProps) {
 
         {/* Upgrade banner for free plan — opens Razorpay directly
             in one click. No intermediate billing page. */}
-        {plan === "FREE" && !collapsed && (
-          <div className="m-3 rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 p-4">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <p className="text-sm font-medium">Upgrade to Pro</p>
+        {plan === "FREE" && !collapsed && (() => {
+          const used = count ?? 0;
+          const max = PLAN_LIMITS.FREE.maxTestimonials;
+          const pct = Math.min(100, Math.round((used / max) * 100));
+          const heading =
+            used >= max ? "Free limit reached" : used >= 8 ? "Almost at your free limit" : "Upgrade to Pro";
+          return (
+            <div className="m-3 rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 p-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <p className="text-sm font-medium">{heading}</p>
+              </div>
+              {count !== undefined && (
+                <div className="mt-2">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-primary/15">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                  </div>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {used} of {max} testimonials used
+                  </p>
+                </div>
+              )}
+              <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
+                <li>Unlimited testimonials and widgets</li>
+                <li>No “Powered by” badge</li>
+                <li>30 deeper scans a month, weekly re-scan</li>
+              </ul>
+              <UpgradeProButton
+                surface="sidebar_upgrade_banner"
+                size="sm"
+                className="mt-3 w-full"
+                label="Upgrade, $19/mo"
+              />
+              <p className="mt-2 text-center text-[10px] text-muted-foreground">
+                Flat price, no tiers. Senja starts at ${COMPETITORS.senja.firstPaidUsd}.
+              </p>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Unlock unlimited testimonials, widgets, and more.
-            </p>
-            <UpgradeProButton
-              surface="sidebar_upgrade_banner"
-              size="sm"
-              className="mt-3 w-full"
-              label="Upgrade"
-            />
-          </div>
-        )}
+          );
+        })()}
 
         </div>
 

@@ -30,6 +30,7 @@ import { useSubscription } from "@/lib/use-subscription";
 import { LimitBanner } from "@/components/plan/limit-banner";
 import { track } from "@/lib/analytics";
 import { WidgetPreviewOnUrl } from "@/components/widget-preview-on-url";
+import { WatermarkNudge } from "@/components/upgrade/watermark-nudge";
 
 const LAYOUTS = [
   { id: "GRID", label: "Grid", icon: LayoutGrid },
@@ -149,6 +150,8 @@ export default function WidgetsPage() {
           Create Widget
         </Button>
       </div>
+
+      {!atLimit && <WatermarkNudge where="widgets" />}
 
       {atLimit && plan === "FREE" && (
         <LimitBanner

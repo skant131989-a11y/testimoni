@@ -231,3 +231,20 @@ export async function refundRescue(actor: ScanActor): Promise<void> {
     // best effort
   }
 }
+
+/** An account's scan usage this month, for the dashboard. */
+export async function getAccountScanUsage(
+  userId: string,
+  tier: "free" | "pro"
+): Promise<{ used: number; limit: number }> {
+  const { limit, scope } = SCAN_LIMITS[tier];
+  try {
+    const row = await prisma.scanUsage.findUnique({
+      where: { subject_period: { subject: `u:${userId}`, period: periodFor(scope) } },
+      select: { count: true },
+    });
+    return { used: row?.count ?? 0, limit };
+  } catch {
+    return { used: 0, limit };
+  }
+}
