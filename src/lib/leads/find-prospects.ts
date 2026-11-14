@@ -42,7 +42,7 @@ const registrable = (h: string): string => {
 
 async function get(url: string): Promise<{ status: number; text: string }> {
   const ctl = new AbortController();
-  const t = setTimeout(() => ctl.abort(), 8000);
+  const t = setTimeout(() => ctl.abort(), 5000);
   try {
     const r = await fetch(url, {
       signal: ctl.signal,
@@ -96,10 +96,12 @@ async function evaluate(domain: string): Promise<Evaluated | null> {
   if (large) { score -= 25; sig.push("looks large/enterprise"); }
 
   let emails = emailsFrom(html, registrable(domain));
-  for (const p of ["/contact", "/about", "/contact-us"]) {
-    if (emails.length) break;
-    const r = await get("https://" + domain + p);
-    if (r.status === 200) emails = emailsFrom(r.text, registrable(domain));
+  if (!emails.length) {
+    // the three likely contact pages, fetched together instead of one by one
+    const pages = await Promise.all(["/contact", "/about", "/contact-us"].map((p) => get("https://" + domain + p)));
+    for (const r of pages) {
+      if (r.status === 200 && !emails.length) emails = emailsFrom(r.text, registrable(domain));
+    }
   }
   if (!emails.length) return { domain, score: 0, sig: ["no business email found"], email: null };
   const best = emails.find(NAMED) || emails[0];
@@ -139,6 +141,8 @@ export async function findProspects(opts: {
   minScore: number;
   /** Rotates which search queries run, so repeated runs on one day differ. */
   runIndex: number;
+  /** Sites checked in parallel (default 8). */
+  workers?: number;
   dryRun?: boolean;
 }) {
   const started = Date.now();
@@ -193,7 +197,7 @@ export async function findProspects(opts: {
       if (r) results.push({ ...r, query: candidates.get(d) ?? "" });
     }
   }
-  await Promise.all(Array.from({ length: 8 }, worker));
+  await Promise.all(Array.from({ length: opts.workers ?? 8 }, worker));
 
   const good = results
     .filter((r) => r.score >= opts.minScore && r.email && !suppressed.has(r.email))
