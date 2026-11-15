@@ -785,6 +785,27 @@ model FindProofCache {
   @@map("find_proof_cache")
 }
 
+/// One row per Find my praise / Customer Voice run (no IP, email or user id).
+/// Shows which provider answered, whether Claude ran and how much came back.
+model ToolRun {
+  id         String   @id @default(cuid())
+  tool       String
+  host       String
+  tier       String
+  outcome    String
+  provider   String
+  snippets   Int      @default(0)
+  reviewSite Int      @default(0) @map("review_site")
+  quotes     Int      @default(0)
+  dropped    Int      @default(0)
+  claudeUsed Boolean  @default(false) @map("claude_used")
+  ms         Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([tool, createdAt])
+  @@map("tool_runs")
+}
+
 enum ConsentStatus {
   NONE
   ASKED

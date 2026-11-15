@@ -16,6 +16,7 @@ import {
   RESCUE,
 } from "@/lib/scan-limits";
 import { getCachedScan, saveCachedScan } from "@/lib/find-proof-cache";
+import { logToolRun } from "@/lib/tool-run-log";
 
 /**
  * POST /api/tools/find-proof
@@ -156,6 +157,38 @@ function isVerbatim(content: string, haystack: string): boolean {
 
 const CODE_ARTIFACT = /\$\{|\bpick\(|\brandom\(|<%|%>|\[\s*['"][^'"]+['"]\s*,/;
 
+// Review sites searched by company name. Their product pages are titled
+// with the product ("EdgeIQ Reviews"), which often differs from the domain
+// ("edgeiqlabs.com"), so a plain domain search misses them.
+const REVIEW_SITES = [
+  "g2.com",
+  "capterra.com",
+  "getapp.com",
+  "softwareadvice.com",
+  "trustpilot.com",
+  "sourceforge.net",
+  "alternativeto.net",
+  "apps.apple.com",
+  "play.google.com",
+  "chromewebstore.google.com",
+];
+
+/** "Edgeiqlabs" -> "edgeiq": the name a review site is likely to use. */
+function coreName(brand: string): string {
+  const b = brand.toLowerCase();
+  const stripped = b.replace(/(labs?|hq|apps?|io|ai|inc|software|tech|technologies|systems|studio|cloud)$/, "");
+  return stripped.length >= 4 ? stripped : b;
+}
+
+function onReviewSite(url: string): boolean {
+  try {
+    const h = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+    return REVIEW_SITES.some((d) => h === d || h.endsWith("." + d));
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   let body: z.infer<typeof BODY>;
   try {
@@ -172,6 +205,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const startedAt = Date.now();
   const actor = await resolveScanActor(req);
   const isPro = actor.tier === "pro";
   const cacheTier = isPro ? "pro" : "basic";
@@ -209,6 +243,15 @@ export async function POST(req: NextRequest) {
     const saved = await getCachedScan<Result & { provider?: string }>(normalized, cacheTier);
     if (saved) {
       const empty = !saved.topQuotes || saved.topQuotes.length === 0;
+      await logToolRun({
+        tool: "find-proof",
+        host: new URL(normalized).hostname.replace(/^www\./, ""),
+        tier: actor.tier,
+        outcome: "cached",
+        provider: "cached",
+        quotes: saved.topQuotes?.length ?? 0,
+        ms: Date.now() - startedAt,
+      });
       return NextResponse.json({
         ...saved,
         cached: true,
@@ -241,6 +284,8 @@ export async function POST(req: NextRequest) {
 
   const brand = brandFromUrl(normalized);
   const host = new URL(normalized).hostname.replace(/^www\./, "");
+  const logError = (provider: string, snippets = 0) =>
+    logToolRun({ tool: "find-proof", host, tier: actor.tier, outcome: "error", provider, snippets, reviewSite: reviewSiteHits, ms: Date.now() - startedAt });
 
   // Handle discovery: user-supplied fields win. If the user gave
   // nothing, scrape the pasted URL's homepage (cheap, silent-fail).
@@ -251,6 +296,9 @@ export async function POST(req: NextRequest) {
   const linkedinRefs: string[] = [];
   if (userLinkedin) linkedinRefs.push(userLinkedin);
   linkedinRefs.push(...scraped.linkedin);
+
+  const core = coreName(brand);
+  let reviewSiteHits = 0;
 
   async function gatherSnippets(deep: boolean): Promise<Snippet[]> {
     const broadQuery = `"${host}" OR "${brand}.com" review "love using" OR "recommend" OR "best tool"`;
@@ -305,7 +353,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const responses = await Promise.all(searches);
+    // Review sites by company name, so "EdgeIQ" on G2 is found for
+    // edgeiqlabs.com. Never fatal: if this search fails the rest still runs.
+    const reviewSearch = tavilySearch({
+      query: `"${core}" reviews`,
+      searchDepth: "advanced",
+      maxResults: 8,
+      includeDomains: REVIEW_SITES,
+    }).catch((err) => {
+      console.warn("[find-proof] review-site search failed:", err);
+      return { query: "", results: [] as { title: string; url: string; content: string }[] };
+    });
+
+    const [responses, reviewResponse] = await Promise.all([Promise.all(searches), reviewSearch]);
+    // A review page counts only if the product name is in its address or title.
+    const reviewPages =
+      core.length >= 4
+        ? reviewResponse.results
+            .filter((r) => onReviewSite(r.url) && `${r.url} ${r.title}`.toLowerCase().includes(core))
+            .slice(0, 4)
+        : [];
+    reviewSiteHits = reviewPages.length;
     const seen = new Set<string>();
     const combined = responses
       .flatMap((r) => r.results)
@@ -321,13 +389,20 @@ export async function POST(req: NextRequest) {
     const needle = host.toLowerCase();
     const stemNeedle = brand.toLowerCase();
     const handleNeedles = twitterHandles.map((h) => h.toLowerCase());
-    return combined
+    const others = combined.filter((r) => {
+      const hay = `${r.url} ${r.title} ${r.content}`.toLowerCase();
+      if (hay.includes(needle)) return true;
+      if (handleNeedles.some((h) => hay.includes(h))) return true;
+      if (stemSafe && hay.includes(stemNeedle)) return true;
+      return false;
+    });
+    // Review pages go first so they are not crowded out by social posts.
+    const picked = new Set<string>();
+    return [...reviewPages, ...others]
       .filter((r) => {
-        const hay = `${r.url} ${r.title} ${r.content}`.toLowerCase();
-        if (hay.includes(needle)) return true;
-        if (handleNeedles.some((h) => hay.includes(h))) return true;
-        if (stemSafe && hay.includes(stemNeedle)) return true;
-        return false;
+        if (picked.has(r.url)) return false;
+        picked.add(r.url);
+        return true;
       })
       .slice(0, deep ? 30 : 15);
   }
@@ -366,6 +441,8 @@ HARD RULES
     news.ycombinator.com → "Hacker News"
     trustpilot.com → "Trustpilot"
     g2.com → "G2"
+    capterra.com / getapp.com / softwareadvice.com → "Capterra"
+    apps.apple.com → "App Store"; play.google.com → "Google Play"
     other → "Blog"
 9. Score 1-100 based on: specificity of outcome (+30), verifiable identity (+25), emotional strength (+20), platform (+15), recency (+10). Default around 55-70.
 10. If no positive verbatim quote exists in a snippet that clearly refers to the target product, SKIP it. Better to return 0 real quotes than 5 wrong-product quotes.
@@ -489,6 +566,7 @@ Return the JSON now.`;
   } catch (err) {
     console.error("[find-proof] search failed:", err);
     await refundScan(actor);
+    await logError("search_failed");
     return NextResponse.json(
       { error: "Search failed — please try again in a moment." },
       { status: 502 }
@@ -501,6 +579,7 @@ Return the JSON now.`;
   } catch {
     console.warn("[find-proof] Model output wasn't valid JSON:", raw.slice(0, 300));
     await refundScan(actor);
+    await logError("bad_json", snippets.length);
     return NextResponse.json(
       { error: "The search results came back garbled — please try again." },
       { status: 502 }
@@ -511,6 +590,7 @@ Return the JSON now.`;
   if (!validated.success) {
     console.warn("[find-proof] Model output didn't match shape:", validated.error.message);
     await refundScan(actor);
+    await logError("bad_shape", snippets.length);
     return NextResponse.json(
       { error: "The search results came back in an unexpected shape." },
       { status: 502 }
@@ -576,6 +656,20 @@ Return the JSON now.`;
   if (!customReferences && deepSearch !== "login") {
     await saveCachedScan(normalized, cacheTier, result);
   }
+
+  await logToolRun({
+    tool: "find-proof",
+    host,
+    tier: actor.tier,
+    outcome: result.topQuotes.length > 0 ? "found" : "empty",
+    provider: result.provider,
+    snippets: snippets.length,
+    reviewSite: reviewSiteHits,
+    quotes: result.topQuotes.length,
+    dropped,
+    claudeUsed: result.provider.includes("claude"),
+    ms: Date.now() - startedAt,
+  });
 
   return NextResponse.json({ ...result, deepSearch, usage: reservation.usage });
 }

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { checkAndIncrement } from "@/lib/ask-rate-limit";
 import { buildTeaser, type ScanResult } from "@/lib/scan-report";
 import { normalizeUrl, runUrlScan } from "@/lib/url-scan";
+import { logToolRun } from "@/lib/tool-run-log";
 
 /**
  * POST /api/scans
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
+  const startedAt = Date.now();
   const normalized = normalizeUrl(body.url);
   if (!normalized) {
     return NextResponse.json(
@@ -72,6 +74,7 @@ export async function POST(req: NextRequest) {
   // genuinely new discovery run below does that.
   const cached = await prisma.urlScan.findUnique({ where: { normalizedUrl: normalized } });
   if (cached && Date.now() - cached.refreshedAt.getTime() < CACHE_TTL_MS) {
+    await logToolRun({ tool: "customer-voice", host: new URL(normalized).hostname, tier: "visitor", outcome: "cached", provider: "cached", ms: Date.now() - startedAt });
     return NextResponse.json({
       id: cached.id,
       ...buildTeaser(cached.resultJson as unknown as ScanResult),
@@ -98,11 +101,23 @@ export async function POST(req: NextRequest) {
     allowClaude: true,
   });
   if (!out) {
+    await logToolRun({ tool: "customer-voice", host: new URL(normalized).hostname, tier: "visitor", outcome: "error", provider: "none", ms: Date.now() - startedAt });
     return NextResponse.json(
       { error: "The search didn't return any content — please try again." },
       { status: 502 }
     );
   }
+
+  await logToolRun({
+    tool: "customer-voice",
+    host: new URL(normalized).hostname,
+    tier: "visitor",
+    outcome: out.result.totalMentions > 0 ? "found" : "empty",
+    provider: out.provider,
+    quotes: out.result.totalMentions,
+    claudeUsed: out.provider === "claude",
+    ms: Date.now() - startedAt,
+  });
 
   return NextResponse.json({
     id: out.id,
