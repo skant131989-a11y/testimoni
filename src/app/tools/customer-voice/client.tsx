@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { track } from "@/lib/analytics";
+import { track, countBucket } from "@/lib/analytics";
 
 const STAGES = [
   "Reading your website…",
@@ -78,10 +78,26 @@ export function CustomerVoiceClient() {
         track("scan_failed", { url: trimmed, reason: data.error });
         return;
       }
+      const total: number = data.totalMentions ?? 0;
+      const counts = (data.counts ?? {}) as Record<string, number>;
       track("scan_completed", {
         url: trimmed,
-        total: data.totalMentions,
-        cached: data.cached,
+        total,
+        result_bucket: countBucket(total),
+        empty: total === 0,
+        cached: !!data.cached,
+        // tavily | claude | own (a cached scan does not say which)
+        provider: data.provider ?? (data.cached ? "cached" : undefined),
+        claude_used: data.provider === "claude",
+        praise: counts.praise ?? 0,
+        testimonial: counts.testimonial ?? 0,
+        complaint: counts.complaint ?? 0,
+        feature_request: counts.feature_request ?? 0,
+        use_case: counts.use_case ?? 0,
+        outcome: counts.outcome ?? 0,
+        question: counts.question ?? 0,
+        objection: counts.objection ?? 0,
+        competitor_mention: counts.competitor_mention ?? 0,
       });
       router.push(`/tools/customer-voice/${data.id}`);
     } catch {

@@ -297,6 +297,15 @@ export function track(
   }
 }
 
+/** Groups a result count so PostHog can chart "how often do we find nothing". */
+export function countBucket(n: number): "0" | "1" | "2-3" | "4-9" | "10+" {
+  if (n <= 0) return "0";
+  if (n === 1) return "1";
+  if (n <= 3) return "2-3";
+  if (n <= 9) return "4-9";
+  return "10+";
+}
+
 /**
  * Per-tab anonymous distinct_id. Kept in sessionStorage so events
  * within one tab's lifetime group together (form_viewed and

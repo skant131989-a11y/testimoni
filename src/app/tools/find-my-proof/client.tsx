@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { track } from "@/lib/analytics";
+import { track, countBucket } from "@/lib/analytics";
 import { saveToWall } from "@/lib/save-to-wall";
 import { useIsLoggedIn } from "@/lib/use-is-logged-in";
 import {
@@ -224,10 +224,21 @@ export function FindMyProofClient() {
           })),
         );
       }
+      const quoteCount: number = data.topQuotes?.length ?? 0;
       track("find_proof_success", {
         url: trimmed,
         total: data.totalMentions,
-        quotes: data.topQuotes?.length ?? 0,
+        quotes: quoteCount,
+        result_bucket: countBucket(quoteCount),
+        empty: quoteCount === 0,
+        platforms: Array.isArray(data.platforms) ? data.platforms.map((p: { name: string }) => p.name) : [],
+        platform_count: Array.isArray(data.platforms) ? data.platforms.length : 0,
+        // tavily | tavily+claude | shared-scan | own | cached
+        provider: data.provider ?? (data.cached ? "cached" : "tavily"),
+        cached: !!data.cached,
+        claude_used: typeof data.provider === "string" && data.provider.includes("claude"),
+        deep_search: data.deepSearch ?? "none",
+        tier: data.usage?.tier,
       });
     } catch {
       setError("Network hiccup. Try again in a moment.");

@@ -29,7 +29,12 @@ export function ScanReportClient({ id }: { id: string }) {
           return;
         }
         setResult(data);
-        track("scan_result_viewed", { scanId: id, locked: data.locked });
+        track("scan_result_viewed", {
+          scanId: id,
+          locked: data.locked,
+          total: data.totalMentions,
+          tier: data.tier,
+        });
       } catch {
         if (!cancelled) setError("Network hiccup. Refresh to try again.");
       }
