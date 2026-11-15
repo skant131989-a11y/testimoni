@@ -15,7 +15,7 @@ import {
   limitMessage,
   RESCUE,
 } from "@/lib/scan-limits";
-import { getCachedScan, saveCachedScan } from "@/lib/find-proof-cache";
+import { getCachedScan, saveCachedScan, getSharedScanQuotes } from "@/lib/find-proof-cache";
 import { logToolRun } from "@/lib/tool-run-log";
 
 /**
@@ -239,29 +239,46 @@ export async function POST(req: NextRequest) {
   const userLinkedin = body.linkedinUrl?.trim();
   const customReferences = userTwitter.length > 0 || !!userLinkedin || !!body.extra?.trim();
 
+  const canRescue = actor.tier !== "visitor" && !!process.env.ANTHROPIC_API_KEY;
+  type Saved = Result & { provider?: string; rescued?: boolean };
+  let saved: Saved | null = null;
+
+  async function sendSaved(s: Saved, how: string) {
+    const empty = !s.topQuotes || s.topQuotes.length === 0;
+    await logToolRun({
+      tool: "find-proof",
+      host: new URL(normalized as string).hostname.replace(/^www\./, ""),
+      tier: actor.tier,
+      outcome: "cached",
+      provider: how,
+      quotes: s.topQuotes?.length ?? 0,
+      ms: Date.now() - startedAt,
+    });
+    return NextResponse.json({
+      ...s,
+      cached: true,
+      deepSearch: empty && actor.tier === "visitor" ? "login" : "none",
+      usage: await peekScanUsage(actor),
+    });
+  }
+
   if (!customReferences) {
-    const saved = await getCachedScan<Result & { provider?: string }>(normalized, cacheTier);
-    if (saved) {
-      const empty = !saved.topQuotes || saved.topQuotes.length === 0;
-      await logToolRun({
-        tool: "find-proof",
-        host: new URL(normalized).hostname.replace(/^www\./, ""),
-        tier: actor.tier,
-        outcome: "cached",
-        provider: "cached",
-        quotes: saved.topQuotes?.length ?? 0,
-        ms: Date.now() - startedAt,
-      });
-      return NextResponse.json({
-        ...saved,
-        cached: true,
-        deepSearch: empty && actor.tier === "visitor" ? "login" : "none",
-        usage: await peekScanUsage(actor),
-      });
+    saved = await getCachedScan<Saved>(normalized, cacheTier);
+    // A saved result with 0-1 quotes where Claude's backup was never tried is
+    // worth one more go for a signed-in account; everyone else just gets it.
+    const thin = !!saved && (saved.topQuotes?.length ?? 0) <= 1 && !saved.rescued;
+    if (saved && !(thin && canRescue)) return sendSaved(saved, "cached");
+
+    // Customer Voice may already have scanned this site: reuse its praise
+    // instead of searching again (standard tier only; Pro scans go deeper).
+    if (!isPro) {
+      const shared = await getSharedScanQuotes(normalized);
+      if (shared && shared.topQuotes.length > (saved?.topQuotes?.length ?? 0)) {
+        return sendSaved(shared, "shared-scan");
+      }
     }
   }
 
-  const canRescue = actor.tier !== "visitor" && !!process.env.ANTHROPIC_API_KEY;
   if (!hasTavily() || !process.env.GROQ_API_KEY) {
     return NextResponse.json(
       { error: "Search is temporarily unavailable — please try again later." },
@@ -272,6 +289,8 @@ export async function POST(req: NextRequest) {
   // A real scan is about to run: take one from the allowance.
   const reservation = await reserveScan(actor);
   if (!reservation.ok) {
+    // Out of scans but a saved result exists: show it rather than an error.
+    if (saved) return sendSaved(saved, "cached");
     return NextResponse.json(
       {
         error: limitMessage(actor),
@@ -613,7 +632,7 @@ Return the JSON now.`;
 
   const byPlatform = new Map<string, number>();
   for (const q of kept) byPlatform.set(q.source, (byPlatform.get(q.source) ?? 0) + 1);
-  const result: Omit<Result, "topQuotes"> & { topQuotes: OutQuote[]; provider: string } = {
+  const result: Omit<Result, "topQuotes"> & { topQuotes: OutQuote[]; provider: string; rescued?: boolean } = {
     brand: validated.data.brand,
     totalMentions: Math.max(validated.data.totalMentions, kept.length),
     platforms: [...byPlatform.entries()].map(([name, count]) => ({ name, count })),
@@ -659,10 +678,11 @@ Return the JSON now.`;
     }
   }
 
-  // A visitor's empty result isn't saved: an account asking about the
-  // same site later should still get the backup search.
-  // A visitor's single quote isn't saved either, for the same reason.
-  if (!customReferences && deepSearch !== "login" && !(actor.tier === "visitor" && result.topQuotes.length <= 1)) {
+  // Every result is saved for everyone, empty ones included, so the same site
+  // is never searched twice. `rescued` records that Claude's backup was
+  // tried, so only a thin result that never had it is retried by an account.
+  if (!customReferences) {
+    result.rescued = rescueRan;
     await saveCachedScan(normalized, cacheTier, result);
   }
 

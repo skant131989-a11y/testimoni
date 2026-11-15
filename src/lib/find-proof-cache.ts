@@ -43,6 +43,54 @@ export async function getCachedScan<T extends { topQuotes?: unknown[] }>(
   }
 }
 
+/**
+ * Customer Voice keeps its own saved scan per website (UrlScan). When one
+ * exists, its praise and testimonials answer Find my praise for the same
+ * site with no search at all.
+ */
+export async function getSharedScanQuotes(normalizedUrl: string) {
+  try {
+    const row = await prisma.urlScan.findUnique({ where: { normalizedUrl } });
+    if (!row || Date.now() - row.refreshedAt.getTime() > 7 * 24 * HOUR) return null;
+    const r = row.resultJson as unknown as {
+      brand?: string;
+      mentions?: Array<{
+        content: string;
+        author: string;
+        role?: string;
+        source: string;
+        sourceUrl?: string;
+        categories?: string[];
+        score?: number;
+      }>;
+    };
+    const topQuotes = (r.mentions ?? [])
+      .filter((m) => m.categories?.includes("praise") || m.categories?.includes("testimonial"))
+      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+      .slice(0, 10)
+      .map((m) => ({
+        content: m.content,
+        author: m.author,
+        role: m.role,
+        source: m.source,
+        sourceUrl: m.sourceUrl,
+        score: Math.max(1, Math.min(100, Math.round(m.score ?? 60))),
+      }));
+    if (topQuotes.length === 0) return null;
+    const byPlatform = new Map<string, number>();
+    for (const q of topQuotes) byPlatform.set(q.source, (byPlatform.get(q.source) ?? 0) + 1);
+    return {
+      brand: r.brand || row.brand,
+      totalMentions: topQuotes.length,
+      platforms: [...byPlatform.entries()].map(([name, count]) => ({ name, count })),
+      topQuotes,
+      provider: "shared-scan",
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function saveCachedScan(
   normalizedUrl: string,
   tier: CacheTier,

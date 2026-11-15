@@ -42,6 +42,7 @@ const BODY = z.object({
 });
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const FOUND_TTL_MS = 7 * CACHE_TTL_MS;
 
 function ipFrom(req: NextRequest): string {
   return (
@@ -73,7 +74,10 @@ export async function POST(req: NextRequest) {
   // a domain you already scanned today never burns quota — only a
   // genuinely new discovery run below does that.
   const cached = await prisma.urlScan.findUnique({ where: { normalizedUrl: normalized } });
-  if (cached && Date.now() - cached.refreshedAt.getTime() < CACHE_TTL_MS) {
+  // A scan that found something is shared with everyone for a week; an empty
+  // one for a day, in case the search just missed.
+  const cachedFound = ((cached?.resultJson as { totalMentions?: number } | null)?.totalMentions ?? 0) > 0;
+  if (cached && Date.now() - cached.refreshedAt.getTime() < (cachedFound ? FOUND_TTL_MS : CACHE_TTL_MS)) {
     await logToolRun({ tool: "customer-voice", host: new URL(normalized).hostname, tier: "visitor", outcome: "cached", provider: "cached", ms: Date.now() - startedAt });
     return NextResponse.json({
       id: cached.id,
