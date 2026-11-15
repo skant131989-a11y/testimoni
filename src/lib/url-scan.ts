@@ -117,6 +117,20 @@ function extractJsonObject(raw: string): string {
 // Defense against LLM hallucination — same guard as Find My Proof.
 const CODE_ARTIFACT = /\$\{|\bpick\(|\brandom\(|<%|%>|\[\s*['"][^'"]+['"]\s*,/;
 
+/** Add Claude's finds to what Tavily already found, without repeating a quote. */
+function mergeMentions(existing: ScanMention[], added: ScanMention[]): ScanMention[] {
+  const keyOf = (m: ScanMention) => (m.sourceUrl || m.content).toLowerCase().replace(/\W+/g, " ").trim().slice(0, 120);
+  const seen = new Set(existing.map(keyOf));
+  const out = [...existing];
+  for (const m of added) {
+    const k = keyOf(m);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(m);
+  }
+  return out;
+}
+
 function cleanMentions(mentions: ScanMention[]): ScanMention[] {
   const seen = new Set<string>();
   return mentions.filter((m) => {
@@ -136,7 +150,7 @@ const CLASSIFY_RULES = `CATEGORIES — a quote can belong to MORE THAN ONE categ
   question          — someone asking how the product works, whether it does X, pricing, or other pre-purchase/how-to questions — not a complaint or a request, genuinely just asking
   use_case          — a description of how someone actually uses the product (sentiment-neutral is fine)
   objection         — a stated reason someone DIDN'T buy/use it, or hesitation/doubt about it (price, trust, missing feature, "not sure this is for me") — distinct from complaint, which is dissatisfaction from an existing user
-  outcome           — a MEASURABLE result: saved time, increased revenue, replaced another tool, improved productivity, reduced effort. Often overlaps with praise/testimonial — tag both when true.
+  outcome           — a MEASURABLE result stated in the quote: saved time, increased revenue, replaced another tool, a number or a before/after. "Easy to use" or "easy to set up" is praise, NOT an outcome.
   competitor_mention — compares the product to a named competitor, or mentions switching to/from one. When you use this category, ALSO set competitorName to the other product's name.
 
 HOMONYM CHECK — CRITICAL
@@ -151,7 +165,8 @@ HARD RULES
 6. date = only if a specific date/timestamp is visibly stated in the snippet. Never estimate or invent one — omit if unsure.
 7. competitorName = only present when categories includes competitor_mention; the other product's actual name, never invented.
 8. score 1-100: specificity (+30), verifiable identity (+25), emotional/informational strength (+20), platform credibility (+15), recency (+10).
-9. If no snippet clearly refers to the target product, return an empty mentions array. Zero honest results beats fabricated ones.`;
+9. If no snippet clearly refers to the target product, return an empty mentions array. Zero honest results beats fabricated ones.
+10. Be precise with categories: most quotes fit one or two. Use at most three, only the ones the quote clearly shows. Tag feature_request only for an explicit ask for something missing, and use_case only when the quote describes how the product is actually used.`;
 
 async function classifyWithGroq(
   brand: string,
@@ -222,13 +237,13 @@ categories is an array — include every category that applies. date and competi
 
   const response = (await anthropic.messages.create({
     model: CHAT_MODEL,
-    max_tokens: 4000,
+    max_tokens: 2500,
     system,
     tools: [
       {
         type: "web_search_20260209",
         name: "web_search",
-        max_uses: 4,
+        max_uses: 2,
         allowed_callers: ["direct"],
       },
     ],
@@ -441,7 +456,11 @@ export async function runUrlScan(
     }
   }
 
-  const needsFallback = !discovery || discovery.mentions.length === 0;
+  // Claude's own web search is the backup when Tavily + Groq found nothing
+  // or just one mention (small brands often have a single review on a site
+  // Tavily can't read, like G2). Its finds are added to what we already have.
+  const foundBefore = discovery?.mentions.length ?? 0;
+  const needsFallback = provider !== "own" && (!discovery || foundBefore <= 1);
   if (needsFallback && opts.allowClaude && process.env.ANTHROPIC_API_KEY) {
     const day = today();
     if (fallbackDay !== day) {
@@ -452,9 +471,14 @@ export async function runUrlScan(
       try {
         const claudeResult = await classifyWithClaude(brand, normalized);
         if (claudeResult) {
-          discovery = claudeResult;
-          provider = "claude";
           fallbackCount += 1;
+          if (claudeResult.mentions.length > 0 || !discovery) {
+            discovery = {
+              brand: discovery?.brand || claudeResult.brand,
+              mentions: mergeMentions(discovery?.mentions ?? [], claudeResult.mentions),
+            };
+          }
+          provider = "claude";
         }
       } catch (err) {
         console.warn("[scans] Claude discovery fallback failed:", err);

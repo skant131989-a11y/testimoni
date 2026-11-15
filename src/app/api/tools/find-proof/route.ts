@@ -471,13 +471,13 @@ OUTPUT — ONLY this JSON, no fences, no commentary:
 {"brand":"${brand}","totalMentions":N,"platforms":[{"name":"X","count":N}],"topQuotes":[{"content":"...","author":"...","role":"...","source":"X|LinkedIn|Reddit|Product Hunt|Hacker News|App Store|Blog|G2|Trustpilot","sourceUrl":"...","score":N}]}`;
     const response = (await anthropic.messages.create({
       model: CHAT_MODEL,
-      max_tokens: 2000,
+      max_tokens: 1500,
       system,
       tools: [
         {
           type: "web_search_20260209",
           name: "web_search",
-          max_uses: 3,
+          max_uses: 2,
           allowed_callers: ["direct"],
         },
       ],
@@ -624,22 +624,30 @@ Return the JSON now.`;
   // Nothing found: visitors are invited to log in for a deeper search;
   // accounts get one Claude backup search if the limits allow.
   let deepSearch: "none" | "login" | "used" = "none";
-  if (kept.length === 0) {
+  let rescueRan = false;
+  // Zero or one quote found: accounts get one Claude backup search (a lone
+  // quote usually means the rest sit on a site Tavily can't read, like G2).
+  if (kept.length <= 1) {
     if (actor.tier === "visitor") {
-      deepSearch = "login";
+      if (kept.length === 0) deepSearch = "login";
     } else if (canRescue) {
       const slot = await reserveRescue(actor);
       if (slot === "user_limit") {
         deepSearch = "used";
       } else if (slot === "ok") {
+        rescueRan = true;
         try {
           const maxQuotes = isPro ? RESCUE.maxQuotes.pro : RESCUE.maxQuotes.free;
           const found = await rescueWithClaude(maxQuotes);
-          if (found.length > 0) {
+          // Keep what we already found and add Claude's finds, no repeats.
+          const have = new Set(kept.map((q) => normalizeText(q.content)));
+          const extra = found.filter((q) => !have.has(normalizeText(q.content)));
+          if (extra.length > 0) {
+            const merged = [...kept, ...extra];
             const byDeep = new Map<string, number>();
-            for (const q of found) byDeep.set(q.source, (byDeep.get(q.source) ?? 0) + 1);
-            result.topQuotes = found;
-            result.totalMentions = found.length;
+            for (const q of merged) byDeep.set(q.source, (byDeep.get(q.source) ?? 0) + 1);
+            result.topQuotes = merged;
+            result.totalMentions = merged.length;
             result.platforms = [...byDeep.entries()].map(([name, count]) => ({ name, count }));
             result.provider = "tavily+claude";
           }
@@ -653,7 +661,8 @@ Return the JSON now.`;
 
   // A visitor's empty result isn't saved: an account asking about the
   // same site later should still get the backup search.
-  if (!customReferences && deepSearch !== "login") {
+  // A visitor's single quote isn't saved either, for the same reason.
+  if (!customReferences && deepSearch !== "login" && !(actor.tier === "visitor" && result.topQuotes.length <= 1)) {
     await saveCachedScan(normalized, cacheTier, result);
   }
 
@@ -667,7 +676,7 @@ Return the JSON now.`;
     reviewSite: reviewSiteHits,
     quotes: result.topQuotes.length,
     dropped,
-    claudeUsed: result.provider.includes("claude"),
+    claudeUsed: rescueRan,
     ms: Date.now() - startedAt,
   });
 

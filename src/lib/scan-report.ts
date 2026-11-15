@@ -44,6 +44,8 @@ export interface ScanMention {
   date?: string;
   /** Only meaningful when categories includes "competitor_mention". */
   competitorName?: string;
+  /** Set by buildTeaser only: the category this free sample is shown under. */
+  shownIn?: ScanCategory;
 }
 
 export interface ScanSummary {
@@ -167,7 +169,7 @@ export function buildTeaser(result: ScanResult): ScanTeaser {
     // "+N more" locked line covers it without repeating a quote.
     const pick = inCategory.find((m) => !used.has(m));
     if (pick) {
-      sample.push(pick);
+      sample.push({ ...pick, shownIn: category });
       used.add(pick);
     }
   }

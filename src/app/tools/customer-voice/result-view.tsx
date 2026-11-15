@@ -35,6 +35,7 @@ export interface ApiMention {
   score: number;
   date?: string;
   competitorName?: string;
+  shownIn?: ScanCategory;
 }
 
 export interface ApiScanResult {
@@ -175,16 +176,26 @@ export function ScanResultView({
     paywallRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  const mentionsByCategory = useMemo(() => {
-    const map = new Map<ScanCategory, ApiMention[]>();
+  // A quote can carry several categories. In the "All" view it is shown
+  // once, under the category it was picked for (free sample) or its first
+  // category; picking a category chip lists every quote with that tag.
+  const { mentionsByCategory, placedByCategory } = useMemo(() => {
+    const all = new Map<ScanCategory, ApiMention[]>();
+    const placed = new Map<ScanCategory, ApiMention[]>();
     for (const m of result.mentions) {
       for (const category of m.categories) {
-        const list = map.get(category) ?? [];
+        const list = all.get(category) ?? [];
         list.push(m);
-        map.set(category, list);
+        all.set(category, list);
+      }
+      const home = m.shownIn ?? CATEGORY_ORDER.find((c) => m.categories.includes(c)) ?? m.categories[0];
+      if (home) {
+        const list = placed.get(home) ?? [];
+        list.push(m);
+        placed.set(home, list);
       }
     }
-    return map;
+    return { mentionsByCategory: all, placedByCategory: placed };
   }, [result.mentions]);
 
   const loggedIn = useIsLoggedIn();
@@ -456,8 +467,14 @@ export function ScanResultView({
       {/* Evidence by category */}
       <div className="mt-6 space-y-8">
         {filteredCategories.map((cat) => {
-          const shown = mentionsByCategory.get(cat) ?? [];
-          const lockedCount = result.counts[cat] - shown.length;
+          const shown =
+            (filter === "all" ? placedByCategory.get(cat) : mentionsByCategory.get(cat)) ?? [];
+          const lockedCount = result.locked
+            ? Math.max(0, result.counts[cat] - (mentionsByCategory.get(cat) ?? []).length)
+            : 0;
+          // "All" view: a category whose only quotes are shown under another
+          // heading has nothing of its own to list.
+          if (filter === "all" && shown.length === 0 && lockedCount === 0) return null;
           return (
             <div key={cat}>
               <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
@@ -488,6 +505,9 @@ export function ScanResultView({
                         <p className="text-xs font-medium text-muted-foreground">
                           {m.author}{m.role ? ` — ${m.role}` : ""} · {m.source}
                           {m.date ? ` · ${m.date}` : ""}
+                          {filter === "all" && m.categories.filter((c) => c !== cat).length > 0
+                            ? ` · also ${m.categories.filter((c) => c !== cat).map((c) => CATEGORY_META[c].label.toLowerCase()).join(", ")}`
+                            : ""}
                         </p>
                         {canAdd && (
                           <button
