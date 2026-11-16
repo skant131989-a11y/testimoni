@@ -252,6 +252,13 @@ export default async function DashboardPage() {
     };
   })();
 
+  // Offer the trial once there is something for Pro to work on (a
+  // testimonial, or a scan already run). An empty new account would burn
+  // its one trial on nothing, so it sees only the "Next step" card; the
+  // trial is also offered at the Pro limits (requests, proof placement).
+  const trialActivated = totalTestimonials >= 1 || scanUsage.used > 0;
+  const showTrialOffer = trialEligible && trialActivated;
+
   return (
     <div className="space-y-6">
       <PageLoadPerf surface="dashboard" />
@@ -270,13 +277,13 @@ export default async function DashboardPage() {
           question / scan result while that flow is active, otherwise the
           Find my proof card. */}
       <MentionsBanner where="home" fallback={<FindMyProofCard surface="dashboard" dismissible />} />
-      {trialEligible && <TrialBanner state="eligible" />}
+      {showTrialOffer && <TrialBanner state="eligible" />}
       {trialActive && <TrialBanner state="active" daysLeft={trialDaysLeft} />}
       <ScanAllowance used={scanUsage.used} limit={scanUsage.limit} isPro={isPro} />
 
       {/* Free accounts near or at the free testimonial limit (the trial
           offer above takes its place for accounts that can still start one). */}
-      {!isPro && !trialEligible && <FreeLimitBanner count={totalTestimonials} max={limits.maxTestimonials} />}
+      {!isPro && !showTrialOffer && <FreeLimitBanner count={totalTestimonials} max={limits.maxTestimonials} />}
 
       {/* One clear next step for the user's current state (approve the
           inbox, add the first testimonial, share the form, embed the

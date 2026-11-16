@@ -10,6 +10,30 @@ import { prisma } from "@/lib/prisma";
  */
 export const TRIAL_DAYS = 14;
 
+/**
+ * Who can be offered the trial: a free workspace that has never paid, never
+ * had a trial and holds no bundle grant. (The offer is also shown only at
+ * moments when Pro would help, not to every empty account.)
+ */
+export function canOfferTrial(args: {
+  plan: string;
+  hasTrial: boolean;
+  sub?: {
+    stripeSubscriptionId?: string | null;
+    razorpaySubscriptionId?: string | null;
+    grantedUntil?: Date | null;
+  } | null;
+}): boolean {
+  const { plan, hasTrial, sub } = args;
+  return (
+    plan === "FREE" &&
+    !hasTrial &&
+    !sub?.stripeSubscriptionId &&
+    !sub?.razorpaySubscriptionId &&
+    !sub?.grantedUntil
+  );
+}
+
 export type StartTrialResult =
   | { ok: true; endsAt: Date }
   | { ok: false; reason: "already_used" | "already_pro" | "no_subscription" };

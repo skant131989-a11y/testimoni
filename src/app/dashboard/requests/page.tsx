@@ -6,6 +6,7 @@ import { getEffectivePlan } from "@/lib/plan";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { getMonthlyUsage } from "@/lib/scan-limits";
 import { newHookSecret, requestsSubject } from "@/lib/requests";
+import { canOfferTrial } from "@/lib/trial";
 import { RequestsClient } from "./requests-client";
 
 export const metadata: Metadata = {
@@ -27,7 +28,9 @@ export default async function RequestsPage() {
     (await prisma.requestHook.findUnique({ where: { workspaceId } })) ??
     (await prisma.requestHook.create({ data: { workspaceId, secret: newHookSecret() } }));
 
-  const [rows, used] = await Promise.all([
+  const sub = membership.workspace.subscription;
+  const [trialRow, rows, used] = await Promise.all([
+    prisma.proTrial.findUnique({ where: { workspaceId }, select: { id: true } }),
     prisma.testimonialRequest.findMany({
       where: { workspaceId },
       orderBy: { createdAt: "desc" },
@@ -42,6 +45,7 @@ export default async function RequestsPage() {
       baseUrl={process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}
       initialSecret={hook.secret}
       isFree={plan === "FREE"}
+      trialEligible={canOfferTrial({ plan, hasTrial: !!trialRow, sub })}
       limit={Number.isFinite(limit) ? limit : null}
       used={used}
       rows={rows.map((r) => ({

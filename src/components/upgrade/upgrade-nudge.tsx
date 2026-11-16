@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Lock, Sparkles } from "lucide-react";
 import { track } from "@/lib/analytics";
 import { UpgradeProButton } from "@/components/upgrade-pro-button";
+import { StartTrialButton } from "@/components/upgrade/trial-banner";
 
 /**
  * Upgrade prompts for the dashboard. Both log `upgrade_nudge_viewed`
@@ -18,12 +19,15 @@ export function UpgradeNudge({
   children,
   points,
   label = "Upgrade to Pro, $19/mo",
+  trialEligible = false,
 }: {
   surface: string;
   title: string;
   children?: React.ReactNode;
   points?: string[];
   label?: string;
+  /** When true the button starts the free 14-day trial instead of paying. */
+  trialEligible?: boolean;
 }) {
   useEffect(() => {
     track("upgrade_nudge_viewed", { surface });
@@ -46,7 +50,11 @@ export function UpgradeNudge({
         )}
       </div>
       <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-        <UpgradeProButton surface={surface} label={label} />
+        {trialEligible ? (
+          <StartTrialButton surface={surface} label="Try Pro free for 14 days" />
+        ) : (
+          <UpgradeProButton surface={surface} label={label} />
+        )}
         <Link
           href={`/pricing?src=${encodeURIComponent(surface)}`}
           className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"

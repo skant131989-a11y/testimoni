@@ -32,6 +32,7 @@ export function RequestsClient({
   baseUrl,
   initialSecret,
   isFree,
+  trialEligible,
   limit,
   used,
   rows,
@@ -39,6 +40,7 @@ export function RequestsClient({
   baseUrl: string;
   initialSecret: string;
   isFree: boolean;
+  trialEligible: boolean;
   limit: number | null;
   used: number;
   rows: Row[];
@@ -120,8 +122,12 @@ export function RequestsClient({
         )}
       </div>
 
-      {isFree && left !== null && left <= 3 && (
-        <UpgradeNudge surface="requests_limit" title="You're nearly out of free requests this month">
+      {isFree && left !== null && left <= 1 && (
+        <UpgradeNudge
+          surface="requests_limit"
+          title={left === 0 ? "You've used this month's free requests" : "You're nearly out of free requests this month"}
+          trialEligible={trialEligible}
+        >
           Pro sends up to 500 a month, so you can ask every customer.
         </UpgradeNudge>
       )}
