@@ -194,8 +194,8 @@ export default function LandingPage() {
             <TrackedLink cta="nav_tools" surface="home_nav" href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
               Free tools
             </TrackedLink>
-            <TrackedLink cta="nav_sample_wall" surface="home_nav" href="/w/demo" className="text-sm text-muted-foreground hover:text-foreground">
-              Sample wall
+            <TrackedLink cta="nav_live_demo" surface="home_nav" href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
+              Live demo
             </TrackedLink>
             <PublicNavAuth />
           </nav>

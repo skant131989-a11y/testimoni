@@ -70,12 +70,12 @@ export function PublicNav({ right }: PublicNavProps) {
             Free tools
           </TrackedLink>
           <TrackedLink
-            cta="nav_sample_wall"
+            cta="nav_live_demo"
             surface="public_nav"
-            href="/w/demo"
+            href="/demo"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            Sample wall
+            Live demo
           </TrackedLink>
           <TrackedLink
             cta="nav_pricing"
