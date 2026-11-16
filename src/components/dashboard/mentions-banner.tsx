@@ -30,10 +30,23 @@ const SEEN_KEY = "mentions_banner_dismissed";
  *  - the "we found N mentions" result: dashboard home and Testimonials,
  *    where "Review & add to my wall" leads. It has its own dismiss.
  */
-export function MentionsBanner() {
+export function MentionsBanner({
+  where = "testimonials",
+  fallback,
+}: {
+  /** "home": rendered by the dashboard page itself, under the heading.
+   *  "testimonials": the layout's copy, which only shows the result strip
+   *  on the Testimonials pages. */
+  where?: "home" | "testimonials";
+  /** Shown on the home page whenever there is nothing to ask or report
+   *  (so the dashboard shows this banner OR the Find my proof card). */
+  fallback?: React.ReactNode;
+}) {
   const pathname = usePathname() ?? "";
-  const onHome = pathname === "/dashboard";
-  const onTestimonials = pathname === "/dashboard/testimonials" || pathname.startsWith("/dashboard/testimonials/");
+  const onHome = where === "home";
+  const onTestimonials =
+    where === "testimonials" &&
+    (pathname === "/dashboard/testimonials" || pathname.startsWith("/dashboard/testimonials/"));
   const [data, setData] = useState<ProductState | null>(null);
   const [url, setUrl] = useState("");
   const [saving, setSaving] = useState(false);
@@ -85,7 +98,8 @@ export function MentionsBanner() {
     }
   })();
 
-  if (!data || hidden) return null;
+  if (!data) return null;
+  if (hidden) return onHome ? <>{fallback}</> : null;
 
   async function saveUrl(e: React.FormEvent) {
     e.preventDefault();
@@ -195,5 +209,7 @@ export function MentionsBanner() {
     );
   }
 
-  return null;
+  // Nothing to ask or report (prompt dismissed, nothing found, result
+  // already dismissed): on the home page show the fallback card instead.
+  return onHome ? <>{fallback}</> : null;
 }

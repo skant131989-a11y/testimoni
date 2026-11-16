@@ -27,6 +27,7 @@ import { PageLoadPerf } from "@/components/page-load-perf";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { PlanLimitProgress } from "@/components/plan-limit-progress";
 import { FindMyProofCard } from "@/components/dashboard/find-my-proof-card";
+import { MentionsBanner } from "@/components/dashboard/mentions-banner";
 import { RotatingTip } from "@/components/dashboard/rotating-tip";
 import { getEffectiveLimits, getEffectivePlan } from "@/lib/plan";
 import { getDbUserWithWorkspace, loadDbUserWithWorkspaceFresh } from "@/lib/session";
@@ -265,7 +266,10 @@ export default async function DashboardPage() {
       {/* TOP — Find My Proof nudge. Users repeatedly said the wedge
           card should lead the dashboard, above everything else. Kept
           dismissible; localStorage remembers the choice. */}
-      <FindMyProofCard surface="dashboard" dismissible />
+      {/* One "find praise for my product" prompt, not two: the website
+          question / scan result while that flow is active, otherwise the
+          Find my proof card. */}
+      <MentionsBanner where="home" fallback={<FindMyProofCard surface="dashboard" dismissible />} />
       {trialEligible && <TrialBanner state="eligible" />}
       {trialActive && <TrialBanner state="active" daysLeft={trialDaysLeft} />}
       <ScanAllowance used={scanUsage.used} limit={scanUsage.limit} isPro={isPro} />
