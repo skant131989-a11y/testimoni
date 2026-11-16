@@ -786,6 +786,19 @@ model FindProofCache {
   @@map("find_proof_cache")
 }
 
+/// The 14-day no-card Pro trial (one per workspace). The plan itself is set
+/// with Subscription.plan + grantedUntil; the expire-grants cron ends it.
+model ProTrial {
+  id          String   @id @default(cuid())
+  workspaceId String   @unique @map("workspace_id")
+  userId      String   @map("user_id")
+  startedAt   DateTime @default(now()) @map("started_at")
+  endsAt      DateTime @map("ends_at")
+
+  @@index([endsAt])
+  @@map("pro_trials")
+}
+
 /// A proof placement audit: which pages of the customer's website show no
 /// customer proof, and which wall quotes fit each page (see lib/proof-placement.ts).
 model ProofAudit {

@@ -19,10 +19,14 @@ export default async function ProofPlacementPage() {
   const workspace = membership.workspace;
 
   const plan = getEffectivePlan(workspace.slug, workspace.subscription?.plan);
-  const [latest, totalAudits] = await Promise.all([
+  const [latest, totalAudits, trial] = await Promise.all([
     prisma.proofAudit.findFirst({ where: { workspaceId: workspace.id }, orderBy: { createdAt: "desc" } }),
     prisma.proofAudit.count({ where: { workspaceId: workspace.id } }),
+    prisma.proTrial.findUnique({ where: { workspaceId: workspace.id }, select: { id: true } }),
   ]);
+  const sub = workspace.subscription;
+  const trialEligible =
+    plan === "FREE" && !trial && !sub?.stripeSubscriptionId && !sub?.razorpaySubscriptionId && !sub?.grantedUntil;
 
   return (
     <ProofPlacementClient
@@ -30,6 +34,7 @@ export default async function ProofPlacementPage() {
       defaultUrl={workspace.websiteUrl ?? ""}
       canRun={totalAudits < PLAN_LIMITS[plan].maxProofAudits}
       plan={plan}
+      trialEligible={trialEligible}
     />
   );
 }

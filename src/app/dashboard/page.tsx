@@ -35,6 +35,7 @@ import {
   RecentTestimonialsSkeleton,
 } from "./recent-testimonials";
 import { FreeLimitBanner } from "@/components/upgrade/free-limit-banner";
+import { TrialBanner } from "@/components/upgrade/trial-banner";
 import { ScanAllowance } from "@/components/upgrade/scan-allowance";
 import { getAccountScanUsage } from "@/lib/scan-limits";
 
@@ -131,6 +132,7 @@ export default async function DashboardPage() {
       pending: number;
       impressions: number;
       videos: number;
+      trial_ends: Date | null;
     }[]
   >`
     SELECT
@@ -141,7 +143,8 @@ export default async function DashboardPage() {
          WHERE f.workspace_id = ${workspaceId} AND s.status = 'NEW')::int AS pending,
       (SELECT COALESCE(sum(a.impressions), 0) FROM widget_analytics a JOIN widgets w ON w.id = a.widget_id
          WHERE w.workspace_id = ${workspaceId})::int AS impressions,
-      (SELECT count(*) FROM testimonials WHERE workspace_id = ${workspaceId} AND video_storage_key IS NOT NULL)::int AS videos
+      (SELECT count(*) FROM testimonials WHERE workspace_id = ${workspaceId} AND video_storage_key IS NOT NULL)::int AS videos,
+      (SELECT ends_at FROM pro_trials WHERE workspace_id = ${workspaceId}) AS trial_ends
   `;
   const totalTestimonials = stats?.total ?? 0;
   const approvedTestimonials = stats?.approved ?? 0;
@@ -150,6 +153,14 @@ export default async function DashboardPage() {
   const videoCount = stats?.videos ?? 0;
   const limits = getEffectiveLimits(workspaceSlug, subscription?.plan);
   const scanUsage = await scanUsagePromise;
+
+  // The 14-day Pro trial: offered once to Free accounts that never paid,
+  // then a "days left" banner until it ends.
+  const everPaid = Boolean(subscription?.stripeSubscriptionId || subscription?.razorpaySubscriptionId);
+  const trialEnds = stats?.trial_ends ? new Date(stats.trial_ends) : null;
+  const trialActive = isPro && !everPaid && !!trialEnds && trialEnds.getTime() > Date.now();
+  const trialEligible = !isPro && !everPaid && !trialEnds && !subscription?.grantedUntil;
+  const trialDaysLeft = trialEnds ? Math.max(0, Math.ceil((trialEnds.getTime() - Date.now()) / 86_400_000)) : 0;
 
   const impressionsTotal = stats?.impressions ?? 0;
   const wallUrl = defaultWidget
@@ -255,10 +266,13 @@ export default async function DashboardPage() {
           card should lead the dashboard, above everything else. Kept
           dismissible; localStorage remembers the choice. */}
       <FindMyProofCard surface="dashboard" dismissible />
+      {trialEligible && <TrialBanner state="eligible" />}
+      {trialActive && <TrialBanner state="active" daysLeft={trialDaysLeft} />}
       <ScanAllowance used={scanUsage.used} limit={scanUsage.limit} isPro={isPro} />
 
-      {/* Free accounts near or at the 10-testimonial limit. */}
-      {!isPro && <FreeLimitBanner count={totalTestimonials} max={limits.maxTestimonials} />}
+      {/* Free accounts near or at the free testimonial limit (the trial
+          offer above takes its place for accounts that can still start one). */}
+      {!isPro && !trialEligible && <FreeLimitBanner count={totalTestimonials} max={limits.maxTestimonials} />}
 
       {/* One clear next step for the user's current state (approve the
           inbox, add the first testimonial, share the form, embed the

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, CheckCircle2, Copy, Check, Loader2, Target, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { track } from "@/lib/analytics";
 import type { PlanType } from "@/lib/constants";
+import { StartTrialButton } from "@/components/upgrade/trial-banner";
 import type { PageAudit, ProofAuditResult } from "@/lib/proof-placement";
 
 const PRIORITY: Record<PageAudit["priority"], { label: string; cls: string }> = {
@@ -41,17 +42,21 @@ export function ProofPlacementClient({
   defaultUrl,
   canRun,
   plan,
+  trialEligible,
 }: {
   initial: ProofAuditResult | null;
   defaultUrl: string;
   canRun: boolean;
   plan: PlanType;
+  trialEligible: boolean;
 }) {
   const [url, setUrl] = useState(defaultUrl);
   const [result, setResult] = useState<ProofAuditResult | null>(initial);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [allowed, setAllowed] = useState(canRun);
+  // Starting the trial refreshes the page with canRun=true; pick that up.
+  useEffect(() => setAllowed(canRun), [canRun]);
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -109,13 +114,20 @@ export function ProofPlacementClient({
         </Button>
       </form>
       {!allowed && (
-        <p className="mt-2 text-sm text-muted-foreground">
-          Your free audit is used.{" "}
-          <Link href="/pricing" className="font-medium text-primary underline-offset-4 hover:underline">
-            Pro
-          </Link>{" "}
-          re-runs it whenever you change your site or add testimonials.
-        </p>
+        <div className="mt-3 rounded-xl border-2 border-primary/30 bg-primary/5 p-4">
+          <p className="text-sm">
+            Your free audit is used.{" "}
+            <Link href="/pricing" className="font-medium text-primary underline-offset-4 hover:underline">
+              Pro
+            </Link>{" "}
+            re-runs it whenever you change your site or add testimonials.
+          </p>
+          {trialEligible && (
+            <div className="mt-3">
+              <StartTrialButton surface="proof_placement" label="Try Pro free for 14 days, no card" />
+            </div>
+          )}
+        </div>
       )}
       {error && (
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm">
