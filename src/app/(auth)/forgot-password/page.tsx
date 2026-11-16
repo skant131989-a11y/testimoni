@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
+import { useTurnstileGate } from "@/components/auth/use-turnstile-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,12 +31,20 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const gate = useTurnstileGate("forgot-password", { lazy: true });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     if (!email) return;
     setIsLoading(true);
+    // Sending a reset email must be bot-gated like the sign-in code.
+    const check = await gate.verify("forgot_password");
+    if (!check.ok) {
+      setError(check.message);
+      setIsLoading(false);
+      return;
+    }
     track("forgot_password_requested", { source: "forgot_page" });
     try {
       const supabase = createClient();
@@ -43,8 +52,10 @@ export default function ForgotPasswordPage() {
         email,
         {
           redirectTo: `${window.location.origin}/reset-password`,
+          ...(check.captchaToken ? { captchaToken: check.captchaToken } : {}),
         },
       );
+      if (check.captchaToken) gate.reset();
       if (authError) {
         setError(authError.message);
         return;
@@ -122,11 +133,13 @@ export default function ForgotPasswordPage() {
                   placeholder="you@work.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onFocus={gate.arm}
                   required
                   disabled={isLoading}
                   autoComplete="email"
                 />
               </div>
+              {gate.widget}
               {error && (
                 <p className="text-sm text-destructive" role="alert">
                   {error}
