@@ -57,7 +57,10 @@ export async function POST(req: NextRequest) {
   try {
     body = BODY.parse(await req.json());
   } catch {
-    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Enter your website address, like acme.com" },
+      { status: 400 }
+    );
   }
 
   const startedAt = Date.now();
