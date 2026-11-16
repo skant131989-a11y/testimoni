@@ -3,13 +3,10 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import {
   MessageSquareQuote,
-  Code2,
   Inbox,
   Eye,
   Plus,
-  Sparkles,
   ArrowRight,
-  Search,
   RefreshCw,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -25,10 +22,7 @@ import { FormUrlCard } from "@/components/form-url-card";
 import { TrackedLink } from "@/components/tracked-link";
 import { PageLoadPerf } from "@/components/page-load-perf";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
-import { PlanLimitProgress } from "@/components/plan-limit-progress";
-import { FindMyProofCard } from "@/components/dashboard/find-my-proof-card";
 import { MentionsBanner } from "@/components/dashboard/mentions-banner";
-import { RotatingTip } from "@/components/dashboard/rotating-tip";
 import { getEffectiveLimits, getEffectivePlan } from "@/lib/plan";
 import { getDbUserWithWorkspace, loadDbUserWithWorkspaceFresh } from "@/lib/session";
 import {
@@ -149,9 +143,7 @@ export default async function DashboardPage() {
   `;
   const totalTestimonials = stats?.total ?? 0;
   const approvedTestimonials = stats?.approved ?? 0;
-  const activeWidgets = stats?.widgets ?? 0;
   const pendingSubmissions = stats?.pending ?? 0;
-  const videoCount = stats?.videos ?? 0;
   const limits = getEffectiveLimits(workspaceSlug, subscription?.plan);
   const scanUsage = await scanUsagePromise;
 
@@ -259,6 +251,49 @@ export default async function DashboardPage() {
   const trialActivated = totalTestimonials >= 1 || scanUsage.used > 0;
   const showTrialOffer = trialEligible && trialActivated;
 
+  const nbaCard = (
+    <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Next step</p>
+        <p className="mt-0.5 font-semibold">{nba.title}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{nba.desc}</p>
+      </div>
+      <Button asChild className="shrink-0">
+        {nba.external ? (
+          <a href={nba.href} target="_blank" rel="noopener noreferrer">
+            {nba.label} <ArrowRight className="ml-1.5 h-4 w-4" />
+          </a>
+        ) : (
+          <TrackedLink cta={"nba_" + nba.kind} surface="dashboard" href={nba.href}>
+            {nba.label} <ArrowRight className="ml-1.5 h-4 w-4" />
+          </TrackedLink>
+        )}
+      </Button>
+    </div>
+  );
+
+  // ONE card for "what to do now". Priority: at the free limit (trial or
+  // upgrade) > getting started (inbox, first testimonial, embed) > the trial
+  // offer > the general next step. The website question / scan result from
+  // MentionsBanner takes this slot first while that flow is active.
+  const maxT = limits.maxTestimonials;
+  const atLimit = !isPro && Number.isFinite(maxT) && totalTestimonials >= maxT;
+  const gettingStarted =
+    ["review_inbox", "first_import", "copy_embed"].includes(nba.kind) ||
+    (nba.kind === "share_form" && totalTestimonials < 3);
+  let topCard: React.ReactNode;
+  if (atLimit) {
+    topCard = showTrialOffer ? <TrialBanner state="eligible" /> : <FreeLimitBanner count={totalTestimonials} max={maxT} />;
+  } else if (gettingStarted) {
+    topCard = nbaCard;
+  } else if (showTrialOffer) {
+    topCard = <TrialBanner state="eligible" />;
+  } else {
+    topCard = nbaCard;
+  }
+  // Only worth a line when the free scans are nearly gone.
+  const scansNearlyOut = Number.isFinite(scanUsage.limit) && scanUsage.limit - scanUsage.used <= 2;
+
   return (
     <div className="space-y-6">
       <PageLoadPerf surface="dashboard" />
@@ -270,54 +305,15 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* TOP — Find My Proof nudge. Users repeatedly said the wedge
-          card should lead the dashboard, above everything else. Kept
-          dismissible; localStorage remembers the choice. */}
-      {/* One "find praise for my product" prompt, not two: the website
-          question / scan result while that flow is active, otherwise the
-          Find my proof card. */}
-      <MentionsBanner where="home" fallback={<FindMyProofCard surface="dashboard" dismissible />} />
-      {showTrialOffer && <TrialBanner state="eligible" />}
       {trialActive && <TrialBanner state="active" daysLeft={trialDaysLeft} />}
-      <ScanAllowance used={scanUsage.used} limit={scanUsage.limit} isPro={isPro} />
 
-      {/* Free accounts near or at the free testimonial limit (the trial
-          offer above takes its place for accounts that can still start one). */}
-      {!isPro && !showTrialOffer && <FreeLimitBanner count={totalTestimonials} max={limits.maxTestimonials} />}
+      {/* The single "what now" slot: the website question / scan result
+          while that flow is active, otherwise the card chosen above. */}
+      <MentionsBanner where="home" fallback={topCard} />
 
-      {/* One clear next step for the user's current state (approve the
-          inbox, add the first testimonial, share the form, embed the
-          wall…). Without it a new user lands on stat cards and a row of
-          buttons and has to guess what matters. */}
-      <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
-            Next step
-          </p>
-          <p className="mt-0.5 font-semibold">{nba.title}</p>
-          <p className="mt-0.5 text-sm text-muted-foreground">{nba.desc}</p>
-        </div>
-        <Button asChild className="shrink-0">
-          {nba.external ? (
-            <a href={nba.href} target="_blank" rel="noopener noreferrer">
-              {nba.label} <ArrowRight className="ml-1.5 h-4 w-4" />
-            </a>
-          ) : (
-            <TrackedLink
-              cta={`nba_${nba.kind}`}
-              surface="dashboard"
-              href={nba.href}
-            >
-              {nba.label} <ArrowRight className="ml-1.5 h-4 w-4" />
-            </TrackedLink>
-          )}
-        </Button>
-      </div>
+      {scansNearlyOut && <ScanAllowance used={scanUsage.used} limit={scanUsage.limit} isPro={isPro} />}
 
-      {/* Milestone celebration — fires ONLY when approvedTestimonials
-          hits an exact milestone (1, 5, 10, 25, 50, 100). This is the
-          hero moment; the rotating tip below hides itself when a
-          milestone is showing so nothing competes for attention. */}
+      {/* Milestone celebration: fires only at an exact milestone (1, 5, 10, 25, 50, 100). */}
       {defaultWidget && wallUrl && MILESTONE_COUNTS.includes(approvedTestimonials) && (
         <MilestoneNudge
           approvedCount={approvedTestimonials}
@@ -326,26 +322,14 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* Stats cards — each links to the natural drill-down page for
-          its value so users can click a number to see what's behind
-          it. Impressions falls back to the widget page when no
-          default widget exists yet. */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Three numbers, each linking to the page behind it. */}
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatsCard
           title="Total Testimonials"
           value={totalTestimonials}
-          icon={
-            <MessageSquareQuote className="h-4 w-4 text-muted-foreground" />
-          }
+          icon={<MessageSquareQuote className="h-4 w-4 text-muted-foreground" />}
           href="/dashboard/testimonials"
           analyticsKey="testimonials"
-        />
-        <StatsCard
-          title="Active Widgets"
-          value={activeWidgets}
-          icon={<Code2 className="h-4 w-4 text-muted-foreground" />}
-          href="/dashboard/widgets"
-          analyticsKey="widgets"
         />
         <StatsCard
           title="Pending Submissions"
@@ -363,11 +347,8 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Quick actions — three focused CTAs a founder actually
-          clicks: add a testimonial, extract one from a screenshot
-          via AI, or find fresh praise tweets to import. "See my
-          Wall" and "Manage widgets" moved to the sidebar where
-          they belong; keeping them here diluted the row. */}
+      {/* Three actions. Screenshot extraction lives inside Add testimonial,
+          and the other tools are in the sidebar and the Free tools menu. */}
       <div className="flex flex-wrap items-center gap-3">
         <Button asChild>
           <Link href="/dashboard/import">
@@ -376,55 +357,14 @@ export default async function DashboardPage() {
           </Link>
         </Button>
         <Button asChild variant="outline">
-          <Link href="/dashboard/import?tab=screenshot">
-            <Sparkles className="mr-2 h-4 w-4" />
-            Extract from screenshot
-          </Link>
-        </Button>
-        <Button asChild variant="outline">
           <Link href="/dashboard/sources">
             <RefreshCw className="mr-2 h-4 w-4" />
             Import from sources
           </Link>
         </Button>
-        <PlanLimitProgress
-          current={totalTestimonials}
-          max={limits.maxTestimonials}
-          resource="testimonials"
-          upgradeSurface="dashboard_quick_actions"
-        />
-        <Button variant="outline" asChild>
-          <a
-            href="/tools/praise-tweet-finder"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Search className="mr-2 h-4 w-4" />
-            Find praise tweets
-          </a>
-        </Button>
       </div>
 
-      {/* Rotating tips — one-at-a-time notification strip that
-          cycles ~every 7 seconds. Feels like a live nudge feed
-          instead of the previous stacked-nudges wall. */}
-      <RotatingTip
-        state={{
-          totalTestimonials,
-          videoCount,
-          activeWidgets,
-          impressionsTotal,
-          hasWallScoreRun: false,
-          hasAskMyWall: false,
-          hasFormLink: !!formShareHref,
-        }}
-        wallUrl={wallUrl ?? undefined}
-      />
-
-      {/* Form-link card — moved BELOW the stats + actions because
-          users repeatedly said it dominated the top of the page,
-          pushing everything else down. Keeps it visible for the
-          share-the-form job, but as a secondary card. */}
+      {/* Form-link card: the share-the-form job, as a secondary card. */}
       {formShareHref && (
         <FormUrlCard
           formUrl={`${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}${formShareHref}`}
@@ -432,11 +372,8 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* Recent testimonials — streamed in via <Suspense> so the
-          stats + FormUrlCard render immediately and this card fills
-          in when its findMany returns. Was previously part of the
-          big $transaction above and blocked everything on the
-          slowest query. */}
+      {/* Recent testimonials: streamed in via <Suspense> so everything above
+          renders immediately and this card fills in when its query returns. */}
       <Suspense fallback={<RecentTestimonialsSkeleton />}>
         <RecentTestimonialsCard
           workspaceId={workspaceId}
