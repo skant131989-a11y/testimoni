@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Loader2, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,12 +20,20 @@ interface ProductState {
 const SEEN_KEY = "mentions_banner_dismissed";
 
 /**
- * Dashboard-wide strip. Asks once for the product URL (prefilled when
- * the signup email is a work domain), kicks off the background scan,
- * then tells the owner how much public praise was found. Shown only
- * when there is something worth saying — never on every visit.
+ * Asks once for the product URL (prefilled when the signup email is a
+ * work domain), kicks off the background scan, then tells the owner how
+ * much public praise was found.
+ *
+ * Where it shows (it used to sit above every dashboard page and every
+ * public page, which was noise):
+ *  - the question and the "looking…" note: dashboard home only;
+ *  - the "we found N mentions" result: dashboard home and Testimonials,
+ *    where "Review & add to my wall" leads. It has its own dismiss.
  */
 export function MentionsBanner() {
+  const pathname = usePathname() ?? "";
+  const onHome = pathname === "/dashboard";
+  const onTestimonials = pathname === "/dashboard/testimonials" || pathname.startsWith("/dashboard/testimonials/");
   const [data, setData] = useState<ProductState | null>(null);
   const [url, setUrl] = useState("");
   const [saving, setSaving] = useState(false);
@@ -113,6 +122,7 @@ export function MentionsBanner() {
   }
 
   if (data.state === "needs_url") {
+    if (!onHome) return null;
     return (
       <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
         <form onSubmit={saveUrl} className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -142,6 +152,7 @@ export function MentionsBanner() {
   }
 
   if (data.state === "scanning") {
+    if (!onHome) return null;
     return (
       <div className="mb-4 flex items-center gap-2 rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -150,7 +161,7 @@ export function MentionsBanner() {
     );
   }
 
-  if (data.state === "ready" && data.notify && data.scanId && !alreadyDismissed) {
+  if (data.state === "ready" && data.notify && data.scanId && !alreadyDismissed && (onHome || onTestimonials)) {
     return (
       <div className="mb-4 flex flex-col gap-2 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <span className="font-medium text-emerald-900">
