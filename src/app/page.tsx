@@ -30,7 +30,6 @@ import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { PageEngagement } from "@/components/page-engagement";
 import { PageLoadPerf } from "@/components/page-load-perf";
-import { LaunchBar } from "@/components/launch-bar";
 import { FadeIn } from "@/components/fade-in";
 import { ExitIntent } from "@/components/exit-intent";
 import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
@@ -157,15 +156,7 @@ export default function LandingPage() {
       <PageLoadPerf surface="home" anonymous />
       <HashScrollCleanup />
 
-      {/* Launch bar: desktop only, so on a phone the hero is the first thing seen. */}
-      <div className="hidden md:block">
-        <LaunchBar
-          id="ask-my-wall-2026-09"
-          href="#features"
-          message="Ask My Wall is live — an AI chatbot that only quotes real customers."
-          cta="See it"
-        />
-      </div>
+      {/* No launch bar on the home page: the hero already is the Find my proof input. */}
 
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">

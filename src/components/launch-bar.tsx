@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Sparkles, ArrowRight, X } from "lucide-react";
 import { track } from "@/lib/analytics";
 
@@ -23,12 +24,16 @@ export function LaunchBar({
   href,
   message,
   cta,
+  badge = "New",
 }: {
   id: string;
   href: string;
   message: string;
   cta: string;
+  /** Small pill before the message. Defaults to "New". */
+  badge?: string;
 }) {
+  const pathname = usePathname() ?? "";
   const [mounted, setMounted] = useState(false);
   const [dismissed, setDismissed] = useState(true);
 
@@ -42,6 +47,11 @@ export function LaunchBar({
   }, [id]);
 
   if (!mounted || dismissed) return null;
+  // No point linking to the page you are already on.
+  if (!href.startsWith("#")) {
+    const target = href.split("#")[0].split("?")[0];
+    if (target !== "/" && (pathname === target || pathname.startsWith(`${target}/`))) return null;
+  }
 
   const onDismiss = () => {
     try {
@@ -76,9 +86,11 @@ export function LaunchBar({
       >
         <Sparkles className="h-3.5 w-3.5 shrink-0" />
         <span className="hidden sm:inline">
-          <span className="mr-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-            New
-          </span>
+          {badge && (
+            <span className="mr-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+              {badge}
+            </span>
+          )}
           {message}
         </span>
         <span className="sm:hidden">{message}</span>

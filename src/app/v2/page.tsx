@@ -19,6 +19,7 @@ import { PageEngagement } from "@/components/page-engagement";
 import { PageLoadPerf } from "@/components/page-load-perf";
 import { TrackedLink } from "@/components/tracked-link";
 import { LaunchBar } from "@/components/launch-bar";
+import { LAUNCH_BAR } from "@/lib/launch-bar";
 import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
 import { StructuredData } from "@/components/seo/structured-data";
 import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
@@ -125,12 +126,7 @@ export default function LandingV2() {
       <PageLoadPerf surface="home_v2" anonymous />
       <HashScrollCleanup />
 
-      <LaunchBar
-        id="ask-my-wall-2026-09"
-        href="#new-ai-features"
-        message="Ask My Wall is live — an AI chatbot that only quotes real customers."
-        cta="See it"
-      />
+      <LaunchBar {...LAUNCH_BAR} />
 
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">

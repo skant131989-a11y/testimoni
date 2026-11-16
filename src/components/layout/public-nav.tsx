@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { TrackedLink } from "@/components/tracked-link";
 import { LaunchBar } from "@/components/launch-bar";
+import { LAUNCH_BAR } from "@/lib/launch-bar";
 import {
   PublicNavAuth,
   PublicNavAuthMobile,
@@ -32,12 +33,7 @@ interface PublicNavProps {
 export function PublicNav({ right }: PublicNavProps) {
   return (
     <>
-      <LaunchBar
-        id="ask-my-wall-2026-09"
-        href="/#new-ai-features"
-        message="Ask My Wall is live — an AI chatbot that only quotes real customers."
-        cta="See it"
-      />
+      <LaunchBar {...LAUNCH_BAR} />
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">

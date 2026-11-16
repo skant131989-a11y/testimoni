@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TrackedLink } from "@/components/tracked-link";
 import { LaunchBar } from "@/components/launch-bar";
+import { LAUNCH_BAR } from "@/lib/launch-bar";
 import { createClient } from "@/lib/supabase/client";
 
 /**
@@ -45,12 +46,7 @@ export function ToolsHeader({ backToTools = false }: { backToTools?: boolean }) 
 
   return (
     <>
-      <LaunchBar
-        id="ask-my-wall-2026-09"
-        href="/#new-ai-features"
-        message="Ask My Wall is live — an AI chatbot that only quotes real customers."
-        cta="See it"
-      />
+      <LaunchBar {...LAUNCH_BAR} />
       <header className="border-b bg-background">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
