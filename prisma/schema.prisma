@@ -785,6 +785,28 @@ model FindProofCache {
   @@map("find_proof_cache")
 }
 
+/// "Email me when you find something": someone typed their address into the
+/// box on an empty Find my praise / Customer Voice result. The recheck cron
+/// scans the site again a few times and emails once if more turns up.
+model ScanWatch {
+  id            String    @id @default(cuid())
+  email         String
+  normalizedUrl String    @map("normalized_url")
+  tool          String
+  /// What we had when they signed up (0 for an empty result).
+  lastCount     Int       @default(0) @map("last_count")
+  checks        Int       @default(0)
+  active        Boolean   @default(true)
+  notifiedAt    DateTime? @map("notified_at")
+  lastCheckedAt DateTime? @map("last_checked_at")
+  expiresAt     DateTime  @map("expires_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@unique([email, normalizedUrl])
+  @@index([active, lastCheckedAt])
+  @@map("scan_watches")
+}
+
 /// One row per Find my praise / Customer Voice run (no IP, email or user id).
 /// Shows which provider answered, whether Claude ran and how much came back.
 model ToolRun {

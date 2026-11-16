@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NotifyMeBox } from "@/components/notify-me-box";
 import { track } from "@/lib/analytics";
 import { addPendingTestimonial, addPendingTestimonials } from "@/lib/pending-testimonials";
 import { saveToWall, type WallItem } from "@/lib/save-to-wall";
@@ -360,12 +361,25 @@ export function ScanResultView({
   return (
     <div>
       <div className="text-center">
-        <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-          Found it
+        <div
+          className={`mb-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white ${
+            result.totalMentions === 0 ? "bg-amber-500" : "bg-emerald-500"
+          }`}
+        >
+          {result.totalMentions === 0 ? "Nothing public yet" : "Found it"}
         </div>
         <h2 className="text-4xl font-bold md:text-5xl">
-          We found <span className="text-primary">{result.totalMentions}</span> customer
-          conversations about <span className="text-primary">{result.brand}</span>
+          {result.totalMentions === 0 ? (
+            <>
+              We couldn&rsquo;t find public conversations about{" "}
+              <span className="text-primary">{result.brand}</span> yet
+            </>
+          ) : (
+            <>
+              We found <span className="text-primary">{result.totalMentions}</span> customer
+              conversations about <span className="text-primary">{result.brand}</span>
+            </>
+          )}
         </h2>
       </div>
 
@@ -615,6 +629,7 @@ export function ScanResultView({
             We didn&rsquo;t find customer conversations we could verify. This happens for newer or
             lower-profile products — try a different URL, or go straight to your own customers instead.
           </p>
+          <NotifyMeBox tool="customer-voice" scanId={result.id} />
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link href="/tools/customer-voice">
               <Button size="lg" className="gap-2">

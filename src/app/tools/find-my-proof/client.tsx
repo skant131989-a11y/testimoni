@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { track, countBucket } from "@/lib/analytics";
+import { NotifyMeBox } from "@/components/notify-me-box";
 import { saveToWall } from "@/lib/save-to-wall";
 import { useIsLoggedIn } from "@/lib/use-is-logged-in";
 import {
@@ -610,6 +611,7 @@ function ResultView({
                 existing customers — most walls start empty and grow from there.
               </li>
             </ul>
+            {result.provider !== "own" && <NotifyMeBox tool="find-proof" url={searchedUrl} />}
             {result.deepSearch === "login" && (
               <div className="mx-auto mt-5 max-w-md rounded-xl border-2 border-primary/30 bg-primary/5 p-4 text-left">
                 <p className="font-semibold">Want us to dig deeper?</p>
