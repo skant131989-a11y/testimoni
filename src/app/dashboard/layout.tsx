@@ -7,6 +7,7 @@ import {
   loadDbUserWithWorkspaceFresh,
 } from "@/lib/session";
 import { Sidebar } from "@/components/layout/sidebar";
+import { MobileNavProvider } from "@/components/layout/mobile-nav";
 import { AuthIdentifier } from "@/components/auth-identifier";
 import { Header } from "@/components/layout/header";
 import { generateSlug } from "@/lib/utils";
@@ -230,6 +231,7 @@ export default async function DashboardLayout({
     : null;
 
   return (
+    <MobileNavProvider>
     <div className="flex h-screen overflow-hidden">
       {/* Session-cache sync — writes workspace + URLs to localStorage
           on mount so the welcome page and FormUrlCard can hydrate
@@ -274,5 +276,6 @@ export default async function DashboardLayout({
         </main>
       </div>
     </div>
+    </MobileNavProvider>
   );
 }

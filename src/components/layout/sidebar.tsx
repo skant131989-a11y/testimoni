@@ -24,12 +24,14 @@ import {
   Gauge,
   MessageSquare,
   Target,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import { PLAN_LIMITS, type PlanType } from "@/lib/constants";
 import { QuoteOpen } from "@/components/icons/quote-open";
+import { useMobileNav } from "@/components/layout/mobile-nav";
 import { track } from "@/lib/analytics";
 
 const navItems: {
@@ -78,7 +80,12 @@ interface SidebarProps {
 
 export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: SidebarProps) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const { open: mobileOpen, setOpen: setMobileOpen } = useMobileNav();
+  // "Collapsed to icons" is a desktop-only preference; the phone drawer
+  // always shows the full labels.
+  const [collapsedPref, setCollapsed] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const collapsed = collapsedPref && isDesktop;
   const [wallCopied, setWallCopied] = useState(false);
   const [count, setCount] = useState<number | undefined>(testimonialCount);
 
@@ -94,6 +101,27 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
       .catch(() => {});
   }, [pathname, plan]);
 
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  // Close the drawer after navigating, and on Escape.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname, setMobileOpen]);
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [mobileOpen, setMobileOpen]);
+
   async function copyWallUrl() {
     if (!wallUrl) return;
     try {
@@ -106,11 +134,21 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
 
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Phones and tablets: dim the page behind the open drawer; tap to close. */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-background transition-all duration-300 lg:relative",
-          collapsed ? "w-16" : "w-64"
+          // Below lg: an off-canvas drawer that slides in from the left.
+          // From lg up: the normal always-visible sidebar.
+          "fixed inset-y-0 left-0 z-50 flex w-64 max-w-[85vw] flex-col border-r bg-background transition-transform duration-300 lg:relative lg:max-w-none lg:translate-x-0 lg:transition-all",
+          mobileOpen ? "translate-x-0" : "-translate-x-full",
+          collapsed ? "lg:w-16" : "lg:w-64"
         )}
       >
         {/* One header row: logo and workspace name. */}
@@ -137,6 +175,16 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
               </div>
             )}
           </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 lg:hidden"
+            aria-label="Close menu"
+            onClick={() => setMobileOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Scrollable middle. The aside is a fixed-height column inside an
@@ -298,8 +346,8 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCollapsed(!collapsed)}
-            className="h-8 w-8 shrink-0"
+            onClick={() => setCollapsed(!collapsedPref)}
+            className="hidden h-8 w-8 shrink-0 lg:inline-flex"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? (

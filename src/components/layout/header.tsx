@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LogOut, User, ChevronsUpDown } from "lucide-react";
+import { LogOut, User, ChevronsUpDown, Menu } from "lucide-react";
+import { useMobileNav } from "@/components/layout/mobile-nav";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -34,6 +35,7 @@ export function Header({
   workspaceName,
 }: HeaderProps) {
   const pathname = usePathname();
+  const { open: mobileNavOpen, setOpen: setMobileNavOpen } = useMobileNav();
   const [menuOpen, setMenuOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -51,12 +53,25 @@ export function Header({
   }, []);
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-background px-6">
+    <header className="flex h-16 items-center justify-between gap-2 border-b bg-background px-3 sm:px-6">
+      {/* Menu button (phones and tablets): opens the sidebar drawer. */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="shrink-0 lg:hidden"
+        aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
+        aria-expanded={mobileNavOpen}
+        onClick={() => setMobileNavOpen(!mobileNavOpen)}
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+
       {/* Breadcrumb area */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">{workspaceName}</span>
-        <span className="text-sm text-muted-foreground">/</span>
-        <h1 className="text-sm font-medium">{currentLabel}</h1>
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <span className="hidden truncate text-sm text-muted-foreground sm:inline">{workspaceName}</span>
+        <span className="hidden text-sm text-muted-foreground sm:inline">/</span>
+        <h1 className="truncate text-sm font-medium">{currentLabel}</h1>
       </div>
 
       {/* User menu */}
