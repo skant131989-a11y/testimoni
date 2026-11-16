@@ -113,7 +113,7 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
           collapsed ? "w-16" : "w-64"
         )}
       >
-        {/* One header row: logo, workspace name, and the wall's View / Copy icons. */}
+        {/* One header row: logo and workspace name. */}
         <div className="flex h-14 shrink-0 items-center gap-1 border-b px-3">
           <Link
             href="/"
@@ -137,32 +137,6 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
               </div>
             )}
           </Link>
-          {wallUrl && !collapsed && (
-            <>
-              <Button asChild size="icon" variant="ghost" className="h-8 w-8 shrink-0 text-primary">
-                <a
-                  href={wallUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={`View your Wall of Love (${wallUrl.replace(/^https?:\/\//, "")})`}
-                  aria-label="View your Wall of Love"
-                  onClick={() => track("wall_view_clicked", { surface: "sidebar", via: "button" })}
-                >
-                  <Heart className="h-4 w-4 fill-current" />
-                </a>
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 shrink-0"
-                onClick={copyWallUrl}
-                title="Copy your wall link to share"
-                aria-label="Copy wall link"
-              >
-                {wallCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </>
-          )}
         </div>
 
         {/* Scrollable middle. The aside is a fixed-height column inside an
@@ -170,20 +144,46 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
             the fold was clipped and unreachable. The logo above and the
             footer below stay pinned; this region scrolls between them. */}
         <div className="min-h-0 flex-1 overflow-y-auto">
-        {/* Collapsed sidebar: the wall is a single heart icon. When expanded, the
-            wall link lives in the header row above (saves a whole row). */}
-        {wallUrl && collapsed && (
-          <div className="border-b px-2 py-2">
-            <a
-              href={wallUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Your Wall of Love"
-              className="flex items-center justify-center rounded-md bg-gradient-to-br from-primary/20 to-pink-500/15 p-2 text-primary hover:from-primary/30 hover:to-pink-500/25"
-              onClick={() => track("wall_view_clicked", { surface: "sidebar", via: "icon" })}
-            >
-              <Heart className="h-5 w-5 fill-current" />
-            </a>
+        {/* Your Wall of Love: its own row at the top of the list (View + a copy
+            button), a single heart when the sidebar is collapsed. */}
+        {wallUrl && (
+          <div className="px-2 pt-2">
+            {collapsed ? (
+              <a
+                href={wallUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Your Wall of Love"
+                className="flex items-center justify-center rounded-md bg-gradient-to-br from-primary/20 to-pink-500/15 p-2 text-primary hover:from-primary/30 hover:to-pink-500/25"
+                onClick={() => track("wall_view_clicked", { surface: "sidebar", via: "icon" })}
+              >
+                <Heart className="h-5 w-5 fill-current" />
+              </a>
+            ) : (
+              <div className="flex items-center rounded-md bg-primary/5 transition-colors hover:bg-primary/10">
+                <a
+                  href={wallUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={`Open your Wall of Love (${wallUrl.replace(/^https?:\/\//, "")})`}
+                  className="flex min-w-0 flex-1 items-center gap-3 px-3 py-1 text-sm font-semibold text-primary"
+                  onClick={() => track("wall_view_clicked", { surface: "sidebar", via: "url_text" })}
+                >
+                  <Heart className="h-[18px] w-[18px] shrink-0 fill-current" />
+                  <span className="truncate">Your Wall of Love</span>
+                </a>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="mr-0.5 h-7 w-7 shrink-0 text-primary hover:bg-primary/10"
+                  onClick={copyWallUrl}
+                  title="Copy your wall link to share"
+                  aria-label="Copy wall link"
+                >
+                  {wallCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
