@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { ImportSourcesRow } from "@/components/import-sources-row";
 import { WelcomeSplash } from "@/components/welcome-splash";
+import { GettingStarted } from "@/components/dashboard/getting-started";
 import { PageLoadPerf } from "@/components/page-load-perf";
 import { celebrateFirstTestimonial } from "@/lib/confetti";
 import { readSessionCache } from "@/lib/session-cache";
@@ -55,6 +56,8 @@ interface WelcomeClientProps {
   signupTimestamp: number | null;
   userId: string | null;
   userEmail: string | null;
+  /** Workspace progress for the 3-step strip. */
+  onboarding?: { testimonials: number; impressions: number };
 }
 
 export function WelcomeClient({
@@ -66,6 +69,7 @@ export function WelcomeClient({
   signupTimestamp,
   userId,
   userEmail,
+  onboarding,
 }: WelcomeClientProps) {
   const router = useRouter();
   const [url, setUrl] = useState("");
@@ -1187,6 +1191,15 @@ export function WelcomeClient({
               ? "Two ways to get your first testimonial live in 30 seconds — pick whichever feels closer to home."
               : "Type in a testimonial you already have — from an email, a DM, or a screenshot."}
           </p>
+
+          {/* The whole job in three steps, so people know what finishing looks like. */}
+          {!imported && onboarding && (
+            <GettingStarted
+              variant="roadmap"
+              testimonials={onboarding.testimonials}
+              impressions={onboarding.impressions}
+            />
+          )}
 
         {/* Two doors card — replaces the meh "3 quotes today" text
             with an actionable side-by-side: auto-find your praise

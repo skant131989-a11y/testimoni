@@ -3,6 +3,7 @@ import {
   getDbUserWithWorkspace,
   loadDbUserWithWorkspaceFresh,
 } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
 import { WelcomeClient } from "./welcome-client";
 
 /**
@@ -48,6 +49,21 @@ export default async function WelcomePage() {
   const signupTimestamp = isNewSignup ? createdAt : null;
 
   const workspace = dbUser?.workspaceMembers[0]?.workspace;
+  // Progress for the 3-step strip (a returning user sees where they left off).
+  let onboarding = { testimonials: 0, impressions: 0 };
+  if (workspace) {
+    try {
+      const [row] = await prisma.$queryRaw<{ total: number; impressions: number }[]>`
+        SELECT
+          (SELECT count(*) FROM testimonials WHERE workspace_id = ${workspace.id})::int AS total,
+          (SELECT COALESCE(sum(a.impressions), 0) FROM widget_analytics a JOIN widgets w ON w.id = a.widget_id
+             WHERE w.workspace_id = ${workspace.id})::int AS impressions
+      `;
+      onboarding = { testimonials: row?.total ?? 0, impressions: row?.impressions ?? 0 };
+    } catch {
+      // The strip is a nicety; the welcome page works without it.
+    }
+  }
   if (workspace) {
     defaultWidgetId = workspace.widgets[0]?.id ?? null;
     workspaceName = workspace.name;
@@ -66,6 +82,7 @@ export default async function WelcomePage() {
       signupTimestamp={signupTimestamp}
       userId={authUser?.id ?? null}
       userEmail={authUser?.email ?? null}
+      onboarding={onboarding}
     />
   );
 }

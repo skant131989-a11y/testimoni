@@ -23,6 +23,11 @@ import { TrackedLink } from "@/components/tracked-link";
 import { PageLoadPerf } from "@/components/page-load-perf";
 import { MILESTONE_COUNTS } from "@/lib/milestones";
 import { MentionsBanner } from "@/components/dashboard/mentions-banner";
+import {
+  GettingStarted,
+  GETTING_STARTED_STEPS,
+  gettingStartedDone,
+} from "@/components/dashboard/getting-started";
 import { getEffectiveLimits, getEffectivePlan } from "@/lib/plan";
 import { getDbUserWithWorkspace, loadDbUserWithWorkspaceFresh } from "@/lib/session";
 import {
@@ -278,14 +283,18 @@ export default async function DashboardPage() {
   // MentionsBanner takes this slot first while that flow is active.
   const maxT = limits.maxTestimonials;
   const atLimit = !isPro && Number.isFinite(maxT) && totalTestimonials >= maxT;
-  const gettingStarted =
-    ["review_inbox", "first_import", "copy_embed"].includes(nba.kind) ||
-    (nba.kind === "share_form" && totalTestimonials < 3);
+  const onboardingDone = gettingStartedDone(totalTestimonials, impressionsTotal) === GETTING_STARTED_STEPS;
   let topCard: React.ReactNode;
   if (atLimit) {
     topCard = showTrialOffer ? <TrialBanner state="eligible" /> : <FreeLimitBanner count={totalTestimonials} max={maxT} />;
-  } else if (gettingStarted) {
+  } else if (nba.kind === "review_inbox") {
+    // Something is waiting for their approval: that comes before anything else.
     topCard = nbaCard;
+  } else if (!onboardingDone) {
+    // The 3-step guide: add one, get to three, put the wall on a site.
+    topCard = (
+      <GettingStarted testimonials={totalTestimonials} impressions={impressionsTotal} embedHref={embedHref} />
+    );
   } else if (showTrialOffer) {
     topCard = <TrialBanner state="eligible" />;
   } else {
