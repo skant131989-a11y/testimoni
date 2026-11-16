@@ -389,46 +389,7 @@ export default function DemoClient() {
         </div>
       </header>
 
-      {/* Loved-by-founders strip — placed right below the demo's own
-          header. Same position as on /pricing: nav → strip → hero.
-          Grounds the demo experience in real founder proof before
-          the visitor starts clicking through the mock flow. */}
-      <LovedByFoundersStrip />
-
       <main className="mx-auto max-w-7xl px-4 py-12">
-        {/* Banner — surfaces the Screenshot → Testimonial tool as a
-            skip-the-flow alternative for visitors who already have
-            praise to import. Compact, one line, links directly to
-            the free tool page. */}
-        <div className="mb-8 rounded-2xl border-2 border-primary/30 bg-gradient-to-r from-primary/5 via-primary/[0.03] to-transparent p-4">
-          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15">
-                <Sparkles className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold">
-                  Already have praise in your DMs, tweets, or Slack?
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Skip the flow — drop a screenshot and we&apos;ll extract it
-                  into a testimonial in 3 seconds.
-                </p>
-              </div>
-            </div>
-            <TrackedLink
-              cta="demo_screenshot_banner"
-              surface="demo"
-              href="/tools/screenshot-to-testimonial"
-              className="shrink-0"
-            >
-              <Button size="sm" variant="outline" className="gap-1.5">
-                Try Screenshot → Testimonial <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </TrackedLink>
-          </div>
-        </div>
-
         {/* Hero */}
         <div className="text-center">
           <Badge variant="outline" className="mb-4">
@@ -436,8 +397,8 @@ export default function DemoClient() {
             Try the flow. Save it to an account when you want it on your site.
           </Badge>
           <h1 className="text-4xl font-bold md:text-5xl">
-            Paste a tweet, drop a screenshot, or fill a form.{" "}
-            <span className="text-primary">See it live in 30 seconds.</span>
+            See your first testimonial{" "}
+            <span className="text-primary">live on a widget in 30 seconds.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
             Nothing to sign up for. Add a testimonial below, approve it, and
@@ -1001,6 +962,11 @@ export default function DemoClient() {
           caption="Paste a tweet → live testimonial on your wall. That's it."
         />
 
+        {/* Founder proof goes here, after the visitor has tried the demo. */}
+        <div className="mt-16">
+          <LovedByFoundersStrip />
+        </div>
+
         {/* Bottom CTA — matches home + /w/demo: inline signup form
             beside the pitch. Replaces the older button-only version so
             visitors can convert without a page hop. */}
@@ -1041,6 +1007,15 @@ export default function DemoClient() {
                   className="font-medium text-primary hover:underline"
                 >
                   or see a sample wall →
+                </TrackedLink>
+                {" · "}
+                <TrackedLink
+                  cta="demo_screenshot_banner"
+                  surface="demo"
+                  href="/tools/screenshot-to-testimonial"
+                  className="font-medium text-primary hover:underline"
+                >
+                  or turn a screenshot of praise into a testimonial →
                 </TrackedLink>
               </p>
             </div>
