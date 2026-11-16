@@ -28,9 +28,11 @@ interface Props {
   /** Back to the form to correct the email. */
   onChangeEmail: () => void;
   surface: string;
+  /** Analytics event on success; defaults from `mode`. */
+  successEvent?: string;
 }
 
-export function VerifyEmailScreen({ email, mode, redirectTo, onResend, onChangeEmail, surface }: Props) {
+export function VerifyEmailScreen({ email, mode, redirectTo, onResend, onChangeEmail, surface, successEvent }: Props) {
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_S);
   const [resending, setResending] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export function VerifyEmailScreen({ email, mode, redirectTo, onResend, onChangeE
         email={email}
         redirectTo={redirectTo}
         otpType={mode === "signup" ? "signup" : "email"}
-        successEvent={mode === "signup" ? "signup_completed" : "login_completed"}
+        successEvent={successEvent ?? (mode === "signup" ? "signup_completed" : "login_completed")}
         method={mode === "signup" ? "email_password" : "email_code"}
         surface={surface}
         hideHeader
@@ -100,7 +102,7 @@ export function VerifyEmailScreen({ email, mode, redirectTo, onResend, onChangeE
       <div className="space-y-2 text-xs text-muted-foreground">
         <p>The code expires in about an hour. Not there? Check spam or promotions.</p>
         {mode === "login" && (
-          <p>No code at all? Make sure it&apos;s the same email you signed up with.</p>
+          <p>No code at all? Check the address for typos, or continue with Google instead.</p>
         )}
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
           <button
