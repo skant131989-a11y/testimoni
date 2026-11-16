@@ -17,6 +17,8 @@ export const PLAN_LIMITS = {
     // Wall Score: 1 lifetime audit (viral hook — user gets the
     // score card image once and can screenshot/share). No renewal.
     maxWallScoreAudits: 1,
+    // Proof placement audit: 1 free run, then Pro.
+    maxProofAudits: 1,
     // Testimonial → Tweet drafts per calendar month.
     maxTweetDraftsPerMonth: 5,
     // Ask My Wall chatbot: a capped taste on Free. Answers come from
@@ -43,6 +45,7 @@ export const PLAN_LIMITS = {
     // didn't earn its complexity pre-scale. Revisit when we see a
     // usage cohort that would justify carving it back out.
     maxWallScoreAudits: Infinity,
+    maxProofAudits: Infinity,
     maxTweetDraftsPerMonth: Infinity,
     askMyWall: true,
     askMyWallAnswersPerMonth: Infinity,
@@ -63,6 +66,7 @@ export const PLAN_LIMITS = {
     watermark: false,
     customBranding: true,
     maxWallScoreAudits: Infinity,
+    maxProofAudits: Infinity,
     maxTweetDraftsPerMonth: Infinity,
     askMyWall: true,
     askMyWallAnswersPerMonth: Infinity,

@@ -48,6 +48,7 @@ model Workspace {
   subscription    Subscription?
   reviewSources   ReviewSource[]
   wallScoreAudits WallScoreAudit[]
+  proofAudits     ProofAudit[]
   socialAccounts  SocialAccount[]
   askMyWall       AskMyWallConfig?
   mentionScan     WorkspaceMentionScan?
@@ -783,6 +784,21 @@ model FindProofCache {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("find_proof_cache")
+}
+
+/// A proof placement audit: which pages of the customer's website show no
+/// customer proof, and which wall quotes fit each page (see lib/proof-placement.ts).
+model ProofAudit {
+  id          String   @id @default(cuid())
+  workspaceId String   @map("workspace_id")
+  siteUrl     String   @map("site_url")
+  result      Json
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@map("proof_audits")
 }
 
 /// "Email me when you find something": someone typed their address into the

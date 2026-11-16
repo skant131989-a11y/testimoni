@@ -24,6 +24,7 @@ import {
   RefreshCw,
   Gauge,
   MessageSquare,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ const navItems: {
   { href: "/dashboard/import", label: "Import", icon: Import },
   { href: "/dashboard/sources", label: "Review sources", icon: RefreshCw },
   { href: "/dashboard/wall-score", label: "Wall Score", icon: Gauge, freeTag: "1 free" },
+  { href: "/dashboard/proof-placement", label: "Proof placement", icon: Target, freeTag: "1 free" },
   { href: "/dashboard/tweet-drafts", label: "Tweet drafts", icon: Send, freeTag: "5/mo" },
   { href: "/dashboard/ask-my-wall", label: "Ask My Wall", icon: MessageSquare, freeTag: "30/mo" },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
