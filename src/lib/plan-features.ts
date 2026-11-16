@@ -35,7 +35,7 @@ export const FREE_FEATURES = [
   "1 collection form + 1 widget",
   "2 video testimonials (MP4/MOV, up to 50MB each)",
   "Ask My Wall chatbot: 30 answers a month",
-  "10 testimonial request emails a month (by hand or webhook)",
+  "3 testimonial request emails a month (by hand or webhook)",
   "Review markup so Google and AI can read your wall",
   "Public Wall of Love URL",
   "Grid layout + one-line script embed",

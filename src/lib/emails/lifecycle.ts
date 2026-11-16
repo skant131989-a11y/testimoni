@@ -37,7 +37,7 @@ export function lifecycleEmail(
       lines: [
         "You've started your wall, which is the hard part. The next step is asking customers, and most people never do.",
         "Testimoni can ask for you: paste a list of customer emails (or call a webhook from Stripe, Shopify or Zapier when someone buys), and each person gets a short email with your form, plus one reminder if they don't reply.",
-        "The free plan includes 10 request emails a month.",
+        "The free plan includes 3 request emails a month.",
       ],
       cta: "Send my first requests",
       href: `${APP}/dashboard/requests`,

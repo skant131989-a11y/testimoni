@@ -27,7 +27,7 @@ export const PLAN_LIMITS = {
     askMyWall: true,
     askMyWallAnswersPerMonth: 30,
     // Testimonial request emails (dashboard or webhook) per month.
-    requestsPerMonth: 10,
+    requestsPerMonth: 3,
     // Wall Score tracking & weekly email — Pro AI only.
     wallScoreTracking: false,
   },
