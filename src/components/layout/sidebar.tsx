@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Mail,
@@ -30,7 +30,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import { PLAN_LIMITS, type PlanType } from "@/lib/constants";
-import { COMPETITORS } from "@/lib/competitors";
 import { QuoteOpen } from "@/components/icons/quote-open";
 import { track } from "@/lib/analytics";
 
@@ -56,6 +55,15 @@ const navItems: {
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
+
+/** A thin divider after these items splits the list into groups (your wall,
+ *  getting proof in, using it, then the account links) without taking the
+ *  height of section headings. */
+const DIVIDER_AFTER = new Set([
+  "/dashboard/widgets",
+  "/dashboard/sources",
+  "/dashboard/ask-my-wall",
+]);
 
 interface SidebarProps {
   workspaceName: string;
@@ -106,33 +114,30 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
           collapsed ? "w-16" : "w-64"
         )}
       >
-        {/* Logo area */}
-        <div className="flex h-16 items-center justify-between border-b px-4">
-          {!collapsed && (
-            <Link href="/" className="flex items-center gap-2">
-              <Image
-                src="/icon.png"
-                alt="Testimoni logo"
-                width={32}
-                height={32}
-                className="rounded-lg"
-                priority
-              />
-              <span className="text-lg font-semibold">Testimoni</span>
-            </Link>
-          )}
-          {collapsed && (
-            <Link href="/" className="mx-auto flex items-center justify-center">
-              <Image
-                src="/icon.png"
-                alt="Testimoni logo"
-                width={32}
-                height={32}
-                className="rounded-lg"
-                priority
-              />
-            </Link>
-          )}
+        {/* Logo + workspace name in one row (was two stacked blocks). */}
+        <div className="flex h-14 shrink-0 items-center border-b px-3">
+          <Link
+            href="/"
+            className={cn("flex min-w-0 items-center gap-2", collapsed && "mx-auto")}
+            title={collapsed ? workspaceName : undefined}
+          >
+            <Image
+              src="/icon.png"
+              alt="Testimoni logo"
+              width={32}
+              height={32}
+              className="shrink-0 rounded-lg"
+              priority
+            />
+            {!collapsed && (
+              <div className="min-w-0 leading-tight">
+                <span className="block text-sm font-semibold">Testimoni</span>
+                <span className="block truncate text-[11px] text-muted-foreground">
+                  {workspaceName}
+                </span>
+              </div>
+            )}
+          </Link>
         </div>
 
         {/* Scrollable middle. The aside is a fixed-height column inside an
@@ -140,22 +145,10 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
             the fold was clipped and unreachable. The logo above and the
             footer below stay pinned; this region scrolls between them. */}
         <div className="min-h-0 flex-1 overflow-y-auto">
-        {/* Workspace name */}
-        {!collapsed && (
-          <div className="border-b px-4 py-3">
-            <p className="truncate text-sm font-medium text-muted-foreground">
-              {workspaceName}
-            </p>
-          </div>
-        )}
-
-        {/* Your Wall of Love — always-visible link to the primary
-            shareable asset. Prominently styled (gradient, bigger
-            heading + heart emoji) because sharing the wall is the
-            #1 outcome we want users to remember. Cheap to show,
-            outsized value when users click through and share. */}
+        {/* Your Wall of Love — one compact row: the link plus View and
+            Copy as icon buttons. The full URL shows on hover. */}
         {wallUrl && (
-          <div className={cn("border-b p-3", collapsed && "px-2")}>
+          <div className={cn("border-b px-3 py-2", collapsed && "px-2")}>
             {collapsed ? (
               <a
                 href={wallUrl}
@@ -170,69 +163,60 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
                 <Heart className="h-5 w-5 fill-current" />
               </a>
             ) : (
-              <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/10 via-pink-500/[0.06] to-transparent p-3 shadow-sm">
-                <div className="flex items-center gap-1.5">
-                  <Heart className="h-4 w-4 shrink-0 fill-primary text-primary" />
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
-                    Your Wall of Love
-                  </p>
-                </div>
-                <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                  Share this anywhere — bio, email, DM.
-                </p>
+              <div className="flex items-center gap-1 rounded-lg border border-primary/25 bg-gradient-to-br from-primary/10 via-pink-500/[0.06] to-transparent py-1 pl-2.5 pr-1">
+                <Heart className="h-4 w-4 shrink-0 fill-primary text-primary" />
                 <a
                   href={wallUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   title={wallUrl}
-                  className="mt-2 block truncate rounded border border-primary/15 bg-background/70 px-2 py-1 font-mono text-[11px] text-foreground hover:border-primary/40 hover:text-primary"
+                  className="min-w-0 flex-1 truncate text-xs font-semibold text-primary hover:underline"
                   onClick={() =>
                     track("wall_view_clicked", { surface: "sidebar", via: "url_text" })
                   }
                 >
-                  {wallUrl.replace(/^https?:\/\//, "")}
+                  Your Wall of Love
                 </a>
-                <div className="mt-2 flex gap-1.5">
-                  <Button
-                    asChild
-                    size="sm"
-                    className="h-7 flex-1 px-2 text-[11px]"
+                <Button
+                  asChild
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 shrink-0"
+                >
+                  <a
+                    href={wallUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="View your wall"
+                    aria-label="View your wall"
+                    onClick={() =>
+                      track("wall_view_clicked", { surface: "sidebar", via: "button" })
+                    }
                   >
-                    <a
-                      href={wallUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() =>
-                        track("wall_view_clicked", { surface: "sidebar", via: "button" })
-                      }
-                    >
-                      <ExternalLink className="mr-1 h-3 w-3" /> View
-                    </a>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 flex-1 px-2 text-[11px]"
-                    onClick={copyWallUrl}
-                  >
-                    {wallCopied ? (
-                      <>
-                        <Check className="mr-1 h-3 w-3" /> Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="mr-1 h-3 w-3" /> Copy
-                      </>
-                    )}
-                  </Button>
-                </div>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 shrink-0"
+                  onClick={copyWallUrl}
+                  title="Copy the link to share"
+                  aria-label="Copy wall link"
+                >
+                  {wallCopied ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-600" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                </Button>
               </div>
             )}
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="space-y-1 px-2 py-4">
+        <nav className="space-y-0.5 px-2 py-2">
           {navItems.map((item) => {
             const isActive =
               item.href === "/dashboard"
@@ -240,11 +224,11 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
                 : pathname.startsWith(item.href);
 
             return (
+              <Fragment key={item.href}>
               <Link
-                key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "relative flex items-center gap-3 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                   isActive
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -252,7 +236,7 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
                 )}
                 title={collapsed ? item.label : undefined}
               >
-                <item.icon className="h-5 w-5 shrink-0" />
+                <item.icon className="h-[18px] w-[18px] shrink-0" />
                 {!collapsed && (
                   <span className="flex-1">{item.label}</span>
                 )}
@@ -286,12 +270,15 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
                   </>
                 )}
               </Link>
+              {DIVIDER_AFTER.has(item.href) && <div className="mx-2 my-1 border-t" />}
+              </Fragment>
             );
           })}
         </nav>
 
         {/* Upgrade banner for free plan — opens Razorpay directly
-            in one click. No intermediate billing page. */}
+            in one click. No intermediate billing page. Kept short so it
+            doesn't push the links off the screen. */}
         {plan === "FREE" && !collapsed && (() => {
           const used = count ?? 0;
           const max = PLAN_LIMITS.FREE.maxTestimonials;
@@ -299,11 +286,10 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
           const heading =
             used >= max ? "Free limit reached" : used >= max - 2 ? "Almost at your free limit" : "Upgrade to Pro";
           return (
-            <div className="m-3 rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 p-4">
-              <div className="flex items-center gap-2">
+            <div className="m-2 rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 p-3">
+              <div className="flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-primary" />
-                <p className="text-sm font-medium">{heading}</p>
-              </div>
+                <p className="text-sm font-medium">{heading}</p>              </div>
               {count !== undefined && (
                 <div className="mt-2">
                   <div className="h-1.5 overflow-hidden rounded-full bg-primary/15">
@@ -314,45 +300,37 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
                   </p>
                 </div>
               )}
-              <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
-                <li>Unlimited testimonials and widgets</li>
-                <li>No “Powered by” badge</li>
-                <li>30 deeper scans a month, weekly re-scan</li>
-              </ul>
               <UpgradeProButton
                 surface="sidebar_upgrade_banner"
                 size="sm"
-                className="mt-3 w-full"
+                className="mt-2 w-full"
                 label="Upgrade, $19/mo"
               />
-              <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                Flat price, no tiers. Senja starts at ${COMPETITORS.senja.firstPaidUsd}.
-              </p>
             </div>
           );
         })()}
 
         </div>
 
-        {/* Collapse toggle */}
-        <div className="shrink-0 border-t p-2 space-y-1">
+        {/* Pinned footer: feedback and the collapse toggle share one row. */}
+        <div className={cn("flex shrink-0 items-center gap-1 border-t p-2", collapsed && "flex-col")}>
           <Link
             href="/contact"
             target="_blank"
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-              collapsed && "justify-center px-2"
+              "flex flex-1 items-center gap-3 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+              collapsed && "w-full flex-none justify-center px-2"
             )}
             title={collapsed ? "Send feedback" : undefined}
           >
-            <MessageCircle className="h-5 w-5 shrink-0" />
+            <MessageCircle className="h-[18px] w-[18px] shrink-0" />
             {!collapsed && <span>Send feedback</span>}
           </Link>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
-            className="w-full"
+            className="h-8 w-8 shrink-0"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? (
