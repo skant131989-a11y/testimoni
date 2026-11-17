@@ -86,6 +86,8 @@ export const PRICING: Record<
     code: Currency;
     proMonthly: number;
     proAiMonthly: number;
+    /** Regular price shown struck through next to a launch offer, when there is one. */
+    proListMonthly?: number;
     locale: string;
   }
 > = {
@@ -100,6 +102,8 @@ export const PRICING: Record<
     symbol: "₹",
     code: "INR",
     proMonthly: 499,
+    // Launch offer for India: shown as ₹499 from the regular ₹999.
+    proListMonthly: 999,
     proAiMonthly: 1499,
     locale: "en-IN",
   },

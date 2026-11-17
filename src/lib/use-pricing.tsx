@@ -8,6 +8,8 @@ interface PricingContextValue {
   setCurrency: (c: Currency) => void;
   proMonthly: number;
   proMonthlyFormatted: string;
+  /** The struck-through regular price when a launch offer applies (INR), else null. */
+  proMonthlyList: string | null;
   proMonthlyUsd: string;
   proMonthlyInr: string;
   proAiMonthly: number;
@@ -36,6 +38,10 @@ function build(currency: Currency, setCurrency: (c: Currency) => void): PricingC
     setCurrency,
     proMonthly: PRICING[currency].proMonthly,
     proMonthlyFormatted: formatPrice(PRICING[currency].proMonthly, currency),
+    proMonthlyList:
+      PRICING[currency].proListMonthly != null
+        ? formatPrice(PRICING[currency].proListMonthly as number, currency)
+        : null,
     proMonthlyUsd: formatPrice(PRICING.USD.proMonthly, "USD"),
     proMonthlyInr: formatPrice(PRICING.INR.proMonthly, "INR"),
     proAiMonthly: PRICING[currency].proAiMonthly,

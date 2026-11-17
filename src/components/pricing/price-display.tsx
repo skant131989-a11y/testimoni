@@ -8,9 +8,12 @@ interface ProPriceProps {
 }
 
 export function ProPrice({ suffix = "/mo", className }: ProPriceProps) {
-  const { proMonthlyFormatted } = usePricing();
+  const { proMonthlyFormatted, proMonthlyList } = usePricing();
   return (
     <span className={className}>
+      {proMonthlyList && (
+        <span className="mr-2 text-xl font-normal text-muted-foreground line-through">{proMonthlyList}</span>
+      )}
       {proMonthlyFormatted}
       {suffix && (
         <span className="text-base font-normal text-muted-foreground">
@@ -23,11 +26,13 @@ export function ProPrice({ suffix = "/mo", className }: ProPriceProps) {
 
 /** Shown only to visitors on rupee pricing: says it plainly, so it is not a surprise. */
 export function ProPriceNote({ className }: { className?: string }) {
-  const { currency, proMonthlyUsd } = usePricing();
+  const { currency, proMonthlyUsd, proMonthlyList, proMonthlyFormatted } = usePricing();
   if (currency !== "INR") return null;
   return (
     <p className={className ?? "mt-1 text-xs text-muted-foreground"}>
-      Priced for India and billed in rupees. Everywhere else Pro is {proMonthlyUsd}/month. Same plan.
+      <span className="font-semibold text-emerald-700">Launch offer for India:</span>{" "}
+      {proMonthlyFormatted}/month{proMonthlyList ? ` from the regular ${proMonthlyList}` : ""}, billed in rupees.
+      Everywhere else Pro is {proMonthlyUsd}/month. Same plan.
     </p>
   );
 }
