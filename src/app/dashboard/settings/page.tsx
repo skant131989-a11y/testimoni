@@ -93,7 +93,10 @@ export default async function SettingsPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                This is used in your public collection form URLs.
+                This is used in your public collection form URLs. If you
+                change it, links you already shared keep working and send
+                people to the new address, but update your bio or emails
+                when you can.
               </p>
             </div>
           </CardContent>

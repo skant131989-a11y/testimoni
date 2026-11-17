@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { detectCurrency, formatPrice, PRICING, type Currency } from "@/lib/constants";
 
 interface PricingContextValue {
@@ -18,62 +18,47 @@ interface PricingContextValue {
 
 const PricingContext = createContext<PricingContextValue | null>(null);
 
+/**
+ * Rupee pricing for visitors in India, behind a switch.
+ *
+ * Pro is $19/mo everywhere unless NEXT_PUBLIC_INR_PRICING=1 is set. With it
+ * on, a browser in an Indian time zone sees Pro at ₹499/mo and pays through a
+ * rupee Razorpay plan (RAZORPAY_PRO_PLAN_ID_INR), because many Indian cards
+ * decline recurring dollar charges. Everyone else, and the first paint
+ * before the time zone is read, stays on USD, so there is no server/browser
+ * mismatch. The switch is off until the rupee plan exists in Razorpay.
+ */
+export const INR_PRICING_ENABLED = process.env.NEXT_PUBLIC_INR_PRICING === "1";
+
+function build(currency: Currency, setCurrency: (c: Currency) => void): PricingContextValue {
+  return {
+    currency,
+    setCurrency,
+    proMonthly: PRICING[currency].proMonthly,
+    proMonthlyFormatted: formatPrice(PRICING[currency].proMonthly, currency),
+    proMonthlyUsd: formatPrice(PRICING.USD.proMonthly, "USD"),
+    proMonthlyInr: formatPrice(PRICING.INR.proMonthly, "INR"),
+    proAiMonthly: PRICING[currency].proAiMonthly,
+    proAiMonthlyFormatted: formatPrice(PRICING[currency].proAiMonthly, currency),
+    proAiMonthlyUsd: formatPrice(PRICING.USD.proAiMonthly, "USD"),
+    proAiMonthlyInr: formatPrice(PRICING.INR.proAiMonthly, "INR"),
+  };
+}
+
 export function PricingProvider({ children }: { children: ReactNode }) {
-  // Pro is a flat $19/mo everywhere — no more region-based INR pricing,
-  // so there's nothing to detect or switch. Kept as a fixed value (not
-  // a literal constant inline) so every consumer still reads through
-  // this one context.
-  const currency: Currency = "USD";
-  const setCurrency = () => {};
+  const [currency, setCurrency] = useState<Currency>("USD");
 
-  const proMonthly = PRICING[currency].proMonthly;
-  const proMonthlyFormatted = formatPrice(proMonthly, currency);
-  const proMonthlyUsd = formatPrice(PRICING.USD.proMonthly, "USD");
-  const proMonthlyInr = formatPrice(PRICING.INR.proMonthly, "INR");
-  const proAiMonthly = PRICING[currency].proAiMonthly;
-  const proAiMonthlyFormatted = formatPrice(proAiMonthly, currency);
-  const proAiMonthlyUsd = formatPrice(PRICING.USD.proAiMonthly, "USD");
-  const proAiMonthlyInr = formatPrice(PRICING.INR.proAiMonthly, "INR");
+  useEffect(() => {
+    if (INR_PRICING_ENABLED && detectCurrency() === "INR") setCurrency("INR");
+  }, []);
 
-  return (
-    <PricingContext.Provider
-      value={{
-        currency,
-        setCurrency,
-        proMonthly,
-        proMonthlyFormatted,
-        proMonthlyUsd,
-        proMonthlyInr,
-        proAiMonthly,
-        proAiMonthlyFormatted,
-        proAiMonthlyUsd,
-        proAiMonthlyInr,
-      }}
-    >
-      {children}
-    </PricingContext.Provider>
-  );
+  return <PricingContext.Provider value={build(currency, setCurrency)}>{children}</PricingContext.Provider>;
 }
 
 export function usePricing(): PricingContextValue {
   const ctx = useContext(PricingContext);
-  if (!ctx) {
-    return {
-      currency: "USD",
-      setCurrency: () => {},
-      proMonthly: PRICING.USD.proMonthly,
-      proMonthlyFormatted: formatPrice(PRICING.USD.proMonthly, "USD"),
-      proMonthlyUsd: formatPrice(PRICING.USD.proMonthly, "USD"),
-      proMonthlyInr: formatPrice(PRICING.INR.proMonthly, "INR"),
-      proAiMonthly: PRICING.USD.proAiMonthly,
-      proAiMonthlyFormatted: formatPrice(PRICING.USD.proAiMonthly, "USD"),
-      proAiMonthlyUsd: formatPrice(PRICING.USD.proAiMonthly, "USD"),
-      proAiMonthlyInr: formatPrice(PRICING.INR.proAiMonthly, "INR"),
-    };
-  }
-  return ctx;
+  return ctx ?? build("USD", () => {});
 }
 
 // Expose detectCurrency for callers that want to opt into geo-based defaults.
 export { detectCurrency };
-

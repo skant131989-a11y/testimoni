@@ -21,6 +21,17 @@ export function ProPrice({ suffix = "/mo", className }: ProPriceProps) {
   );
 }
 
+/** Shown only to visitors on rupee pricing: says it plainly, so it is not a surprise. */
+export function ProPriceNote({ className }: { className?: string }) {
+  const { currency, proMonthlyUsd } = usePricing();
+  if (currency !== "INR") return null;
+  return (
+    <p className={className ?? "mt-1 text-xs text-muted-foreground"}>
+      Priced for India and billed in rupees. Everywhere else Pro is {proMonthlyUsd}/month. Same plan.
+    </p>
+  );
+}
+
 export function FreePrice({ suffix = "/mo", className }: ProPriceProps) {
   const { currency } = usePricing();
   const symbol = currency === "INR" ? "₹" : "$";

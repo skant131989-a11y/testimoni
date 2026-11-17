@@ -26,6 +26,10 @@ model Workspace {
   id            String   @id @default(cuid())
   name          String
   slug          String   @unique
+  // Addresses this workspace used before it was renamed in Settings. Links
+  // shared under an old address (collection form, founder page, embedded
+  // chatbot) redirect to the current one instead of going to a 404.
+  previousSlugs String[] @default([]) @map("previous_slugs")
   logoUrl       String?  @map("logo_url")
   // Public founder directory opt-in. When true, this workspace shows
   // up on /founders and gets a public /founders/[slug] profile page.

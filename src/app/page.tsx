@@ -200,31 +200,19 @@ export default function LandingPage() {
                 <Star className="h-3 w-3" /> Free to try · No signup
               </span>
               <h1 className="mt-4 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.4rem]">
-                Collect testimonials.{" "}
+                See who&rsquo;s already{" "}
                 <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-                  Find the ones you already have.
+                  praising your product.
                 </span>
               </h1>
               <p className="mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
-                Send a form, or paste your website and we&rsquo;ll find real posts about you on X,
-                LinkedIn, Reddit and more. Approve with a click, then show them on a hosted wall
-                or with one line of code.
+                Paste your website. In about 20 seconds we show real posts about you on X, LinkedIn
+                and Reddit, ready to put on your site. Free, no signup.
               </p>
               <div className="mt-6 max-w-xl">
                 <FindProofForm placement="hero" />
               </div>
-              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-                <span className="text-muted-foreground">Rather ask your customers directly?</span>
-                <TrackedLink
-                  cta="hero_collect_form"
-                  surface="home"
-                  href="/signup?src=home_hero_form"
-                  className="inline-flex items-center gap-1.5 rounded-lg border-2 border-primary/30 bg-background px-4 py-2 font-semibold text-primary transition hover:bg-primary/5"
-                >
-                  Create a collection form <ArrowRight className="h-4 w-4" />
-                </TrackedLink>
-              </div>
-              <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+              <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
                 <li className="inline-flex items-center gap-1">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> 3 free scans a day
                 </li>
@@ -232,12 +220,20 @@ export default function LandingPage() {
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Free for 15 testimonials
                 </li>
                 <li className="inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Pro is a flat $19/month
-                </li>
-                <li className="inline-flex items-center gap-1">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> No credit card
                 </li>
               </ul>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Rather ask your customers directly?{" "}
+                <TrackedLink
+                  cta="hero_collect_form"
+                  surface="home"
+                  href="/signup?src=home_hero_form"
+                  className="font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  Create a collection form →
+                </TrackedLink>
+              </p>
             </div>
             <HeroPreview />
           </div>

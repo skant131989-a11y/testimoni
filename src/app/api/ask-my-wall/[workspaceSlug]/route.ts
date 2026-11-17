@@ -34,8 +34,10 @@ export async function POST(
 ) {
   const { workspaceSlug } = await params;
 
-  const workspace = await prisma.workspace.findUnique({
-    where: { slug: workspaceSlug },
+  // Also match an address the workspace used before a rename, so chat
+  // widgets already embedded on customer sites keep answering.
+  const workspace = await prisma.workspace.findFirst({
+    where: { OR: [{ slug: workspaceSlug }, { previousSlugs: { has: workspaceSlug } }] },
     include: { subscription: true, askMyWall: true },
   });
   if (!workspace) {

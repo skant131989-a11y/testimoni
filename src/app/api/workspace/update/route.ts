@@ -63,7 +63,7 @@ export async function POST(request: Request) {
   // Build a partial update — only include fields the form actually
   // sent. Prevents the public-listing form from clobbering the name
   // set by the workspace form and vice versa.
-  const data: Record<string, string | boolean | null> = {};
+  const data: Record<string, unknown> = {};
 
   if (form.has("name")) {
     const name = clean(form.get("name"), NAME_MAX);
@@ -75,11 +75,21 @@ export async function POST(request: Request) {
     if (slug && slug !== member.workspace.slug) {
       // Guard against uniqueness collisions — Prisma would throw
       // on the update otherwise, dropping the whole form.
-      const clash = await prisma.workspace.findUnique({
-        where: { slug },
+      // An address another workspace used to have is also off limits, or we
+      // would hijack the links they shared under it.
+      const clash = await prisma.workspace.findFirst({
+        where: {
+          id: { not: member.workspace.id },
+          OR: [{ slug }, { previousSlugs: { has: slug } }],
+        },
         select: { id: true },
       });
-      if (!clash) data.slug = slug;
+      if (!clash) {
+        data.slug = slug;
+        // Keep the old address working: links already shared (Linktree,
+        // email, social) redirect to the new one.
+        data.previousSlugs = { push: member.workspace.slug };
+      }
     }
   }
 

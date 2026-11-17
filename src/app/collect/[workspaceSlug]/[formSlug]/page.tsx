@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import PublicCollectionForm from "@/components/collection/public-form";
 
 export default async function CollectionFormPage({
@@ -14,7 +14,16 @@ export default async function CollectionFormPage({
     select: { id: true, name: true, logoUrl: true },
   });
 
-  if (!workspace) notFound();
+  if (!workspace) {
+    // The workspace may have been renamed: send links shared under the old
+    // address to the current one.
+    const renamed = await prisma.workspace.findFirst({
+      where: { previousSlugs: { has: workspaceSlug } },
+      select: { slug: true },
+    });
+    if (renamed) redirect(`/collect/${renamed.slug}/${formSlug}`);
+    notFound();
+  }
 
   const form = await prisma.collectionForm.findFirst({
     where: {

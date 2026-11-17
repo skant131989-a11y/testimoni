@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import type { Currency } from "@/lib/constants";
 import { track } from "@/lib/analytics";
+import { usePricing } from "@/lib/use-pricing";
 import "@/lib/razorpay-window";
 
 /**
@@ -86,10 +87,11 @@ export function UpgradeProButton({
 }: UpgradeProButtonProps) {
   const [upgrading, setUpgrading] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const { currency: pricingCurrency, proMonthlyFormatted } = usePricing();
 
   async function handleClick() {
     setUpgrading(true);
-    const currency = currencyProp ?? "USD";
+    const currency = currencyProp ?? pricingCurrency;
     track("upgrade_clicked", { currency, plan: "PRO", surface });
     try {
       await ensureRazorpayLoaded();
@@ -159,7 +161,8 @@ export function UpgradeProButton({
   return (
     <Button onClick={handleClick} disabled={busy} {...buttonProps}>
       {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      {label ??
+      {/* Labels are written with "$19"; show the visitor's own price. */}
+      {(typeof label === "string" ? label.replace("$19", proMonthlyFormatted) : label) ??
         (verifying
           ? "Confirming payment…"
           : upgrading
