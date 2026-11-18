@@ -8,6 +8,7 @@ import {
   ExternalLink,
   FileText,
   Inbox,
+  Play,
   LayoutGrid,
   Search,
   Sparkles,
@@ -23,8 +24,11 @@ import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { COMPETITORS, FACTS_VERIFIED_ON, TESTIMONI } from "@/lib/competitors";
 import { HOME_FAQ, SOURCES } from "@/lib/home-content";
 import { FindProofForm } from "@/components/home/find-proof-form";
-import { HeroPreview } from "@/components/home/hero-preview";
+import { HeroWall } from "@/components/home/hero-wall";
 import { LiveWall } from "@/components/home/live-wall";
+import { LaunchBar } from "@/components/launch-bar";
+import { LAUNCH_BAR } from "@/lib/launch-bar";
+import { getWallQuotes } from "@/lib/home-wall";
 import { HeroDualDemo } from "@/components/hero-dual-demo";
 import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
@@ -148,7 +152,11 @@ const COMPARE = [TESTIMONI, COMPETITORS.senja, COMPETITORS["testimonial-to"]];
 // Our own public wall (real posts from X), embedded live in the proof section.
 const WALL_ID = "cmtedlomj0009w0btzyi3yweh";
 
-export default function LandingPage() {
+// Re-read the wall quotes once an hour; the rest of the page is static.
+export const revalidate = 3600;
+
+export default async function LandingPage() {
+  const quotes = await getWallQuotes(WALL_ID);
   return (
     <div className="flex min-h-screen flex-col">
       <StructuredData faqs={HOME_FAQ} />
@@ -156,7 +164,7 @@ export default function LandingPage() {
       <PageLoadPerf surface="home" anonymous />
       <HashScrollCleanup />
 
-      {/* No launch bar on the home page: the hero already is the Find my proof input. */}
+      <LaunchBar {...LAUNCH_BAR} />
 
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -192,50 +200,72 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        {/* 1 — Hero: one promise, one input */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-violet-50 via-background to-background">
-          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 md:grid-cols-[1.05fr_1fr] md:gap-12 md:py-20">
+        {/* 1 — Hero: the outcome first, the picture of it beside it */}
+        <section className="relative overflow-hidden bg-gradient-to-b from-violet-100/70 via-violet-50/40 to-background">
+          <div className="pointer-events-none absolute -top-40 left-1/2 h-[28rem] w-[60rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-300/30 via-fuchsia-200/30 to-violet-300/30 blur-3xl" />
+          <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-10 md:grid-cols-[1.05fr_1fr] md:gap-10 md:pb-24 md:pt-16">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-600/25 bg-violet-600/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-700">
-                <Star className="h-3 w-3" /> Free to try · No signup
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-600/25 bg-white/80 px-3 py-1 text-xs font-semibold text-violet-700 shadow-sm">
+                <Star className="h-3 w-3 fill-current" /> Free to start · No credit card · Live in 30 seconds
               </span>
-              <h1 className="mt-4 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.4rem]">
-                See who&rsquo;s already{" "}
-                <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-                  praising your product.
+              <h1 className="mt-5 text-[2.6rem] font-extrabold leading-[1.04] tracking-tight sm:text-5xl lg:text-[3.6rem]">
+                Your customers already love you.{" "}
+                <span className="gradient-pan bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
+                  Put it on your website.
                 </span>
               </h1>
-              <p className="mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
-                Paste your website. In about 20 seconds we show real posts about you on X, LinkedIn
-                and Reddit, ready to put on your site. Free, no signup.
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
+                Collect testimonials with a link, or find what people already posted about you on X,
+                LinkedIn and Reddit. Approve with a click, then show it anywhere with one line of
+                code.
               </p>
-              <div className="mt-6 max-w-xl">
-                <FindProofForm placement="hero" />
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <TrackedLink
+                  cta="hero_start_free"
+                  surface="home"
+                  href="/signup?src=home_hero"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-base font-bold text-primary-foreground shadow-xl shadow-primary/30 transition hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-primary/40"
+                >
+                  Create my free wall <ArrowRight className="h-5 w-5" />
+                </TrackedLink>
+                <TrackedLink
+                  cta="hero_see_live"
+                  surface="home"
+                  href="/demo"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-violet-200 bg-white px-6 py-3 text-base font-semibold text-violet-700 transition hover:border-primary hover:bg-violet-50"
+                >
+                  <Play className="h-4 w-4 fill-current" /> See it live, 30 seconds
+                </TrackedLink>
               </div>
-              <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-                <li className="inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> 3 free scans a day
+              <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+                <li className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Free for 15 testimonials
                 </li>
-                <li className="inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Free for 15 testimonials
-                </li>
-                <li className="inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> No credit card
+                <li className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Works on Webflow, Framer, WordPress, Shopify
                 </li>
               </ul>
-              <p className="mt-4 text-sm text-muted-foreground">
-                Rather ask your customers directly?{" "}
-                <TrackedLink
-                  cta="hero_collect_form"
-                  surface="home"
-                  href="/signup?src=home_hero_form"
-                  className="font-semibold text-primary underline-offset-4 hover:underline"
-                >
-                  Create a collection form →
-                </TrackedLink>
-              </p>
+
+              {/* On phones the picture of the outcome comes right after the buttons. */}
+              <div className="mt-10 md:hidden">
+                <HeroWall quotes={quotes} />
+              </div>
+
+              <div className="mt-8 max-w-xl rounded-2xl border border-violet-200/70 bg-white/70 p-4 shadow-sm backdrop-blur">
+                <p className="text-sm font-semibold">
+                  Not sure what people say about you?
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Paste your website. In about 20 seconds we show the real posts we find, free, no signup.
+                </p>
+                <div className="mt-3">
+                  <FindProofForm placement="hero" size="md" />
+                </div>
+              </div>
             </div>
-            <HeroPreview />
+            <div className="hidden md:block">
+              <HeroWall quotes={quotes} />
+            </div>
           </div>
         </section>
 
@@ -255,6 +285,38 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
+          </div>
+        </section>
+
+        {/* 7 — Proof: our own wall, running live with the embed above */}
+        <section className="py-16 md:py-20">
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Loved by founders</p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
+                Real posts from real people
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                This is our own wall, embedded on this page with one line of code. Each quote came
+                from a post on X and keeps its link.
+              </p>
+            </div>
+            <div className="relative mt-10 overflow-hidden rounded-2xl border bg-card p-3 shadow-sm sm:p-5">
+              <div className="max-h-[640px] overflow-hidden">
+                <LiveWall widgetId={WALL_ID} />
+              </div>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card to-transparent" />
+            </div>
+            <div className="mt-5 text-center">
+              <TrackedLink
+                cta="proof_open_wall"
+                surface="home"
+                href={`/w/${WALL_ID}?showcase=1`}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+              >
+                See the full wall <ExternalLink className="h-3.5 w-3.5" />
+              </TrackedLink>
+            </div>
           </div>
         </section>
 
@@ -332,61 +394,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 5 — Everything in one place */}
-        <section id="features" className="scroll-mt-20 py-16 md:py-20">
-          <div className="mx-auto max-w-6xl px-4">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Features</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-                Everything you need to collect, manage and show testimonials
-              </h2>
-              <p className="mt-3 text-muted-foreground">
-                And tools for the part most testimonial tools skip: finding praise that already
-                exists and putting it to work.
-              </p>
-            </div>
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {FEATURE_GROUPS.map(({ Icon, title, note, items }, i) => {
-                const extra = title === "Beyond collecting";
-                return (
-                  <FadeIn key={title} delay={i * 60}>
-                    <div
-                      className={`h-full rounded-2xl border bg-card p-6 ${
-                        extra ? "border-2 border-primary shadow-lg shadow-primary/10" : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                          <Icon className="h-5 w-5 text-primary" />
-                        </span>
-                        <div>
-                          <h3 className="font-semibold">{title}</h3>
-                          {note && <p className="text-xs text-muted-foreground">{note}</p>}
-                        </div>
-                      </div>
-                      <ul className="mt-5 space-y-3 text-sm">
-                        {items.map((it) => (
-                          <li key={it.text} className="flex items-start gap-2">
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                            <span className="min-w-0 break-words">
-                              {it.text}
-                              {it.tag && (
-                                <span className="mt-1 block w-fit max-w-full rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
-                                  {it.tag}
-                                </span>
-                              )}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </FadeIn>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
         {/* 6 — Show it anywhere */}
         <section className="border-y bg-muted/30 py-16 md:py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 md:grid-cols-2">
@@ -440,38 +447,6 @@ export default function LandingPage() {
                   <span className="text-sky-300">{"></script>"}</span>
                 </code>
               </pre>
-            </div>
-          </div>
-        </section>
-
-        {/* 7 — Proof: our own wall, running live with the embed above */}
-        <section className="py-16 md:py-20">
-          <div className="mx-auto max-w-6xl px-4">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Loved by founders</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-                Real posts from real people
-              </h2>
-              <p className="mt-3 text-muted-foreground">
-                This is our own wall, embedded on this page with the one line of code above. Each
-                quote came from a post on X and keeps its link.
-              </p>
-            </div>
-            <div className="relative mt-10 overflow-hidden rounded-2xl border bg-card p-3 shadow-sm sm:p-5">
-              <div className="max-h-[640px] overflow-hidden">
-                <LiveWall widgetId={WALL_ID} />
-              </div>
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card to-transparent" />
-            </div>
-            <div className="mt-5 text-center">
-              <TrackedLink
-                cta="proof_open_wall"
-                surface="home"
-                href={`/w/${WALL_ID}?showcase=1`}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-              >
-                See the full wall <ExternalLink className="h-3.5 w-3.5" />
-              </TrackedLink>
             </div>
           </div>
         </section>
@@ -591,6 +566,61 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* 5 — Everything in one place */}
+        <section id="features" className="scroll-mt-20 py-16 md:py-20">
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Features</p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
+                Everything you need to collect, manage and show testimonials
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                And tools for the part most testimonial tools skip: finding praise that already
+                exists and putting it to work.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {FEATURE_GROUPS.map(({ Icon, title, note, items }, i) => {
+                const extra = title === "Beyond collecting";
+                return (
+                  <FadeIn key={title} delay={i * 60}>
+                    <div
+                      className={`h-full rounded-2xl border bg-card p-6 ${
+                        extra ? "border-2 border-primary shadow-lg shadow-primary/10" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                          <Icon className="h-5 w-5 text-primary" />
+                        </span>
+                        <div>
+                          <h3 className="font-semibold">{title}</h3>
+                          {note && <p className="text-xs text-muted-foreground">{note}</p>}
+                        </div>
+                      </div>
+                      <ul className="mt-5 space-y-3 text-sm">
+                        {items.map((it) => (
+                          <li key={it.text} className="flex items-start gap-2">
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <span className="min-w-0 break-words">
+                              {it.text}
+                              {it.tag && (
+                                <span className="mt-1 block w-fit max-w-full rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
+                                  {it.tag}
+                                </span>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </FadeIn>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* 10 — FAQ */}
         <section className="border-t bg-muted/30 py-16 md:py-20">
           <div className="mx-auto max-w-3xl px-4">
@@ -649,25 +679,35 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 12 — Final call to action: same input as the hero */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-violet-200/70 via-purple-100 to-fuchsia-100 py-16 md:py-20">
-          <div className="mx-auto max-w-2xl px-4 text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Your praise is already out there.
+        {/* 12 — Final call to action */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 py-16 text-white md:py-20">
+          <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-fuchsia-300/20 blur-3xl" />
+          <div className="relative mx-auto max-w-2xl px-4 text-center">
+            <h2 className="text-3xl font-extrabold tracking-tight md:text-4xl">
+              Your wall of love is 30 seconds away.
             </h2>
-            <p className="mt-3 text-muted-foreground">
-              Paste your website and see what we find. It takes about a minute and costs nothing.
+            <p className="mt-3 text-white/85">
+              Free for 15 testimonials. No credit card. Put real customer praise on your site today.
             </p>
-            <div className="mx-auto mt-6 max-w-xl text-left">
-              <FindProofForm placement="final" size="md" />
+            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <TrackedLink
+                cta="final_start_free"
+                surface="home"
+                href="/signup?src=home_final"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-base font-bold text-violet-700 shadow-xl transition hover:-translate-y-0.5"
+              >
+                Create my free wall <ArrowRight className="h-5 w-5" />
+              </TrackedLink>
+              <TrackedLink
+                cta="final_find_praise"
+                surface="home"
+                href="/tools/find-my-proof"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-white/40 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10"
+              >
+                Or see who&rsquo;s praising you
+              </TrackedLink>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              Or{" "}
-              <Link href="/signup?src=home_final_form" className="font-semibold text-foreground underline underline-offset-2">
-                create a collection form and ask your customers
-              </Link>
-              .
-            </p>
           </div>
         </section>
       </main>

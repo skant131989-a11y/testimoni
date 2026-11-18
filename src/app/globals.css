@@ -234,3 +234,15 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Gentle drifting motion for the home hero's wall cards. Slow and small so
+   it reads as "alive", not busy; switched off for reduced-motion users. */
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.hero-float-a { animation: hero-float 6s ease-in-out infinite; }
+.hero-float-b { animation: hero-float 7.5s ease-in-out -2s infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-float-a, .hero-float-b { animation: none; }
+}
