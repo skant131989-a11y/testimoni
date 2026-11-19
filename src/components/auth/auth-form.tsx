@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -98,6 +98,40 @@ export function AuthForm({ variant }: { variant: "login" | "signup" }) {
   const alwaysGate = process.env.NEXT_PUBLIC_SUPABASE_CAPTCHA === "1";
   const [pending, setPending] = useState<{ email: string; mode: "login" | "signup" } | null>(null);
 
+  // Bot or real person? Judged from signals the page can see, and attached
+  // to the sign-up events as `attempt` ("bot" | "real_person") with the
+  // reasons in `attempt_signals`, so PostHog can split the two.
+  const interactedRef = useRef(false);
+  const lastAttemptAtRef = useRef(0);
+  const attemptCountRef = useRef(0);
+  useEffect(() => {
+    const mark = () => {
+      interactedRef.current = true;
+    };
+    const kinds = ["pointerdown", "keydown", "input", "touchstart"] as const;
+    kinds.forEach((k) => window.addEventListener(k, mark, { passive: true }));
+    return () => kinds.forEach((k) => window.removeEventListener(k, mark));
+  }, []);
+
+  function classifyAttempt(addr: string): { attempt: "bot" | "real_person"; attempt_signals: string } {
+    const signals: string[] = [];
+    if (isGmailDotStuffing(addr)) signals.push("gmail_dot_pattern");
+    if (botTrap) signals.push("honeypot");
+    if (typeof navigator !== "undefined" && (navigator as Navigator & { webdriver?: boolean }).webdriver) {
+      signals.push("webdriver");
+    }
+    if (Date.now() - mountedAt < 800) signals.push("too_fast");
+    if (!interactedRef.current) signals.push("no_interaction");
+    const now = Date.now();
+    if (attemptCountRef.current > 0 && now - lastAttemptAtRef.current < 8000) signals.push("rapid_retry");
+    attemptCountRef.current += 1;
+    lastAttemptAtRef.current = now;
+    // One strong signal, or two weak ones: a person retyping a typo trips one at most.
+    const strong = ["gmail_dot_pattern", "honeypot", "webdriver"].some((s) => signals.includes(s));
+    const isBot = strong || signals.length >= 2;
+    return { attempt: isBot ? "bot" : "real_person", attempt_signals: signals.join(",") };
+  }
+
   const nextParam = searchParams.get("next");
   const nextPath = nextParam?.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/dashboard";
 
@@ -181,22 +215,31 @@ export function AuthForm({ variant }: { variant: "login" | "signup" }) {
 
   async function continueWithEmail() {
     setError(null);
+    const who = classifyAttempt(email.trim());
+    // The known bot pattern is stopped here, before it counts as a started
+    // sign-up or a failed one, so those numbers only describe real people.
+    if (isGmailDotStuffing(email.trim())) {
+      track(`${variant}_rejected`, { reason: "gmail_dot_pattern", method: "email_code", enforced: true, ...who });
+      setError("Please use your regular email address, or continue with Google.");
+      return;
+    }
     noteBotSignals(variant, "email_code");
     setIsLoading(true);
-    track(variant === "signup" ? "signup_started" : "login_started", { method: "email_code", source: `${variant}_page` }, { instant: true });
+    track(variant === "signup" ? "signup_started" : "login_started", { method: "email_code", source: `${variant}_page`, ...who }, { instant: true });
     const sent = await requestCode(email.trim());
     setIsLoading(false);
     if (!sent.ok) {
       setError(sent.message);
-      track(variant === "signup" ? "signup_failed" : "login_failed", { method: "email_code", error: sent.message });
+      track(variant === "signup" ? "signup_failed" : "login_failed", { method: "email_code", error: sent.message, ...who });
       return;
     }
-    track("login_code_requested", { variant });
+    track("login_code_requested", { variant, ...who });
     setPending({ email: email.trim(), mode: "login" });
   }
 
   async function signInWithPassword() {
     setError(null);
+    const who = classifyAttempt(email.trim());
     noteBotSignals("login", "email");
     let captchaToken: string | undefined;
     if (alwaysGate || failedAttempts >= FREE_FAILED_ATTEMPTS) {
@@ -209,7 +252,7 @@ export function AuthForm({ variant }: { variant: "login" | "signup" }) {
     }
 
     setIsLoading(true);
-    track("login_started", { method: "email_password" }, { instant: true });
+    track("login_started", { method: "email_password", ...who }, { instant: true });
     try {
       const supabase = createClient();
       const { data, error: authError } = await supabase.auth.signInWithPassword({
@@ -236,7 +279,7 @@ export function AuthForm({ variant }: { variant: "login" | "signup" }) {
             ? "Wrong email or password. No account yet? Use \"Email me a code instead\" below and we'll create one."
             : authError.message
         );
-        track("login_failed", { method: "email_password", reason, error: authError.message });
+        track("login_failed", { method: "email_password", reason, error: authError.message, ...who });
         setFailedAttempts((n) => n + 1);
         return;
       }
@@ -309,7 +352,14 @@ export function AuthForm({ variant }: { variant: "login" | "signup" }) {
               setError(null);
             }}
           />
-          {gate.widget}
+          {/* The security check only appears here when "Resend code" needs a
+              fresh one, so a person typing their code never sees it. */}
+          {gate.verifying && (
+            <>
+              <p className="mt-3 text-center text-xs text-muted-foreground">Confirming you&apos;re human…</p>
+              {gate.widget}
+            </>
+          )}
         </CardContent>
       </Card>
     );
