@@ -155,7 +155,7 @@ export default function PricingPage() {
                 },
                 {
                   q: "Do you offer annual billing?",
-                  a: "Yes. Pro is $19 a month, or $149 a year (about 35% less). Until 31 December, the first 25 customers get a limited offer of $9 a month or $99 a year, kept for as long as they stay subscribed. Whichever you pick, it is the same Pro plan. If a yearly option is not shown above, it is not open yet.",
+                  a: "Yes. Pro is $19 a month, or $149 a year (about 35% less). Until 31 December there is a year-end offer: $9 a month or $99 a year, kept for as long as you stay subscribed. Spots are limited. Whichever you pick, it is the same Pro plan. If a yearly option is not shown above, it is not open yet.",
                 },
               ].map((faq) => (
                 <div key={faq.q} className="rounded-lg border p-6">

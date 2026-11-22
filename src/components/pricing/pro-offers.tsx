@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import { createClient } from "@/lib/supabase/client";
-import { PRO_OFFER_PRICES, FOUNDING_SEATS, OFFER_END_LABEL, type ProOffers } from "@/lib/pro-offers-config";
+import { PRO_OFFER_PRICES, OFFER_END_LABEL, type ProOffers } from "@/lib/pro-offers-config";
 
 /**
  * Pro price options under the regular price.
@@ -61,17 +61,18 @@ export function ProOffersBox({ surface }: { surface: string }) {
     return (
       <div className="mt-4 rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/70 p-4 text-left">
         <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">
-          Limited offer · first {FOUNDING_SEATS} customers
+          Year-end offer · ends {OFFER_END_LABEL}
         </p>
         <p className="mt-1 text-sm font-semibold text-violet-950">
-          {left} of {FOUNDING_SEATS} spots left · ends {OFFER_END_LABEL}
+          {left <= 10 ? `Only ${left} ${left === 1 ? "spot" : "spots"} left at this price` : "Over half off Pro, for the rest of the year"}
         </p>
         <div className="mt-3 space-y-2">
           {monthly && (
             <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 shadow-sm">
               <span className="text-sm">
                 <span className="text-lg font-bold">${P.founding}</span>
-                <span className="text-muted-foreground"> / month</span>
+                <span className="text-muted-foreground"> / month </span>
+                <span className="text-xs text-muted-foreground line-through">${P.monthly}</span>
               </span>
               {loggedIn ? (
                 <UpgradeProButton offer="founding" surface={`${surface}_founding`} size="sm" label="Get this price" />
@@ -99,7 +100,7 @@ export function ProOffersBox({ surface }: { surface: string }) {
           )}
         </div>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          Same Pro plan, just a lower price. It stays the same for as long as you stay subscribed; if you cancel and come back, it is the regular
+          Same Pro plan. Your price stays the same for as long as you stay subscribed; if you cancel and come back, it is the regular
           ${P.monthly}/month. Cancel any time.
         </p>
       </div>
