@@ -35,7 +35,11 @@ on:
     inputs:
       path:
         description: "Endpoint to call, e.g. /api/cron/lifecycle?dryRun=1"
-        required: true
+        required: false
+        type: string
+      schedule:
+        description: "Or: pretend this cron string fired, to test the schedule mapping (e.g. 15 1 * * *)"
+        required: false
         type: string
 
 permissions:
@@ -46,14 +50,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
-      group: cron-${{ github.event.schedule || github.event.inputs.path }}
+      group: cron-${{ github.event.schedule || github.event.inputs.schedule || github.event.inputs.path || github.run_id }}
       cancel-in-progress: false
     steps:
       - name: Call the job
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ secrets.APP_URL }}
-          SCHEDULE: ${{ github.event.schedule }}
+          SCHEDULE: ${{ github.event.schedule || github.event.inputs.schedule }}
           INPUT_PATH: ${{ github.event.inputs.path }}
         run: |
           set -euo pipefail
