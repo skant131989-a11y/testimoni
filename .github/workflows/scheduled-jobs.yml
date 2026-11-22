@@ -90,8 +90,13 @@ jobs:
 
           BASE="${APP_URL:-https://testimoni.io}"
           echo "Calling ${P%%\?*} on ${BASE}"
-          # Body goes to /dev/null on purpose; only the status code is kept.
-          CODE=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 150 \
+          # The response can contain email addresses, so it is never printed. It is
+          # saved, and only counts and the send switch are shown below.
+          CODE=$(curl -sS -o /tmp/body.json -w "%{http_code}" --max-time 150 \
             -H "Authorization: Bearer ${CRON_SECRET}" "${BASE}${P}")
           echo "HTTP ${CODE}"
+          jq -c '{ok, dryRun, note, error, dailyLimit, sentToday, processed, sent, queueLeft, owners, week,
+            actions: ((.report // []) | map(.action // empty) | group_by(.) | map({(.[0]): length}) | add),
+            outreach_sent: (if .results then ([.results[] | select(.sent == true)] | length) else null end)}
+            | with_entries(select(.value != null))' /tmp/body.json 2>/dev/null || echo "(no summary in this response)"
           case "$CODE" in 2*) ;; *) echo "::error::${P%%\?*} returned HTTP ${CODE}"; exit 1 ;; esac
