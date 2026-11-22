@@ -32,6 +32,7 @@ on:
     - cron: "45 4 * * *"    # daily trial-emails        day-10 / day-13 trial reminders
     - cron: "30 5 * * *"    # daily inbox-reminders     testimonials waiting 24h+ for approval
     - cron: "30 3 * * 1"    # Mon   wall-digest         weekly wall views / new testimonials note
+    - cron: "0 7 * * *"     # daily limit-emails        free wall nearly full / full with testimonials waiting
   workflow_dispatch:
     inputs:
       path:
@@ -82,6 +83,7 @@ jobs:
               "45 4 * * *")   P="/api/cron/trial-emails" ;;
               "30 5 * * *")   P="/api/cron/inbox-reminders" ;;
               "30 3 * * 1")   P="/api/cron/wall-digest" ;;
+              "0 7 * * *")    P="/api/cron/limit-emails" ;;
               *) echo "::error::No job is mapped to schedule '$SCHEDULE'."; exit 1 ;;
             esac
           fi
