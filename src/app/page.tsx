@@ -20,6 +20,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { StructuredData } from "@/components/seo/structured-data";
 import { ProPrice, FreePrice } from "@/components/pricing/price-display";
 import { PricingCta } from "@/components/pricing/pricing-cta";
+import { ProOffersBox } from "@/components/pricing/pro-offers";
 import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { COMPETITORS, FACTS_VERIFIED_ON, TESTIMONI } from "@/lib/competitors";
 import { HOME_FAQ, SOURCES } from "@/lib/home-content";
@@ -557,6 +558,7 @@ export default async function LandingPage() {
                 <h3 className="text-lg font-semibold">Pro</h3>
                 <p className="mt-2 text-4xl font-bold"><ProPrice /></p>
                 <p className="text-sm text-muted-foreground">Flat price, no tiers</p>
+                <ProOffersBox surface="home" />
                 <ul className="mt-6 flex-1 space-y-2.5">
                   {PRO_TOP.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm">
