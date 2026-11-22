@@ -22,15 +22,15 @@ export function lifecycleEmail(
 
   const copy: Record<LifecycleKind, { subject: string; lines: string[]; cta: string; href: string; ps: string }> = {
     day3_empty_wall: {
-      subject: "Your Testimoni wall is still empty. Want a hand?",
+      subject: "Your first testimonial is one link away",
       lines: [
-        "You signed up a few days ago, so I wanted to check in: your wall doesn't have any testimonials yet.",
-        "The quickest way to fix that takes about a minute. Paste your website into Find my praise and it searches X, LinkedIn, Reddit and more for real posts about you. Pick the ones you like and they go on your wall with the author and a link to the original.",
-        "Nothing to find yet? Send your collection form to two or three happy customers instead.",
+        "You signed up a few days ago and your wall is still empty, so here is the quickest fix I know.",
+        "Your account already has a collection form with its own link. Send that link to two or three customers who have said something nice to you before, by WhatsApp, email or DM. Whatever they write lands in your inbox, and one click puts it on your wall.",
+        "That is all it takes. People who do this usually have their first testimonial the same day.",
       ],
-      cta: "Find my praise",
-      href: `${APP}/tools/find-my-proof`,
-      ps: "If something confused you or didn't work, just reply to this email. I read every reply.",
+      cta: "Copy my form link",
+      href: `${APP}/dashboard/collect`,
+      ps: "No customers to ask yet? Reply and tell me what you sell. I will help you find real praise about you online.",
     },
     day7_ask_customers: {
       subject: "A faster way to get testimonials from customers",

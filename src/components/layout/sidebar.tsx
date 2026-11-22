@@ -89,6 +89,30 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
   const [wallCopied, setWallCopied] = useState(false);
   const [count, setCount] = useState<number | undefined>(testimonialCount);
 
+  // Testimonials waiting for approval, shown as a badge on Inbox. Refreshed
+  // on every navigation and whenever the tab comes back into view, so a
+  // submission that arrived while you were elsewhere shows up.
+  const [pendingInbox, setPendingInbox] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    const load = () =>
+      fetch("/api/inbox/count", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (!cancelled && d && typeof d.pending === "number") setPendingInbox(d.pending);
+        })
+        .catch(() => {});
+    load();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [pathname]);
+
   // The sidebar stays mounted while pages change, so refresh the count
   // on each navigation (Free accounts only).
   useEffect(() => {
@@ -277,6 +301,21 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
                     users should discover. Rendered in the collapsed
                     sidebar too as a bare purple dot so the signal
                     survives at 40px width. */}
+                {item.href === "/dashboard/inbox" && pendingInbox > 0 && (
+                  <>
+                    {!collapsed && (
+                      <span
+                        className="rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white"
+                        aria-label={`${pendingInbox} waiting for approval`}
+                      >
+                        {pendingInbox > 99 ? "99+" : pendingInbox}
+                      </span>
+                    )}
+                    {collapsed && (
+                      <span className="absolute right-2 top-1.5 h-2 w-2 rounded-full bg-rose-500" />
+                    )}
+                  </>
+                )}
                 {item.href === "/dashboard/sources" && (
                   <>
                     {!collapsed && (

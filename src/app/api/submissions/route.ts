@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { createSubmissionSchema } from "@/lib/validations/submission";
@@ -205,7 +205,7 @@ export async function POST(request: Request) {
    * configured (RESEND_API_KEY missing in staging), sendEmail
    * silently no-ops. The DB submission still lands regardless.
    */
-  function fireOwnerNotification() {
+  async function sendOwnerNotification(): Promise<void> {
     // Rebind `form` to a local const so TypeScript can narrow it
     // inside this closure. Without this, TS treats the outer `form`
     // as still-possibly-null even though the code above returned
@@ -226,8 +226,7 @@ export async function POST(request: Request) {
       rating: submissionData.rating ?? null,
       inboxUrl,
     });
-    // Fire without await
-    sendEmail({
+    await sendEmail({
       to: owner.email,
       subject: submissionNotifyEmailSubject(
         submissionData.customerName,
@@ -236,6 +235,14 @@ export async function POST(request: Request) {
       html,
       replyTo: submissionData.customerEmail ?? undefined,
     }).catch(() => {});
+  }
+
+  // Runs after the response has gone to the visitor, but inside the same
+  // request lifetime. A bare un-awaited promise can be cut off when the
+  // serverless function is frozen the moment it responds, which is how an
+  // owner can miss the "new testimonial" email entirely.
+  function fireOwnerNotification() {
+    after(() => sendOwnerNotification());
   }
 
   // Auto-approve path — insert directly into the Testimonial library

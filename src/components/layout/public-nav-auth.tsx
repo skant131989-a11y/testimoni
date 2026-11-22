@@ -20,8 +20,28 @@ import { createClient } from "@/lib/supabase/client";
  * Anonymous visitors — the majority — see the correct state
  * immediately. Same pattern Vercel, Linear, Stripe use.
  */
+/** Testimonials waiting for approval, for a logged-in visitor on the public site. */
+function usePendingInbox(isLoggedIn: boolean | null): number {
+  const [pending, setPending] = useState(0);
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    let cancelled = false;
+    fetch("/api/inbox/count", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled && d && typeof d.pending === "number") setPending(d.pending);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn]);
+  return pending;
+}
+
 export function PublicNavAuth() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const pending = usePendingInbox(isLoggedIn);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,9 +59,17 @@ export function PublicNavAuth() {
   if (isLoggedIn) {
     return (
       <>
-        <Button size="sm" asChild>
+        <Button size="sm" asChild className="relative">
           <TrackedLink cta="nav_dashboard" surface="public_nav" href="/dashboard">
             Dashboard
+            {pending > 0 && (
+              <span
+                className="ml-1.5 rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white"
+                aria-label={`${pending} testimonials waiting for approval`}
+              >
+                {pending > 99 ? "99+" : pending}
+              </span>
+            )}
           </TrackedLink>
         </Button>
       </>
@@ -73,6 +101,7 @@ export function PublicNavAuth() {
  */
 export function PublicNavAuthMobile() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const pending = usePendingInbox(isLoggedIn);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +141,14 @@ export function PublicNavAuthMobile() {
         surface="public_nav"
         href={isLoggedIn ? "/dashboard" : "/signup"}
       >
-        <Button size="sm">{isLoggedIn ? "Dashboard" : "Start free"}</Button>
+        <Button size="sm">
+          {isLoggedIn ? "Dashboard" : "Start free"}
+          {isLoggedIn && pending > 0 && (
+            <span className="ml-1.5 rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+              {pending > 99 ? "99+" : pending}
+            </span>
+          )}
+        </Button>
       </TrackedLink>
     </div>
   );
