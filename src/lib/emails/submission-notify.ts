@@ -24,6 +24,8 @@ export interface SubmissionNotifyEmailData {
   content?: string | null;
   rating?: number | null;
   inboxUrl: string;
+  /** One-tap review page (signed link). When present it becomes the main button. */
+  approveUrl?: string | null;
 }
 
 export function submissionNotifyEmailHtml(data: SubmissionNotifyEmailData): string {
@@ -37,7 +39,11 @@ export function submissionNotifyEmailHtml(data: SubmissionNotifyEmailData): stri
     content,
     rating,
     inboxUrl: rawInboxUrl,
+    approveUrl: rawApproveUrl,
   } = data;
+  const approveUrl = rawApproveUrl
+    ? withUtm(rawApproveUrl, { source: "email", medium: "email", campaign: "submission_notify", content: "approve_cta" })
+    : null;
   const firstName = ownerName.split(" ")[0] || ownerName;
 
   const inboxUrl = withUtm(rawInboxUrl, {
@@ -100,16 +106,29 @@ export function submissionNotifyEmailHtml(data: SubmissionNotifyEmailData): stri
               ${contentBlock}
 
               <p style="margin:0 0 12px 0;color:#4b5563;font-size:14px;">
-                Review it in your inbox to approve or reject — approved ones
-                flow onto your Wall of Love automatically.
+                ${approveUrl ? "Approve it in one tap, no login needed. Approved ones flow onto your Wall of Love automatically." : "Review it in your inbox to approve or reject — approved ones flow onto your Wall of Love automatically."}
               </p>
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px 0;">
                 <tr>
-                  <td style="background-color:#5b21b6;border-radius:8px;">
+                  ${
+                    approveUrl
+                      ? `<td style="background-color:#5b21b6;border-radius:8px;">
+                    <a href="${escapeAttr(approveUrl)}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                      Approve or reject &rarr;
+                    </a>
+                  </td>
+                  <td style="width:12px;"></td>
+                  <td style="border:1px solid #d8d3ea;border-radius:8px;">
+                    <a href="${escapeAttr(inboxUrl)}" target="_blank" style="display:inline-block;padding:11px 18px;color:#5b21b6;font-size:14px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                      Open inbox
+                    </a>
+                  </td>`
+                      : `<td style="background-color:#5b21b6;border-radius:8px;">
                     <a href="${escapeAttr(inboxUrl)}" target="_blank" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
                       Review in inbox &rarr;
                     </a>
-                  </td>
+                  </td>`
+                  }
                 </tr>
               </table>
 

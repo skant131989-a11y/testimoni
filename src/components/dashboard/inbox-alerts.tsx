@@ -20,10 +20,10 @@ import { celebrateFirstTestimonial } from "@/lib/confetti";
  */
 
 type Latest = { id: string; name: string; snippet: string; rating: number | null };
-type Payload = { pending: number; latest: Latest | null; hasTestimonials: boolean };
+type Payload = { pending: number; latest: Latest | null; hasTestimonials: boolean; wallUrl?: string | null };
 type Toast =
-  | { kind: "new"; latest: Latest; pending: number; first: boolean }
-  | { kind: "approved"; name: string; first: boolean }
+  | { kind: "new"; latest: Latest; pending: number; first: boolean; wallUrl: string | null }
+  | { kind: "approved"; name: string; first: boolean; wallUrl: string | null }
   | { kind: "error"; message: string };
 
 const POLL_MS = 45_000;
@@ -53,7 +53,7 @@ export function InboxAlerts() {
       }
       if (d.latest && !seenRef.current.has(d.latest.id)) {
         seenRef.current.add(d.latest.id);
-        setToast({ kind: "new", latest: d.latest, pending: d.pending, first: !d.hasTestimonials });
+        setToast({ kind: "new", latest: d.latest, pending: d.pending, first: !d.hasTestimonials, wallUrl: d.wallUrl ?? null });
         track("inbox_alert_shown", { pending: d.pending });
       }
     } catch {
@@ -99,7 +99,7 @@ export function InboxAlerts() {
     return () => clearInterval(t);
   }, [toast]);
 
-  async function approve(latest: Latest, first: boolean) {
+  async function approve(latest: Latest, first: boolean, wallUrl: string | null) {
     setBusy(true);
     try {
       const res = await fetch(`/api/submissions/${latest.id}/approve`, { method: "POST" });
@@ -110,7 +110,7 @@ export function InboxAlerts() {
       }
       track("inbox_alert_approved", { first });
       if (first) celebrateFirstTestimonial();
-      setToast({ kind: "approved", name: latest.name, first });
+      setToast({ kind: "approved", name: latest.name, first, wallUrl });
       window.dispatchEvent(new Event("inbox-changed"));
       router.refresh();
     } catch {
@@ -156,7 +156,7 @@ export function InboxAlerts() {
                   <p className="mt-1 text-xs text-amber-500">{"★".repeat(toast.latest.rating)}</p>
                 ) : null}
                 <div className="mt-3 flex items-center gap-2">
-                  <Button size="sm" onClick={() => approve(toast.latest, toast.first)} disabled={busy}>
+                  <Button size="sm" onClick={() => approve(toast.latest, toast.first, toast.wallUrl)} disabled={busy}>
                     {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
                     Approve
                   </Button>
@@ -174,6 +174,25 @@ export function InboxAlerts() {
                   {toast.first ? "That's your first one on the wall" : `${toast.name} is on your wall`}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">It is live on your Wall of Love and your widget now.</p>
+                {toast.first && toast.wallUrl && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Button size="sm" asChild>
+                      <a
+                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Our Wall of Love is live. Real words from real customers:")}&url=${encodeURIComponent(toast.wallUrl)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => track("went_live_share_clicked", { channel: "x" })}
+                      >
+                        Share it on X
+                      </a>
+                    </Button>
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={toast.wallUrl} target="_blank" rel="noopener noreferrer">
+                        See your wall
+                      </a>
+                    </Button>
+                  </div>
+                )}
               </>
             )}
             {toast.kind === "error" && <p className="text-sm text-destructive">{toast.message}</p>}

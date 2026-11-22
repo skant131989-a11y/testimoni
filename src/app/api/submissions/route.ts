@@ -6,6 +6,7 @@ import { generateSlug } from "@/lib/utils";
 import { getEffectiveLimits } from "@/lib/plan";
 import { sendEmail } from "@/lib/emails/send";
 import { invalidateWallCache } from "@/lib/wall-cache";
+import { signReviewToken } from "@/lib/review-token";
 import {
   submissionNotifyEmailHtml,
   submissionNotifyEmailSubject,
@@ -29,6 +30,9 @@ export async function GET(request: Request) {
         slug: true,
         isActive: true,
         headline: true,
+        description: true,
+        thankYouMessage: true,
+        thankYouReward: true,
         createdAt: true,
         workspace: { select: { slug: true } },
         _count: { select: { submissions: true } },
@@ -205,7 +209,7 @@ export async function POST(request: Request) {
    * configured (RESEND_API_KEY missing in staging), sendEmail
    * silently no-ops. The DB submission still lands regardless.
    */
-  async function sendOwnerNotification(): Promise<void> {
+  async function sendOwnerNotification(submissionId?: string): Promise<void> {
     // Rebind `form` to a local const so TypeScript can narrow it
     // inside this closure. Without this, TS treats the outer `form`
     // as still-possibly-null even though the code above returned
@@ -225,6 +229,11 @@ export async function POST(request: Request) {
       content: submissionData.content,
       rating: submissionData.rating ?? null,
       inboxUrl,
+      // A signed one-tap link, for submissions that still need approving.
+      approveUrl: (() => {
+        const t = submissionId ? signReviewToken(submissionId) : null;
+        return t ? `${appUrl}/review/${t}` : null;
+      })(),
     });
     await sendEmail({
       to: owner.email,
@@ -241,8 +250,8 @@ export async function POST(request: Request) {
   // request lifetime. A bare un-awaited promise can be cut off when the
   // serverless function is frozen the moment it responds, which is how an
   // owner can miss the "new testimonial" email entirely.
-  function fireOwnerNotification() {
-    after(() => sendOwnerNotification());
+  function fireOwnerNotification(submissionId?: string) {
+    after(() => sendOwnerNotification(submissionId));
   }
 
   // Auto-approve path — insert directly into the Testimonial library
@@ -319,7 +328,7 @@ export async function POST(request: Request) {
   response.headers.set("Access-Control-Allow-Origin", "*");
   // Manual-approval path — this is the primary case owners want a
   // notification for. Fires fire-and-forget so response TTFB is unaffected.
-  fireOwnerNotification();
+  fireOwnerNotification(submission.id);
   return response;
 }
 

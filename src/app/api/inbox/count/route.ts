@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ pending: 0, latest: null, hasTestimonials: true }, { status: 401, headers: NO_STORE });
   }
   const where = { status: "NEW" as const, form: { workspaceId: auth.workspace.id } };
-  const [pending, latest, testimonials] = await Promise.all([
+  const [pending, latest, testimonials, widget] = await Promise.all([
     prisma.submission.count({ where }),
     prisma.submission.findFirst({
       where,
@@ -28,7 +28,13 @@ export async function GET(request: Request) {
       select: { id: true, customerName: true, content: true, rating: true },
     }),
     prisma.testimonial.count({ where: { workspaceId: auth.workspace.id } }),
+    prisma.widget.findFirst({
+      where: { workspaceId: auth.workspace.id, isActive: true },
+      orderBy: { createdAt: "asc" },
+      select: { id: true },
+    }),
   ]);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io";
   return NextResponse.json(
     {
       pending,
@@ -41,6 +47,7 @@ export async function GET(request: Request) {
           }
         : null,
       hasTestimonials: testimonials > 0,
+      wallUrl: widget ? `${appUrl}/w/${widget.id}` : null,
     },
     { headers: NO_STORE }
   );

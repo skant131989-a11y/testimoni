@@ -9,6 +9,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Star, CheckCircle2, Loader2 } from "lucide-react";
 import { track } from "@/lib/analytics";
 
+// One tap puts a sentence-opener in the box, which is usually the hard part.
+const STARTERS = [
+  "Before I found you, I was struggling with",
+  "What I like most is",
+  "I'd recommend you to anyone who",
+  "The best part was",
+];
+
 interface FormConfig {
   id: string;
   headline: string;
@@ -16,6 +24,7 @@ interface FormConfig {
   allowRating: boolean;
   allowVideo: boolean;
   thankYouMessage: string;
+  thankYouReward?: string | null;
   workspace: { name: string; logoUrl: string | null };
 }
 
@@ -45,6 +54,47 @@ export default function PublicCollectionForm({
   // populate every input trip it and we drop the submission silently
   // via server-side rejection (schema.honeypot must be empty).
   const [honeypot, setHoneypot] = useState("");
+
+  // The starters, "Help me say it" and the share card only make sense on a
+  // real testimonial form (the founder's contact form reuses this component).
+  const isTestimonialForm = contentLabel === "Your testimonial";
+  // "Help me say it": a few rough words become a sentence (free AI, optional).
+  const [polishAvailable, setPolishAvailable] = useState(true);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [roughText, setRoughText] = useState("");
+  const [polishing, setPolishing] = useState(false);
+  const [polishNote, setPolishNote] = useState("");
+  // Id of what was submitted, so the thank-you page can link to a share card.
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+
+  async function polish() {
+    setPolishing(true);
+    setPolishNote("");
+    try {
+      const res = await fetch("/api/collect/polish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formId: formConfig.id, text: roughText }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 503 || (res.status === 502 && data.error === "unavailable")) {
+        setPolishAvailable(false);
+        return;
+      }
+      if (!res.ok || !data.text) {
+        setPolishNote(data.error || "Couldn't do that one. Your own words are great too.");
+        return;
+      }
+      setContent(data.text);
+      setHelpOpen(false);
+      setPolishNote("");
+      track("form_help_used", { form_id: formConfig.id }, { anonymous: true });
+    } catch {
+      setPolishNote("Couldn't reach the helper. Your own words are great too.");
+    } finally {
+      setPolishing(false);
+    }
+  }
 
   // Fire once per page mount — anonymous funnel start.
   // Uses anonymous: true so PostHog does NOT attach the current
@@ -125,6 +175,13 @@ export default function PublicCollectionForm({
         return;
       }
 
+      try {
+        const ok = await res.clone().json();
+        if (ok?.submission?.id) setSubmissionId(String(ok.submission.id));
+      } catch {
+        // No id is fine: the share buttons just fall back to this page's address.
+      }
+
       // Successful submission — anonymous funnel completion. Flags
       // let us compute what got filled without shipping PII: only
       // booleans for text/rating/email/title presence, plus the
@@ -161,11 +218,15 @@ export default function PublicCollectionForm({
   }
 
   if (submitted) {
-    // Only on real testimonial forms; the founder's contact form reuses this
-    // component for plain messages, which are not something to share.
-    const isTestimonialForm = contentLabel === "Your testimonial";
     const words = content.trim();
-    const pageUrl = typeof window !== "undefined" ? window.location.href.split("#")[0] : "";
+    // Share a designed card page for this exact review when we have its id
+    // (its preview image shows the quote and stars); otherwise this form's page.
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const pageUrl = submissionId
+      ? `${origin}/s/${submissionId}`
+      : typeof window !== "undefined"
+        ? window.location.href.split("#")[0]
+        : "";
     const shareText = words
       ? `“${words.length > 220 ? words.slice(0, 217) + "…" : words}” (my review of ${formConfig.workspace.name})`
       : `I just left a ${rating}★ review for ${formConfig.workspace.name}`;
@@ -183,6 +244,13 @@ export default function PublicCollectionForm({
             <p className="mt-2 text-muted-foreground">
               {formConfig.thankYouMessage}
             </p>
+
+            {formConfig.thankYouReward && (
+              <div className="mx-auto mt-5 max-w-sm rounded-2xl border-2 border-dashed border-violet-300 bg-violet-50 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">A thank-you from {formConfig.workspace.name}</p>
+                <p className="mt-1 text-base font-semibold text-violet-950">{formConfig.thankYouReward}</p>
+              </div>
+            )}
 
             {isTestimonialForm && (words || rating > 0) && (
               <div className="mt-6 text-left">
@@ -306,6 +374,11 @@ export default function PublicCollectionForm({
             )}
 
             <div>
+              {formConfig.allowRating && rating > 0 && !content.trim() && (
+                <p className="mb-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                  Thanks for the {rating} {rating === 1 ? "star" : "stars"}! A few words would mean a lot, but you can also just send it.
+                </p>
+              )}
               <Label htmlFor="content">{contentLabel} *</Label>
               <Textarea
                 id="content"
@@ -330,18 +403,58 @@ export default function PublicCollectionForm({
                   UTM-tagged so we can see if the bridge converts
                   (both to a completed form + a signup on the tool
                   page). */}
-              <p className="mt-2 text-xs text-muted-foreground">
-                Stuck on what to write?{" "}
-                <a
-                  href="/tools/testimonial-writer?utm_source=collect_form&utm_medium=writers_block_link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-primary hover:underline"
-                >
-                  Get 3 draft options →
-                </a>{" "}
-                (free, no signup)
-              </p>
+              {isTestimonialForm && (
+                <div className="mt-3 rounded-xl border border-violet-100 bg-violet-50/50 p-3">
+                  <p className="text-xs font-semibold text-violet-900">Stuck on what to write? Tap one to start:</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {STARTERS.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          setContent((c) => (c.trim() ? `${c.trim()} ${s} ` : `${s} `));
+                          track("form_starter_used", { form_id: formConfig.id }, { anonymous: true });
+                        }}
+                        className="rounded-full border border-violet-200 bg-white px-2.5 py-1 text-xs text-violet-800 hover:bg-violet-100"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+
+                  {polishAvailable && !helpOpen && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setHelpOpen(true);
+                        track("form_help_opened", { form_id: formConfig.id }, { anonymous: true });
+                      }}
+                      className="mt-3 text-xs font-semibold text-primary hover:underline"
+                    >
+                      ✨ Or type it roughly and we&apos;ll turn it into a sentence
+                    </button>
+                  )}
+                  {polishAvailable && helpOpen && (
+                    <div className="mt-3 space-y-2">
+                      <Textarea
+                        value={roughText}
+                        onChange={(e) => setRoughText(e.target.value)}
+                        rows={2}
+                        maxLength={600}
+                        placeholder="Just a few rough words, e.g. fast delivery, friendly staff, great price"
+                        className="bg-white text-sm"
+                      />
+                      <div className="flex items-center gap-3">
+                        <Button type="button" size="sm" onClick={polish} disabled={polishing || roughText.trim().length < 8}>
+                          {polishing ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
+                          Make it a sentence
+                        </Button>
+                        {polishNote && <span className="text-xs text-muted-foreground">{polishNote}</span>}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Honeypot — labelled "Website" but hidden from human

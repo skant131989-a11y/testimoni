@@ -457,7 +457,9 @@ function renderWidget(container, data) {
   if (showWatermark) {
     // UTM-tagged so we can attribute traffic from embedded widgets
     // on customer sites separately from the hosted wall path.
-    html += '<div class="fw-watermark"><a href="https://testimoni.io/?utm_source=widget&utm_medium=embed&utm_campaign=powered_by" target="_blank" rel="noopener">Powered by Testimoni</a></div>';
+    // utm_content names the wall it came from, so we can see which free
+    // walls bring visitors back to us.
+    html += '<div class="fw-watermark"><a href="https://testimoni.io/?utm_source=widget&utm_medium=embed&utm_campaign=powered_by&utm_content=' + encodeURIComponent(widget && widget.id ? widget.id : "") + '" target="_blank" rel="noopener">Powered by Testimoni &middot; Collect yours free &rarr;</a></div>';
   }
 
   container.innerHTML = html;

@@ -170,6 +170,8 @@ model CollectionForm {
   allowVideo      Boolean @default(false) @map("allow_video")
   allowRating     Boolean @default(true) @map("allow_rating")
   thankYouMessage String  @default("Thank you for your feedback!") @map("thank_you_message")
+  // Optional gift shown after someone submits: a discount code, a link, a thank-you offer.
+  thankYouReward  String? @map("thank_you_reward") @db.VarChar(240)
   autoApprove     Boolean @default(false) @map("auto_approve")
 
   isActive  Boolean  @default(true) @map("is_active")

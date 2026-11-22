@@ -25,8 +25,10 @@ import {
   ChevronUp,
   MessageCircle,
   MessageSquare,
+  Pencil,
+  Printer,
 } from "lucide-react";
-import QRCode from "qrcode";
+import { FormCustomizer } from "@/components/collection/form-customizer";
 
 interface CollectionForm {
   id: string;
@@ -34,6 +36,9 @@ interface CollectionForm {
   slug: string;
   isActive: boolean;
   headline: string;
+  description?: string | null;
+  thankYouMessage?: string;
+  thankYouReward?: string | null;
   createdAt: string;
   workspace: { slug: string };
   _count: { submissions: number };
@@ -170,6 +175,7 @@ export default function CollectPage() {
     { id: "qr", label: "QR Code", icon: QrCode },
     { id: "embed", label: "Embed", icon: Code },
     { id: "iframe", label: "iFrame", icon: Frame },
+    { id: "customize", label: "Customize", icon: Pencil },
   ];
 
   return (
@@ -473,6 +479,15 @@ export default function CollectPage() {
                         </div>
                       )}
 
+                      {currentTab === "customize" && (
+                        <FormCustomizer
+                          form={form}
+                          onSaved={(patch) =>
+                            setForms((prev) => prev.map((f) => (f.id === form.id ? { ...f, ...patch } : f)))
+                          }
+                        />
+                      )}
+
                       {currentTab === "qr" && (
                         <div className="space-y-3">
                           <p className="text-sm text-muted-foreground">
@@ -488,11 +503,23 @@ export default function CollectPage() {
                               height={180}
                             />
                             <div className="flex-1 space-y-2">
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={getQrUrl(form)} download={`qr-${form.slug}.png`}>
-                                  Download PNG
-                                </a>
-                              </Button>
+                              <div className="flex flex-wrap gap-2">
+                                <Button size="sm" asChild>
+                                  <a
+                                    href={`/poster/${form.workspace.slug}/${form.slug}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    onClick={() => track("poster_opened", { formId: form.id })}
+                                  >
+                                    <Printer className="mr-1 h-3.5 w-3.5" /> Print a poster
+                                  </a>
+                                </Button>
+                                <Button size="sm" variant="outline" asChild>
+                                  <a href={getQrUrl(form)} download={`qr-${form.slug}.png`}>
+                                    Download PNG
+                                  </a>
+                                </Button>
+                              </div>
                               <p className="text-xs text-muted-foreground">
                                 QR points to:<br />
                                 <span className="font-mono">{getFormUrl(form)}</span>

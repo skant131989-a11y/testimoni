@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/emails/send";
 import { inboxReminderEmail } from "@/lib/emails/inbox-reminder";
+import { signReviewToken } from "@/lib/review-token";
 
 /**
  * GET /api/cron/inbox-reminders (daily)
@@ -114,6 +115,10 @@ export async function GET(req: NextRequest) {
         name: i.customerName,
         snippet: (i.content ?? "").replace(/\s+/g, " ").trim().slice(0, 160),
         rating: i.rating,
+        approveUrl: (() => {
+          const t = signReviewToken(i.id);
+          return t ? `${appUrl}/review/${t}` : null;
+        })(),
       })),
     });
     const res = await sendEmail({

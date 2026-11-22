@@ -38,6 +38,7 @@ export default async function CollectionFormPage({
       allowRating: true,
       allowVideo: true,
       thankYouMessage: true,
+      thankYouReward: true,
     },
   });
 

@@ -13,6 +13,8 @@ export interface InboxReminderItem {
   name: string;
   snippet: string;
   rating: number | null;
+  /** Signed one-tap review page for this one. */
+  approveUrl?: string | null;
 }
 
 export interface InboxReminderData {
@@ -55,7 +57,11 @@ export function inboxReminderEmail(data: InboxReminderData): { subject: string; 
         `<div style="margin:0 0 12px 0;padding:12px 14px;border-left:3px solid #7c3aed;background-color:#faf7ff;">` +
         (stars(i.rating) ? `<div style="color:#f59e0b;font-size:15px;letter-spacing:2px;">${stars(i.rating)}</div>` : "") +
         (i.snippet ? `<div style="margin:4px 0;font-style:italic;color:#1f2937;">&ldquo;${esc(i.snippet)}&rdquo;</div>` : "") +
-        `<div style="font-size:13px;color:#6b7280;">${esc(i.name)}</div></div>`
+        `<div style="font-size:13px;color:#6b7280;">${esc(i.name)}` +
+        (i.approveUrl
+          ? ` &middot; <a href="${esc(i.approveUrl)}" style="color:#7c3aed;font-weight:600;text-decoration:none;">Approve or reject</a>`
+          : "") +
+        `</div></div>`
     )
     .join("");
   const more = data.total > data.items.length ? `<p style="margin:0 0 16px 0;color:#6b7280;font-size:14px;">…and ${data.total - data.items.length} more.</p>` : "";
