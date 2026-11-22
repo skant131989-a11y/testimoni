@@ -10,6 +10,10 @@
 # busy, which is fine for these. To run one now: Actions -> Scheduled jobs ->
 # Run workflow, and give the path (for example /api/cron/lifecycle?dryRun=1).
 #
+# The prospect finder (/api/cron/find-prospects) is NOT scheduled here: it does not finish inside
+# Vercel's 60-second limit (it timed out three times in a test), and it spends search credits.
+# The laptop task "Testimoni find prospects 0930" runs it instead.
+#
 # Logs are not given the response body on purpose: some jobs return email
 # addresses, and workflow logs may be public. Only the HTTP status is shown.
 
@@ -19,10 +23,6 @@ on:
   schedule:
     - cron: "37 2 * * 1"    # Mon   wall-score-weekly   weekly Wall Score email
     - cron: "45 3 * * *"    # daily testimonial-requests  reminders + due request emails
-    - cron: "0 2 * * *"     # daily find-prospects run 1
-    - cron: "0 5 * * *"     # daily find-prospects run 2
-    - cron: "0 8 * * *"     # daily find-prospects run 3
-    - cron: "0 11 * * *"    # daily find-prospects run 4
     - cron: "0 4 * * *"     # daily lifecycle           day-3 / day-7 onboarding emails
     - cron: "15 1 * * *"    # daily expire-grants       end finished trials and grants
     - cron: "30 14 * * *"   # daily daily-outreach      prospect emails (8:00 PM IST)
@@ -68,10 +68,6 @@ jobs:
             case "$SCHEDULE" in
               "37 2 * * 1")   P="/api/cron/wall-score-weekly" ;;
               "45 3 * * *")   P="/api/cron/testimonial-requests" ;;
-              "0 2 * * *")    P="/api/cron/find-prospects?run=1" ;;
-              "0 5 * * *")    P="/api/cron/find-prospects?run=2" ;;
-              "0 8 * * *")    P="/api/cron/find-prospects?run=3" ;;
-              "0 11 * * *")   P="/api/cron/find-prospects?run=4" ;;
               "0 4 * * *")    P="/api/cron/lifecycle" ;;
               "15 1 * * *")   P="/api/cron/expire-grants" ;;
               "30 14 * * *")  P="/api/cron/daily-outreach" ;;
@@ -89,7 +85,7 @@ jobs:
           BASE="${APP_URL:-https://testimoni.io}"
           echo "Calling ${P%%\?*} on ${BASE}"
           # Body goes to /dev/null on purpose; only the status code is kept.
-          CODE=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 150 --retry 2 --retry-delay 15 \
+          CODE=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 150 \
             -H "Authorization: Bearer ${CRON_SECRET}" "${BASE}${P}")
           echo "HTTP ${CODE}"
           case "$CODE" in 2*) ;; *) echo "::error::${P%%\?*} returned HTTP ${CODE}"; exit 1 ;; esac
