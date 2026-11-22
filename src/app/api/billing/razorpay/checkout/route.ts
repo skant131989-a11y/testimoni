@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     }
     if (variant === "founding" || variant === "founding_annual") {
       if ((await foundingSeatsLeft()) <= 0) {
-        return NextResponse.json({ error: "All the founding spots are taken." }, { status: 409 });
+        return NextResponse.json({ error: "This offer has ended or all the spots are taken." }, { status: 409 });
       }
     }
     planId = vPlan;

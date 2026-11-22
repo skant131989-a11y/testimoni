@@ -14,6 +14,14 @@ export type ProVariant = "monthly" | "annual" | "founding" | "founding_annual";
 
 export const FOUNDING_SEATS = 25;
 
+/**
+ * The $9 / $99 prices are a time-limited offer: first 25 customers, and
+ * only until this moment (exclusive). After it, the offer is gone even if
+ * spots remain, on the server as well as in the page copy.
+ */
+export const OFFER_ENDS_AT = "2027-01-01T00:00:00Z";
+export const OFFER_END_LABEL = "31 December";
+
 export const PRO_OFFER_PRICES = {
   monthly: 19,
   annual: 149,

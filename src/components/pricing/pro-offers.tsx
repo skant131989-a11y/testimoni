@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { UpgradeProButton } from "@/components/upgrade-pro-button";
 import { createClient } from "@/lib/supabase/client";
-import { PRO_OFFER_PRICES, FOUNDING_SEATS, type ProOffers } from "@/lib/pro-offers-config";
+import { PRO_OFFER_PRICES, FOUNDING_SEATS, OFFER_END_LABEL, type ProOffers } from "@/lib/pro-offers-config";
 
 /**
  * Pro price options under the regular price.
@@ -61,10 +61,10 @@ export function ProOffersBox({ surface }: { surface: string }) {
     return (
       <div className="mt-4 rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/70 p-4 text-left">
         <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">
-          Founding price · first {FOUNDING_SEATS} customers
+          Limited offer · first {FOUNDING_SEATS} customers
         </p>
         <p className="mt-1 text-sm font-semibold text-violet-950">
-          {left} of {FOUNDING_SEATS} spots left
+          {left} of {FOUNDING_SEATS} spots left · ends {OFFER_END_LABEL}
         </p>
         <div className="mt-3 space-y-2">
           {monthly && (
@@ -99,7 +99,7 @@ export function ProOffersBox({ surface }: { surface: string }) {
           )}
         </div>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          Same Pro plan. The price is locked while you stay subscribed; if you cancel and come back, it is the regular
+          Same Pro plan, just a lower price. It stays the same for as long as you stay subscribed; if you cancel and come back, it is the regular
           ${P.monthly}/month. Cancel any time.
         </p>
       </div>

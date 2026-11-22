@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { FOUNDING_SEATS, type ProOffers, type ProVariant } from "@/lib/pro-offers-config";
+import { FOUNDING_SEATS, OFFER_ENDS_AT, type ProOffers, type ProVariant } from "@/lib/pro-offers-config";
 
 /**
  * Server side of the Pro price options: which Razorpay plan each option
@@ -20,6 +20,8 @@ export function variantPlanId(variant: ProVariant): string | undefined {
 
 /** Founding spots taken so far: paying workspaces on either founding plan. */
 export async function foundingSeatsLeft(): Promise<number> {
+  // The offer ends on a date, whatever is left.
+  if (Date.now() >= new Date(OFFER_ENDS_AT).getTime()) return 0;
   const ids = [variantPlanId("founding"), variantPlanId("founding_annual")].filter((x): x is string => Boolean(x));
   if (ids.length === 0) return 0;
   const taken = await prisma.subscription.count({
