@@ -161,15 +161,100 @@ export default function PublicCollectionForm({
   }
 
   if (submitted) {
+    // Only on real testimonial forms; the founder's contact form reuses this
+    // component for plain messages, which are not something to share.
+    const isTestimonialForm = contentLabel === "Your testimonial";
+    const words = content.trim();
+    const pageUrl = typeof window !== "undefined" ? window.location.href.split("#")[0] : "";
+    const shareText = words
+      ? `“${words.length > 220 ? words.slice(0, 217) + "…" : words}” (my review of ${formConfig.workspace.name})`
+      : `I just left a ${rating}★ review for ${formConfig.workspace.name}`;
+    const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(pageUrl)}`;
+    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
+    const shared = (channel: string) =>
+      track("thank_you_share_clicked", { channel, workspace_name: formConfig.workspace.name }, { anonymous: true });
+
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-4">
         <Card className="w-full max-w-md text-center">
-          <CardContent className="py-12">
+          <CardContent className="py-10">
             <CheckCircle2 className="mx-auto h-16 w-16 text-green-500" />
             <h2 className="mt-4 text-2xl font-bold">Thank you!</h2>
             <p className="mt-2 text-muted-foreground">
               {formConfig.thankYouMessage}
             </p>
+
+            {isTestimonialForm && (words || rating > 0) && (
+              <div className="mt-6 text-left">
+                <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Your words
+                </p>
+                <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-white p-4 shadow-sm">
+                  {rating > 0 && (
+                    <div className="flex gap-0.5 text-amber-400">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className={`h-4 w-4 ${s <= rating ? "fill-current" : "text-gray-200"}`} />
+                      ))}
+                    </div>
+                  )}
+                  {words && <p className="mt-2 text-sm italic leading-relaxed">&ldquo;{words}&rdquo;</p>}
+                  <p className="mt-3 text-xs font-semibold">
+                    {name.trim()}
+                    <span className="font-normal text-muted-foreground"> on {formConfig.workspace.name}</span>
+                  </p>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                  <a
+                    href={xUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => shared("x")}
+                    className="rounded-full border px-3.5 py-1.5 text-xs font-semibold hover:bg-muted"
+                  >
+                    Share on X
+                  </a>
+                  <a
+                    href={linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => shared("linkedin")}
+                    className="rounded-full border px-3.5 py-1.5 text-xs font-semibold hover:bg-muted"
+                  >
+                    Share on LinkedIn
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      shared("copy");
+                      void navigator.clipboard?.writeText(`${shareText} ${pageUrl}`.trim());
+                    }}
+                    className="rounded-full border px-3.5 py-1.5 text-xs font-semibold hover:bg-muted"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                  Only if you like. Sharing it helps {formConfig.workspace.name}, and others can leave theirs the same way.
+                </p>
+              </div>
+            )}
+
+            {isTestimonialForm && (
+              <div className="mt-6 border-t pt-5">
+                <p className="text-sm text-muted-foreground">
+                  Do you run a business? Collect testimonials like this for yours.
+                </p>
+                <a
+                  href="https://testimoni.io/signup?src=thank_you"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => track("thank_you_signup_clicked", { workspace_name: formConfig.workspace.name }, { anonymous: true })}
+                  className="mt-2 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  Create your free Wall of Love &rarr;
+                </a>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

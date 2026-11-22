@@ -17,60 +17,6 @@
       "maxDuration": 60
     }
   },
-  "crons": [
-    {
-      "path": "/api/cron/wall-score-weekly",
-      "schedule": "37 2 * * 1"
-    },
-    {
-      "path": "/api/cron/testimonial-requests",
-      "schedule": "45 3 * * *"
-    },
-    {
-      "path": "/api/cron/find-prospects?run=1",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/find-prospects?run=2",
-      "schedule": "0 5 * * *"
-    },
-    {
-      "path": "/api/cron/find-prospects?run=3",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/find-prospects?run=4",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/cron/lifecycle",
-      "schedule": "0 4 * * *"
-    },
-    {
-      "path": "/api/cron/expire-grants",
-      "schedule": "15 1 * * *"
-    },
-    {
-      "path": "/api/cron/daily-outreach",
-      "schedule": "30 14 * * *"
-    },
-    {
-      "path": "/api/cron/weekly-mentions",
-      "schedule": "0 16 * * 1"
-    },
-    {
-      "path": "/api/cron/weekly-mentions",
-      "schedule": "20 16 * * 1"
-    },
-    {
-      "path": "/api/cron/watch-recheck",
-      "schedule": "30 6 * * *"
-    },
-    {
-      "path": "/api/cron/trial-emails",
-      "schedule": "45 4 * * *"
-    }
-  ],
   "headers": [
     {
       "source": "/embed/collect.js",

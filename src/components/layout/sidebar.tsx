@@ -107,9 +107,12 @@ export function Sidebar({ workspaceName, plan, wallUrl, testimonialCount }: Side
       if (document.visibilityState === "visible") load();
     };
     document.addEventListener("visibilitychange", onVisible);
+    // The live alert fires this after an in-place approval.
+    window.addEventListener("inbox-changed", onVisible);
     return () => {
       cancelled = true;
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("inbox-changed", onVisible);
     };
   }, [pathname]);
 

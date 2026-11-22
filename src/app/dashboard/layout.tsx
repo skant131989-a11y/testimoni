@@ -8,6 +8,7 @@ import {
 } from "@/lib/session";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNavProvider } from "@/components/layout/mobile-nav";
+import { InboxAlerts } from "@/components/dashboard/inbox-alerts";
 import { AuthIdentifier } from "@/components/auth-identifier";
 import { Header } from "@/components/layout/header";
 import { generateSlug } from "@/lib/utils";
@@ -257,6 +258,7 @@ export default async function DashboardLayout({
           page) for every dashboard route. See DashboardPageTracker
           for details — pathname-keyed so counters reset per route. */}
       <DashboardPageTracker />
+      <InboxAlerts />
       <Sidebar
         workspaceName={workspace.name}
         plan={plan}
