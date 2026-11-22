@@ -5,6 +5,7 @@ import { ProPrice, ProAiPrice, FreePrice, ProPriceNote } from "@/components/pric
 import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
+import { ProOffersBox } from "@/components/pricing/pro-offers";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { PRO_AI_PUBLIC } from "@/lib/feature-flags";
@@ -83,6 +84,7 @@ export default function PricingPage() {
                 <ProPrice suffix="/month" />
               </p>
               <ProPriceNote />
+              <ProOffersBox surface="pricing" />
               <p className="mt-3 text-sm text-muted-foreground">
                 Unlimited utility + one AI perk (unlimited tweet drafts).
               </p>

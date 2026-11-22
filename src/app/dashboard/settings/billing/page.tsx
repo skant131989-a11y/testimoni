@@ -15,6 +15,7 @@ import { Check, CreditCard, Zap, XCircle } from "lucide-react";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { usePricing } from "@/lib/use-pricing";
 import { CurrencySwitcher } from "@/components/pricing/price-display";
+import { ProOffersBox } from "@/components/pricing/pro-offers";
 import { track } from "@/lib/analytics";
 import "@/lib/razorpay-window";
 
@@ -327,6 +328,7 @@ export default function BillingPage() {
             {error && (
               <p className="text-center text-sm text-destructive">{error}</p>
             )}
+            <ProOffersBox surface="billing" />
             <Button
               onClick={handleRazorpayUpgrade}
               disabled={upgrading}

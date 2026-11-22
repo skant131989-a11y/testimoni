@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthContext } from "@/lib/auth";
 import { getRazorpay } from "@/lib/razorpay";
+import { isProVariant, type ProVariant } from "@/lib/pro-offers-config";
+import { foundingSeatsLeft, variantPlanId } from "@/lib/pro-offers";
 
 export async function POST(request: Request) {
   const auth = await getAuthContext(request);
@@ -35,6 +37,22 @@ export async function POST(request: Request) {
           process.env.RAZORPAY_PRO_PLAN_ID;
   }
 
+  // Yearly and founding options are their own Razorpay plans (US dollars
+  // only). The webhook makes any of them Pro, so nothing else differs.
+  const variant: ProVariant = tier === "pro" && isProVariant(body?.variant) ? body.variant : "monthly";
+  if (variant !== "monthly") {
+    const vPlan = variantPlanId(variant);
+    if (!vPlan) {
+      return NextResponse.json({ error: "That option isn't available right now." }, { status: 400 });
+    }
+    if (variant === "founding" || variant === "founding_annual") {
+      if ((await foundingSeatsLeft()) <= 0) {
+        return NextResponse.json({ error: "All the founding spots are taken." }, { status: 409 });
+      }
+    }
+    planId = vPlan;
+  }
+
   if (!planId) {
     const envVar =
       tier === "pro_ai"
@@ -54,13 +72,15 @@ export async function POST(request: Request) {
     // total_count=60 → auto-continues for 5 years (long enough to feel indefinite)
     const subscription = await razorpay.subscriptions.create({
       plan_id: planId,
-      total_count: 60,
+      // 5 billing periods: five years on a yearly plan, five years of months otherwise.
+      total_count: variant === "annual" || variant === "founding_annual" ? 5 : 60,
       customer_notify: 1,
       notes: {
         workspaceId: auth.workspace.id,
         workspaceSlug: auth.workspace.slug,
         userEmail: auth.user.email,
         tier,
+        variant,
       },
     });
 

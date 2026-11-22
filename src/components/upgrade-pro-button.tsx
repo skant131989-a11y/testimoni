@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import type { Currency } from "@/lib/constants";
+import type { ProVariant } from "@/lib/pro-offers-config";
 import { track } from "@/lib/analytics";
 import { usePricing } from "@/lib/use-pricing";
 import "@/lib/razorpay-window";
@@ -76,6 +77,8 @@ interface UpgradeProButtonProps
    *  Default true. Set false when a surrounding component wants to
    *  handle its own refresh. */
   reloadOnSuccess?: boolean;
+  /** Which Pro price option to buy; defaults to the regular monthly plan. */
+  offer?: ProVariant;
 }
 
 export function UpgradeProButton({
@@ -83,6 +86,7 @@ export function UpgradeProButton({
   label,
   currency: currencyProp,
   reloadOnSuccess = true,
+  offer = "monthly",
   ...buttonProps
 }: UpgradeProButtonProps) {
   const [upgrading, setUpgrading] = useState(false);
@@ -92,14 +96,14 @@ export function UpgradeProButton({
   async function handleClick() {
     setUpgrading(true);
     const currency = currencyProp ?? pricingCurrency;
-    track("upgrade_clicked", { currency, plan: "PRO", surface });
+    track("upgrade_clicked", { currency, plan: "PRO", surface, offer });
     try {
       await ensureRazorpayLoaded();
 
       const res = await fetch("/api/billing/razorpay/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currency }),
+        body: JSON.stringify({ currency: offer === "monthly" ? currency : "USD", variant: offer }),
       });
       const data = await res.json();
       if (!res.ok || !data.subscription_id) {
