@@ -1,0 +1,3 @@
+
+# Workflow files run on Linux: keep Unix line endings or the shell steps break.
+.github/workflows/*.yml text eol=lf
