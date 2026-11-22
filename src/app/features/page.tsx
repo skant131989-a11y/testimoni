@@ -26,6 +26,11 @@ import {
   Trophy,
   Award,
   Newspaper,
+  Printer,
+  Gift,
+  Bell,
+  MailCheck,
+  Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PublicNav } from "@/components/layout/public-nav";
@@ -125,8 +130,13 @@ const features: Array<{
   { icon: Link2, title: "Drop the link", desc: "Paste any tweet, LinkedIn post, Reddit comment, blog URL — we pull the quote and author. Credit stays with the original.", category: "intake" },
   { icon: Camera, title: "Screenshot → testimonial (AI)", desc: "Drop a screenshot of any praise — DM, tweet, Slack, WhatsApp, email, App Store review. Claude Vision extracts the quote, author, and source.", category: "intake" },
   { icon: Send, title: "5 collection channels", desc: "Share your form via link, embed script, iframe, email template, or QR code. All submissions land in one inbox.", category: "intake" },
+  { icon: Wand2, title: "Help me say it (free AI)", desc: "Customers stuck on a blank box tap a starter sentence, or type a few rough words and get a natural sentence back to edit. It never invents facts, and it uses a free model.", category: "intake" },
+  { icon: Gift, title: "Thank-you gift", desc: "Show a discount code or link right after someone submits, and a card of their own words to share on X or LinkedIn. Both bring you more reviews.", category: "intake" },
+  { icon: Printer, title: "QR poster for your counter", desc: "One click opens a print-ready A4 poster with a big QR code to your form. Made for shops, cafes, salons and market stalls.", category: "intake" },
   { icon: Video, title: "Video testimonials", desc: "2 free videos on every plan, unlimited on Pro. Upload MP4 or MOV. Plays inline on your wall — converts ~2× better than text.", category: "intake" },
   { icon: Inbox, title: "One-click approval", desc: "Review submissions in a single inbox. Approve, reject, or edit inline. Optimistic UI — no refresh.", category: "curate" },
+  { icon: Bell, title: "Live alert", desc: "A card in your dashboard the moment a testimonial arrives, with the words, the stars and an Approve button, plus a count in the browser tab.", category: "curate" },
+  { icon: MailCheck, title: "Approve from your email", desc: "The notification email has an Approve or reject button. One tap on your phone, no login. Opening the link changes nothing until you tap.", category: "curate" },
   { icon: Palette, title: "Full theme control", desc: "Colors, fonts, spacing, border radius. Match your brand exactly, save theme presets across workspaces.", category: "display" },
   { icon: LayoutGrid, title: "5 layouts", desc: "Grid, Masonry, Carousel, List, and Marquee. Pick different layouts for different pages, all from one library.", category: "display" },
   { icon: Code2, title: "One-line embed", desc: "Copy a <script> tag and drop into any HTML. Works on Framer, Webflow, WordPress, Shopify, Next.js, React, Vue.", category: "display" },

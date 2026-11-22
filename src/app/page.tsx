@@ -26,6 +26,7 @@ import { HOME_FAQ, SOURCES } from "@/lib/home-content";
 import { FindProofForm } from "@/components/home/find-proof-form";
 import { HeroWall } from "@/components/home/hero-wall";
 import { LiveWall } from "@/components/home/live-wall";
+import { AfterTheLink } from "@/components/home/after-the-link";
 import { LaunchBar } from "@/components/launch-bar";
 import { LAUNCH_BAR } from "@/lib/launch-bar";
 import { getWallQuotes } from "@/lib/home-wall";
@@ -105,6 +106,9 @@ const FEATURE_GROUPS: {
       { text: "Ask customers by email, or automatically from a webhook, with a reminder", tag: "3/mo free" },
       { text: "Paste a link or drop a screenshot to add one yourself" },
       { text: "Import reviews from app stores and Product Hunt" },
+      { text: "Starter prompts and a free AI helper so customers finish their review" },
+      { text: "A thank-you gift shown after they submit, and a card of their words to share" },
+      { text: "A print-ready QR poster for your counter or packaging" },
     ],
   },
   {
@@ -113,6 +117,9 @@ const FEATURE_GROUPS: {
     items: [
       { text: "One inbox: approve or reject with a click" },
       { text: "Edit the wording, name and title before you publish" },
+      { text: "Live alert in your dashboard with Approve on it, and a count in the tab" },
+      { text: "Approve or reject from the email in one tap, no login" },
+      { text: "A weekly note: views, what is new, and one next step" },
       { text: "Choose what each widget shows", tag: "Pro" },
       { text: "Analytics on your wall", tag: "Pro" },
     ],
@@ -364,6 +371,9 @@ export default async function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* 3b — The path after you share the link, customer then owner */}
+        <AfterTheLink />
 
         {/* 4 — Add one yourself (live demos) */}
         <section id="try" className="scroll-mt-20 border-y bg-gradient-to-br from-violet-50/60 via-background to-primary/[0.03] py-16 md:py-20">
