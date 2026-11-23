@@ -96,7 +96,32 @@ export function AuthForm({ variant }: { variant: "login" | "signup" }) {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const FREE_FAILED_ATTEMPTS = 2;
   const alwaysGate = process.env.NEXT_PUBLIC_SUPABASE_CAPTCHA === "1";
-  const [pending, setPending] = useState<{ email: string; mode: "login" | "signup" } | null>(null);
+  // The "enter your code" screen. Remembered for 30 minutes in this tab so that
+  // leaving to open the email (which can reload the page on a phone) brings the
+  // person back to the code box instead of a blank form.
+  const PENDING_KEY = "testimoni_pending_code";
+  const PENDING_TTL_MS = 30 * 60 * 1000;
+  const [pending, setPendingState] = useState<{ email: string; mode: "login" | "signup" } | null>(null);
+  function setPending(next: { email: string; mode: "login" | "signup" } | null) {
+    setPendingState(next);
+    try {
+      if (next) sessionStorage.setItem(PENDING_KEY, JSON.stringify({ ...next, at: Date.now() }));
+      else sessionStorage.removeItem(PENDING_KEY);
+    } catch {}
+  }
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(PENDING_KEY);
+      if (!raw) return;
+      const p = JSON.parse(raw) as { email?: string; mode?: string; at?: number };
+      if (p.email && (p.mode === "login" || p.mode === "signup") && typeof p.at === "number" && Date.now() - p.at < PENDING_TTL_MS) {
+        setPendingState({ email: p.email, mode: p.mode });
+      } else {
+        sessionStorage.removeItem(PENDING_KEY);
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Bot or real person? Judged from signals the page can see, and attached
   // to the sign-up events as `attempt` ("bot" | "real_person") with the
