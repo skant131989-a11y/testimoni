@@ -6,6 +6,7 @@ import { PublicNav } from "@/components/layout/public-nav";
 import { InlineSignup } from "@/components/inline-signup";
 import { PricingCta } from "@/components/pricing/pricing-cta";
 import { ProOffersBox } from "@/components/pricing/pro-offers";
+import { getProOffers } from "@/lib/pro-offers";
 import { LovedByFoundersStrip } from "@/components/loved-by-founders-strip";
 import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { PRO_AI_PUBLIC } from "@/lib/feature-flags";
@@ -28,7 +29,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PricingPage() {
+// Offers are read on the server so the box shows on first paint; refreshed hourly.
+export const revalidate = 3600;
+
+export default async function PricingPage() {
+  const offers = await getProOffers().catch(() => null);
   return (
     <div className="flex min-h-screen flex-col">
       <PublicNav />
@@ -80,11 +85,15 @@ export default function PricingPage() {
                 Most Popular
               </div>
               <h3 className="text-xl font-semibold">Pro</h3>
-              <p className="mt-2 text-3xl font-bold">
-                <ProPrice suffix="/month" />
-              </p>
-              <ProPriceNote />
-              <ProOffersBox surface="pricing" />
+              {!offers?.founding.available && (
+                <>
+                  <p className="mt-2 text-3xl font-bold">
+                    <ProPrice suffix="/month" />
+                  </p>
+                  <ProPriceNote />
+                </>
+              )}
+              <ProOffersBox surface="pricing" initial={offers} />
               <p className="mt-3 text-sm text-muted-foreground">
                 Unlimited utility + one AI perk (unlimited tweet drafts).
               </p>

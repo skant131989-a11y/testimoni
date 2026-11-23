@@ -1,25 +1,12 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { DashboardEmptyState } from "@/components/dashboard-empty-state";
 import { AvatarImage } from "@/components/avatar-image";
 
 /**
- * Recent Testimonials card — extracted from dashboard/page.tsx and
- * turned into its own async server component so it can be streamed
- * behind a <Suspense> boundary. The findMany here is the slowest
- * query on the dashboard (5 rows joined with images/videos), and
- * blocking above-the-fold stats + FormUrlCard on it made the whole
- * dashboard feel sluggish. Now the stats render instantly; this
- * card fills in when its query returns.
+ * "Latest on your wall": the newest testimonials as quote cards, quote first.
+ * Its own async server component so it streams in behind a <Suspense> and the
+ * stats above never wait for this query.
  */
 export async function RecentTestimonialsCard({
   workspaceId,
@@ -31,122 +18,88 @@ export async function RecentTestimonialsCard({
   const recentTestimonials = await prisma.testimonial.findMany({
     where: { workspaceId },
     orderBy: { createdAt: "desc" },
-    take: 5,
+    take: 4,
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Testimonials</CardTitle>
-        <CardDescription>
-          Your latest testimonials across all sources.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {recentTestimonials.length === 0 ? (
-          <div className="py-2">
-            <DashboardEmptyState
-              formUrl={
-                formShareHref
-                  ? `${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}${formShareHref}`
-                  : null
-              }
-            />
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {recentTestimonials.map((testimonial: (typeof recentTestimonials)[number]) => (
-              <div
-                key={testimonial.id}
-                className="flex items-start gap-4 rounded-lg border p-4"
-              >
-                <AvatarImage src={testimonial.customerAvatar} name={testimonial.customerName} size={40} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">
-                      {testimonial.customerName}
-                    </p>
-                    <Badge
-                      variant={
-                        testimonial.status === "APPROVED"
-                          ? "default"
-                          : testimonial.status === "PENDING"
-                            ? "secondary"
-                            : "outline"
-                      }
-                    >
-                      {testimonial.status.toLowerCase()}
-                    </Badge>
-                  </div>
-                  {testimonial.rating && (
-                    <div className="mt-0.5 flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <span
-                          key={i}
-                          className={
-                            i < testimonial.rating!
-                              ? "text-yellow-500"
-                              : "text-muted-foreground/30"
-                          }
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                    {testimonial.content}
-                  </p>
-                </div>
-                <time className="shrink-0 text-xs text-muted-foreground">
-                  {new Date(testimonial.createdAt).toLocaleDateString()}
-                </time>
-              </div>
-            ))}
-
-            <div className="pt-2 text-center">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard/testimonials">View all testimonials</Link>
-              </Button>
-            </div>
-          </div>
+    <section>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Latest on your wall</h3>
+        {recentTestimonials.length > 0 && (
+          <Link href="/dashboard/testimonials" className="text-sm font-medium text-primary hover:underline">
+            See all &rarr;
+          </Link>
         )}
-      </CardContent>
-    </Card>
-  );
-}
+      </div>
 
-/**
- * Skeleton shown while the Recent Testimonials query is in flight.
- * Matches the real card's dimensions so there's no layout shift when
- * the actual content streams in.
- */
-export function RecentTestimonialsSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Testimonials</CardTitle>
-        <CardDescription>
-          Your latest testimonials across all sources.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-4 rounded-lg border p-4"
-            >
-              <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-muted" />
-              <div className="min-w-0 flex-1 space-y-2">
-                <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-                <div className="h-3 w-full animate-pulse rounded bg-muted" />
-                <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
+      {recentTestimonials.length === 0 ? (
+        <div className="rounded-2xl border bg-card p-4">
+          <DashboardEmptyState
+            formUrl={
+              formShareHref
+                ? `${process.env.NEXT_PUBLIC_APP_URL || "https://testimoni.io"}${formShareHref}`
+                : null
+            }
+          />
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {recentTestimonials.map((testimonial: (typeof recentTestimonials)[number]) => (
+            <div key={testimonial.id} className="flex flex-col rounded-2xl border border-violet-200/70 bg-card p-4">
+              {testimonial.rating ? (
+                <div className="flex gap-0.5 text-sm text-amber-500" aria-label={`${testimonial.rating} stars`}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} className={i < testimonial.rating! ? "" : "text-muted-foreground/30"}>
+                      ★
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              <p className="mt-2 line-clamp-4 flex-1 text-sm leading-relaxed">&ldquo;{testimonial.content}&rdquo;</p>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <AvatarImage src={testimonial.customerAvatar} name={testimonial.customerName} size={28} />
+                  <span className="truncate text-sm font-medium">{testimonial.customerName}</span>
+                </div>
+                <span
+                  className={
+                    testimonial.status === "APPROVED"
+                      ? "shrink-0 rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-medium text-violet-800"
+                      : testimonial.status === "PENDING"
+                        ? "shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800"
+                        : "shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
+                  }
+                >
+                  {testimonial.status === "APPROVED" ? "on wall" : testimonial.status.toLowerCase()}
+                </span>
               </div>
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </section>
+  );
+}
+
+/** Placeholder while the query is in flight; same shape as the real cards. */
+export function RecentTestimonialsSkeleton() {
+  return (
+    <section>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Latest on your wall</h3>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="rounded-2xl border border-violet-200/70 bg-card p-4">
+            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+            <div className="mt-3 space-y-2">
+              <div className="h-3 w-full animate-pulse rounded bg-muted" />
+              <div className="h-3 w-4/5 animate-pulse rounded bg-muted" />
+            </div>
+            <div className="mt-4 h-6 w-32 animate-pulse rounded-full bg-muted" />
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

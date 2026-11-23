@@ -18,8 +18,8 @@ import { PRO_OFFER_PRICES, OFFER_END_LABEL, type ProOffers } from "@/lib/pro-off
  * A visitor who is not logged in is sent to sign up first; a free account
  * goes straight to checkout.
  */
-export function ProOffersBox({ surface }: { surface: string }) {
-  const [offers, setOffers] = useState<ProOffers | null>(null);
+export function ProOffersBox({ surface, initial = null }: { surface: string; initial?: ProOffers | null }) {
+  const [offers, setOffers] = useState<ProOffers | null>(initial);
   const [loggedIn, setLoggedIn] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
 
@@ -59,50 +59,54 @@ export function ProOffersBox({ surface }: { surface: string }) {
   if (offers.founding.available) {
     const { left, monthly, annual } = offers.founding;
     return (
-      <div className="mt-4 rounded-xl border-2 border-dashed border-violet-300 bg-violet-50/70 p-4 text-left">
-        <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">
-          Year-end offer · ends {OFFER_END_LABEL}
-        </p>
-        <p className="mt-1 text-sm font-semibold text-violet-950">
-          {left <= 10 ? `Only ${left} ${left === 1 ? "spot" : "spots"} left at this price` : "Over half off Pro, for the rest of the year"}
-        </p>
-        <div className="mt-3 space-y-2">
+      <div className="mt-4 overflow-hidden rounded-2xl border-2 border-violet-600 bg-white text-left shadow-lg shadow-violet-900/10">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 bg-violet-900 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-white">
+          <span>Year-end offer</span>
+          <span className="text-violet-200">Ends {OFFER_END_LABEL}</span>
+        </div>
+        <div className="p-4">
           {monthly && (
-            <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 shadow-sm">
-              <span className="text-sm">
-                <span className="text-lg font-bold">${P.founding}</span>
-                <span className="text-muted-foreground"> / month </span>
-                <span className="text-xs text-muted-foreground line-through">${P.monthly}</span>
-              </span>
-              {loggedIn ? (
-                <UpgradeProButton offer="founding" surface={`${surface}_founding`} size="sm" label="Get this price" />
-              ) : (
-                <Link href={signupHref("founding_monthly")} className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
-                  Get this price
-                </Link>
-              )}
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-5xl font-extrabold leading-none tracking-tight text-violet-950">${P.founding}</span>
+                <span className="text-sm text-muted-foreground">/ month</span>
+                <span className="ml-1 text-base text-muted-foreground line-through">${P.monthly}</span>
+              </div>
+              <p className="mt-1.5 text-sm font-medium text-violet-700">
+                {left <= 10
+                  ? `Only ${left} ${left === 1 ? "spot" : "spots"} left at this price`
+                  : "Over half off Pro, for the rest of the year"}
+              </p>
+              <div className="mt-3">
+                {loggedIn ? (
+                  <UpgradeProButton offer="founding" surface={`${surface}_founding`} className="w-full" label={`Get Pro at $${P.founding}`} />
+                ) : (
+                  <Link href={signupHref("founding_monthly")} className="flex w-full items-center justify-center rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90">
+                    Get Pro at ${P.founding}
+                  </Link>
+                )}
+              </div>
             </div>
           )}
           {annual && (
-            <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 shadow-sm">
+            <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-violet-50 px-3 py-2.5">
               <span className="text-sm">
-                <span className="text-lg font-bold">${P.founding_annual}</span>
-                <span className="text-muted-foreground"> / year · save ${P.founding * 12 - P.founding_annual}</span>
+                <span className="font-bold">or ${P.founding_annual} a year</span>
+                <span className="text-muted-foreground"> · save ${P.founding * 12 - P.founding_annual}</span>
               </span>
               {loggedIn ? (
-                <UpgradeProButton offer="founding_annual" surface={`${surface}_founding_annual`} size="sm" label="Get this price" />
+                <UpgradeProButton offer="founding_annual" surface={`${surface}_founding_annual`} size="sm" variant="outline" label="Choose yearly" />
               ) : (
-                <Link href={signupHref("founding_annual")} className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
-                  Get this price
+                <Link href={signupHref("founding_annual")} className="rounded-md border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-800 hover:bg-violet-100">
+                  Choose yearly
                 </Link>
               )}
             </div>
           )}
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Same Pro plan. Your price stays the same for as long as you stay subscribed; if you cancel and come back, it is the regular ${P.monthly}/month. Cancel any time.
+          </p>
         </div>
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          Same Pro plan. Your price stays the same for as long as you stay subscribed; if you cancel and come back, it is the regular
-          ${P.monthly}/month. Cancel any time.
-        </p>
       </div>
     );
   }

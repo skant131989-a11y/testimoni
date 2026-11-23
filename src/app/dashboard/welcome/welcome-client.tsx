@@ -17,6 +17,9 @@ import {
   Pencil,
   X,
   Code,
+  MessageCircle,
+  Mail,
+  QrCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +28,6 @@ import { Label } from "@/components/ui/label";
 import { LetterAvatar } from "@/components/letter-avatar";
 import { ImportSourcesRow } from "@/components/import-sources-row";
 import { WelcomeSplash } from "@/components/welcome-splash";
-import { GettingStarted } from "@/components/dashboard/getting-started";
 import { PageLoadPerf } from "@/components/page-load-perf";
 import { celebrateFirstTestimonial } from "@/lib/confetti";
 import { readSessionCache } from "@/lib/session-cache";
@@ -69,7 +71,6 @@ export function WelcomeClient({
   signupTimestamp,
   userId,
   userEmail,
-  onboarding,
 }: WelcomeClientProps) {
   const router = useRouter();
   const [url, setUrl] = useState("");
@@ -1165,115 +1166,110 @@ export function WelcomeClient({
 
       <div className="mx-auto max-w-4xl space-y-6 py-6">
         <div className="text-center">
-          {/* You're in — success chip. Sets the mood before the
-              welcome headline so first-mount reads as "yes, made it"
-              not "another blank page". */}
-          <div className="mx-auto inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700 shadow-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            </span>
-            You&rsquo;re in · Your workspace is live
-          </div>
-
-          <div className="mx-auto mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25">
-            <Sparkles className="h-8 w-8 text-white" />
-          </div>
-          <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight md:text-5xl">
-            Welcome to{" "}
-            <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-              {workspaceName || "Testimoni"}
-            </span>{" "}
-            <span className="inline-block animate-wave-hand origin-bottom-right">👋</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-slate-700 md:text-xl">
-            {mode === "url"
-              ? "Two ways to get your first testimonial live in 30 seconds — pick whichever feels closer to home."
-              : "Type in a testimonial you already have — from an email, a DM, or a screenshot."}
+          <p className="text-sm text-muted-foreground">
+            Welcome to {workspaceName || "Testimoni"}
           </p>
+          <h1 className="mt-1 text-3xl font-bold leading-tight tracking-tight md:text-4xl">
+            One step to your first testimonial.
+          </h1>
+        </div>
 
-          {/* The whole job in three steps, so people know what finishing looks like. */}
-          {!imported && onboarding && (
-            <GettingStarted
-              variant="roadmap"
-              testimonials={onboarding.testimonials}
-              impressions={onboarding.impressions}
-            />
+        {/* The one thing to do: send the form link to a happy customer. */}
+        <div className="rounded-3xl bg-gradient-to-br from-violet-900 via-violet-800 to-violet-600 p-6 text-white shadow-xl shadow-violet-900/20 md:p-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-violet-200">Step 1 of 3</p>
+          <h2 className="mt-2 text-2xl font-bold leading-tight md:text-3xl">
+            Send your link to one happy customer.
+          </h2>
+          <p className="mt-2 text-sm text-violet-200">
+            Takes them under a minute. No account needed. Every reply lands in your inbox for you to approve.
+          </p>
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+            <div className="min-w-0 flex-1 truncate rounded-xl bg-white/15 px-4 py-3 font-mono text-sm">
+              {fullFormUrl ??
+                (refreshAttempts.current >= 5
+                  ? "Setup incomplete. Refresh the page or contact hello@testimoni.io"
+                  : "Setting up your form…")}
+            </div>
+            <Button
+              onClick={copyForm}
+              disabled={!fullFormUrl}
+              className="shrink-0 rounded-xl bg-white px-5 py-3 text-violet-900 hover:bg-violet-50"
+            >
+              {formCopied ? (
+                <>
+                  <Check className="mr-2 h-4 w-4" /> Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="mr-2 h-4 w-4" /> Copy link
+                </>
+              )}
+            </Button>
+          </div>
+          {fullFormUrl && (
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-violet-100">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Hi! Would you share a quick testimonial about us? It takes a minute: ${fullFormUrl}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => track("welcome_share_click", { via: "whatsapp" })}
+                className="inline-flex items-center gap-1.5 hover:text-white hover:underline"
+              >
+                <MessageCircle className="h-4 w-4" /> WhatsApp
+              </a>
+              <a
+                href={`mailto:?subject=${encodeURIComponent("Could you share a quick testimonial?")}&body=${encodeURIComponent(`Hi,\n\nWould you share a quick testimonial about us? It takes a minute:\n${fullFormUrl}\n\nThank you!`)}`}
+                onClick={() => track("welcome_share_click", { via: "email" })}
+                className="inline-flex items-center gap-1.5 hover:text-white hover:underline"
+              >
+                <Mail className="h-4 w-4" /> Email
+              </a>
+              <Link
+                href="/dashboard/collect"
+                onClick={() => track("welcome_share_click", { via: "qr_poster" })}
+                className="inline-flex items-center gap-1.5 hover:text-white hover:underline"
+              >
+                <QrCode className="h-4 w-4" /> QR poster
+              </Link>
+              <a
+                href={fullFormUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-white hover:underline"
+              >
+                <ExternalLink className="h-4 w-4" /> Preview the form
+              </a>
+            </div>
           )}
+        </div>
 
-        {/* Two doors card — replaces the meh "3 quotes today" text
-            with an actionable side-by-side: auto-find your praise
-            (find-my-proof) OR paste it manually below. Uses the
-            marketing brand's violet-purple gradient so a founder who
-            signed up from the landing page recognises the aesthetic. */}
-        {!imported && (
-          <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border bg-card p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Step 2</p>
+            <p className="mt-1 text-base font-semibold">Approve what comes in</p>
+            <p className="mt-1 text-sm text-muted-foreground">We alert you the moment it lands.</p>
+          </div>
+          <div className="rounded-2xl border bg-card p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Step 3</p>
+            <p className="mt-1 text-base font-semibold">Put the wall on your site</p>
+            <p className="mt-1 text-sm text-muted-foreground">One line of code, or a shareable link.</p>
+          </div>
+        </div>
+
+        <div className="pt-4 text-center">
+          <h3 className="text-lg font-semibold">Already have kind words? Add them now.</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Paste a post, drop a screenshot, or type one in. Or{" "}
             <Link
               href="/tools/find-my-proof"
-              onClick={() =>
-                track("welcome_two_doors_card_click", { door: "find_my_proof" })
-              }
-              className="group relative overflow-hidden rounded-3xl border-2 border-violet-300/70 bg-gradient-to-br from-violet-100 via-purple-50 to-fuchsia-50/80 p-6 text-left shadow-xl shadow-violet-500/15 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-violet-500/25"
+              onClick={() => track("welcome_two_doors_card_click", { door: "find_my_proof" })}
+              className="font-medium text-primary hover:underline"
             >
-              <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-400/30 blur-2xl" />
-              <div className="pointer-events-none absolute -left-6 -bottom-6 h-24 w-24 rounded-full bg-fuchsia-400/20 blur-2xl" />
-              <div className="relative">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-violet-600/40 bg-white/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-700 shadow-sm">
-                    ✨ Free · Auto
-                  </span>
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-violet-600 shadow-md transition-all group-hover:bg-violet-600 group-hover:text-white group-hover:translate-x-0.5">
-                    →
-                  </span>
-                </div>
-                <h3 className="mt-4 text-lg font-bold leading-tight text-slate-900 md:text-xl">
-                  Skip the ask —{" "}
-                  <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-                    find praise you already have
-                  </span>
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                  Paste your website. We scan X, Reddit, LinkedIn, Product
-                  Hunt & App Store for real customer love — you approve, it
-                  lands on your wall.
-                </p>
-                <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-semibold text-violet-700">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">X</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">Reddit</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">LinkedIn</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">Product Hunt</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5">App Store</span>
-                </div>
-              </div>
+              let us find praise about you
             </Link>
-
-            <div className="relative overflow-hidden rounded-3xl border-2 border-slate-200 bg-white/80 p-6 shadow-md backdrop-blur">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
-                  Or · Manual
-                </span>
-                <span className="inline-flex h-8 w-8 animate-bounce items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                  ↓
-                </span>
-              </div>
-              <h3 className="mt-4 text-lg font-bold leading-tight text-slate-900 md:text-xl">
-                Have a specific rave?{" "}
-                <span className="text-slate-500">Drop it below.</span>
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                A tweet URL, LinkedIn post, blog review, or a screenshot
-                from a DM. Extract, approve, publish — 30 seconds each.
-              </p>
-              <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-semibold text-slate-600">
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5">Tweet URL</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5">LinkedIn</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5">Reddit</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5">Screenshot</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+            .
+          </p>
+        </div>
 
       {/* Primary card — URL input, manual form, or screenshot
           extractor depending on mode. */}
@@ -1655,143 +1651,6 @@ export function WelcomeClient({
         )}
       </div>
 
-      {/* Secondary — share collection form. ALWAYS rendered, no
-          conditional gating on defaultFormUrl. Even in the rare
-          edge case where the workspace hasn't auto-provisioned a
-          form yet (a race during first-visit provisioning), the
-          panel still shows with a fallback so users see the second
-          path exists. Sits below the paste-a-tweet primary CTA. */}
-      <div className="rounded-2xl border bg-card p-5 text-left">
-        <p className="text-sm font-semibold">📮 Your form — send this link to customers</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Send this link anywhere — email, DM, follow-up message. Every reply
-          lands in your inbox for you to approve.
-        </p>
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          <div className="min-w-0 flex-1 truncate rounded-md border bg-muted/60 px-3 py-2 font-mono text-xs">
-            {fullFormUrl ??
-              (refreshAttempts.current >= 5
-                ? "Setup incomplete — refresh the page or contact hello@testimoni.io"
-                : "Setting up your form and widget…")}
-          </div>
-          <Button
-            onClick={copyForm}
-            variant={formCopied ? "default" : "outline"}
-            className="shrink-0"
-            disabled={!fullFormUrl}
-          >
-            {formCopied ? (
-              <>
-                <Check className="mr-2 h-4 w-4" /> Copied
-              </>
-            ) : (
-              <>
-                <Copy className="mr-2 h-4 w-4" /> Copy link
-              </>
-            )}
-          </Button>
-          <Button
-            asChild={!!fullFormUrl}
-            variant="outline"
-            className="shrink-0"
-            disabled={!fullFormUrl}
-          >
-            {fullFormUrl ? (
-              <a href={fullFormUrl} target="_blank" rel="noopener noreferrer">
-                Preview <ExternalLink className="ml-2 h-4 w-4" />
-              </a>
-            ) : (
-              <span>
-                Preview <ExternalLink className="ml-2 h-4 w-4" />
-              </span>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {/* First-run engagement grid — four concrete next-steps
-          visible without scrolling into the empty white space
-          below. Each card opens in a new tab (target="_blank") so
-          the welcome tab stays where they came from and doesn't
-          lose the paste-URL context. */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <a
-          href="/dashboard/sources"
-          className="group flex flex-col rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-pink-500/[0.06] to-transparent p-4 shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
-        >
-          <div className="flex items-center gap-2">
-            <div className="text-2xl">🔄</div>
-            <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-primary">
-              Pro · New
-            </span>
-          </div>
-          <p className="mt-2 text-sm font-semibold">
-            Import from review sources
-          </p>
-          <p className="mt-1 flex-1 text-xs text-muted-foreground">
-            Auto-sync App Store + Chrome Web Store reviews to your
-            wall. Paste your app URL, we handle the rest.
-          </p>
-          <span className="mt-3 text-xs font-medium text-primary group-hover:underline">
-            Connect a source →
-          </span>
-        </a>
-        <a
-          href="/tools/ask-templates"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex flex-col rounded-xl border bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
-        >
-          <div className="text-2xl">✍️</div>
-          <p className="mt-2 text-sm font-semibold">
-            Get 3 templates to ask
-          </p>
-          <p className="mt-1 flex-1 text-xs text-muted-foreground">
-            Copy-paste WhatsApp, email, or LinkedIn DMs proven to
-            get a testimonial back in a day.
-          </p>
-          <span className="mt-3 text-xs font-medium text-primary group-hover:underline">
-            Open templates →
-          </span>
-        </a>
-        <a
-          href="/w/cmtedlomj0009w0btzyi3yweh"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex flex-col rounded-xl border bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
-        >
-          <div className="text-2xl">🩷</div>
-          <p className="mt-2 text-sm font-semibold">
-            See a real Wall of Love
-          </p>
-          <p className="mt-1 flex-1 text-xs text-muted-foreground">
-            Neha&rsquo;s wall — actual testimonials, live. Yours can
-            look like this in 30 seconds.
-          </p>
-          <span className="mt-3 text-xs font-medium text-primary group-hover:underline">
-            View wall →
-          </span>
-        </a>
-        <a
-          href="/tools/praise-tweet-finder"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex flex-col rounded-xl border bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
-        >
-          <div className="text-2xl">🔎</div>
-          <p className="mt-2 text-sm font-semibold">
-            Find your praise tweets
-          </p>
-          <p className="mt-1 flex-1 text-xs text-muted-foreground">
-            Search X for existing praise about your work. Each result
-            has a <span className="font-medium text-primary">Save to my Wall</span> button
-            that lands the tweet here in one click.
-          </p>
-          <span className="mt-3 text-xs font-medium text-primary group-hover:underline">
-            Find my praise →
-          </span>
-        </a>
-      </div>
     </div>
     </>
   );

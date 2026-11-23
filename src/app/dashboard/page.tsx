@@ -1,21 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import {
-  MessageSquareQuote,
-  Inbox,
-  Eye,
-  Plus,
-  ArrowRight,
-  RefreshCw,
-} from "lucide-react";
+import { Plus, ArrowRight, RefreshCw } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MilestoneNudge } from "@/components/milestone-nudge";
 import { FormUrlCard } from "@/components/form-url-card";
@@ -42,7 +29,7 @@ import { getAccountScanUsage } from "@/lib/scan-limits";
 interface StatsCardProps {
   title: string;
   value: number;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   description?: string;
   /** Optional destination — when set, the whole card becomes a link.
    *  Adds hover state (border tint + subtle lift) so it reads as
@@ -52,26 +39,18 @@ interface StatsCardProps {
   analyticsKey?: string;
 }
 
-function StatsCard({ title, value, icon, description, href, analyticsKey }: StatsCardProps) {
+function StatsCard({ title, value, description, href, analyticsKey }: StatsCardProps) {
   const inner = (
-    <Card
+    <div
       className={
-        href
-          ? "transition-shadow hover:border-primary/40 hover:shadow-md"
-          : undefined
+        "rounded-2xl border border-violet-200/70 bg-card px-4 py-3 " +
+        (href ? "transition-shadow hover:border-primary/40 hover:shadow-md" : "")
       }
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value.toLocaleString()}</div>
-        {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        )}
-      </CardContent>
-    </Card>
+      <p className="text-xs text-muted-foreground">{title}</p>
+      <p className="mt-0.5 text-2xl font-bold">{value.toLocaleString()}</p>
+      {description && <p className="text-[11px] font-medium text-emerald-600">{description}</p>}
+    </div>
   );
 
   if (!href) return inner;
@@ -257,13 +236,13 @@ export default async function DashboardPage() {
   const showTrialOffer = trialEligible && trialActivated;
 
   const nbaCard = (
-    <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-4 rounded-2xl bg-gradient-to-br from-violet-900 via-violet-800 to-violet-600 p-5 text-white shadow-lg shadow-violet-900/15 sm:flex-row sm:items-center sm:justify-between md:p-6">
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Next step</p>
-        <p className="mt-0.5 font-semibold">{nba.title}</p>
-        <p className="mt-0.5 text-sm text-muted-foreground">{nba.desc}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-violet-200">Next step</p>
+        <p className="mt-1 text-xl font-bold leading-tight md:text-2xl">{nba.title}</p>
+        <p className="mt-1.5 text-sm text-violet-200">{nba.desc}</p>
       </div>
-      <Button asChild className="shrink-0">
+      <Button asChild className="shrink-0 bg-white text-violet-900 hover:bg-violet-50">
         {nba.external ? (
           <a href={nba.href} target="_blank" rel="noopener noreferrer">
             {nba.label} <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -300,18 +279,35 @@ export default async function DashboardPage() {
   } else {
     topCard = nbaCard;
   }
+  const firstName = dbUser.name?.trim().split(/\s+/)[0] ?? "";
   // Only worth a line when the free scans are nearly gone.
   const scansNearlyOut = Number.isFinite(scanUsage.limit) && scanUsage.limit - scanUsage.used <= 2;
 
   return (
     <div className="space-y-6">
       <PageLoadPerf surface="dashboard" />
-      {/* Page heading */}
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-muted-foreground">
-          Welcome back! Here&apos;s an overview of your testimonials.
-        </p>
+      {/* Greeting, with the two everyday actions beside it */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-sm text-muted-foreground">{membership.workspace.name}</p>
+          <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+            {firstName ? `Welcome back, ${firstName}.` : "Welcome back."}
+          </h2>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href="/dashboard/sources">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Import
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/dashboard/import">
+              <Plus className="mr-2 h-4 w-4" />
+              Add testimonial
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {trialActive && <TrialBanner state="active" daysLeft={trialDaysLeft} />}
@@ -331,46 +327,27 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* Three numbers, each linking to the page behind it. */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* Three quiet numbers, each linking to the page behind it. */}
+      <div className="grid grid-cols-3 gap-3">
         <StatsCard
-          title="Total Testimonials"
-          value={totalTestimonials}
-          icon={<MessageSquareQuote className="h-4 w-4 text-muted-foreground" />}
+          title="Live on your wall"
+          value={approvedTestimonials}
           href="/dashboard/testimonials"
           analyticsKey="testimonials"
         />
         <StatsCard
-          title="Pending Submissions"
+          title="Waiting for you"
           value={pendingSubmissions}
-          icon={<Inbox className="h-4 w-4 text-muted-foreground" />}
+          description={pendingSubmissions === 0 ? "All caught up" : undefined}
           href="/dashboard/inbox"
           analyticsKey="inbox"
         />
         <StatsCard
-          title="Total Impressions"
+          title="Wall views"
           value={impressionsTotal}
-          icon={<Eye className="h-4 w-4 text-muted-foreground" />}
           href="/dashboard/analytics"
           analyticsKey="impressions"
         />
-      </div>
-
-      {/* Three actions. Screenshot extraction lives inside Add testimonial,
-          and the other tools are in the sidebar and the Free tools menu. */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Button asChild>
-          <Link href="/dashboard/import">
-            <Plus className="mr-2 h-4 w-4" />
-            Add testimonial
-          </Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/dashboard/sources">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Import from sources
-          </Link>
-        </Button>
       </div>
 
       {/* Form-link card: the share-the-form job, as a secondary card. */}

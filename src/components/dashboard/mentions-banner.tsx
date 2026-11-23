@@ -98,7 +98,9 @@ export function MentionsBanner({
     }
   })();
 
-  if (!data) return null;
+  // While the product lookup is in flight, show the normal next-step card on the home page
+  // instead of a blank gap; it is swapped out only if the website question applies.
+  if (!data) return onHome ? <>{fallback}</> : null;
   if (hidden) return onHome ? <>{fallback}</> : null;
 
   async function saveUrl(e: React.FormEvent) {

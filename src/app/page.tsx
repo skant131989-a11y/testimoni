@@ -6,14 +6,8 @@ import {
   ArrowRight,
   CheckCircle2,
   ExternalLink,
-  FileText,
-  Inbox,
   Play,
-  LayoutGrid,
-  Search,
-  Sparkles,
   Star,
-  Upload,
 } from "lucide-react";
 import { PublicNavAuth, PublicNavAuthMobile } from "@/components/layout/public-nav-auth";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -21,13 +15,14 @@ import { StructuredData } from "@/components/seo/structured-data";
 import { ProPrice, FreePrice } from "@/components/pricing/price-display";
 import { PricingCta } from "@/components/pricing/pricing-cta";
 import { ProOffersBox } from "@/components/pricing/pro-offers";
+import { getProOffers } from "@/lib/pro-offers";
 import { FREE_FEATURES, PRO_FEATURES } from "@/lib/plan-features";
 import { COMPETITORS, FACTS_VERIFIED_ON, TESTIMONI } from "@/lib/competitors";
 import { HOME_FAQ, SOURCES } from "@/lib/home-content";
 import { FindProofForm } from "@/components/home/find-proof-form";
 import { HeroWall } from "@/components/home/hero-wall";
 import { LiveWall } from "@/components/home/live-wall";
-import { AfterTheLink } from "@/components/home/after-the-link";
+import { HowItWorks } from "@/components/home/how-it-works";
 import { LaunchBar } from "@/components/launch-bar";
 import { LAUNCH_BAR } from "@/lib/launch-bar";
 import { getWallQuotes } from "@/lib/home-wall";
@@ -36,7 +31,6 @@ import { StickyMobileCta } from "@/components/sticky-mobile-cta";
 import { TrackedLink } from "@/components/tracked-link";
 import { PageEngagement } from "@/components/page-engagement";
 import { PageLoadPerf } from "@/components/page-load-perf";
-import { FadeIn } from "@/components/fade-in";
 import { ExitIntent } from "@/components/exit-intent";
 import { HashScrollCleanup } from "@/components/hash-scroll-cleanup";
 
@@ -50,106 +44,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   openGraph: { title: TITLE, description: DESCRIPTION, url: "/" },
 };
-
-const WAYS = [
-  {
-    Icon: FileText,
-    title: "Ask your customers",
-    body: "Share a form that takes text, star ratings and video.",
-    points: [
-      "Send it by link, email, WhatsApp, DM or QR code",
-      "Or embed the form on your own site",
-      "Approve each one from your inbox",
-    ],
-    cta: "Create a collection form",
-    href: "/signup?src=home_ways_ask",
-  },
-  {
-    Icon: Search,
-    title: "Find what's already out there",
-    body: "Paste your website. We search X, LinkedIn, Reddit, Product Hunt and app stores for real posts about you.",
-    points: [
-      "Every quote keeps its author and source link",
-      "Free to try, no signup",
-      "Pro re-scans weekly and emails new praise",
-    ],
-    cta: "Find my praise",
-    href: "/tools/find-my-proof",
-  },
-  {
-    Icon: Upload,
-    title: "Add what you already have",
-    body: "Paste a link, drop a screenshot, or pull in store reviews.",
-    points: [
-      "Tweets, LinkedIn posts, Reddit comments and any public URL",
-      "AI reads screenshots of DMs, emails and reviews",
-      "App Store, Google Play, Chrome Web Store and Product Hunt reviews",
-    ],
-    cta: "Try it below",
-    href: "#try",
-  },
-];
-
-// What's included, grouped the way people shop for these tools. Tags
-// only where a plan really limits the feature (see lib/plan-features.ts).
-const FEATURE_GROUPS: {
-  Icon: typeof FileText;
-  title: string;
-  note?: string;
-  items: { text: string; tag?: string }[];
-}[] = [
-  {
-    Icon: FileText,
-    title: "Collect",
-    items: [
-      { text: "Forms with text, star ratings and video", tag: "1 free, unlimited on Pro" },
-      { text: "Share by link, email, WhatsApp, DM, QR code or embed" },
-      { text: "Ask customers by email, or automatically from a webhook, with a reminder", tag: "3/mo free" },
-      { text: "Paste a link or drop a screenshot to add one yourself" },
-      { text: "Import reviews from app stores and Product Hunt" },
-      { text: "Starter prompts and a free AI helper so customers finish their review" },
-      { text: "A thank-you gift shown after they submit, and a card of their words to share" },
-      { text: "A print-ready QR poster for your counter or packaging" },
-    ],
-  },
-  {
-    Icon: Inbox,
-    title: "Manage",
-    items: [
-      { text: "One inbox: approve or reject with a click" },
-      { text: "Edit the wording, name and title before you publish" },
-      { text: "Live alert in your dashboard with Approve on it, and a count in the tab" },
-      { text: "Approve or reject from the email in one tap, no login" },
-      { text: "A weekly note: views, what is new, and one next step" },
-      { text: "Choose what each widget shows", tag: "Pro" },
-      { text: "Analytics on your wall", tag: "Pro" },
-    ],
-  },
-  {
-    Icon: LayoutGrid,
-    title: "Show",
-    items: [
-      { text: "A hosted Wall of Love page, free" },
-      { text: "One line of code for any site, styles isolated" },
-      { text: "Grid free; masonry, carousel, list and marquee", tag: "Pro" },
-      { text: "Your branding, no watermark, Trust Score badge", tag: "Pro" },
-      { text: "Review markup so Google and AI can read your wall" },
-    ],
-  },
-  {
-    Icon: Sparkles,
-    title: "Beyond collecting",
-    note: "Tools for finding and using praise",
-    items: [
-      { text: "Find my praise: scan the web for real posts about you" },
-      { text: "Customer Voice: praise, complaints and requests, free summary" },
-      { text: "Wall Score: audit your wall from 0 to 100", tag: "1 free, unlimited on Pro" },
-      { text: "Ask My Wall: a chatbot that quotes your real customers", tag: "30 answers free, unlimited on Pro" },
-      { text: "Tweet drafts from any quote", tag: "5 a month free" },
-      { text: "Case study generator and weekly new-praise email", tag: "Pro" },
-    ],
-  },
-];
 
 const FREE_TOP = FREE_FEATURES.slice(0, 7);
 const PRO_TOP = PRO_FEATURES.filter(
@@ -165,6 +59,8 @@ export const revalidate = 3600;
 
 export default async function LandingPage() {
   const quotes = await getWallQuotes(WALL_ID);
+  // Rendered on the server so the offer shows on first paint (this page is cached for an hour).
+  const offers = await getProOffers().catch(() => null);
   return (
     <div className="flex min-h-screen flex-col">
       <StructuredData faqs={HOME_FAQ} />
@@ -259,7 +155,7 @@ export default async function LandingPage() {
                 <HeroWall quotes={quotes} />
               </div>
 
-              <div className="mt-8 max-w-xl rounded-2xl border border-violet-200/70 bg-white/70 p-4 shadow-sm backdrop-blur">
+              <div id="find-praise" className="mt-8 max-w-xl scroll-mt-24 rounded-2xl border border-violet-200/70 bg-white/70 p-4 shadow-sm backdrop-blur">
                 <p className="text-sm font-semibold">
                   Not sure what people say about you?
                 </p>
@@ -328,53 +224,8 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* 3 — Three ways to get testimonials */}
-        <section id="how" className="scroll-mt-20 py-16 md:py-20">
-          <div className="mx-auto max-w-6xl px-4">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">How it works</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-                Three ways to get customer testimonials
-              </h2>
-              <p className="mt-3 text-muted-foreground">
-                Use one or all three. Then approve each testimonial in one click and show it on a
-                hosted Wall of Love or with one line of code.
-              </p>
-            </div>
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {WAYS.map(({ Icon, title, body, points, cta, href }, i) => (
-                <FadeIn key={title} delay={i * 80}>
-                  <div className="flex h-full flex-col rounded-2xl border bg-card p-6">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </span>
-                    <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
-                    <ul className="mt-4 flex-1 space-y-2 text-sm">
-                      {points.map((p) => (
-                        <li key={p} className="flex items-start gap-2">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span>{p}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <TrackedLink
-                      cta={`ways_${i}`}
-                      surface="home"
-                      href={href}
-                      className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-                    >
-                      {cta} <ArrowRight className="h-4 w-4" />
-                    </TrackedLink>
-                  </div>
-                </FadeIn>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 3b — The path after you share the link, customer then owner */}
-        <AfterTheLink />
+        {/* 3 — How it works: the whole job in three steps */}
+        <HowItWorks />
 
         {/* 4 — Add one yourself (live demos) */}
         <section id="try" className="scroll-mt-20 border-y bg-gradient-to-br from-violet-50/60 via-background to-primary/[0.03] py-16 md:py-20">
@@ -556,9 +407,13 @@ export default async function LandingPage() {
                   Most popular
                 </span>
                 <h3 className="text-lg font-semibold">Pro</h3>
-                <p className="mt-2 text-4xl font-bold"><ProPrice /></p>
-                <p className="text-sm text-muted-foreground">Flat price, no tiers</p>
-                <ProOffersBox surface="home" />
+                {!offers?.founding.available && (
+                  <>
+                    <p className="mt-2 text-4xl font-bold"><ProPrice /></p>
+                    <p className="text-sm text-muted-foreground">Flat price, no tiers</p>
+                  </>
+                )}
+                <ProOffersBox surface="home" initial={offers} />
                 <ul className="mt-6 flex-1 space-y-2.5">
                   {PRO_TOP.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm">
@@ -575,61 +430,6 @@ export default async function LandingPage() {
                 See the full plan comparison
               </Link>
             </p>
-          </div>
-        </section>
-
-        {/* 5 — Everything in one place */}
-        <section id="features" className="scroll-mt-20 py-16 md:py-20">
-          <div className="mx-auto max-w-6xl px-4">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Features</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-                Everything you need to collect, manage and show testimonials
-              </h2>
-              <p className="mt-3 text-muted-foreground">
-                And tools for the part most testimonial tools skip: finding praise that already
-                exists and putting it to work.
-              </p>
-            </div>
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {FEATURE_GROUPS.map(({ Icon, title, note, items }, i) => {
-                const extra = title === "Beyond collecting";
-                return (
-                  <FadeIn key={title} delay={i * 60}>
-                    <div
-                      className={`h-full rounded-2xl border bg-card p-6 ${
-                        extra ? "border-2 border-primary shadow-lg shadow-primary/10" : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                          <Icon className="h-5 w-5 text-primary" />
-                        </span>
-                        <div>
-                          <h3 className="font-semibold">{title}</h3>
-                          {note && <p className="text-xs text-muted-foreground">{note}</p>}
-                        </div>
-                      </div>
-                      <ul className="mt-5 space-y-3 text-sm">
-                        {items.map((it) => (
-                          <li key={it.text} className="flex items-start gap-2">
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                            <span className="min-w-0 break-words">
-                              {it.text}
-                              {it.tag && (
-                                <span className="mt-1 block w-fit max-w-full rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
-                                  {it.tag}
-                                </span>
-                              )}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </FadeIn>
-                );
-              })}
-            </div>
           </div>
         </section>
 
