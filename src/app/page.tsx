@@ -23,6 +23,8 @@ import { FindProofForm } from "@/components/home/find-proof-form";
 import { HeroWall } from "@/components/home/hero-wall";
 import { LiveWall } from "@/components/home/live-wall";
 import { HowItWorks } from "@/components/home/how-it-works";
+import { ThreeWays } from "@/components/home/three-ways";
+import { FeatureCards } from "@/components/home/feature-cards";
 import { LaunchBar } from "@/components/launch-bar";
 import { LAUNCH_BAR } from "@/lib/launch-bar";
 import { getWallQuotes } from "@/lib/home-wall";
@@ -227,6 +229,9 @@ export default async function LandingPage() {
         {/* 3 — How it works: the whole job in three steps */}
         <HowItWorks />
 
+        {/* 3b — Three ways to fill the wall */}
+        <ThreeWays />
+
         {/* 4 — Add one yourself (live demos) */}
         <section id="try" className="scroll-mt-20 border-y bg-gradient-to-br from-violet-50/60 via-background to-primary/[0.03] py-16 md:py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 md:grid-cols-[1fr_1.1fr]">
@@ -255,6 +260,9 @@ export default async function LandingPage() {
             <HeroDualDemo hide={["website"]} />
           </div>
         </section>
+
+        {/* 5 — Everything in one place */}
+        <FeatureCards />
 
         {/* 6 — Show it anywhere */}
         <section className="border-y bg-muted/30 py-16 md:py-20">
