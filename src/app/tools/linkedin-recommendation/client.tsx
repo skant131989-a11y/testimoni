@@ -37,6 +37,12 @@ const TONES = [
   { id: "punchy", label: "Punchy" },
 ] as const;
 
+const EXAMPLES = [
+  "clear communication, reliable, great under pressure",
+  "strong leader who brings out the best in a team",
+  "creative problem solver who ships fast",
+] as const;
+
 interface Variant {
   angle: string;
   text: string;
@@ -52,9 +58,10 @@ export function RecommendationClient() {
   const [variants, setVariants] = useState<Variant[] | null>(null);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [started, setStarted] = useState(false);
 
   async function generate() {
-    if (!personName.trim() || !skills.trim()) return;
+    if (skills.trim().length < 3) return;
     setLoading(true);
     setError(null);
     track("linkedin_rec_generate_clicked", { relationship, tone });
@@ -100,17 +107,55 @@ export function RecommendationClient() {
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
             Someone asked you for a recommendation and you don&apos;t know where to
-            start. Enter a name, their role, and what they&apos;re good at.
-            You&apos;ll get 3 versions.
+            start. Say what they&apos;re good at and you&apos;ll get 3 versions
+            to edit. A name is optional.
           </p>
         </div>
 
-        {/* Form */}
+        {/* Form: one required box, everything else optional */}
         <div className="mt-10 space-y-5 rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-6">
+          <div>
+            <Label htmlFor="skills" className="text-sm font-semibold">
+              What are they good at?
+            </Label>
+            <Textarea
+              id="skills"
+              value={skills}
+              onChange={(e) => {
+                setSkills(e.target.value);
+                if (!started) {
+                  setStarted(true);
+                  track("linkedin_rec_started");
+                }
+              }}
+              placeholder="e.g. design systems, cross-team communication, turning fuzzy briefs into shipped features"
+              rows={3}
+              className="mt-1.5"
+              maxLength={300}
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">Not sure? Tap one:</span>
+              {EXAMPLES.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() => {
+                    setSkills(ex);
+                    setStarted(true);
+                    track("linkedin_rec_example_used");
+                  }}
+                  className="rounded-full border border-primary/30 bg-background px-3 py-1 text-xs font-medium text-primary transition hover:bg-primary/10"
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="person" className="text-sm font-semibold">
-                Their name *
+                Their name <span className="font-normal text-muted-foreground">(optional)</span>
               </Label>
               <Input
                 id="person"
@@ -123,7 +168,7 @@ export function RecommendationClient() {
             </div>
             <div>
               <Label htmlFor="role" className="text-sm font-semibold">
-                Role / title
+                Role / title <span className="font-normal text-muted-foreground">(optional)</span>
               </Label>
               <Input
                 id="role"
@@ -136,67 +181,57 @@ export function RecommendationClient() {
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="skills" className="text-sm font-semibold">
-              What are they good at? *
-            </Label>
-            <Textarea
-              id="skills"
-              value={skills}
-              onChange={(e) => setSkills(e.target.value)}
-              placeholder="e.g. design systems, cross-team communication, turning fuzzy briefs into shipped features"
-              rows={3}
-              className="mt-1.5"
-              maxLength={300}
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              {skills.length}/300 characters
-            </p>
-          </div>
+          <details className="rounded-xl border bg-background/60 px-4 py-3">
+            <summary className="cursor-pointer text-sm font-semibold">
+              Fine-tune the relationship and tone{" "}
+              <span className="font-normal text-muted-foreground">(optional)</span>
+            </summary>
+            <div className="mt-4 space-y-5">
+              <div>
+                <Label className="text-sm font-semibold">Relationship</Label>
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {RELATIONSHIPS.map((r) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => setRelationship(r.id)}
+                      className={`rounded-full border-2 px-3 py-1 text-xs font-medium ${
+                        relationship === r.id
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted/50"
+                      }`}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <div>
-            <Label className="text-sm font-semibold">Relationship</Label>
-            <div className="mt-1.5 flex flex-wrap gap-2">
-              {RELATIONSHIPS.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => setRelationship(r.id)}
-                  className={`rounded-full border-2 px-3 py-1 text-xs font-medium ${
-                    relationship === r.id
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  {r.label}
-                </button>
-              ))}
+              <div>
+                <Label className="text-sm font-semibold">Tone</Label>
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {TONES.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setTone(t.id)}
+                      className={`rounded-full border-2 px-3 py-1 text-xs font-medium ${
+                        tone === t.id
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted/50"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div>
-            <Label className="text-sm font-semibold">Tone</Label>
-            <div className="mt-1.5 flex flex-wrap gap-2">
-              {TONES.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setTone(t.id)}
-                  className={`rounded-full border-2 px-3 py-1 text-xs font-medium ${
-                    tone === t.id
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          </details>
 
           <Button
             onClick={generate}
-            disabled={loading || !personName.trim() || !skills.trim()}
+            disabled={loading || skills.trim().length < 3}
             size="lg"
             className="w-full gap-2"
           >

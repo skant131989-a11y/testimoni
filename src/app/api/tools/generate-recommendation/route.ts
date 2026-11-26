@@ -34,16 +34,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const person = (body.personName || "").trim().slice(0, 80);
+  // The name is optional: drafts show "[Name]" for the person to replace.
+  const person = (body.personName || "").trim().slice(0, 80) || "[Name]";
   const role = (body.role || "").trim().slice(0, 120);
   const skills = (body.skills || "").trim().slice(0, 300);
   const relationship: Relationship = body.relationship || "worked_with";
   const tone: Tone = body.tone || "professional";
   const yourName = (body.yourName || "").trim().slice(0, 80);
 
-  if (!person || !skills) {
+  if (!skills) {
     return NextResponse.json(
-      { error: "personName and skills are required" },
+      { error: "Tell us what they are good at" },
       { status: 400 }
     );
   }

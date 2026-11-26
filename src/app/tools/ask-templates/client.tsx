@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -63,11 +63,8 @@ export function AskTemplatesClient() {
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function generate() {
-    if (!customerName.trim() || !business.trim()) return;
-    setLoading(true);
-    setError(null);
-    track("ask_templates_generate_clicked", { channel, tone, ask });
+  /** Asks the server for the messages. Touches no state, so an effect can call it. */
+  async function requestVariants(): Promise<{ variants?: Variant[]; error?: string }> {
     try {
       const res = await fetch("/api/tools/generate-ask-template", {
         method: "POST",
@@ -83,18 +80,40 @@ export function AskTemplatesClient() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Could not generate. Try again.");
-        return;
-      }
-      setVariants(data.variants);
-      track("ask_templates_variants_shown", { count: data.variants?.length ?? 0 });
+      if (!res.ok) return { error: data.error || "Could not generate. Try again." };
+      return { variants: data.variants };
     } catch {
-      setError("Network error. Try again.");
-    } finally {
-      setLoading(false);
+      return { error: "Network error. Try again." };
     }
   }
+
+  async function generate() {
+    setLoading(true);
+    setError(null);
+    track("ask_templates_generate_clicked", { channel, tone, ask });
+    const out = await requestVariants();
+    if (out.error) setError(out.error);
+    if (out.variants) {
+      setVariants(out.variants);
+      track("ask_templates_variants_shown", { count: out.variants.length, source: "click" });
+    }
+    setLoading(false);
+  }
+
+  // Show the messages straight away (they need no input), and refresh them
+  // when the channel, tone or ask type changes. Names apply on the button.
+  useEffect(() => {
+    let cancelled = false;
+    void requestVariants().then((out) => {
+      if (cancelled || !out.variants) return;
+      setVariants(out.variants);
+      track("ask_templates_variants_shown", { count: out.variants.length, source: "auto" });
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channel, tone, ask]);
 
   async function copyVariant(text: string, idx: number) {
     await navigator.clipboard.writeText(text);
@@ -117,75 +136,15 @@ export function AskTemplatesClient() {
             &ldquo;What do I even say?&rdquo;
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Copy-paste templates for asking customers to leave a testimonial —
-            in the tone and channel they actually reply to.
+            Copy-paste messages for asking a customer to leave a testimonial,
+            in the channel they actually reply to. Pick one below and copy it.
           </p>
         </div>
 
-        {/* Form */}
+        {/* Form: messages show straight away; every field is optional */}
         <div className="mt-10 space-y-5 rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="customer" className="text-sm font-semibold">
-                Customer&apos;s name *
-              </Label>
-              <Input
-                id="customer"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Sarah"
-                className="mt-1.5"
-                maxLength={60}
-              />
-            </div>
-            <div>
-              <Label htmlFor="your" className="text-sm font-semibold">
-                Your name
-              </Label>
-              <Input
-                id="your"
-                value={yourName}
-                onChange={(e) => setYourName(e.target.value)}
-                placeholder="Alex"
-                className="mt-1.5"
-                maxLength={60}
-              />
-            </div>
-          </div>
-
           <div>
-            <Label htmlFor="business" className="text-sm font-semibold">
-              What are they leaving a testimonial about? *
-            </Label>
-            <Input
-              id="business"
-              value={business}
-              onChange={(e) => setBusiness(e.target.value)}
-              placeholder="e.g. my design services / Acme Studio / the course"
-              className="mt-1.5"
-              maxLength={80}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="form" className="text-sm font-semibold">
-              Your form URL <span className="font-normal text-muted-foreground">(optional)</span>
-            </Label>
-            <Input
-              id="form"
-              value={formUrl}
-              onChange={(e) => setFormUrl(e.target.value)}
-              placeholder="testimoni.io/f/your-form"
-              className="mt-1.5"
-              maxLength={200}
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              Leave blank if you don&apos;t have one yet — we&apos;ll use a placeholder.
-            </p>
-          </div>
-
-          <div>
-            <Label className="text-sm font-semibold">Channel</Label>
+            <Label className="text-sm font-semibold">Where will you send it?</Label>
             <div className="mt-1.5 flex flex-wrap gap-2">
               {CHANNELS.map((c) => {
                 const Icon = c.icon;
@@ -208,50 +167,124 @@ export function AskTemplatesClient() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label className="text-sm font-semibold">Tone</Label>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {TONES.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setTone(t.id)}
-                    className={`rounded-full border-2 px-2.5 py-1 text-xs font-medium ${
-                      tone === t.id
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:bg-muted/50"
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
+          <details className="rounded-xl border bg-background/60 px-4 py-3">
+            <summary className="cursor-pointer text-sm font-semibold">
+              Add names and your form link{" "}
+              <span className="font-normal text-muted-foreground">(optional)</span>
+            </summary>
+            <div className="mt-4 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="customer" className="text-sm font-semibold">
+                    Customer&apos;s name
+                  </Label>
+                  <Input
+                    id="customer"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Sarah"
+                    className="mt-1.5"
+                    maxLength={60}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="your" className="text-sm font-semibold">
+                    Your name
+                  </Label>
+                  <Input
+                    id="your"
+                    value={yourName}
+                    onChange={(e) => setYourName(e.target.value)}
+                    placeholder="Alex"
+                    className="mt-1.5"
+                    maxLength={60}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="business" className="text-sm font-semibold">
+                  What are they leaving a testimonial about?
+                </Label>
+                <Input
+                  id="business"
+                  value={business}
+                  onChange={(e) => setBusiness(e.target.value)}
+                  placeholder="e.g. my design services / Acme Studio / the course"
+                  className="mt-1.5"
+                  maxLength={80}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="form" className="text-sm font-semibold">
+                  Your form URL
+                </Label>
+                <Input
+                  id="form"
+                  value={formUrl}
+                  onChange={(e) => setFormUrl(e.target.value)}
+                  placeholder="testimoni.io/f/your-form"
+                  className="mt-1.5"
+                  maxLength={200}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Leave blank if you don&apos;t have one yet. We&apos;ll use a placeholder.
+                </p>
               </div>
             </div>
-            <div>
-              <Label className="text-sm font-semibold">Ask type</Label>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {ASKS.map((a) => (
-                  <button
-                    key={a.id}
-                    type="button"
-                    onClick={() => setAsk(a.id)}
-                    className={`rounded-full border-2 px-2.5 py-1 text-xs font-medium ${
-                      ask === a.id
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:bg-muted/50"
-                    }`}
-                  >
-                    {a.label}
-                  </button>
-                ))}
+          </details>
+
+          <details className="rounded-xl border bg-background/60 px-4 py-3">
+            <summary className="cursor-pointer text-sm font-semibold">
+              Change the tone or what you ask for{" "}
+              <span className="font-normal text-muted-foreground">(optional)</span>
+            </summary>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label className="text-sm font-semibold">Tone</Label>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {TONES.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setTone(t.id)}
+                      className={`rounded-full border-2 px-2.5 py-1 text-xs font-medium ${
+                        tone === t.id
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted/50"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm font-semibold">Ask type</Label>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {ASKS.map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => setAsk(a.id)}
+                      className={`rounded-full border-2 px-2.5 py-1 text-xs font-medium ${
+                        ask === a.id
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted/50"
+                      }`}
+                    >
+                      {a.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          </details>
 
           <Button
             onClick={generate}
-            disabled={loading || !customerName.trim() || !business.trim()}
+            disabled={loading}
             size="lg"
             className="w-full gap-2"
           >
@@ -261,7 +294,7 @@ export function AskTemplatesClient() {
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4" /> Give me 3 messages
+                <Sparkles className="h-4 w-4" /> {variants ? "Update my messages" : "Give me 3 messages"}
               </>
             )}
           </Button>

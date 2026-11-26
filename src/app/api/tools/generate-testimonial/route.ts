@@ -58,14 +58,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const name = (body.reviewingName || "").trim().slice(0, 80);
+  // The name is optional: without one the drafts say "this team".
+  const name = (body.reviewingName || "").trim().slice(0, 80) || "this team";
   const didWhat = (body.didWhat || "").trim().slice(0, 300);
   const feeling: Feeling = body.feeling && body.feeling in FEELING_SENTENCE ? body.feeling : "impressed";
   const tone: Tone = body.tone === "professional" || body.tone === "enthusiastic" ? body.tone : "casual";
   const length: Length = body.length === "short" || body.length === "long" ? body.length : "medium";
 
-  if (!name || !didWhat) {
-    return NextResponse.json({ error: "reviewingName and didWhat are required" }, { status: 400 });
+  if (!didWhat) {
+    return NextResponse.json({ error: "Tell us what they did" }, { status: 400 });
   }
 
   let limited = false;

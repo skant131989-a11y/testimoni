@@ -43,6 +43,13 @@ const TONES = [
   { id: "enthusiastic", label: "Enthusiastic" },
 ] as const;
 
+const EXAMPLES = [
+  "fixed my website in one day",
+  "taught me to code in three months",
+  "saved my team hours every week",
+  "designed a logo I love",
+] as const;
+
 const LENGTHS = [
   { id: "short", label: "Short (1 sentence)" },
   { id: "medium", label: "Medium (2-3 sentences)" },
@@ -65,9 +72,10 @@ export function TestimonialWriterClient() {
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
+  const [started, setStarted] = useState(false);
 
   async function generate() {
-    if (!reviewingName.trim() || !didWhat.trim()) return;
+    if (didWhat.trim().length < 3) return;
     setLoading(true);
     setError(null);
     track("writer_generate_clicked", { feeling, tone, length });
@@ -116,7 +124,7 @@ export function TestimonialWriterClient() {
         "pending_tool_testimonial",
         JSON.stringify({
           content: text,
-          customerName: reviewingName.trim(),
+          customerName: reviewingName.trim() || "A happy customer",
           customerTitle: null,
           rating: 5,
           tool: "writer",
@@ -141,17 +149,55 @@ export function TestimonialWriterClient() {
             Free testimonial writer
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Start a testimonial draft with a real customer&apos;s name and what
-            they did. Choose a tone and length, then review every detail with
-            them before you publish it.
+            Tell us what a customer did for you and get three drafts to edit.
+            Check every detail with them before you publish it.
           </p>
         </div>
 
-        {/* Form */}
+        {/* Form: one required box, everything else optional */}
         <div className="mt-10 space-y-5 rounded-2xl border-2 border-primary/20 bg-primary/[0.03] p-6">
           <div>
+            <Label htmlFor="what" className="text-sm font-semibold">
+              What did they do for you?
+            </Label>
+            <Textarea
+              id="what"
+              value={didWhat}
+              onChange={(e) => {
+                setDidWhat(e.target.value);
+                if (!started) {
+                  setStarted(true);
+                  track("writer_started");
+                }
+              }}
+              placeholder="e.g. redesigned my landing page and doubled my signups"
+              rows={3}
+              className="mt-1.5"
+              maxLength={300}
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">Not sure? Tap one:</span>
+              {EXAMPLES.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() => {
+                    setDidWhat(ex);
+                    setStarted(true);
+                    track("writer_example_used");
+                  }}
+                  className="rounded-full border border-primary/30 bg-background px-3 py-1 text-xs font-medium text-primary transition hover:bg-primary/10"
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
             <Label htmlFor="who" className="text-sm font-semibold">
-              Who are you writing about? *
+              Who is it about?{" "}
+              <span className="font-normal text-muted-foreground">(optional)</span>
             </Label>
             <Input
               id="who"
@@ -163,84 +209,74 @@ export function TestimonialWriterClient() {
             />
           </div>
 
-          <div>
-            <Label htmlFor="what" className="text-sm font-semibold">
-              What did they do? *
-            </Label>
-            <Textarea
-              id="what"
-              value={didWhat}
-              onChange={(e) => setDidWhat(e.target.value)}
-              placeholder="e.g. redesigned my landing page and doubled my signups"
-              rows={3}
-              className="mt-1.5"
-              maxLength={300}
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              {didWhat.length}/300 characters
-            </p>
-          </div>
+          <details className="rounded-xl border bg-background/60 px-4 py-3">
+            <summary className="cursor-pointer text-sm font-semibold">
+              Fine-tune the feeling, tone and length{" "}
+              <span className="font-normal text-muted-foreground">(optional)</span>
+            </summary>
+            <div className="mt-4 space-y-5">
+              <div>
+                <Label className="text-sm font-semibold">How did it feel?</Label>
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {FEELINGS.map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setFeeling(f.id)}
+                      className={`rounded-full border-2 px-3 py-1 text-xs font-medium transition ${
+                        feeling === f.id
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted/50"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <div>
-            <Label className="text-sm font-semibold">How did it feel?</Label>
-            <div className="mt-1.5 flex flex-wrap gap-2">
-              {FEELINGS.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setFeeling(f.id)}
-                  className={`rounded-full border-2 px-3 py-1 text-xs font-medium transition ${
-                    feeling === f.id
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="tone" className="text-sm font-semibold">
+                    Tone
+                  </Label>
+                  <select
+                    id="tone"
+                    value={tone}
+                    onChange={(e) => setTone(e.target.value as typeof TONES[number]["id"])}
+                    className="mt-1.5 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    {TONES.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="length" className="text-sm font-semibold">
+                    Length
+                  </Label>
+                  <select
+                    id="length"
+                    value={length}
+                    onChange={(e) => setLength(e.target.value as typeof LENGTHS[number]["id"])}
+                    className="mt-1.5 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    {LENGTHS.map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="tone" className="text-sm font-semibold">
-                Tone
-              </Label>
-              <select
-                id="tone"
-                value={tone}
-                onChange={(e) => setTone(e.target.value as typeof TONES[number]["id"])}
-                className="mt-1.5 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                {TONES.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="length" className="text-sm font-semibold">
-                Length
-              </Label>
-              <select
-                id="length"
-                value={length}
-                onChange={(e) => setLength(e.target.value as typeof LENGTHS[number]["id"])}
-                className="mt-1.5 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                {LENGTHS.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          </details>
 
           <Button
             onClick={generate}
-            disabled={loading || !reviewingName.trim() || !didWhat.trim()}
+            disabled={loading || didWhat.trim().length < 3}
             size="lg"
             className="w-full gap-2"
           >
@@ -410,8 +446,8 @@ export function TestimonialWriterClient() {
         <section className="mt-12 rounded-2xl border bg-card p-6">
           <h2 className="text-xl font-bold">How to use this testimonial writer</h2>
           <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
-            <li>Enter the person&apos;s name and a factual description of what they did.</li>
-            <li>Choose a tone and length, then generate draft wording to edit.</li>
+            <li>Say in a few words what they did for you. A name is optional.</li>
+            <li>Generate the drafts, and fine-tune the tone and length only if you want to.</li>
             <li>Check every statement and ask the person to approve the final testimonial before publishing.</li>
           </ol>
           <p className="mt-4 text-sm text-muted-foreground">
